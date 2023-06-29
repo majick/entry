@@ -106,16 +106,35 @@ export class GetPasteFromURL implements Endpoint {
                                 <div
                                     style={{
                                         display: "flex",
+                                        justifyContent: "space-between",
                                         gap: "0.4rem",
+                                        width: "100%",
                                     }}
                                 >
-                                    <button>
+                                    <button
+                                        style={{
+                                            height: "max-content",
+                                        }}
+                                    >
                                         <a
                                             href={`/?mode=edit&OldURL=${result.CustomURL}`}
                                         >
                                             Edit
                                         </a>
                                     </button>
+
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "center",
+                                            alignItems: "right",
+                                            color: "var(--text-color-faded)",
+                                        }}
+                                    >
+                                        <span>Pub: {result.PubDate}</span>
+                                        <span>Edit: {result.EditDate}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -166,17 +185,24 @@ export class EditPaste implements Endpoint {
         body.OldContent = decodeURIComponent(body.OldContent);
         body.NewContent = decodeURIComponent(body.NewContent);
 
+        // get paste
+        const paste = await db.GetPasteFromURL(body.OldURL);
+
         // edit paste
         const result = await db.EditPaste(
             {
                 Content: body.OldContent,
                 EditPassword: body.OldEditPassword,
                 CustomURL: body.OldURL,
+                PubDate: "",
+                EditDate: "",
             },
             {
                 Content: body.NewContent,
                 EditPassword: body.NewEditPassword || body.OldEditPassword,
                 CustomURL: body.NewURL || body.OldURL,
+                PubDate: (paste || { PubDate: "" }).PubDate,
+                EditDate: new Date().toUTCString(),
             }
         );
 
@@ -213,10 +239,6 @@ export class DeletePaste implements Endpoint {
         const result = await db.DeletePaste(
             {
                 CustomURL: body.CustomURL,
-                // these fields aren't actually needed (below), as they aren't used
-                // by the function. password is supplied in the second parameter
-                Content: "",
-                EditPassword: "",
             },
             body.password
         );

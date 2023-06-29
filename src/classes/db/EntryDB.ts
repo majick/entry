@@ -14,6 +14,8 @@ export type Paste = {
     Content: string;
     EditPassword: string;
     CustomURL: string;
+    PubDate: string;
+    EditDate: string;
 };
 
 /**
@@ -49,7 +51,9 @@ export default class EntryDB {
                     query: `CREATE TABLE Pastes (
                         Content varchar(${EntryDB.MaxContentLength}),
                         EditPassword varchar(${EntryDB.MaxPasswordLength}),
-                        CustomURL varchar(${EntryDB.MaxCustomURLLength})
+                        CustomURL varchar(${EntryDB.MaxCustomURLLength}),
+                        PubDate datetime DEFAULT CURRENT_TIMESTAMP,
+                        EditDate datetime DEFAULT CURRENT_TIMESTAMP
                     )`,
                 });
         })();
@@ -152,8 +156,12 @@ export default class EntryDB {
         // create paste
         await SQL.QueryOBJ({
             db: this.db,
-            query: "INSERT INTO Pastes VALUES (?, ?, ?)",
-            params: Object.values(PasteInfo),
+            query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?)",
+            params: [
+                ...Object.values(PasteInfo),
+                new Date().toUTCString(), // PubDate
+                new Date().toUTCString(), // EditDate
+            ],
             transaction: true,
             use: "Prepare",
         });
@@ -199,7 +207,7 @@ export default class EntryDB {
         // update paste
         await SQL.QueryOBJ({
             db: this.db,
-            query: "UPDATE Pastes SET (Content, EditPassword, CustomURL) = (?, ?, ?) WHERE CustomURL = ?",
+            query: "UPDATE Pastes SET (Content, EditPassword, CustomURL, PubDate, EditDate) = (?, ?, ?, ?, ?) WHERE CustomURL = ?",
             params: [...Object.values(NewPasteInfo), PasteInfo.CustomURL],
             use: "Prepare",
         });
@@ -217,9 +225,12 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public async DeletePaste(
-        PasteInfo: Paste,
+        PasteInfo: Partial<Paste>,
         password: string
-    ): Promise<[boolean, string, Paste]> {
+    ): Promise<[boolean, string, Partial<Paste>]> {
+        if (!PasteInfo.CustomURL)
+            return [false, "Missing CustomURL", PasteInfo];
+
         // get paste
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
 
