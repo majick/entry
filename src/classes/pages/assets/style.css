@@ -335,3 +335,12 @@ dialog h4 {
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.5);
 }
+
+.editor-tab h1,
+.editor-tab h2,
+.editor-tab h3,
+.editor-tab h4,
+.editor-tab h5,
+.editor-tab h6 {
+    width: 100%;
+}

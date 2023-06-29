@@ -73,6 +73,8 @@ export class _Server {
                                 },
                             }
                         );
+                    else if (url.pathname === "/robots.txt")
+                        return new Response("User-agent: *\nAllow: /\nDisallow:");
                     // check if pathname is the url of a paste
                     else {
                         return await new API.GetPasteFromURL().request(request); // will return 404 for us if not found

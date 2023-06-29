@@ -101,9 +101,13 @@ export default function CreateEditor(ElementID: string, content: string) {
         parent: element,
     });
 
-    document
-        .querySelector("#editor-tab-text .cm-editor .cm-scroller .cm-content")!
-        .setAttribute("spellcheck", "true");
+    // add attributes
+    const contentField = document.querySelector(
+        "#editor-tab-text .cm-editor .cm-scroller .cm-content"
+    )!;
+    
+    contentField.setAttribute("spellcheck", "true");
+    contentField.setAttribute("aria-label", "Content Editor");
 }
 
 // handle tabs

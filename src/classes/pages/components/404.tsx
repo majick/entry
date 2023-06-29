@@ -33,7 +33,10 @@ export default class _404Page implements Endpoint {
                     </div>
 
                     <Footer />
-                </main>
+                </main>,
+                <>
+                    <title>404 - Entry</title>
+                </>
             ),
             {
                 headers: {

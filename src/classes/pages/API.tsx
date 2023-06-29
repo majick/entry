@@ -133,7 +133,13 @@ export class GetPasteFromURL implements Endpoint {
                     <>
                         <meta
                             name="description"
-                            content={`${result.CustomURL} on Entry - Markdown Pastebin`}
+                            content={
+                                // if length of content is greater than 250, cut it at 250 characters and add "..."
+                                // otherwise, we can just show the full content
+                                result.CustomURL.length > 250
+                                    ? `${result.CustomURL.substring(0, 250)}...`
+                                    : result.CustomURL
+                            }
                         />
 
                         <title>{result.CustomURL}</title>

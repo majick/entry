@@ -42,8 +42,19 @@ export function ParseMarkdown(content: string): string {
         '<div class="mdnote note-$2"><b class="mdnote-title">$3</b></div>'
     );
 
+    // we have to do this ourselves because the next step would make it not work!
+    content = content.replaceAll(
+        /(\*\*\*)(.*?)(\*\*\*)/g,
+        "<strong><em>$2</em></strong>"
+    );
+
     // replace *** with <hr /> (rentry uses *** for hr, that's dumb)
     content = content.replaceAll("***", "<hr />");
+
+    // remove scripts, on[...] attributes and <link> elements
+    content = content.replaceAll(/(on)(.*)\=(.*)\"/g, "");
+    content = content.replaceAll(/(<script.*>)(.*?)(<\/script>)/gs, "");
+    content = content.replaceAll(/(<link.*>)/gs, "");
 
     // parse content with marked and return
     return marked.parse(content, {
