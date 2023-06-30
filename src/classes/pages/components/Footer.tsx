@@ -11,29 +11,60 @@ export default function Footer() {
             <hr
                 style={{
                     width: "425px",
-                    borderColor: "var(--background-surface1)",
                     maxWidth: "100vw",
                 }}
             />
 
-            <div
+            <ul
+                class={"__footernav"}
                 style={{
                     display: "flex",
                     gap: "0.25rem",
+                    padding: "0",
                 }}
             >
-                <a href="/">new</a>
-                <span>·</span>
-                <a href="https://codeberg.org/hkau/entry/issues">issues</a>
-                <span>·</span>
-                <a id={"themeButton"} href={"javascript:toggleTheme()"}>
-                    {
-                        // this option only exists because some people might prefer their
-                        // paste be viewed in light/dark mode, so having the option to switch
-                        // the theme without going to browser settings is helpful
-                    }
-                    theme
-                </a>
+                <li>
+                    <a href="/">new</a>
+                </li>
+
+                <li>
+                    <a href="https://codeberg.org/hkau/entry/issues">issues</a>
+                </li>
+
+                <li>
+                    <a href="/v">version</a>
+                </li>
+
+                <li>
+                    <a id={"themeButton"} href={"javascript:toggleTheme()"}>
+                        {
+                            // this option only exists because some people might prefer their
+                            // paste be viewed in light/dark mode, so having the option to switch
+                            // the theme without going to browser settings is helpful
+                        }
+                        theme
+                    </a>
+                </li>
+
+                <style
+                    dangerouslySetInnerHTML={{
+                        __html: `.__footernav li:not(:first-child) {
+                            margin-left: 0.25rem;
+                        }
+                        
+                        .__footernav li::marker {
+                            content: "·";
+                        }
+
+                        .__footernav li:first-child {
+                           margin-left: -0.25rem;
+                        }
+                        
+                        .__footernav li:first-child::marker {
+                            content: "";
+                        }`,
+                    }}
+                />
 
                 <script
                     dangerouslySetInnerHTML={{
@@ -42,7 +73,7 @@ export default function Footer() {
                         }`,
                     }}
                 />
-            </div>
+            </ul>
 
             <p
                 style={{

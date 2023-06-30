@@ -105,9 +105,15 @@ export default function CreateEditor(ElementID: string, content: string) {
     const contentField = document.querySelector(
         "#editor-tab-text .cm-editor .cm-scroller .cm-content"
     )!;
-    
+
     contentField.setAttribute("spellcheck", "true");
     contentField.setAttribute("aria-label", "Content Editor");
+
+    // set value of contentInput if we have window.sessionStorage.doc
+    const doc = window.sessionStorage.getItem("doc");
+    if (doc)
+        (document.getElementById("contentInput") as HTMLInputElement).value =
+            encodeURIComponent(doc);
 }
 
 // handle tabs

@@ -74,10 +74,23 @@ export class _Server {
                             }
                         );
                     else if (url.pathname === "/robots.txt")
-                        return new Response("User-agent: *\nAllow: /\nDisallow:");
+                        return new Response(
+                            "User-agent: *\nAllow: /\nDisallow:"
+                        );
                     // check if pathname is the url of a paste
                     else {
-                        return await new API.GetPasteFromURL().request(request); // will return 404 for us if not found
+                        if (!url.pathname.startsWith("/api/get/"))
+                            // normal paste view (text/html)
+                            // will return 404 for us if not found
+                            return await new API.GetPasteFromURL().request(
+                                request
+                            );
+                        // get paste record (application/json)
+                        // will return 404 for us if not found
+                        else
+                            return await new API.GetPasteRecord().request(
+                                request
+                            );
                     }
                 } else if (request.method === "POST") {
                     // api endpoints

@@ -16,11 +16,11 @@ Uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database 
 
 Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
 
-| Rentry                                                                                                                       | Entry                                                                                                                    |
-|------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| When deleting pastes, Rentry uses  `POST /api/edit` with `{ delete: "delete" }`                                              | Entry uses `POST /api/delete`                                                                                            |
-| Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports Markdown files                                                                                       |
-| Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders on client for editing previews |
+| Rentry                                                                                                                       | Entry                                                                                                                                                                                                               |
+|------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| When deleting pastes, Rentry uses  `POST /api/edit` with `{ delete: "delete" }`                                              | Entry uses `POST /api/delete`                                                                                                                                                                                       |
+| Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports a `GET /api/get` endpoint, which returns the saved record for the paste without the `EditPassword` hash. Any paste can be viewed raw just by clicking the "Edit" button when viewing the paste. |
+| Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews         |
 
 ## API
 
@@ -36,7 +36,18 @@ I noticed that on the open-source for the Rentry CLI, there was [an issue](https
 
 This is a basic re-creation of Rentry that attempts to look and feel as similar to it as possible.
 
+## (very basic) Federation
+
+Entry supports very basic federation, meaning you can view and edit pastes from other servers on your server.
+
+To view pastes from other servers, you open them the same way (`example.com/paste`) you normally do, but add an `@` symbol and then the hostname of the other server. Example: `example.com/paste@example2.com`
+
+In this example, we are viewing the paste `paste` from the server `example2.com` on the server `example.com`. Editing and deleting pastes is also available for pastes from a different server. Federation **only** supports HTTPS, it is assumed that any secondary server provided is using HTTPS, and the request will fail if it is not.
+
+Pastes cannot normally include any special characters besides `-` and `_`, meaning there should not be any URL conflicts.
+
 ## TODO
 
 - [ ] Private pastes
 - [ ] Encrypted pastes
+    - This and private pastes are essentially linked, for private pastes to work the content must already be encrypted and the key to decrypt it would be the `ViewPassword`

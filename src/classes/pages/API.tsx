@@ -117,7 +117,13 @@ export class GetPasteFromURL implements Endpoint {
                                         }}
                                     >
                                         <a
-                                            href={`/?mode=edit&OldURL=${result.CustomURL}`}
+                                            href={`/?mode=edit&OldURL=${
+                                                result.CustomURL
+                                            }${
+                                                result.HostServer
+                                                    ? `&server=${result.HostServer}`
+                                                    : ""
+                                            }`}
                                         >
                                             Edit
                                         </a>
@@ -170,6 +176,35 @@ export class GetPasteFromURL implements Endpoint {
                     },
                 }
             );
+    }
+}
+
+/**
+ * @export
+ * @class GetPasteRecord
+ * @implements {Endpoint}
+ */
+export class GetPasteRecord implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(
+            url.pathname.slice("/api/get/".length, url.pathname.length)
+        );
+
+        if (paste) paste.EditPassword = ""; // we don't want to send that back to the client! (it's hashed anyways, but good to be sure)
+
+        // return
+        return new Response(
+            JSON.stringify(paste || { Content: "404: Not Found" }),
+            {
+                status: paste ? 200 : 404,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
     }
 }
 
@@ -265,6 +300,7 @@ export class DeletePaste implements Endpoint {
 export default {
     CreatePaste,
     GetPasteFromURL,
+    GetPasteRecord,
     EditPaste,
     DeletePaste,
 };

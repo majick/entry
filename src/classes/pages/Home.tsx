@@ -22,6 +22,10 @@ export default class Home implements Endpoint {
         if (search.get("mode") === "edit" && search.get("OldURL"))
             paste = await db.GetPasteFromURL(search.get("OldURL")!);
 
+        // if search.server, add server to paste.CustomURL
+        if (search.get("server") && paste)
+            paste.CustomURL = `${paste.CustomURL}@${search.get("server")}`;
+
         // return
         return new Response(
             Renderer.Render(
@@ -75,7 +79,7 @@ export default class Home implements Endpoint {
                                     method={"POST"}
                                     action={"/api/new"}
                                 >
-                                    <button style={{ minWidth: "2.8rem" }}>
+                                    <button style={{ minWidth: "max-content" }}>
                                         Go
                                     </button>
 
@@ -84,6 +88,7 @@ export default class Home implements Endpoint {
                                             display: "flex",
                                             gap: "0.5rem",
                                             flexWrap: "wrap",
+                                            justifyContent: "right",
                                         }}
                                     >
                                         <input
@@ -125,7 +130,9 @@ export default class Home implements Endpoint {
                                             action={"/api/edit"}
                                         >
                                             <button
-                                                style={{ minWidth: "2.8rem" }}
+                                                style={{
+                                                    minWidth: "max-content",
+                                                }}
                                             >
                                                 Save
                                             </button>
@@ -135,6 +142,7 @@ export default class Home implements Endpoint {
                                                     display: "flex",
                                                     gap: "0.5rem",
                                                     flexWrap: "wrap",
+                                                    justifyContent: "right",
                                                 }}
                                             >
                                                 <input
@@ -237,8 +245,15 @@ export default class Home implements Endpoint {
                                     removed from the server
                                 </li>
                                 <li>
-                                    Your custom URL (<b>{paste!.CustomURL}</b>)
-                                    will be available
+                                    Your custom URL (
+                                    <b>
+                                        {
+                                            // everything before @ so (if there is a server),
+                                            // it isn't included here
+                                            paste!.CustomURL.split("@")[0]
+                                        }
+                                    </b>
+                                    ) will be available
                                 </li>
                             </ul>
 
@@ -250,6 +265,7 @@ export default class Home implements Endpoint {
                                     alignItems: "center",
                                     flexWrap: "wrap",
                                     gap: "1rem",
+                                    paddingTop: "1rem",
                                 }}
                             >
                                 <form method="dialog">
@@ -279,10 +295,6 @@ export default class Home implements Endpoint {
                                         maxLength={256}
                                         placeholder={"Edit code"}
                                         name={"password"}
-                                        style={{
-                                            background:
-                                                "var(--background-surface)",
-                                        }}
                                     />
 
                                     <input

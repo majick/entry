@@ -1,3 +1,8 @@
+/*
+This holds (most) of the styles used, CodeMirror styles are held in _Render.ts, and a
+lot of elements have a style attribute to set their display to flex and etc.
+*/
+
 :root {
     /* default colors (light) */
     --base-brightness: 94%;
@@ -115,11 +120,13 @@ button {
     outline: none;
     color: var(--text-color-faded1);
     font-size: 16px;
-    padding: 0.475rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     display: flex;
     justify-content: center;
     align-items: center;
     transition: all 0.1s;
+    height: max-content;
+    width: max-content;
 }
 
 button.secondary {
@@ -265,9 +272,8 @@ input {
     color: currentColor;
     border: none;
     outline: none;
-    padding: 0.375rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     font-size: 16px;
-    height: calc(1.5em + 0.75rem + 2px);
 }
 
 img {
@@ -277,8 +283,14 @@ img {
 
 hr {
     margin: 0.6rem 0;
-    border-color: var(--background-surface3);
+    border-color: var(--background-surface1);
     border-top-width: 1px;
+}
+
+.editor-tab hr {
+    /* editor-tab really just means markdown preview, it has a lighter background that matches
+       the normal color of hr, so we need to make hr brighter when it is inside of that */
+    border-color: var(--background-surface2);
 }
 
 span.highlight {
@@ -320,11 +332,10 @@ blockquote {
 }
 
 dialog {
-    background: var(--background-surface1);
+    background: var(--background-surface);
     color: currentColor;
     border: none;
     position: fixed;
-    box-shadow: 0 0 4px var(--background-surface2);
     margin: auto;
 }
 
@@ -343,4 +354,8 @@ dialog::backdrop {
 .editor-tab h5,
 .editor-tab h6 {
     width: 100%;
+}
+
+.editor-tab input {
+    height: max-content;
 }
