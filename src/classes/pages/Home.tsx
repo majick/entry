@@ -203,16 +203,13 @@ export default class Home implements Endpoint {
                                                 marginTop: "1rem",
                                             }}
                                         >
-                                            <button>
-                                                <a
-                                                    href={`/${
-                                                        search.get("OldURL") ||
-                                                        ""
-                                                    }`}
-                                                >
-                                                    Back
-                                                </a>
-                                            </button>
+                                            <a
+                                                href={`/${
+                                                    search.get("OldURL") || ""
+                                                }`}
+                                            >
+                                                <button>Back</button>
+                                            </a>
 
                                             <button
                                                 id={"editor-open-delete-modal"}

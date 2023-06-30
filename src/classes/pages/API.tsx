@@ -111,23 +111,23 @@ export class GetPasteFromURL implements Endpoint {
                                         width: "100%",
                                     }}
                                 >
-                                    <button
-                                        style={{
-                                            height: "max-content",
-                                        }}
+                                    <a
+                                        href={`/?mode=edit&OldURL=${
+                                            result.CustomURL
+                                        }${
+                                            result.HostServer
+                                                ? `&server=${result.HostServer}`
+                                                : ""
+                                        }`}
                                     >
-                                        <a
-                                            href={`/?mode=edit&OldURL=${
-                                                result.CustomURL
-                                            }${
-                                                result.HostServer
-                                                    ? `&server=${result.HostServer}`
-                                                    : ""
-                                            }`}
+                                        <button
+                                            style={{
+                                                height: "max-content",
+                                            }}
                                         >
                                             Edit
-                                        </a>
-                                    </button>
+                                        </button>
+                                    </a>
 
                                     <div
                                         style={{

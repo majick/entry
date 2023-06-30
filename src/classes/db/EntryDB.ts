@@ -165,7 +165,7 @@ export default class EntryDB {
 
                 // just send an /api/get request to the other server
                 const request = fetch(
-                    `http://${server}/api/get/${PasteURL.split("@")[0]}`
+                    `https://${server}/api/get/${PasteURL.split("@")[0]}`
                 );
 
                 // handle bad
@@ -409,7 +409,7 @@ export default class EntryDB {
         body: string[]
     ): Promise<[boolean, Response]> {
         // send request
-        const request = fetch(`http://${server}/api/${endpoint}`, {
+        const request = fetch(`https://${server}/api/${endpoint}`, {
             body: body.join("&"),
             method: "POST",
             headers: {
