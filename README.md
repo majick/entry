@@ -12,6 +12,10 @@ Uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database 
 - Clone the repository and run `bun install` to install dependencies
 - Start the server with `bun run start`
 
+## Usage
+
+Once installed you can start (and build) the server using `bun run start`, to just build do `bun run build`. You can specify a launch port by doing `export PORT={port} && bun run start`, you can also specify a port by creating a `.env` file in the project directory and setting the port there.
+
 ## Compatibility
 
 Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
@@ -24,9 +28,10 @@ Entry supports all Rentry features with (almost) 1:1 compatibility. There are a 
 
 ## API
 
-- `/api/new`: Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword`
-- `/api/edit`: Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
-- `/api/delete`: Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
+- `POST /api/new`: Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword`
+- `POST /api/edit`: Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
+- `POST /api/delete`: Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
+- `GET  /api/get/{paste}`: Get an existing paste
 
 ## Why
 

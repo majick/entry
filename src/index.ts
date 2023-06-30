@@ -7,4 +7,4 @@
 import { _Server } from "./classes/Server";
 
 // create server
-new _Server(8080);
+new _Server(parseInt(process.env.PORT || "8080"));
