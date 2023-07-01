@@ -103,6 +103,9 @@ export class _Server {
                     else if (url.pathname === "/api/delete")
                         // delete existing paste
                         return new API.DeletePaste().request(request);
+                    else if (url.pathname === "/api/decrypt")
+                        // decrypt encrypted paste
+                        return new API.DecryptPaste().request(request);
                 }
 
                 return await new _404Page().request(request);

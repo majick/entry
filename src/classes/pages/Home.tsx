@@ -1,10 +1,11 @@
 import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
+import DecryptionForm from "./components/DecryptionForm";
 import Footer from "./components/Footer";
 
+import { DecryptPaste, db } from "./API";
 import { Paste } from "../db/EntryDB";
-import { db } from "./API";
 
 /**
  * @export
@@ -25,6 +26,22 @@ export default class Home implements Endpoint {
         // if search.server, add server to paste.CustomURL
         if (search.get("server") && paste)
             paste.CustomURL = `${paste.CustomURL}@${search.get("server")}`;
+
+        // decrypt (if we can)
+        if (search.get("ViewPassword") && paste) {
+            const decrypted = await new DecryptPaste().GetDecrypted({
+                // using result.CustomURL makes cross server decryption possible because
+                // when we get the result, we'll have already resolved the other server
+                // ...now GetDecrypted just has to implement it (TODO)
+                CustomURL: paste.CustomURL,
+                ViewPassword: search.get("ViewPassword") as string,
+            });
+
+            if (decrypted) {
+                paste.Content = decrypted;
+                delete paste.ViewPassword; // don't show decrypt form!
+            }
+        }
 
         // return
         return new Response(
@@ -47,6 +64,14 @@ export default class Home implements Endpoint {
                                     </p>
                                 </div>
                             ))}
+
+                        {paste && paste.ViewPassword && (
+                            <DecryptionForm
+                                paste={paste}
+                                urlName="OldURL"
+                                isEdit={true}
+                            />
+                        )}
 
                         <div className="tabbar">
                             <button id={"editor-open-tab-text"}>Text</button>
@@ -96,6 +121,14 @@ export default class Home implements Endpoint {
                                             name={"Content"}
                                             id={"contentInput"}
                                             required
+                                        />
+
+                                        <input
+                                            type="text"
+                                            placeholder={"View code - optional"}
+                                            minLength={5}
+                                            maxLength={256}
+                                            name={"ViewPassword"}
                                         />
 
                                         <input

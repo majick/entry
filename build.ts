@@ -8,7 +8,7 @@ const output = await build({
         "./src/classes/pages/components/Editor.ts",
         "./src/classes/pages/assets/ClientFixMD.ts",
     ],
-    minify: true,
+    // minify: true,
     target: "bun", // technically Editor.ts should have the "browser" target, but this hasn't caused any issues yet so it's fine!
     outdir: "dist",
     splitting: true,

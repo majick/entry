@@ -32,7 +32,7 @@ export function ParseMarkdown(content: string): string {
         /^(\!\!\!)\s(?<TYPE>.*?)\s(?<TITLE>.*?)\n(?<CONTENT>.*?)$/gm,
         `<div class="mdnote note-$2">
             <b class="mdnote-title">$3</b>
-            <p>$3</p>
+            <p>$4</p>
         </div>`
     );
 

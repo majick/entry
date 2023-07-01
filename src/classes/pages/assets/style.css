@@ -255,12 +255,23 @@ code {
     font-family: monospace;
     font-size: 13.5px;
     line-height: 1em;
+    max-width: 100%;
 }
 
 pre code {
+    white-space: pre;
     background: var(--background-surface);
     color: currentColor;
-    border-left: solid 5px var(--red2);
+}
+
+pre {
+    background: var(--background-surface);
+    border-left: solid 5px var(--red3);
+    padding-left: 0.5rem;
+    white-space: pre;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: max-content;
 }
 
 li a {

@@ -7,7 +7,7 @@
 import path from "node:path";
 
 import { Database } from "bun:sqlite";
-import { CreateHash } from "./Hash";
+import { CreateHash, Encrypt } from "./Hash";
 import SQL from "./SQL";
 
 import pack from "../../../package.json";
@@ -18,6 +18,12 @@ export type Paste = {
     CustomURL: string;
     PubDate: string;
     EditDate: string;
+    ENC_IV?: string;
+    ENC_KEY?: string;
+    ENC_CODE?: string;
+    ViewPassword?: string; // we're going to use this to check if the paste is private,
+    //                        if it is valid, the paste is private and should have a
+    //                        corresponding entry in the Encryption table
     HostServer?: string; // this is not actually stored in the record
 };
 
@@ -57,8 +63,20 @@ export default class EntryDB {
                         Content varchar(${EntryDB.MaxContentLength}),
                         EditPassword varchar(${EntryDB.MaxPasswordLength}),
                         CustomURL varchar(${EntryDB.MaxCustomURLLength}),
+                        ViewPassword varchar(${EntryDB.MaxPasswordLength}),
                         PubDate datetime DEFAULT CURRENT_TIMESTAMP,
                         EditDate datetime DEFAULT CURRENT_TIMESTAMP
+                    )`,
+                });
+
+                await SQL.QueryOBJ({
+                    db,
+                    query: `CREATE TABLE Encryption (
+                        ViewPassword varchar(${EntryDB.MaxPasswordLength}),
+                        CustomURL varchar(${EntryDB.MaxCustomURLLength}),
+                        ENC_IV varchar(24),
+                        ENC_KEY varchar(64),
+                        ENC_CODE varchar(32)
                     )`,
                 });
 
@@ -66,7 +84,7 @@ export default class EntryDB {
                 // this is used to check if the server is outdated
                 await SQL.QueryOBJ({
                     db: db,
-                    query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?)",
+                    query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?)",
                     params: [
                         pack.version,
                         "", // an empty EditPassword essentially makes this paste uneditable without server access
@@ -74,6 +92,7 @@ export default class EntryDB {
                         //     that are less than 5 characters, so this isn't possible unless the server created it
                         "v", // a custom URL is required to be more than 2 characters by client and server, this is
                         //      basically just the same thing we did above with the EditPassword
+                        "",
                         new Date().toUTCString(), // PubDate
                         new Date().toUTCString(), // EditDate
                     ],
@@ -113,6 +132,14 @@ export default class EntryDB {
                 false,
                 `Custom URL must be less than ${EntryDB.MaxCustomURLLength} characters!`,
             ];
+        else if (
+            PasteInfo.ViewPassword &&
+            PasteInfo.ViewPassword.length >= EntryDB.MaxPasswordLength
+        )
+            return [
+                false,
+                `View password must be less than ${EntryDB.MaxPasswordLength} characters!`,
+            ];
         // check less than minimum
         else if (PasteInfo.Content.length <= EntryDB.MinContentLength)
             return [
@@ -128,6 +155,14 @@ export default class EntryDB {
             return [
                 false,
                 `Custom URL must be more than ${EntryDB.MinCustomURLLength} characters!`,
+            ];
+        else if (
+            PasteInfo.ViewPassword &&
+            PasteInfo.ViewPassword.length <= EntryDB.MinPasswordLength
+        )
+            return [
+                false,
+                `View password must be more than ${EntryDB.MinPasswordLength} characters!`,
             ];
 
         return [true, ""];
@@ -150,16 +185,33 @@ export default class EntryDB {
                 // logic for the paste being from another server SHOULD have been handled above!
 
                 // get paste from local db
-                const record = await SQL.QueryOBJ({
+                const record = (await SQL.QueryOBJ({
                     db: this.db,
                     query: "SELECT * FROM Pastes WHERE CustomURL = ?",
                     params: [PasteURL],
                     get: true,
                     use: "Prepare",
-                });
+                })) as Paste;
 
-                if (record) return resolve(record as Paste);
-                else return resolve(undefined); // don't reject because we want this to be treated like an async function
+                if (!record) return resolve(undefined); // don't reject because we want this to be treated like an async function
+
+                // update encryption values
+                if (record.ViewPassword) {
+                    const encryption = await SQL.QueryOBJ({
+                        db: this.db,
+                        query: "SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
+                        params: [record.ViewPassword, record.CustomURL],
+                        get: true,
+                        use: "Prepare",
+                    });
+
+                    record.ENC_IV = encryption.ENC_IV;
+                    record.ENC_KEY = encryption.ENC_KEY;
+                    record.ENC_CODE = encryption.ENC_CODE;
+                }
+
+                // return
+                return resolve(record);
             } else {
                 // ...everything after this assumes paste IS from another server!
 
@@ -209,8 +261,10 @@ export default class EntryDB {
                 PasteInfo,
             ];
 
-        // hash password
+        // hash passwords
         PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
+        if (PasteInfo.ViewPassword)
+            PasteInfo.ViewPassword = CreateHash(PasteInfo.ViewPassword);
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(PasteInfo);
@@ -224,12 +278,38 @@ export default class EntryDB {
                 PasteInfo,
             ];
 
+        // encrypt (if needed)
+        if (PasteInfo.ViewPassword) {
+            const result = Encrypt(PasteInfo.Content);
+            if (!result) return [false, "Encryption error!", PasteInfo];
+
+            PasteInfo.Content = result[0];
+
+            // encryption values are stored in a different table
+            await SQL.QueryOBJ({
+                db: this.db,
+                query: "INSERT INTO Encryption VALUES (?, ?, ?, ?, ?)",
+                params: [
+                    PasteInfo.ViewPassword,
+                    PasteInfo.CustomURL,
+                    result[2], // iv
+                    result[1], // key
+                    result[3], // code
+                ],
+                transaction: true,
+                use: "Prepare",
+            });
+        }
+
         // create paste
         await SQL.QueryOBJ({
             db: this.db,
-            query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?)",
+            query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?)",
             params: [
-                ...Object.values(PasteInfo),
+                PasteInfo.Content,
+                PasteInfo.EditPassword,
+                PasteInfo.CustomURL,
+                PasteInfo.ViewPassword,
                 new Date().toUTCString(), // PubDate
                 new Date().toUTCString(), // EditDate
             ],
@@ -287,6 +367,7 @@ export default class EntryDB {
         // hash passwords
         PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
         NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
+        // we're not allowing users to change ViewPasswords currently
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
@@ -314,11 +395,45 @@ export default class EntryDB {
         if (paste.EditPassword !== PasteInfo.EditPassword)
             return [false, "Invalid password!", NewPasteInfo];
 
+        // rencrypt (if needed, again)
+        if (NewPasteInfo.ViewPassword) {
+            // using NewPasteInfo for all of these values because PasteInfo doesn't actually
+            // really matter for this, as the content is only defined in NewPasteInfo
+            const result = Encrypt(NewPasteInfo.Content);
+            if (!result) return [false, "Encryption error!", NewPasteInfo];
+
+            NewPasteInfo.Content = result[0];
+
+            // update encryption
+            // we select by ViewPassword for the Encryption table
+            await SQL.QueryOBJ({
+                db: this.db,
+                query: "UPDATE Encryption SET (ENC_IV, ENC_KEY, ENC_CODE, CustomURL) = (?, ?, ?, ?) WHERE ViewPassword = ? AND CustomURL = ?",
+                params: [
+                    result[2], // iv
+                    result[1], // key
+                    result[3], // code
+                    NewPasteInfo.CustomURL, // update with new CustomURL
+                    NewPasteInfo.ViewPassword,
+                    PasteInfo.CustomURL, // use old custom URL to select encryption
+                ],
+                use: "Prepare",
+            });
+        }
+
         // update paste
         await SQL.QueryOBJ({
             db: this.db,
-            query: "UPDATE Pastes SET (Content, EditPassword, CustomURL, PubDate, EditDate) = (?, ?, ?, ?, ?) WHERE CustomURL = ?",
-            params: [...Object.values(NewPasteInfo), PasteInfo.CustomURL],
+            query: "UPDATE Pastes SET (Content, EditPassword, CustomURL, ViewPassword, PubDate, EditDate) = (?, ?, ?, ?, ?, ?) WHERE CustomURL = ?",
+            params: [
+                NewPasteInfo.Content,
+                NewPasteInfo.EditPassword,
+                NewPasteInfo.CustomURL,
+                NewPasteInfo.ViewPassword,
+                NewPasteInfo.PubDate,
+                NewPasteInfo.EditDate,
+                NewPasteInfo.CustomURL,
+            ],
             use: "Prepare",
         });
 
@@ -379,6 +494,16 @@ export default class EntryDB {
         // validate password
         if (CreateHash(password) !== paste.EditPassword)
             return [false, "Invalid password!", PasteInfo];
+
+        // if paste is encrypted, delete the encryption values too
+        if (paste.ViewPassword) {
+            await SQL.QueryOBJ({
+                db: this.db,
+                query: "DELETE FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
+                params: [paste.ViewPassword, paste.CustomURL],
+                use: "Prepare",
+            });
+        }
 
         // delete paste
         await SQL.QueryOBJ({
@@ -452,5 +577,66 @@ export default class EntryDB {
             // get from url
             return new URLSearchParams(new URL(response.url).search).get("err");
         }
+    }
+
+    /**
+     * @function GetEncryptionInfo
+     *
+     * @param {string} ViewPassword
+     * @param {string} CustomURL
+     * @return {Promise<
+     *         [
+     *             boolean,
+     *             {
+     *                 iv: string;
+     *                 key: string;
+     *                 auth: string;
+     *             }
+     *         ]
+     *     >}
+     * @memberof EntryDB
+     */
+    public async GetEncryptionInfo(
+        ViewPassword: string,
+        CustomURL: string
+    ): Promise<
+        [
+            boolean,
+            {
+                iv: string;
+                key: string;
+                auth: string;
+            }
+        ]
+    > {
+        // get encryption values by view password and customurl
+        const record = (await SQL.QueryOBJ({
+            db: this.db,
+            query: "SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
+            params: [ViewPassword, CustomURL],
+            get: true,
+            use: "Prepare",
+        })) as Paste | undefined;
+
+        // check if paste exists
+        if (!record)
+            return [
+                false,
+                {
+                    iv: "",
+                    key: "",
+                    auth: "",
+                },
+            ];
+
+        // return
+        return [
+            true,
+            {
+                iv: record.ENC_IV as string,
+                key: record.ENC_KEY as string,
+                auth: record.ENC_CODE as string,
+            },
+        ];
     }
 }
