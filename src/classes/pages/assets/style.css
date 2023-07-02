@@ -1,8 +1,3 @@
-/*
-This holds (most) of the styles used, CodeMirror styles are held in _Render.ts, and a
-lot of elements have a style attribute to set their display to flex and etc.
-*/
-
 :root {
     /* default colors (light) */
     --base-brightness: 94%;
@@ -20,7 +15,7 @@ lot of elements have a style attribute to set their display to flex and etc.
     --green1: #dff0d8;
     --yellow: #c09853;
     --yellow1: #fcf8e3;
-    --red: #b94a48;
+    --red: #a6413f;
     --red1: #f2dede;
     --red2: #fdf6f6;
     --red3: #ad0008;
@@ -39,7 +34,7 @@ lot of elements have a style attribute to set their display to flex and etc.
         --green1: #2d3829;
         --yellow: #a88548;
         --yellow1: #4e4632;
-        --red: #bb8483;
+        --red: #ba8382;
         --red1: #4c2a2a;
         --red2: #a3717126;
         --red3: #e0aeb4;
@@ -264,7 +259,12 @@ pre code {
     color: currentColor;
 }
 
+pre, code, pre code span {
+    font-family: monospace;
+}
+
 pre {
+    --base-brightness: 11%;
     background: var(--background-surface);
     border-left: solid 5px var(--red3);
     padding-left: 0.5rem;
@@ -369,4 +369,45 @@ dialog::backdrop {
 
 .editor-tab input {
     height: max-content;
+}
+
+/* codemirror styles */
+.cm-cursor {
+    border-color: currentColor !important;
+}
+
+.cm-selectionBackground {
+    background: var(--background-surface) !important;
+}
+
+.cm-editor.cm-focused {
+    outline: none;
+}
+
+.cm-line .ͼu.ͼt {
+    /* fix list links */
+    padding-left: inherit !important;
+    border-left: none !important;
+}
+
+/* highlight.js styles */
+.hljs-comment {
+    color: var(--green);
+    font-style: italic;
+}
+
+.hljs-keyword {
+    color: var(--red3);
+}
+
+.hljs-variable, .hljs-title {
+    color: var(--blue2);
+}
+
+.hljs-property, .hljs-attr {
+    color: var(--red);
+}
+
+.hljs-string {
+    color: var(--green);
 }

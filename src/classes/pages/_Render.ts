@@ -21,27 +21,6 @@ export default class Renderer {
                 ${head_vnode ? renderToString(head_vnode) : ""}
 
                 <link href="/style.css" rel="stylesheet" />
-
-                <style>
-                    /* codemirror styles */
-                    .cm-cursor {
-                        border-color: currentColor !important;
-                    }
-
-                    .cm-selectionBackground {
-                        background: var(--background-surface) !important;
-                    }
-
-                    .cm-editor.cm-focused {
-                        outline: none;
-                    }
-
-                    .cm-line .ͼu.ͼt {
-                        /* fix list links */
-                        padding-left: inherit !important;
-                        border-left: none !important;
-                    }
-                </style>
             </head>
             <body>${renderToString(vnode)}</body>
         </html>`;

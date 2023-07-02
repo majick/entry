@@ -612,7 +612,7 @@ export default class EntryDB {
         // get encryption values by view password and customurl
         const record = (await SQL.QueryOBJ({
             db: this.db,
-            query: "SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
+            query: `SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?`,
             params: [ViewPassword, CustomURL],
             get: true,
             use: "Prepare",

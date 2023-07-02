@@ -47,7 +47,7 @@ const hightlight = HighlightStyle.define([
         tag: tags.list,
         borderLeft: "solid 5px var(--green)",
         paddingLeft: "40px",
-    },
+    }
 ]);
 
 /**

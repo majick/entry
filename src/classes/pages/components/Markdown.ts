@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import hljs from "highlight.js";
 
 /**
  * @function ParseMarkdown
@@ -96,6 +97,9 @@ export function FixMarkdown(element: HTMLElement) {
 
             _element.replaceWith(paragraph);
         } else continue;
+
+    // highlight
+    hljs.highlightAll();
 }
 
 // default export
