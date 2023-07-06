@@ -7,7 +7,7 @@
 import path from "node:path";
 
 import { Database } from "bun:sqlite";
-import { CreateHash, Encrypt } from "./Hash";
+import { CreateHash, Encrypt, Decrypt } from "./Hash";
 import SQL from "./SQL";
 
 import pack from "../../../package.json";
@@ -103,6 +103,28 @@ export default class EntryDB {
                     transaction: true,
                     use: "Prepare",
                 });
+            } else {
+                // check version
+                const storedVersion = await this.GetPasteFromURL("v");
+                if (!storedVersion) return;
+
+                if (storedVersion.Content !== pack.version) {
+                    // update version, this means that we are running a different version
+                    // than the version file contains
+                    storedVersion.Content = pack.version;
+
+                    await SQL.QueryOBJ({
+                        db: db,
+                        query: "UPDATE Pastes SET (Content, EditDate) = (?, ?) WHERE CustomURL = ?",
+                        params: [
+                            storedVersion.Content,
+                            new Date().toUTCString(), // new edit date
+                            storedVersion.CustomURL,
+                        ],
+                        transaction: true,
+                        use: "Prepare",
+                    });
+                }
             }
         })();
     }
@@ -268,11 +290,13 @@ export default class EntryDB {
      * @method CreatePaste
      *
      * @param {Paste} PasteInfo
+     * @param {boolean} SkipHash used for import, skip hashing passwords (useful if they're already hashed)
      * @return {Promise<[boolean, string, Paste]>}
      * @memberof EntryDB
      */
     public async CreatePaste(
-        PasteInfo: Paste
+        PasteInfo: Paste,
+        SkipHash: boolean = false
     ): Promise<[boolean, string, Paste]> {
         // check custom url
         if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))
@@ -283,9 +307,12 @@ export default class EntryDB {
             ];
 
         // hash passwords
-        PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
-        if (PasteInfo.ViewPassword)
-            PasteInfo.ViewPassword = CreateHash(PasteInfo.ViewPassword);
+        if (!SkipHash) {
+            PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
+
+            if (PasteInfo.ViewPassword)
+                PasteInfo.ViewPassword = CreateHash(PasteInfo.ViewPassword);
+        }
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(PasteInfo);
@@ -522,9 +549,11 @@ export default class EntryDB {
 
         // validate password
         // ...password can be either the paste EditPassword or the server admin password
+        // ...if the custom url is v, then no password can be used (that's the version file, it is required)
         if (
-            password !== config!.admin &&
-            CreateHash(password) !== paste.EditPassword
+            (password !== config!.admin &&
+                CreateHash(password) !== paste.EditPassword) ||
+            paste.CustomURL === "v"
         )
             return [false, "Invalid password!", PasteInfo];
 
@@ -615,7 +644,7 @@ export default class EntryDB {
     /**
      * @function GetEncryptionInfo
      *
-     * @param {string} ViewPassword
+     * @param {string} ViewPassword Must be hashed before
      * @param {string} CustomURL
      * @return {Promise<
      *         [
@@ -682,7 +711,8 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public async GetAllPastes(
-        includePrivate: boolean = false
+        includePrivate: boolean = false,
+        removeInfo: boolean = true
     ): Promise<Paste[]> {
         // get pastes
         const pastes = await SQL.QueryOBJ({
@@ -696,21 +726,42 @@ export default class EntryDB {
         });
 
         // remove passwords from pastes
-        for (let paste of pastes as Paste[]) {
-            paste.EditPassword = "";
+        if (removeInfo)
+            for (let paste of pastes as Paste[]) {
+                paste.EditPassword = "";
 
-            if (paste.ViewPassword) paste.ViewPassword = "exists";
-            // set to "exists" so the server understands the paste is private
-            else paste.ViewPassword = "";
+                if (paste.ViewPassword) paste.ViewPassword = "exists";
+                // set to "exists" so the server understands the paste is private
+                else paste.ViewPassword = "";
 
-            delete paste.ENC_IV;
-            delete paste.ENC_KEY;
-            delete paste.ENC_CODE;
+                delete paste.ENC_IV;
+                delete paste.ENC_KEY;
+                delete paste.ENC_CODE;
 
-            pastes[pastes.indexOf(paste)] = paste;
-        }
+                pastes[pastes.indexOf(paste)] = paste;
+            }
 
         // return
         return pastes;
+    }
+
+    /**
+     * @method ImportPastes
+     *
+     * @param {Paste[]} _export
+     * @return {Promise<[boolean, string, Paste][]>} Outputs
+     * @memberof EntryDB
+     */
+    public async ImportPastes(
+        _export: Paste[]
+    ): Promise<[boolean, string, Paste][]> {
+        let outputs: [boolean, string, Paste][] = [];
+
+        // create each paste
+        for (let paste of _export)
+            outputs.push(await this.CreatePaste(paste, true));
+
+        // return
+        return outputs;
     }
 }

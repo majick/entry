@@ -53,6 +53,9 @@ Pastes cannot normally include any special characters besides `-` and `_`, meani
 
 ### Encryption
 
+!!! note Security
+Encrypted pastes are NOT fully private from the server owner, but they are from other users!
+
 Pastes can be made "private" by encrypting them. This means that only people with your specified `ViewPassword` can decrypt and view the paste. The `ViewPassword` is also required to properly edit the paste.
 
 Encrypted pastes cannot be decrypted from other servers, and the paste decryption form will not be shown. This is because the values for the decryption process are stored on the server (`IV`, `Key`, `AuthCode`), and it is not safe to send them back through HTTP. These values are only read when the server selects the record based on the `ViewPassword` and the `CustomURL`.

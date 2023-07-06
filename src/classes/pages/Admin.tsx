@@ -8,6 +8,7 @@ import { FormDataToJSON } from "../Server";
 import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
+import { CreateHash, Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 import { db } from "./API";
 
@@ -54,6 +55,19 @@ function AdminNav(props: { active: string; pass: string }) {
                     </button>
                 </form>
 
+                <form action="/admin/export" method="POST">
+                    <input
+                        type="hidden"
+                        required
+                        name="AdminPassword"
+                        value={props.pass}
+                    />
+
+                    <button class={props.active === "export" ? "active" : ""}>
+                        Export/Import
+                    </button>
+                </form>
+
                 <a href="https://codeberg.org/hkau/entry">
                     <button>View Source</button>
                 </a>
@@ -71,6 +85,11 @@ function AdminNav(props: { active: string; pass: string }) {
     );
 }
 
+/**
+ * @export
+ * @class Login
+ * @implements {Endpoint}
+ */
 export class Login implements Endpoint {
     public async request(request: Request): Promise<Response> {
         // we aren't actually using a login system, it's just a form for the configured
@@ -294,9 +313,179 @@ export class APIDeletePaste implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class ExportPastes
+ * @implements {Endpoint}
+ */
+export class ExportPastes implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // get request body
+        const body = FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <main>
+                        <div className="tab-container editor-tab">
+                            <AdminNav
+                                active="export"
+                                pass={body.AdminPassword}
+                            />
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <form action="/admin/api/export" method="POST">
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name="AdminPassword"
+                                        value={body.AdminPassword}
+                                    />
+
+                                    <button>Export Pastes</button>
+                                </form>
+
+                                <hr style={{ width: "100%" }} />
+
+                                <form
+                                    action="/admin/api/import"
+                                    method="POST"
+                                    style={{
+                                        display: "flex",
+                                        gap: "0.4rem",
+                                    }}
+                                >
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name="AdminPassword"
+                                        value={body.AdminPassword}
+                                    />
+
+                                    <input
+                                        type="text"
+                                        name={"pastes"}
+                                        required
+                                        placeholder={"Exported Pastes JSON"}
+                                        minLength={2}
+                                    />
+
+                                    <button>Import Pastes</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <Footer />
+                    </main>
+
+                    <style
+                        dangerouslySetInnerHTML={{
+                            __html: `input { background: var(--background-surface); }`,
+                        }}
+                    />
+                </>,
+                <>
+                    <title>Entry Admin</title>
+                </>
+            ),
+            {
+                headers: {
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
+/**
+ * @export
+ * @class APIExport
+ * @implements {Endpoint}
+ */
+export class APIExport implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // get request body
+        const body = FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // get pastes
+        const _export = await db.GetAllPastes(true, false);
+
+        // decrypt encrypted pastes
+        // if paste is encrypted, decrypt
+        // ...otherwise the created paste will decrypt to an encrypted value!!!
+        for (let paste of _export)
+            if (paste.ViewPassword) {
+                // get encryption information
+                const enc = await db.GetEncryptionInfo(
+                    paste.ViewPassword,
+                    paste.CustomURL
+                );
+
+                // decrypt
+                paste.Content = Decrypt(
+                    paste.Content,
+                    enc[1].key,
+                    enc[1].iv,
+                    enc[1].auth
+                )!;
+            } else continue;
+
+        // return
+        return new Response(JSON.stringify(_export, undefined, 4), {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class APIImport
+ * @implements {Endpoint}
+ */
+export class APIImport implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // get request body
+        const body = FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // get pastes
+        const output = await db.ImportPastes(JSON.parse(body.pastes) || []);
+
+        // return
+        return new Response(JSON.stringify(output), {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     Login,
     ManagePastes,
     APIDeletePaste,
+    ExportPastes,
+    APIExport,
+    APIImport,
 };

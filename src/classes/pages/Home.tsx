@@ -73,6 +73,22 @@ export default class Home implements Endpoint {
                             />
                         )}
 
+                        <noscript>
+                            <div class={"mdnote note-error"}>
+                                <b class={"mdnote-title"}>
+                                    JavaScript Disabled
+                                </b>
+                                <p>
+                                    Without JavaScript enabled, the paste editor
+                                    will not work. This means you cannot create
+                                    pastes without JavaScript. Every other
+                                    feature of Entry will still function without
+                                    JavaScript. This includes the admin panel,
+                                    paste viewing and paste decryption.
+                                </p>
+                            </div>
+                        </noscript>
+
                         <div className="tabbar">
                             <button id={"editor-open-tab-text"}>Text</button>
                             <button

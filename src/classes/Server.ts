@@ -116,10 +116,16 @@ export class _Server {
                     // admin endpoints
                     else if (url.pathname === "/admin/manage-pastes")
                         return await new Admin.ManagePastes().request(request);
+                    else if (url.pathname === "/admin/export")
+                        return await new Admin.ExportPastes().request(request);
                     else if (url.pathname === "/admin/api/delete")
                         return await new Admin.APIDeletePaste().request(
                             request
                         );
+                    else if (url.pathname === "/admin/api/export")
+                        return await new Admin.APIExport().request(request);
+                    else if (url.pathname === "/admin/api/import")
+                        return await new Admin.APIImport().request(request);
                     // view post
                     // normal paste view (text/html)
                     // will return 404 for us if not found
