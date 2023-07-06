@@ -52,16 +52,16 @@ export default function Footer() {
                             margin-left: 0.25rem;
                         }
                         
-                        .__footernav li::marker {
-                            content: "·";
+                        .__footernav li {
+                            list-style-type: "·";
                         }
 
                         .__footernav li:first-child {
                            margin-left: -0.25rem;
                         }
                         
-                        .__footernav li:first-child::marker {
-                            content: "";
+                        .__footernav li:first-child {
+                            list-style-type: none;
                         }`,
                     }}
                 />

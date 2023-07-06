@@ -53,9 +53,19 @@ export function ParseMarkdown(content: string): string {
     content = content.replaceAll("***", "<hr />");
 
     // remove scripts, on[...] attributes and <link> elements
+
+    // ...attributes
     content = content.replaceAll(/(on)(.*)\=(.*)\"/g, "");
+    content = content.replaceAll(/(href)\=(.*)\"/g, "");
+
+    // ...elements
     content = content.replaceAll(/(<script.*>)(.*?)(<\/script>)/gs, "");
+    content = content.replaceAll(/(<script.*>)/gs, ""); // the above thing does not match the void <script /> element,
+    //                                                     making the following work:
+    //                                                         <script />alert(1)
+    //                                                     this regex fixes that
     content = content.replaceAll(/(<link.*>)/gs, "");
+    content = content.replaceAll(/(<meta.*>)/gs, "");
 
     // parse content with marked and return
     return marked.parse(content, {
