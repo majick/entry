@@ -2,12 +2,12 @@
   "name": "entry",
   "description": "Open Markdown Pastebin",
   "version": "1.0.2",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
     "@types/marked": "^5.0.0",
     "@types/mime-types": "^2.1.1",
-    "bun-types": "latest"
+    "bun-types": "0.6.13"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

@@ -1,16 +1,38 @@
 :root {
     /* default colors (light) */
-    --base-brightness: 94%;
-    --background-surface: hsl(0, 0%, calc(var(--base-brightness) + 0%));
-    --background-surface1: hsl(0, 0%, calc(var(--base-brightness) + 4%));
-    --background-surface2: hsl(0, 0%, calc(var(--base-brightness) + 21%));
-    --background-surface3: hsl(220, 3%, calc(var(--base-brightness) + 23%));
+    --base-hue: 0;
+    --base-sat: 0%;
+    --base-lit: 93%;
+
+    --background-surface: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) + 0%)
+    );
+
+    --background-surface1: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) + 4%)
+    );
+
+    --background-surface2: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) + 21%)
+    );
+
+    --background-surface3: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) + 23%)
+    );
 
     --text-color: hsl(208, 7%, 42%);
     --text-color-faded: hsl(208, 7%, 38%);
-    --blue: #3a87ad;
+    --blue: #2d6886;
     --blue1: #d9edf7;
-    --blue2: #026dca;
+    --blue2: #025fb1;
     --green: #346535;
     --green1: #dff0d8;
     --yellow: #c09853;
@@ -24,7 +46,7 @@
 @media (prefers-color-scheme: light) {
     html.other-theme {
         /* dark mode colors */
-        --base-brightness: 11%;
+        --base-lit: 11%;
         --text-color: hsl(204, 4%, 80%);
         --text-color-faded: hsl(207, 5%, 54%);
         --blue: #5c8ca4;
@@ -43,13 +65,13 @@
 
 @media (prefers-color-scheme: dark) {
     html:not(.other-theme) {
-        --base-brightness: 11%;
+        --base-lit: 11%;
         --text-color: hsl(204, 4%, 80%);
         --text-color-faded: hsl(207, 5%, 54%);
         --blue: #5c8ca4;
         --blue1: #2b383e;
         --blue2: #4b99d1;
-        --green: #699269;
+        --green: #89a989;
         --green1: #2d3829;
         --yellow: #a88548;
         --yellow1: #4e4632;
@@ -58,6 +80,16 @@
         --red2: #a3717126;
         --red3: #e0aeb4;
     }
+}
+
+html.purple-theme {
+    --base-hue: 255;
+    --base-sat: 50%;
+}
+
+html.blue-theme {
+    --base-hue: 203;
+    --base-sat: 12%;
 }
 
 * {
@@ -259,7 +291,9 @@ pre code {
     color: currentColor;
 }
 
-pre, code, pre code span {
+pre,
+code,
+pre code span {
     font-family: monospace;
 }
 
@@ -332,8 +366,8 @@ table tr {
     border-bottom: solid 1px rgba(120, 125, 125, 0.1);
 }
 
-table td:active {
-    outline: solid 1px var(--blue2);
+table td:focus-within {
+    box-shadow: inset 0 0 0 1px var(--blue2);
 }
 
 blockquote {
@@ -400,11 +434,13 @@ dialog::backdrop {
     color: var(--red3);
 }
 
-.hljs-variable, .hljs-title {
+.hljs-variable,
+.hljs-title {
     color: var(--blue2);
 }
 
-.hljs-property, .hljs-attr {
+.hljs-property,
+.hljs-attr {
     color: var(--red);
 }
 

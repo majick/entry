@@ -68,19 +68,26 @@ export class GetPasteFromURL implements Endpoint {
         const result = await db.GetPasteFromURL(name);
 
         // decrypt (if we can)
-        const search = new URLSearchParams(request.url);
-        if (search.get("ViewPassword") && result) {
-            const decrypted = await new DecryptPaste().GetDecrypted({
-                // using result.CustomURL makes cross server decryption possible because
-                // when we get the result, we'll have already resolved the other server
-                // ...now GetDecrypted just has to implement it (TODO)
-                CustomURL: result.CustomURL,
-                ViewPassword: search.get("ViewPassword") as string,
-            });
+        let ViewPassword = "";
+        if (request.method === "POST" && result) {
+            // get request body
+            const body = FormDataToJSON(await request.formData()) as any;
 
-            if (decrypted) {
-                result.Content = decrypted;
-                delete result.ViewPassword; // don't show decrypt form!
+            if (body.ViewPassword) {
+                const decrypted = await new DecryptPaste().GetDecrypted({
+                    // using result.CustomURL makes cross server decryption possible because
+                    // when we get the result, we'll have already resolved the other server
+                    // ...now GetDecrypted just has to implement it (TODO)
+                    CustomURL: result.CustomURL,
+                    ViewPassword: body.ViewPassword,
+                });
+
+                if (decrypted) {
+                    result.Content = decrypted;
+                    delete result.ViewPassword; // don't show decrypt form!
+
+                    ViewPassword = body.ViewPassword;
+                }
             }
         }
 
@@ -140,10 +147,8 @@ export class GetPasteFromURL implements Endpoint {
                                                 ? `&server=${result.HostServer}`
                                                 : ""
                                         }${
-                                            search.get("ViewPassword")
-                                                ? `&ViewPassword=${search.get(
-                                                      "ViewPassword"
-                                                  )}`
+                                            ViewPassword !== ""
+                                                ? `&ViewPassword=${ViewPassword}`
                                                 : ""
                                         }`}
                                     >
@@ -378,6 +383,25 @@ export class DecryptPaste implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetAllPastes
+ * @implements {Endpoint}
+ */
+export class GetAllPastes implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // get pastes
+        const pastes = await db.GetAllPastes();
+
+        // return
+        return new Response(JSON.stringify(pastes), {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     CreatePaste,
@@ -386,4 +410,5 @@ export default {
     EditPaste,
     DeletePaste,
     DecryptPaste,
+    GetAllPastes,
 };

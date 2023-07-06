@@ -8,7 +8,7 @@ const output = await build({
         "./src/classes/pages/components/Editor.ts",
         "./src/classes/pages/assets/ClientFixMD.ts",
     ],
-    // minify: true,
+    minify: true,
     target: "bun", // technically Editor.ts should have the "browser" target, but this hasn't caused any issues yet so it's fine!
     outdir: "dist",
     splitting: true,
@@ -16,6 +16,11 @@ const output = await build({
         asset: "[name].[ext]",
         chunk: "[name].[ext]",
     },
+    external: [
+        // these files won't be included in the build
+        "package.json",
+        "data/config.json"
+    ]
 });
 
-console.log(output);
+console.log("\x1b[92mBuild finished!\x1b[0m");

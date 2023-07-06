@@ -129,6 +129,7 @@ export default class Home implements Endpoint {
                                             minLength={5}
                                             maxLength={256}
                                             name={"ViewPassword"}
+                                            autoComplete={"off"}
                                         />
 
                                         <input
@@ -137,6 +138,7 @@ export default class Home implements Endpoint {
                                             maxLength={256}
                                             minLength={5}
                                             name={"EditPassword"}
+                                            autoComplete={"off"}
                                             required
                                         />
 
@@ -146,6 +148,7 @@ export default class Home implements Endpoint {
                                             maxLength={100}
                                             minLength={2}
                                             name={"CustomURL"}
+                                            autoComplete={"off"}
                                             required
                                         />
                                     </div>
@@ -213,6 +216,7 @@ export default class Home implements Endpoint {
                                                     maxLength={256}
                                                     minLength={5}
                                                     name={"NewEditPassword"}
+                                                    autoComplete={"off"}
                                                 />
 
                                                 <input
@@ -223,6 +227,7 @@ export default class Home implements Endpoint {
                                                     maxLength={100}
                                                     minLength={2}
                                                     name={"NewURL"}
+                                                    autoComplete={"off"}
                                                 />
                                             </div>
                                         </form>
@@ -325,6 +330,7 @@ export default class Home implements Endpoint {
                                         maxLength={256}
                                         placeholder={"Edit code"}
                                         name={"password"}
+                                        autoComplete={"off"}
                                     />
 
                                     <input

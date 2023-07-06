@@ -14,7 +14,9 @@ Uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database 
 
 ## Usage
 
-Once installed you can start (and build) the server using `bun run start`, to just build do `bun run build`. You can specify a launch port by doing `export PORT={port} && bun run start`, you can also specify a port by creating a `.env` file in the project directory and setting the port there.
+Once installed you can start (and build) the server using `bun run start`, to just build do `bun run build`.
+
+Manually launch once after installing to start the setup prompts. These will allow you to set an admin password and define a different port.
 
 ## Compatibility
 
@@ -26,7 +28,9 @@ Entry supports all Rentry features with (almost) 1:1 compatibility. There are a 
 | Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports a `GET /api/get` endpoint, which returns the saved record for the paste without the `EditPassword` hash. Any paste can be viewed raw just by clicking the "Edit" button when viewing the paste. |
 | Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews         |
 
-## API
+## Features
+
+### API
 
 - `POST /api/new`: Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword`
 - `POST /api/edit`: Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
@@ -34,7 +38,7 @@ Entry supports all Rentry features with (almost) 1:1 compatibility. There are a 
 - `POST /api/decrypt`: Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `GET  /api/get/{paste}`: Get an existing paste
 
-## (very basic) Federation
+### (very basic) Federation
 
 !!! note Encryption
 Federation does not work with encrypted pastes.
@@ -47,7 +51,7 @@ In this example, we are viewing the paste `paste` from the server `example2.com`
 
 Pastes cannot normally include any special characters besides `-` and `_`, meaning there should not be any URL conflicts.
 
-## Encryption
+### Encryption
 
 Pastes can be made "private" by encrypting them. This means that only people with your specified `ViewPassword` can decrypt and view the paste. The `ViewPassword` is also required to properly edit the paste.
 
@@ -66,6 +70,27 @@ const record = (await SQL.QueryOBJ({
 ```
 
 Values are regenerated when an encrypted paste is edited.
+
+### Admin Panel
+
+Entry provides an admin panel that is locked behind a set password that allows the server owner to manage pastes on their server quickly and easily. The admin password is set on initial configuration, and stored (plain text) in `data/config.json` with the key `admin`.
+
+### Customization
+
+Every color is customizable through simple CSS variables. You can customize the background using the `--base-hue`, `--base-sat` and `--base-lit` variables. The background is normally in `hsl` format, while other colors are in hex.
+
+- `--base-hue` - The base hue of the background (int)
+- `--base-sat` - The base saturation of the background (percentage)
+- `--base-lit` - The base lightness of the background (percentage)
+
+Some examples are includes in the base stylesheet. The example below creates a purple theme.
+
+```css
+html.purple-theme {
+    --base-hue: 255;
+    --base-sat: 50%;
+}
+```
 
 ## Why
 

@@ -11,6 +11,7 @@ import { CreateHash, Encrypt } from "./Hash";
 import SQL from "./SQL";
 
 import pack from "../../../package.json";
+import type { Config } from "../..";
 
 export type Paste = {
     Content: string;
@@ -32,7 +33,7 @@ export type Paste = {
  * @class EntryDB
  */
 export default class EntryDB {
-    private readonly DataDirectory = path.resolve(process.cwd(), "data");
+    public static DataDirectory = path.resolve(process.cwd(), "data");
     public readonly db: Database;
 
     private static readonly MaxContentLength = 200000;
@@ -45,6 +46,8 @@ export default class EntryDB {
 
     private static readonly URLRegex = /^[\w\_\-]+$/gm; // custom urls must match this to be accepted
 
+    public static isNew: boolean = true;
+
     /**
      * Creates an instance of EntryDB.
      * @memberof EntryDB
@@ -52,6 +55,7 @@ export default class EntryDB {
     constructor() {
         // create db link
         const [db, isNew] = SQL.CreateDB("entry");
+        EntryDB.isNew = isNew;
         this.db = db;
 
         // check if we need to create tables
@@ -101,6 +105,23 @@ export default class EntryDB {
                 });
             }
         })();
+    }
+
+    /**
+     * @method GetConfig
+     *
+     * @static
+     * @return {Promise<Config>}
+     * @memberof EntryDB
+     */
+    public static async GetConfig(): Promise<Config | undefined> {
+        const ConfigPath = path.resolve(EntryDB.DataDirectory, "config.json");
+
+        // make sure config exists
+        if (!(await Bun.file(ConfigPath).exists())) return undefined;
+
+        // return config
+        return JSON.parse(await Bun.file(ConfigPath).text());
     }
 
     /**
@@ -460,6 +481,11 @@ export default class EntryDB {
         const server = PasteInfo.CustomURL.split("@")[1];
 
         if (server) {
+            // we aren't checking for admin password here or anything because it shouldn't
+            // be provided because the admin panel cannot show federated pastes
+            // TODO: i do think it would be cool to allow the server admin to see an analytics panel
+            //       with the top viewed posts (maybe)
+
             // send request
             const [isBad, record] = await this.ForwardRequest(
                 server,
@@ -491,8 +517,15 @@ export default class EntryDB {
         // make sure a paste exists
         if (!paste) return [false, "This paste does not exist!", PasteInfo];
 
+        // get server config
+        const config = await EntryDB.GetConfig();
+
         // validate password
-        if (CreateHash(password) !== paste.EditPassword)
+        // ...password can be either the paste EditPassword or the server admin password
+        if (
+            password !== config!.admin &&
+            CreateHash(password) !== paste.EditPassword
+        )
             return [false, "Invalid password!", PasteInfo];
 
         // if paste is encrypted, delete the encryption values too
@@ -638,5 +671,46 @@ export default class EntryDB {
                 auth: record.ENC_CODE as string,
             },
         ];
+    }
+
+    /**
+     * @method GetAllPastes
+     * @description Return all (public) pastes in the database
+     *
+     * @static
+     * @param {boolean} includePrivate
+     * @memberof EntryDB
+     */
+    public async GetAllPastes(
+        includePrivate: boolean = false
+    ): Promise<Paste[]> {
+        // get pastes
+        const pastes = await SQL.QueryOBJ({
+            db: this.db,
+            query: `SELECT * From Pastes${
+                !includePrivate ? ' WHERE ViewPassword = ""' : ""
+            }`,
+            all: true,
+            transaction: true,
+            use: "Prepare",
+        });
+
+        // remove passwords from pastes
+        for (let paste of pastes as Paste[]) {
+            paste.EditPassword = "";
+
+            if (paste.ViewPassword) paste.ViewPassword = "exists";
+            // set to "exists" so the server understands the paste is private
+            else paste.ViewPassword = "";
+
+            delete paste.ENC_IV;
+            delete paste.ENC_KEY;
+            delete paste.ENC_CODE;
+
+            pastes[pastes.indexOf(paste)] = paste;
+        }
+
+        // return
+        return pastes;
     }
 }

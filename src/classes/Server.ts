@@ -12,6 +12,7 @@ import { contentType } from "mime-types";
 
 // import endpoints
 import _404Page from "./pages/components/404";
+import Admin from "./pages/Admin";
 import Home from "./pages/Home";
 import API from "./pages/API";
 
@@ -77,6 +78,12 @@ export class _Server {
                         return new Response(
                             "User-agent: *\nAllow: /\nDisallow:"
                         );
+                    // admin
+                    else if (url.pathname === "/admin/login")
+                        return await new Admin.Login().request(request);
+                    // api
+                    else if (url.pathname === "/api/all")
+                        return await new API.GetAllPastes().request(request);
                     // check if pathname is the url of a paste
                     else {
                         if (!url.pathname.startsWith("/api/get/"))
@@ -106,6 +113,18 @@ export class _Server {
                     else if (url.pathname === "/api/decrypt")
                         // decrypt encrypted paste
                         return new API.DecryptPaste().request(request);
+                    // admin endpoints
+                    else if (url.pathname === "/admin/manage-pastes")
+                        return await new Admin.ManagePastes().request(request);
+                    else if (url.pathname === "/admin/api/delete")
+                        return await new Admin.APIDeletePaste().request(
+                            request
+                        );
+                    // view post
+                    // normal paste view (text/html)
+                    // will return 404 for us if not found
+                    else
+                        return await new API.GetPasteFromURL().request(request);
                 }
 
                 return await new _404Page().request(request);

@@ -19,6 +19,7 @@ export default function DecryptionForm(props: {
                     alignItems: "center",
                     marginBottom: "0.5rem",
                 }}
+                method={"POST"}
             >
                 <button>Decrypt</button>
 
