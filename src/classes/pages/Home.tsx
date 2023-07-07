@@ -4,8 +4,8 @@ import Renderer from "./_Render";
 import DecryptionForm from "./components/DecryptionForm";
 import Footer from "./components/Footer";
 
+import EntryDB, { Paste } from "../db/EntryDB";
 import { DecryptPaste, db } from "./API";
-import { Paste } from "../db/EntryDB";
 
 /**
  * @export
@@ -56,12 +56,8 @@ export default class Home implements Endpoint {
                         )) ||
                             (search.get("msg") && (
                                 <div class={"mdnote note-note"}>
-                                    <b class={"mdnote-title"}>
-                                        Application Message
-                                    </b>
-                                    <p>
-                                        {decodeURIComponent(search.get("msg")!)}
-                                    </p>
+                                    <b class={"mdnote-title"}>Application Message</b>
+                                    <p>{decodeURIComponent(search.get("msg")!)}</p>
                                 </div>
                             ))}
 
@@ -75,16 +71,15 @@ export default class Home implements Endpoint {
 
                         <noscript>
                             <div class={"mdnote note-error"}>
-                                <b class={"mdnote-title"}>
-                                    JavaScript Disabled
-                                </b>
+                                <b class={"mdnote-title"}>JavaScript Disabled</b>
                                 <p>
-                                    Without JavaScript enabled, the paste editor
-                                    will not work. This means you cannot create
-                                    pastes without JavaScript. Every other
-                                    feature of Entry will still function without
-                                    JavaScript. This includes the admin panel,
-                                    paste viewing and paste decryption.
+                                    Without JavaScript enabled, the paste editor will
+                                    not work. This means you cannot create pastes
+                                    without JavaScript. Every other feature of Entry
+                                    will still function without JavaScript. This
+                                    includes the admin panel, paste viewing, paste
+                                    decryption and group viewing. Special Markdown
+                                    will not work with JavaScript disabled.
                                 </p>
                             </div>
                         </noscript>
@@ -168,22 +163,28 @@ export default class Home implements Endpoint {
                                             >
                                                 <input
                                                     type="text"
-                                                    placeholder={
-                                                        "Custom edit code"
+                                                    placeholder={"Custom url"}
+                                                    maxLength={
+                                                        EntryDB.MaxCustomURLLength
                                                     }
-                                                    maxLength={256}
-                                                    minLength={5}
-                                                    name={"EditPassword"}
+                                                    minLength={
+                                                        EntryDB.MinCustomURLLength
+                                                    }
+                                                    name={"CustomURL"}
                                                     autoComplete={"off"}
                                                     required
                                                 />
 
                                                 <input
-                                                    type="text"
-                                                    placeholder={"Custom url"}
-                                                    maxLength={100}
-                                                    minLength={2}
-                                                    name={"CustomURL"}
+                                                    type="password"
+                                                    placeholder={"Custom edit code"}
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
+                                                    name={"EditPassword"}
                                                     autoComplete={"off"}
                                                     required
                                                 />
@@ -204,14 +205,80 @@ export default class Home implements Endpoint {
                                                     "details-flex-content-list-box"
                                                 }
                                             >
+                                                <h4
+                                                    style={{
+                                                        margin: "0",
+                                                    }}
+                                                >
+                                                    Private Pastes
+                                                </h4>
+
+                                                <p>
+                                                    Providing a view code makes your
+                                                    paste private. The view code is
+                                                    used to decrypt your paste for
+                                                    viewing.
+                                                </p>
+
                                                 <input
-                                                    type="text"
+                                                    type="password"
                                                     placeholder={
                                                         "View code - optional"
                                                     }
-                                                    minLength={5}
-                                                    maxLength={256}
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
                                                     name={"ViewPassword"}
+                                                    autoComplete={"off"}
+                                                />
+
+                                                <hr />
+                                                <h4
+                                                    style={{
+                                                        margin: "0",
+                                                    }}
+                                                >
+                                                    Group Pastes
+                                                </h4>
+
+                                                <p>
+                                                    Groups cannot be made private.
+                                                    The code is only required when
+                                                    submitting to an existing group.
+                                                    If you provide a group name, the
+                                                    group post code{" "}
+                                                    <b>is required</b>!
+                                                </p>
+
+                                                <input
+                                                    type="text"
+                                                    placeholder={
+                                                        "Group name - optional"
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinCustomURLLength
+                                                    }
+                                                    maxLength={
+                                                        EntryDB.MaxCustomURLLength
+                                                    }
+                                                    name={"GroupName"}
+                                                />
+
+                                                <input
+                                                    type="password"
+                                                    placeholder={
+                                                        "Group post code - optional"
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
+                                                    name={"GroupSubmitPassword"}
                                                     autoComplete={"off"}
                                                 />
                                             </div>
@@ -271,8 +338,12 @@ export default class Home implements Endpoint {
                                                 <input
                                                     type="text"
                                                     placeholder={"Edit code"}
-                                                    maxLength={256}
-                                                    minLength={5}
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
                                                     name={"OldEditPassword"}
                                                     required
                                                 />
@@ -294,8 +365,7 @@ export default class Home implements Endpoint {
                                                     }}
                                                 >
                                                     <summary>
-                                                        Change Settings
-                                                        (optional)
+                                                        Change Settings (optional)
                                                     </summary>
 
                                                     <div
@@ -304,15 +374,17 @@ export default class Home implements Endpoint {
                                                         }
                                                     >
                                                         <input
-                                                            type="text"
+                                                            type="password"
                                                             placeholder={
                                                                 "Change edit code - optional"
                                                             }
-                                                            maxLength={256}
-                                                            minLength={5}
-                                                            name={
-                                                                "NewEditPassword"
+                                                            maxLength={
+                                                                EntryDB.MaxPasswordLength
                                                             }
+                                                            minLength={
+                                                                EntryDB.MinPasswordLength
+                                                            }
+                                                            name={"NewEditPassword"}
                                                             autoComplete={"off"}
                                                         />
 
@@ -321,8 +393,12 @@ export default class Home implements Endpoint {
                                                             placeholder={
                                                                 "Change custom url - optional"
                                                             }
-                                                            maxLength={100}
-                                                            minLength={2}
+                                                            maxLength={
+                                                                EntryDB.MaxCustomURLLength
+                                                            }
+                                                            minLength={
+                                                                EntryDB.MinCustomURLLength
+                                                            }
                                                             name={"NewURL"}
                                                             autoComplete={"off"}
                                                         />
@@ -348,9 +424,7 @@ export default class Home implements Endpoint {
                                                 <button>Back</button>
                                             </a>
 
-                                            <button
-                                                id={"editor-open-delete-modal"}
-                                            >
+                                            <button id={"editor-open-delete-modal"}>
                                                 Delete Paste
                                             </button>
                                         </div>
@@ -371,8 +445,7 @@ export default class Home implements Endpoint {
 
                             <ul>
                                 <li>
-                                    If you delete your paste, it will be gone
-                                    forever
+                                    If you delete your paste, it will be gone forever
                                 </li>
                                 <li>
                                     You cannot restore your paste and it will be
@@ -423,10 +496,10 @@ export default class Home implements Endpoint {
                                     }}
                                 >
                                     <input
-                                        type="text"
+                                        type="password"
                                         required
-                                        minLength={5}
-                                        maxLength={256}
+                                        minLength={EntryDB.MinPasswordLength}
+                                        maxLength={EntryDB.MaxPasswordLength}
                                         placeholder={"Edit code"}
                                         name={"password"}
                                         autoComplete={"off"}

@@ -52,11 +52,7 @@ export function Encrypt(
         const iv = crypto.randomBytes(12);
 
         // create cipher
-        const cipher = crypto.createCipheriv(
-            "aes-256-gcm",
-            Buffer.from(key),
-            iv
-        );
+        const cipher = crypto.createCipheriv("aes-256-gcm", Buffer.from(key), iv);
 
         // encrypt
         let encryptedText = cipher.update(content, "utf-8", "hex");

@@ -1,4 +1,4 @@
-import { Paste } from "../../db/EntryDB";
+import EntryDB, { Paste } from "../../db/EntryDB";
 
 export default function DecryptionForm(props: {
     paste: Paste;
@@ -18,18 +18,14 @@ export default function DecryptionForm(props: {
                     justifyContent: "space-between",
                     alignItems: "center",
                     marginBottom: "0.5rem",
+                    flexWrap: "wrap",
                 }}
                 method={"POST"}
             >
                 <button>Decrypt</button>
 
                 {props.isEdit && (
-                    <input
-                        type={"hidden"}
-                        name={"mode"}
-                        value={"edit"}
-                        required
-                    />
+                    <input type={"hidden"} name={"mode"} value={"edit"} required />
                 )}
 
                 <input
@@ -40,9 +36,11 @@ export default function DecryptionForm(props: {
                 />
 
                 <input
-                    type="text"
+                    type="password"
                     name={"ViewPassword"}
                     placeholder={"View password"}
+                    minLength={EntryDB.MinPasswordLength}
+                    maxLength={EntryDB.MaxPasswordLength}
                     required
                 />
             </form>

@@ -29,9 +29,7 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
     }
 
     function optional(message: string, _default: any) {
-        const answer = prompt(
-            `${message} \x1b[93m(default: ${_default})\x1b[0m:`
-        );
+        const answer = prompt(`${message} \x1b[93m(default: ${_default})\x1b[0m:`);
 
         return answer || _default;
     }

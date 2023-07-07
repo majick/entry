@@ -19,6 +19,8 @@ export type Paste = {
     CustomURL: string;
     PubDate: string;
     EditDate: string;
+    GroupName?: string;
+    GroupSubmitPassword?: string;
     ENC_IV?: string;
     ENC_KEY?: string;
     ENC_CODE?: string;
@@ -36,13 +38,13 @@ export default class EntryDB {
     public static DataDirectory = path.resolve(process.cwd(), "data");
     public readonly db: Database;
 
-    private static readonly MaxContentLength = 200000;
-    private static readonly MaxPasswordLength = 256;
-    private static readonly MaxCustomURLLength = 100;
+    public static readonly MaxContentLength = 200000;
+    public static readonly MaxPasswordLength = 256;
+    public static readonly MaxCustomURLLength = 100;
 
-    private static readonly MinContentLength = 1;
-    private static readonly MinPasswordLength = 5;
-    private static readonly MinCustomURLLength = 2;
+    public static readonly MinContentLength = 1;
+    public static readonly MinPasswordLength = 5;
+    public static readonly MinCustomURLLength = 2;
 
     private static readonly URLRegex = /^[\w\_\-]+$/gm; // custom urls must match this to be accepted
 
@@ -69,7 +71,9 @@ export default class EntryDB {
                         CustomURL varchar(${EntryDB.MaxCustomURLLength}),
                         ViewPassword varchar(${EntryDB.MaxPasswordLength}),
                         PubDate datetime DEFAULT CURRENT_TIMESTAMP,
-                        EditDate datetime DEFAULT CURRENT_TIMESTAMP
+                        EditDate datetime DEFAULT CURRENT_TIMESTAMP,
+                        GroupName varchar(${EntryDB.MaxCustomURLLength}),
+                        GroupSubmitPassword varchar(${EntryDB.MaxPasswordLength})
                     )`,
                 });
 
@@ -88,7 +92,7 @@ export default class EntryDB {
                 // this is used to check if the server is outdated
                 await SQL.QueryOBJ({
                     db: db,
-                    query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?)",
+                    query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                     params: [
                         pack.version,
                         "", // an empty EditPassword essentially makes this paste uneditable without server access
@@ -99,6 +103,8 @@ export default class EntryDB {
                         "",
                         new Date().toUTCString(), // PubDate
                         new Date().toUTCString(), // EditDate
+                        "server",
+                        "", // same deal as EditPassword
                     ],
                     transaction: true,
                     use: "Prepare",
@@ -160,21 +166,25 @@ export default class EntryDB {
         // validate lengths
 
         // check more than maximum
+        // ...content
         if (PasteInfo.Content.length >= EntryDB.MaxContentLength)
             return [
                 false,
                 `Content must be less than ${EntryDB.MaxContentLength} characters!`,
             ];
+        // ...edit password
         else if (PasteInfo.EditPassword.length >= EntryDB.MaxPasswordLength)
             return [
                 false,
                 `Edit password must be less than ${EntryDB.MaxPasswordLength} characters!`,
             ];
+        // ...custom url
         else if (PasteInfo.CustomURL.length >= EntryDB.MaxCustomURLLength)
             return [
                 false,
                 `Custom URL must be less than ${EntryDB.MaxCustomURLLength} characters!`,
             ];
+        // ...view password
         else if (
             PasteInfo.ViewPassword &&
             PasteInfo.ViewPassword.length >= EntryDB.MaxPasswordLength
@@ -183,22 +193,43 @@ export default class EntryDB {
                 false,
                 `View password must be less than ${EntryDB.MaxPasswordLength} characters!`,
             ];
+        // ...group
+        else if (
+            PasteInfo.GroupName &&
+            PasteInfo.GroupName.length >= EntryDB.MaxCustomURLLength
+        )
+            return [
+                false,
+                `Group name must be less than ${EntryDB.MaxCustomURLLength} characters!`,
+            ];
+        else if (
+            PasteInfo.GroupSubmitPassword &&
+            PasteInfo.GroupSubmitPassword.length >= EntryDB.MaxPasswordLength
+        )
+            return [
+                false,
+                `Group submit password must be less than ${EntryDB.MaxPasswordLength} characters!`,
+            ];
         // check less than minimum
+        // ...content
         else if (PasteInfo.Content.length <= EntryDB.MinContentLength)
             return [
                 false,
                 `Content must be more than ${EntryDB.MinContentLength} characters!`,
             ];
+        // ...edit password
         else if (PasteInfo.EditPassword.length <= EntryDB.MinPasswordLength)
             return [
                 false,
                 `Edit password must be more than ${EntryDB.MinPasswordLength} characters!`,
             ];
+        // ...custom url
         else if (PasteInfo.CustomURL.length <= EntryDB.MinCustomURLLength)
             return [
                 false,
                 `Custom URL must be more than ${EntryDB.MinCustomURLLength} characters!`,
             ];
+        // ...view password
         else if (
             PasteInfo.ViewPassword &&
             PasteInfo.ViewPassword.length <= EntryDB.MinPasswordLength
@@ -206,6 +237,23 @@ export default class EntryDB {
             return [
                 false,
                 `View password must be more than ${EntryDB.MinPasswordLength} characters!`,
+            ];
+        // ...group
+        else if (
+            PasteInfo.GroupName &&
+            PasteInfo.GroupName.length <= EntryDB.MinCustomURLLength
+        )
+            return [
+                false,
+                `Group name must be more than ${EntryDB.MinCustomURLLength} characters!`,
+            ];
+        else if (
+            PasteInfo.GroupSubmitPassword &&
+            PasteInfo.GroupSubmitPassword.length <= EntryDB.MinPasswordLength
+        )
+            return [
+                false,
+                `Group submit password must be more than ${EntryDB.MinPasswordLength} characters!`,
             ];
 
         return [true, ""];
@@ -306,17 +354,70 @@ export default class EntryDB {
                 PasteInfo,
             ];
 
+        // check group name
+        if (PasteInfo.GroupName && !PasteInfo.GroupName.match(EntryDB.URLRegex))
+            return [
+                false,
+                `Group name does not pass test: ${EntryDB.URLRegex}`,
+                PasteInfo,
+            ];
+
         // hash passwords
         if (!SkipHash) {
             PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
 
             if (PasteInfo.ViewPassword)
                 PasteInfo.ViewPassword = CreateHash(PasteInfo.ViewPassword);
+
+            if (PasteInfo.GroupSubmitPassword)
+                PasteInfo.GroupSubmitPassword = CreateHash(
+                    PasteInfo.GroupSubmitPassword
+                );
         }
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(PasteInfo);
         if (!lengthsValid[0]) return [...lengthsValid, PasteInfo];
+
+        // if there is a group name, there must be a group password (and vice versa)
+        if (PasteInfo.GroupName && !PasteInfo.GroupSubmitPassword)
+            return [
+                false,
+                "There must be a group submit password provided if there is a group name provided!",
+                PasteInfo,
+            ];
+        else if (PasteInfo.GroupSubmitPassword && !PasteInfo.GroupName)
+            return [
+                false,
+                "There must be a group name provided if there is a group submit password provided!",
+                PasteInfo,
+            ];
+
+        // check if group already exists, i it does make sure the password matches
+        // groups don't really have a table for themselves, more of just if a post
+        // with that group name already exists!
+        if (PasteInfo.GroupName) {
+            const GroupRecord = (await SQL.QueryOBJ({
+                db: this.db,
+                query: "SELECT * From Pastes WHERE GroupName = ?",
+                params: [PasteInfo.GroupName],
+                get: true, // only return 1
+                transaction: true,
+                use: "Prepare",
+            })) as Paste | undefined;
+
+            if (
+                GroupRecord &&
+                // it's safe to assume PasteInfo.GroupSubmitPassword exists becauuse we
+                // required it in the previous step, it was also hashed previously!
+                PasteInfo.GroupSubmitPassword! !== GroupRecord.GroupSubmitPassword
+            )
+                return [
+                    false,
+                    "This is already an existing paste group, please use the correct group password!",
+                    PasteInfo,
+                ];
+        }
 
         // make sure a paste does not already exist with this custom URL
         if (await this.GetPasteFromURL(PasteInfo.CustomURL))
@@ -325,6 +426,10 @@ export default class EntryDB {
                 "A paste with this custom URL already exists!",
                 PasteInfo,
             ];
+
+        // make sure CustomURL isn't the name of a page
+        if (PasteInfo.CustomURL === "group")
+            return [false, 'The custom URL "group" is reserved!', PasteInfo];
 
         // encrypt (if needed)
         if (PasteInfo.ViewPassword) {
@@ -352,7 +457,7 @@ export default class EntryDB {
         // create paste
         await SQL.QueryOBJ({
             db: this.db,
-            query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?)",
+            query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             params: [
                 PasteInfo.Content,
                 PasteInfo.EditPassword,
@@ -360,6 +465,8 @@ export default class EntryDB {
                 PasteInfo.ViewPassword,
                 new Date().toUTCString(), // PubDate
                 new Date().toUTCString(), // EditDate
+                PasteInfo.GroupName || "",
+                PasteInfo.GroupSubmitPassword || "",
             ],
             transaction: true,
             use: "Prepare",
@@ -501,8 +608,7 @@ export default class EntryDB {
         PasteInfo: Partial<Paste>,
         password: string
     ): Promise<[boolean, string, Partial<Paste>]> {
-        if (!PasteInfo.CustomURL)
-            return [false, "Missing CustomURL", PasteInfo];
+        if (!PasteInfo.CustomURL) return [false, "Missing CustomURL", PasteInfo];
 
         // check if paste is from another server
         const server = PasteInfo.CustomURL.split("@")[1];
@@ -514,14 +620,10 @@ export default class EntryDB {
             //       with the top viewed posts (maybe)
 
             // send request
-            const [isBad, record] = await this.ForwardRequest(
-                server,
-                "delete",
-                [
-                    `CustomURL=${PasteInfo.CustomURL.split("@")[0]}`,
-                    `password=${password}`,
-                ]
-            );
+            const [isBad, record] = await this.ForwardRequest(server, "delete", [
+                `CustomURL=${PasteInfo.CustomURL.split("@")[0]}`,
+                `password=${password}`,
+            ]);
 
             // check if promise rejected
             if (isBad) return [false, "Connection failed", PasteInfo];
@@ -543,6 +645,10 @@ export default class EntryDB {
 
         // make sure a paste exists
         if (!paste) return [false, "This paste does not exist!", PasteInfo];
+
+        // make sure paste is not "v" (version paste)
+        if (paste.CustomURL === "v")
+            return [false, "Cannot delete version paste!", PasteInfo];
 
         // get server config
         const config = await EntryDB.GetConfig();
@@ -627,9 +733,7 @@ export default class EntryDB {
      * @return {(string | undefined | null)}
      * @memberof EntryDB
      */
-    private GetErrorFromResponse(
-        response: Response
-    ): string | undefined | null {
+    private GetErrorFromResponse(response: Response): string | undefined | null {
         if (response.headers.get("Location")) {
             // get from location
             return new URLSearchParams(
@@ -668,7 +772,7 @@ export default class EntryDB {
                 iv: string;
                 key: string;
                 auth: string;
-            }
+            },
         ]
     > {
         // get encryption values by view password and customurl
@@ -703,6 +807,30 @@ export default class EntryDB {
     }
 
     /**
+     * @method CleanPaste
+     *
+     * @param {Paste} paste
+     * @return {*}  {Paste}
+     * @memberof EntryDB
+     */
+    public CleanPaste(paste: Paste): Paste {
+        paste.EditPassword = "";
+
+        if (paste.ViewPassword) paste.ViewPassword = "exists";
+        // set to "exists" so the server understands the paste is private
+        else paste.ViewPassword = "";
+
+        delete paste.ENC_IV;
+        delete paste.ENC_KEY;
+        delete paste.ENC_CODE;
+
+        delete paste.GroupSubmitPassword;
+
+        // return
+        return paste;
+    }
+
+    /**
      * @method GetAllPastes
      * @description Return all (public) pastes in the database
      *
@@ -728,16 +856,7 @@ export default class EntryDB {
         // remove passwords from pastes
         if (removeInfo)
             for (let paste of pastes as Paste[]) {
-                paste.EditPassword = "";
-
-                if (paste.ViewPassword) paste.ViewPassword = "exists";
-                // set to "exists" so the server understands the paste is private
-                else paste.ViewPassword = "";
-
-                delete paste.ENC_IV;
-                delete paste.ENC_KEY;
-                delete paste.ENC_CODE;
-
+                paste = this.CleanPaste(paste);
                 pastes[pastes.indexOf(paste)] = paste;
             }
 
@@ -758,10 +877,37 @@ export default class EntryDB {
         let outputs: [boolean, string, Paste][] = [];
 
         // create each paste
-        for (let paste of _export)
-            outputs.push(await this.CreatePaste(paste, true));
+        for (let paste of _export) outputs.push(await this.CreatePaste(paste, true));
 
         // return
         return outputs;
+    }
+
+    /**
+     * @method GetAllPastesInGroup
+     *
+     * @param {string} group
+     * @return {Promise<Paste[]>}
+     * @memberof EntryDB
+     */
+    public async GetAllPastesInGroup(group: string): Promise<Paste[]> {
+        // get pastes
+        const pastes = await SQL.QueryOBJ({
+            db: this.db,
+            query: "SELECT * From Pastes WHERE GroupName = ?",
+            params: [group],
+            all: true,
+            transaction: true,
+            use: "Prepare",
+        });
+
+        // remove passwords from pastes
+        for (let paste of pastes as Paste[]) {
+            paste = this.CleanPaste(paste);
+            pastes[pastes.indexOf(paste)] = paste;
+        }
+
+        // return
+        return pastes;
     }
 }

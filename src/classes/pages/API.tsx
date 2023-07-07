@@ -176,31 +176,50 @@ export class GetPasteFromURL implements Endpoint {
                                     style={{
                                         display: "flex",
                                         justifyContent: "space-between",
-                                        gap: "0.4rem",
+                                        gap: "0.5rem",
                                         width: "100%",
                                     }}
                                 >
-                                    <a
-                                        href={`/?mode=edit&OldURL=${
-                                            result.CustomURL
-                                        }${
-                                            result.HostServer
-                                                ? `&server=${result.HostServer}`
-                                                : ""
-                                        }${
-                                            ViewPassword !== ""
-                                                ? `&ViewPassword=${ViewPassword}`
-                                                : ""
-                                        }`}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "0.5rem",
+                                        }}
                                     >
-                                        <button
-                                            style={{
-                                                height: "max-content",
-                                            }}
+                                        <a
+                                            href={`/?mode=edit&OldURL=${
+                                                result.CustomURL
+                                            }${
+                                                result.HostServer
+                                                    ? `&server=${result.HostServer}`
+                                                    : ""
+                                            }${
+                                                ViewPassword !== ""
+                                                    ? `&ViewPassword=${ViewPassword}`
+                                                    : ""
+                                            }`}
                                         >
-                                            Edit
-                                        </button>
-                                    </a>
+                                            <button
+                                                style={{
+                                                    height: "max-content",
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+                                        </a>
+
+                                        {result.GroupName && (
+                                            <a href={`/group/${result.GroupName}`}>
+                                                <button
+                                                    style={{
+                                                        height: "max-content",
+                                                    }}
+                                                >
+                                                    View Group
+                                                </button>
+                                            </a>
+                                        )}
+                                    </div>
 
                                     <div
                                         style={{
@@ -262,31 +281,19 @@ export class GetPasteRecord implements Endpoint {
         const url = new URL(request.url);
 
         // get paste
-        const paste = await db.GetPasteFromURL(
+        let paste = await db.GetPasteFromURL(
             url.pathname.slice("/api/get/".length, url.pathname.length)
         );
 
-        if (paste) {
-            paste.EditPassword = ""; // we don't want to send that back to the client! (it's hashed anyways, but good to be sure)
-            paste.ViewPassword = "";
-
-            // the rest of these actually do need to get removed, though
-            // (EditPassword isn't optinal so we can't use delete!)
-            delete paste.ENC_IV;
-            delete paste.ENC_KEY;
-            delete paste.ENC_CODE;
-        }
+        if (paste) paste = db.CleanPaste(paste); // <- this is VERY important, we don't want to send passwords back!!!
 
         // return
-        return new Response(
-            JSON.stringify(paste || { Content: "404: Not Found" }),
-            {
-                status: paste ? 200 : 404,
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
+        return new Response(JSON.stringify(paste || { Content: "404: Not Found" }), {
+            status: paste ? 200 : 404,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
     }
 }
 
@@ -342,9 +349,9 @@ export class EditPaste implements Endpoint {
                         ? // if successful, redirect to paste
                           `/${result[2].CustomURL}`
                         : // otherwise, show error message
-                          `/?err=${encodeURIComponent(
-                              result[1]
-                          )}&mode=edit&OldURL=${result[2].CustomURL}`,
+                          `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
+                              result[2].CustomURL
+                          }`,
             },
         });
     }
@@ -387,9 +394,9 @@ export class DeletePaste implements Endpoint {
                         ? // if successful, redirect to home
                           `/?msg=${encodeURIComponent(result[1])}`
                         : // otherwise, show error message
-                          `/?err=${encodeURIComponent(
-                              result[1]
-                          )}&mode=edit&OldURL=${result[2].CustomURL}`,
+                          `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
+                              result[2].CustomURL
+                          }`,
             },
         });
     }
@@ -403,9 +410,7 @@ export class DeletePaste implements Endpoint {
  * @implements {Endpoint}
  */
 export class DecryptPaste implements Endpoint {
-    public async GetDecrypted(
-        body: Partial<Paste>
-    ): Promise<string | undefined> {
+    public async GetDecrypted(body: Partial<Paste>): Promise<string | undefined> {
         if (!body.CustomURL) return undefined;
 
         // get paste
@@ -430,7 +435,7 @@ export class DecryptPaste implements Endpoint {
             request,
             "application/x-www-form-urlencoded"
         );
-        
+
         if (WrongType) return WrongType;
 
         // get request body
@@ -467,14 +472,147 @@ export class GetAllPastes implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetAllPastesInGroup
+ * @implements {Endpoint}
+ */
+export class GetAllPastesInGroup implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get pastes
+        const pastes = await db.GetAllPastesInGroup(
+            // if no group is provided this will return all pastes with no group
+            url.pathname.slice("/api/group/".length, url.pathname.length) || ""
+        );
+
+        // return
+        return new Response(JSON.stringify(pastes), {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class GetAllPastesInGroupPage
+ * @implements {Endpoint}
+ */
+export class GetAllPastesInGroupPage implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+        const group = url.pathname.slice("/group/".length, url.pathname.length);
+
+        // get pastes
+        const pastes = await db.GetAllPastesInGroup(
+            // if no group is provided this will return all pastes with no group
+            group || ""
+        );
+
+        // return
+        if (pastes.length === 0 || !pastes)
+            // show 404 because group does not exist
+            return new _404Page().request(request);
+        else
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <main>
+                            <div className="tab-container editor-tab">
+                                <h1>Posts in {group || "No Group"}</h1>
+
+                                <table
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    <thead>
+                                        <tr>
+                                            <th>Custom URL</th>
+                                            <th>Publish Date</th>
+                                            <th>Edit Date</th>
+                                            <th>Private</th>
+                                            <th>Open</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {pastes.map((paste) => {
+                                            return (
+                                                <tr>
+                                                    <td
+                                                        style={{
+                                                            maxWidth: "5rem",
+                                                            textOverflow: "ellipsis",
+                                                            overflow: "hidden",
+                                                            overflowWrap: "normal",
+                                                            wordBreak: "normal",
+                                                        }}
+                                                    >
+                                                        {paste.CustomURL}
+                                                    </td>
+
+                                                    <td>{paste.PubDate}</td>
+                                                    <td>{paste.EditDate}</td>
+                                                    <td>
+                                                        {paste.ViewPassword ===
+                                                        "exists"
+                                                            ? "yes"
+                                                            : "no"}
+                                                    </td>
+
+                                                    <td>
+                                                        <a
+                                                            href={`/${paste.CustomURL}`}
+                                                            target="_blank"
+                                                        >
+                                                            View Paste
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <Footer />
+                        </main>
+
+                        <style
+                            dangerouslySetInnerHTML={{
+                                __html: `tr { text-align: center; }
+                                th { min-width: max-content; }
+                                form button { margin: auto; }`,
+                            }}
+                        />
+                    </>,
+                    <>
+                        <title>Pastes in {group || "No Group"}</title>
+                    </>
+                ),
+                {
+                    headers: {
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+    }
+}
+
 // default export
 export default {
     VerifyContentType,
     CreatePaste,
     GetPasteFromURL,
-    GetPasteRecord,
+    GetPasteRecord, // json form of the page (previous)
     EditPaste,
     DeletePaste,
     DecryptPaste,
     GetAllPastes,
+    GetAllPastesInGroup,
+    GetAllPastesInGroupPage, // html form of the api (previous)
 };

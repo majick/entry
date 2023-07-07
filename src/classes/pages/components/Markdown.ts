@@ -71,7 +71,6 @@ export function ParseMarkdown(content: string): string {
     content = content.replaceAll(/(<style.*>)(.*?)(<\/style>)/gs, "");
     content = content.replaceAll(/(<style.*>)/gs, "");
 
-
     // parse content with marked and return
     return marked.parse(content, {
         mangle: false,

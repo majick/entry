@@ -29,12 +29,9 @@ export default class SQL {
         );
 
         // see: https://bun.sh/docs/api/sqlite
-        const db = new Database(
-            path.join(process.cwd(), "data", `${name}.sqlite`),
-            {
-                create: true,
-            }
-        );
+        const db = new Database(path.join(process.cwd(), "data", `${name}.sqlite`), {
+            create: true,
+        });
 
         // return
         return [db, needToCreate]; // needToCreate tells us if we need to create tables

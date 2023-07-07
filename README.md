@@ -37,6 +37,7 @@ Entry supports all Rentry features with (almost) 1:1 compatibility. There are a 
 - `POST /api/delete`: Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`: Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `GET  /api/get/{paste}`: Get an existing paste
+- `GET  /api/group/{group}`: Get all pastes in specified group
 
 #### Admin Endpoints
 
@@ -100,6 +101,10 @@ html.purple-theme {
     --base-sat: 50%;
 }
 ```
+
+### Paste Groups
+
+Groups allow users to organize their pastes into different groups that are locked by a password. Anybody can view the pastes in an existing group, but in order to add a new paste to the group you must have the correct password. A group must not already exist with the requested name to create a new group. A group will become available once all the pastes inside of it are deleted.
 
 ## Why
 

@@ -94,8 +94,15 @@ html.blue-theme {
 
 * {
     margin: 0;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Tahoma, Geneva, Verdana, sans-serif;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Tahoma,
+        Geneva,
+        Verdana,
+        sans-serif;
     word-wrap: break-word;
     word-break: break-word;
     box-sizing: border-box;
@@ -424,6 +431,7 @@ details {
     outline: none;
     font-size: 16px;
     height: max-content;
+    max-width: 100%;
 }
 
 details * {
@@ -437,7 +445,7 @@ details summary {
     font-weight: 600;
 }
 
-details[open] summary {
+details[open] summary:not(details details summary) {
     margin-bottom: 0.5rem;
 }
 
@@ -457,6 +465,14 @@ details .details-flex-content-list-box {
     flex-wrap: wrap;
     flex-direction: column;
     padding: 0rem 0.75rem 0.5rem;
+}
+
+details details:nth-child(even) {
+    background: var(--background-surface);
+}
+
+details hr {
+    border-color: var(--background-surface2);
 }
 
 /* codemirror styles */

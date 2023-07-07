@@ -165,10 +165,7 @@ export class ManagePastes implements Endpoint {
                 <>
                     <main>
                         <div className="tab-container editor-tab">
-                            <AdminNav
-                                active="pastes"
-                                pass={body.AdminPassword}
-                            />
+                            <AdminNav active="pastes" pass={body.AdminPassword} />
 
                             <table
                                 style={{
@@ -193,8 +190,7 @@ export class ManagePastes implements Endpoint {
                                                 <td
                                                     style={{
                                                         maxWidth: "5rem",
-                                                        textOverflow:
-                                                            "ellipsis",
+                                                        textOverflow: "ellipsis",
                                                         overflow: "hidden",
                                                         overflowWrap: "normal",
                                                         wordBreak: "normal",
@@ -206,8 +202,7 @@ export class ManagePastes implements Endpoint {
                                                 <td>{paste.PubDate}</td>
                                                 <td>{paste.EditDate}</td>
                                                 <td>
-                                                    {paste.ViewPassword ===
-                                                    "exists"
+                                                    {paste.ViewPassword === "exists"
                                                         ? "yes"
                                                         : "no"}
                                                 </td>
@@ -239,14 +234,10 @@ export class ManagePastes implements Endpoint {
                                                             type="hidden"
                                                             required
                                                             name={"CustomURL"}
-                                                            value={
-                                                                paste.CustomURL
-                                                            }
+                                                            value={paste.CustomURL}
                                                         />
 
-                                                        <button>
-                                                            Delete Paste
-                                                        </button>
+                                                        <button>Delete Paste</button>
                                                     </form>
                                                 </td>
                                             </tr>
@@ -321,9 +312,9 @@ export class APIDeletePaste implements Endpoint {
                         ? // if successful, redirect to home
                           `/admin/login`
                         : // otherwise, show error message
-                          `/?err=${encodeURIComponent(
-                              result[1]
-                          )}&mode=edit&OldURL=${result[2].CustomURL}`,
+                          `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
+                              result[2].CustomURL
+                          }`,
             },
         });
     }
@@ -357,10 +348,7 @@ export class ExportPastes implements Endpoint {
                 <>
                     <main>
                         <div className="tab-container editor-tab">
-                            <AdminNav
-                                active="export"
-                                pass={body.AdminPassword}
-                            />
+                            <AdminNav active="export" pass={body.AdminPassword} />
 
                             <div
                                 style={{
@@ -498,7 +486,7 @@ export class APIImport implements Endpoint {
             request,
             "application/x-www-form-urlencoded"
         );
-        
+
         if (WrongType) return WrongType;
 
         // get request body

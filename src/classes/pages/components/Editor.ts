@@ -63,8 +63,7 @@ export default function CreateEditor(ElementID: string, content: string) {
     const startState = EditorState.create({
         doc:
             // display given content or the saved document if it is blank
-            decodeURIComponent(content) ||
-            window.sessionStorage.getItem("doc")!,
+            decodeURIComponent(content) || window.sessionStorage.getItem("doc")!,
         extensions: [
             keymap.of(markdownKeymap),
             highlightSpecialChars(),
@@ -82,9 +81,7 @@ export default function CreateEditor(ElementID: string, content: string) {
 
                     // update the hidden contentInput element so we can save the paste
                     (
-                        document.getElementById(
-                            "contentInput"
-                        ) as HTMLInputElement
+                        document.getElementById("contentInput") as HTMLInputElement
                     ).value = encodeURIComponent(content); // encoded so we can send it through form
                 }
             }),
@@ -131,34 +128,28 @@ function CloseAllTabs() {
     }
 }
 
-document
-    .getElementById("editor-open-tab-text")!
-    .addEventListener("click", () => {
-        CloseAllTabs();
+document.getElementById("editor-open-tab-text")!.addEventListener("click", () => {
+    CloseAllTabs();
 
-        document
-            .getElementById("editor-open-tab-text")!
-            .classList.remove("secondary");
+    document.getElementById("editor-open-tab-text")!.classList.remove("secondary");
 
-        document.getElementById("editor-tab-text")!.style.display = "block";
-    });
+    document.getElementById("editor-tab-text")!.style.display = "block";
+});
 
-document
-    .getElementById("editor-open-tab-preview")!
-    .addEventListener("click", () => {
-        CloseAllTabs();
-        const tab = document.getElementById("editor-tab-preview")!;
+document.getElementById("editor-open-tab-preview")!.addEventListener("click", () => {
+    CloseAllTabs();
+    const tab = document.getElementById("editor-tab-preview")!;
 
-        tab.innerHTML = window.sessionStorage.getItem("gen") || "";
-        tab.style.display = "block";
+    tab.innerHTML = window.sessionStorage.getItem("gen") || "";
+    tab.style.display = "block";
 
-        document
-            .getElementById("editor-open-tab-preview")!
-            .classList.remove("secondary");
+    document
+        .getElementById("editor-open-tab-preview")!
+        .classList.remove("secondary");
 
-        // fix markdown rendering
-        FixMarkdown(tab);
-    });
+    // fix markdown rendering
+    FixMarkdown(tab);
+});
 
 // handle paste delete modal
 if (document.getElementById("editor-open-delete-modal"))
@@ -166,8 +157,6 @@ if (document.getElementById("editor-open-delete-modal"))
         .getElementById("editor-open-delete-modal")!
         .addEventListener("click", () => {
             (
-                document.getElementById(
-                    "editor-modal-delete"
-                ) as HTMLDialogElement
+                document.getElementById("editor-modal-delete") as HTMLDialogElement
             ).showModal();
         });
