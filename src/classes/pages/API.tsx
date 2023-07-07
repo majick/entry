@@ -23,12 +23,45 @@ import { ParseMarkdown } from "./components/Markdown";
 import "./assets/ClientFixMD";
 
 /**
+ * @function VerifyContentType
+ *
+ * @export
+ * @param {Request} request
+ * @param {string} expected
+ * @return {(Response | undefined)}
+ */
+export function VerifyContentType(
+    request: Request,
+    expected: string
+): Response | undefined {
+    // verify content type
+    if (request.headers.get("Content-Type") !== expected)
+        return new Response(`Expected ${expected}`, {
+            status: 406,
+            headers: {
+                Accept: expected,
+            },
+        });
+
+    // return undefined if it is fine
+    return undefined;
+}
+
+/**
  * @export
  * @class CreatePaste
  * @implements {Endpoint}
  */
 export class CreatePaste implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as Paste;
         body.Content = decodeURIComponent(body.Content);
@@ -70,6 +103,14 @@ export class GetPasteFromURL implements Endpoint {
         // decrypt (if we can)
         let ViewPassword = "";
         if (request.method === "POST" && result) {
+            // verify content type
+            const WrongType = VerifyContentType(
+                request,
+                "application/x-www-form-urlencoded"
+            );
+
+            if (WrongType) return WrongType;
+
             // get request body
             const body = FormDataToJSON(await request.formData()) as any;
 
@@ -256,6 +297,14 @@ export class GetPasteRecord implements Endpoint {
  */
 export class EditPaste implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
         body.OldContent = decodeURIComponent(body.OldContent);
@@ -308,6 +357,14 @@ export class EditPaste implements Endpoint {
  */
 export class DeletePaste implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
         // body.password is automatically hashed in db.DeletePaste
@@ -368,6 +425,14 @@ export class DecryptPaste implements Endpoint {
     }
 
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+        
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as Paste;
 
@@ -404,6 +469,7 @@ export class GetAllPastes implements Endpoint {
 
 // default export
 export default {
+    VerifyContentType,
     CreatePaste,
     GetPasteFromURL,
     GetPasteRecord,

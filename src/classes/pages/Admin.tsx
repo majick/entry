@@ -8,9 +8,9 @@ import { FormDataToJSON } from "../Server";
 import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
-import { CreateHash, Decrypt } from "../db/Hash";
+import { VerifyContentType, db } from "./API";
+import { Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
-import { db } from "./API";
 
 import Footer from "./components/Footer";
 
@@ -22,7 +22,7 @@ const config = await EntryDB.GetConfig();
  * @param {{ active: string }} props
  * @return {*}
  */
-function AdminNav(props: { active: string; pass: string }) {
+function AdminNav(props: { active: string; pass: string }): any {
     return (
         <>
             <h1
@@ -141,6 +141,14 @@ export class Login implements Endpoint {
  */
 export class ManagePastes implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
 
@@ -284,6 +292,14 @@ export class APIDeletePaste implements Endpoint {
         //       and it will still work the same!!!
         // this endpoint is just use to redirect to /admin/login instead of /
 
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
 
@@ -320,6 +336,14 @@ export class APIDeletePaste implements Endpoint {
  */
 export class ExportPastes implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
 
@@ -415,6 +439,14 @@ export class ExportPastes implements Endpoint {
  */
 export class APIExport implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
 
@@ -461,6 +493,14 @@ export class APIExport implements Endpoint {
  */
 export class APIImport implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+        
+        if (WrongType) return WrongType;
+
         // get request body
         const body = FormDataToJSON(await request.formData()) as any;
 

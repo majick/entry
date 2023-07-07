@@ -64,8 +64,13 @@ export function ParseMarkdown(content: string): string {
     //                                                     making the following work:
     //                                                         <script />alert(1)
     //                                                     this regex fixes that
+
     content = content.replaceAll(/(<link.*>)/gs, "");
     content = content.replaceAll(/(<meta.*>)/gs, "");
+
+    content = content.replaceAll(/(<style.*>)(.*?)(<\/style>)/gs, "");
+    content = content.replaceAll(/(<style.*>)/gs, "");
+
 
     // parse content with marked and return
     return marked.parse(content, {

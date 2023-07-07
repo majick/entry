@@ -116,6 +116,7 @@ export default class Home implements Endpoint {
                                     style={{
                                         display: "flex",
                                         justifyContent: "space-between",
+                                        flexWrap: "wrap",
                                     }}
                                     method={"POST"}
                                     action={"/api/new"}
@@ -177,6 +178,7 @@ export default class Home implements Endpoint {
                                             style={{
                                                 display: "flex",
                                                 justifyContent: "space-between",
+                                                flexWrap: "wrap",
                                             }}
                                             method={"POST"}
                                             action={"/api/edit"}
