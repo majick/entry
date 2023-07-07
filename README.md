@@ -38,6 +38,12 @@ Entry supports all Rentry features with (almost) 1:1 compatibility. There are a 
 - `POST /api/decrypt`: Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `GET  /api/get/{paste}`: Get an existing paste
 
+#### Admin Endpoints
+
+- `POST /admin/api/delete`: Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
+- `POST /admin/api/export`: Get JSON of all pastes in server (decrypted): `AdminPassword`
+- `POST /admin/api/import`: Import pastes JSON: `AdminPassword, pastes` (with `paste` being the JSON export from `/admin/api/export`)
+
 ### (very basic) Federation
 
 !!! note Encryption

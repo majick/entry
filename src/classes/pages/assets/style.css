@@ -127,7 +127,7 @@ main {
 .tab-container {
     background: var(--background-surface1);
     padding: 1.5rem;
-    height: 49rem;
+    height: 45rem;
     overflow-y: auto;
     max-height: 90vh;
     margin-bottom: 0.5rem;
@@ -319,6 +319,18 @@ input {
     outline: none;
     padding: 0.5rem 0.75rem;
     font-size: 16px;
+    height: max-content;
+    transition: all 0.15s;
+}
+
+input:invalid:required {
+    box-shadow: inset 0 0 0 2px var(--red);
+}
+
+input:invalid {
+    /* so, the idea behind this is because the input is technically wrong... but it isn't required,
+       we're only going to show a yellow "border" thing! */
+    box-shadow: inset 0 0 0 2px var(--yellow);
 }
 
 img {
@@ -405,6 +417,48 @@ dialog::backdrop {
     height: max-content;
 }
 
+details {
+    background: var(--background-surface1);
+    color: currentColor;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    height: max-content;
+}
+
+details * {
+    max-width: 100%;
+}
+
+details summary {
+    transition: all 0.15s;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+details[open] summary {
+    margin-bottom: 0.5rem;
+}
+
+details summary:hover,
+details[open] summary {
+    background: var(--background-surface);
+    box-shadow: inset 0 0 0 2px var(--background-surface1);
+}
+
+details input {
+    background: var(--background-surface);
+}
+
+details .details-flex-content-list-box {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    flex-direction: column;
+    padding: 0rem 0.75rem 0.5rem;
+}
+
 /* codemirror styles */
 .cm-cursor {
     border-color: currentColor !important;
@@ -422,6 +476,10 @@ dialog::backdrop {
     /* fix list links */
     padding-left: inherit !important;
     border-left: none !important;
+}
+
+.cm-scroller {
+    overflow: auto;
 }
 
 /* highlight.js styles */

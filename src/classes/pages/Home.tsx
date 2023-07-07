@@ -117,11 +117,15 @@ export default class Home implements Endpoint {
                                         display: "flex",
                                         justifyContent: "space-between",
                                         flexWrap: "wrap",
+                                        gap: "0.5rem",
                                     }}
                                     method={"POST"}
                                     action={"/api/new"}
                                 >
-                                    <button style={{ minWidth: "max-content" }}>
+                                    <button
+                                        style={{ minWidth: "max-content" }}
+                                        id={"CreateFormSubmit"}
+                                    >
                                         Go
                                     </button>
 
@@ -130,7 +134,7 @@ export default class Home implements Endpoint {
                                             display: "flex",
                                             gap: "0.5rem",
                                             flexWrap: "wrap",
-                                            justifyContent: "right",
+                                            justifyContent: "center", // aha! this is for mobile :)
                                         }}
                                     >
                                         <input
@@ -140,35 +144,92 @@ export default class Home implements Endpoint {
                                             required
                                         />
 
-                                        <input
-                                            type="text"
-                                            placeholder={"View code - optional"}
-                                            minLength={5}
-                                            maxLength={256}
-                                            name={"ViewPassword"}
-                                            autoComplete={"off"}
-                                        />
+                                        <details
+                                            id={"CreateFormRequired"}
+                                            style={{
+                                                width: "20rem",
+                                            }}
+                                        >
+                                            <summary>
+                                                Paste Information{" "}
+                                                <span
+                                                    style={{
+                                                        color: "var(--red3)",
+                                                    }}
+                                                >
+                                                    (required)
+                                                </span>
+                                            </summary>
 
-                                        <input
-                                            type="text"
-                                            placeholder={"Custom edit code"}
-                                            maxLength={256}
-                                            minLength={5}
-                                            name={"EditPassword"}
-                                            autoComplete={"off"}
-                                            required
-                                        />
+                                            <div
+                                                class={
+                                                    "details-flex-content-list-box"
+                                                }
+                                            >
+                                                <input
+                                                    type="text"
+                                                    placeholder={
+                                                        "Custom edit code"
+                                                    }
+                                                    maxLength={256}
+                                                    minLength={5}
+                                                    name={"EditPassword"}
+                                                    autoComplete={"off"}
+                                                    required
+                                                />
 
-                                        <input
-                                            type="text"
-                                            placeholder={"Custom url"}
-                                            maxLength={100}
-                                            minLength={2}
-                                            name={"CustomURL"}
-                                            autoComplete={"off"}
-                                            required
-                                        />
+                                                <input
+                                                    type="text"
+                                                    placeholder={"Custom url"}
+                                                    maxLength={100}
+                                                    minLength={2}
+                                                    name={"CustomURL"}
+                                                    autoComplete={"off"}
+                                                    required
+                                                />
+                                            </div>
+                                        </details>
+
+                                        <details
+                                            style={{
+                                                width: "20rem",
+                                            }}
+                                        >
+                                            <summary>
+                                                More Options (optional)
+                                            </summary>
+
+                                            <div
+                                                class={
+                                                    "details-flex-content-list-box"
+                                                }
+                                            >
+                                                <input
+                                                    type="text"
+                                                    placeholder={
+                                                        "View code - optional"
+                                                    }
+                                                    minLength={5}
+                                                    maxLength={256}
+                                                    name={"ViewPassword"}
+                                                    autoComplete={"off"}
+                                                />
+                                            </div>
+                                        </details>
                                     </div>
+
+                                    <script
+                                        dangerouslySetInnerHTML={{
+                                            __html: `// open CreateFormRequired on submit
+                                            const CreateFormRequired = document.getElementById("CreateFormRequired");
+                                            const CreateFormSubmit = document.getElementById("CreateFormSubmit");
+                                            
+                                            if (CreateFormSubmit && CreateFormRequired)
+                                                CreateFormSubmit.addEventListener("click", (e) => {
+                                                    CreateFormRequired.toggleAttribute("open", true);
+                                                });`,
+                                        }}
+                                    />
                                 </form>
                             )) ||
                                 (paste && search.get("mode") === "edit" && (
@@ -179,6 +240,7 @@ export default class Home implements Endpoint {
                                                 display: "flex",
                                                 justifyContent: "space-between",
                                                 flexWrap: "wrap",
+                                                gap: "0.5rem",
                                             }}
                                             method={"POST"}
                                             action={"/api/edit"}
@@ -226,27 +288,46 @@ export default class Home implements Endpoint {
                                                     required
                                                 />
 
-                                                <input
-                                                    type="text"
-                                                    placeholder={
-                                                        "Change edit code - optional"
-                                                    }
-                                                    maxLength={256}
-                                                    minLength={5}
-                                                    name={"NewEditPassword"}
-                                                    autoComplete={"off"}
-                                                />
+                                                <details
+                                                    style={{
+                                                        width: "20rem",
+                                                    }}
+                                                >
+                                                    <summary>
+                                                        Change Settings
+                                                        (optional)
+                                                    </summary>
 
-                                                <input
-                                                    type="text"
-                                                    placeholder={
-                                                        "Change custom url - optional"
-                                                    }
-                                                    maxLength={100}
-                                                    minLength={2}
-                                                    name={"NewURL"}
-                                                    autoComplete={"off"}
-                                                />
+                                                    <div
+                                                        class={
+                                                            "details-flex-content-list-box"
+                                                        }
+                                                    >
+                                                        <input
+                                                            type="text"
+                                                            placeholder={
+                                                                "Change edit code - optional"
+                                                            }
+                                                            maxLength={256}
+                                                            minLength={5}
+                                                            name={
+                                                                "NewEditPassword"
+                                                            }
+                                                            autoComplete={"off"}
+                                                        />
+
+                                                        <input
+                                                            type="text"
+                                                            placeholder={
+                                                                "Change custom url - optional"
+                                                            }
+                                                            maxLength={100}
+                                                            minLength={2}
+                                                            name={"NewURL"}
+                                                            autoComplete={"off"}
+                                                        />
+                                                    </div>
+                                                </details>
                                             </div>
                                         </form>
 
