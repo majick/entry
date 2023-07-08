@@ -13,8 +13,9 @@ import { Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
 import Footer from "./components/Footer";
+import { Config } from "../..";
 
-const config = await EntryDB.GetConfig();
+const config = (await EntryDB.GetConfig()) as Config;
 
 /**
  * @function AdminNav
@@ -30,7 +31,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                     width: "100%",
                 }}
             >
-                Entry Admin
+                {config.name} Admin
             </h1>
 
             <div
@@ -122,7 +123,7 @@ export class Login implements Endpoint {
                     </main>
                 </>,
                 <>
-                    <title>Entry Admin</title>
+                    <title>{config.name} Admin</title>
                 </>
             ),
             {
@@ -259,7 +260,7 @@ export class ManagePastes implements Endpoint {
                     />
                 </>,
                 <>
-                    <title>Entry Admin</title>
+                    <title>{config.name} Admin</title>
                 </>
             ),
             {
@@ -408,7 +409,7 @@ export class ExportPastes implements Endpoint {
                     />
                 </>,
                 <>
-                    <title>Entry Admin</title>
+                    <title>{config.name} Admin</title>
                 </>
             ),
             {

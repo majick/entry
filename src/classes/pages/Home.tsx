@@ -7,6 +7,9 @@ import Footer from "./components/Footer";
 import EntryDB, { Paste } from "../db/EntryDB";
 import { DecryptPaste, db } from "./API";
 
+import { Config } from "../..";
+const config = (await EntryDB.GetConfig()) as Config;
+
 /**
  * @export
  * @class Home
@@ -176,7 +179,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
-                                                    type="password"
+                                                    type="text"
                                                     placeholder={"Custom edit code"}
                                                     maxLength={
                                                         EntryDB.MaxPasswordLength
@@ -221,7 +224,7 @@ export default class Home implements Endpoint {
                                                 </p>
 
                                                 <input
-                                                    type="password"
+                                                    type="text"
                                                     placeholder={
                                                         "View code - optional"
                                                     }
@@ -250,7 +253,14 @@ export default class Home implements Endpoint {
                                                     submitting to an existing group.
                                                     If you provide a group name, the
                                                     group post code{" "}
-                                                    <b>is required</b>!
+                                                    <b>is required</b>! Adding a
+                                                    group name will append the group
+                                                    name to the beginning of your set
+                                                    custom URL. This means the custom
+                                                    URL "example" with the group
+                                                    "example-group" would look like
+                                                    "example-group/example" instead
+                                                    of just the custom URL.
                                                 </p>
 
                                                 <input
@@ -268,7 +278,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
-                                                    type="password"
+                                                    type="text"
                                                     placeholder={
                                                         "Group post code - optional"
                                                     }
@@ -374,7 +384,7 @@ export default class Home implements Endpoint {
                                                         }
                                                     >
                                                         <input
-                                                            type="password"
+                                                            type="text"
                                                             placeholder={
                                                                 "Change edit code - optional"
                                                             }
@@ -496,7 +506,7 @@ export default class Home implements Endpoint {
                                     }}
                                 >
                                     <input
-                                        type="password"
+                                        type="text"
                                         required
                                         minLength={EntryDB.MinPasswordLength}
                                         maxLength={EntryDB.MaxPasswordLength}
@@ -544,7 +554,7 @@ export default class Home implements Endpoint {
                         content="Entry - A Markdown Pastebin"
                     ></meta>
 
-                    <title>Entry - A Markdown Pastebin</title>
+                    <title>{config.name} - A Markdown Pastebin</title>
                 </>
             ),
             {

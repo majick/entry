@@ -36,7 +36,7 @@ export default function DecryptionForm(props: {
                 />
 
                 <input
-                    type="password"
+                    type="text"
                     name={"ViewPassword"}
                     placeholder={"View password"}
                     minLength={EntryDB.MinPasswordLength}

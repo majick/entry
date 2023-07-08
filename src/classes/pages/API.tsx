@@ -18,6 +18,9 @@ import { CreateHash, Decrypt } from "../db/Hash";
 import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 
+import { Config } from "../..";
+const config = (await EntryDB.GetConfig()) as Config;
+
 // ...
 import { ParseMarkdown } from "./components/Markdown";
 import "./assets/ClientFixMD";
@@ -190,10 +193,13 @@ export class GetPasteFromURL implements Endpoint {
                                             href={`/?mode=edit&OldURL=${
                                                 result.CustomURL
                                             }${
+                                                // add host server (if it exists)
                                                 result.HostServer
                                                     ? `&server=${result.HostServer}`
                                                     : ""
                                             }${
+                                                // add view password (if it exists)
+                                                // this is so content is automatically decrypted!
                                                 ViewPassword !== ""
                                                     ? `&ViewPassword=${ViewPassword}`
                                                     : ""
@@ -209,7 +215,14 @@ export class GetPasteFromURL implements Endpoint {
                                         </a>
 
                                         {result.GroupName && (
-                                            <a href={`/group/${result.GroupName}`}>
+                                            <a
+                                                href={`/group/${result.GroupName}${
+                                                    // add host server (if it exists)
+                                                    result.HostServer
+                                                        ? `@${result.HostServer}`
+                                                        : ""
+                                                }`}
+                                            >
                                                 <button
                                                     style={{
                                                         height: "max-content",
@@ -228,6 +241,7 @@ export class GetPasteFromURL implements Endpoint {
                                             justifyContent: "center",
                                             alignItems: "right",
                                             color: "var(--text-color-faded)",
+                                            textAlign: "right",
                                         }}
                                     >
                                         <span>Pub: {result.PubDate}</span>
@@ -251,11 +265,11 @@ export class GetPasteFromURL implements Endpoint {
                         <meta
                             name="description"
                             content={
-                                // if length of content is greater than 250, cut it at 250 characters and add "..."
+                                // if length of content is greater than 150, cut it at 150 characters and add "..."
                                 // otherwise, we can just show the full content
-                                result.CustomURL.length > 250
-                                    ? `${result.CustomURL.substring(0, 250)}...`
-                                    : result.CustomURL
+                                result.Content.length > 150
+                                    ? `${result.Content.substring(0, 150)}...`
+                                    : result.Content
                             }
                         />
 
@@ -522,7 +536,9 @@ export class GetAllPastesInGroupPage implements Endpoint {
                     <>
                         <main>
                             <div className="tab-container editor-tab">
-                                <h1>Posts in {group || "No Group"}</h1>
+                                <h1>
+                                    Posts in {(group || "No Group").split("@")[0]}
+                                </h1>
 
                                 <table
                                     style={{
@@ -552,7 +568,14 @@ export class GetAllPastesInGroupPage implements Endpoint {
                                                             wordBreak: "normal",
                                                         }}
                                                     >
-                                                        {paste.CustomURL}
+                                                        {paste.CustomURL.split(
+                                                            "@"
+                                                        )[0]
+                                                            // remove group name
+                                                            .replace(
+                                                                `${group}/`,
+                                                                ""
+                                                            )}
                                                     </td>
 
                                                     <td>{paste.PubDate}</td>
@@ -567,7 +590,6 @@ export class GetAllPastesInGroupPage implements Endpoint {
                                                     <td>
                                                         <a
                                                             href={`/${paste.CustomURL}`}
-                                                            target="_blank"
                                                         >
                                                             View Paste
                                                         </a>
@@ -591,6 +613,13 @@ export class GetAllPastesInGroupPage implements Endpoint {
                         />
                     </>,
                     <>
+                        <meta
+                            name="description"
+                            content={`View pastes in ${group || "No Group"} on ${
+                                config.name
+                            } - A Markdown Pastebin`}
+                        ></meta>
+
                         <title>Pastes in {group || "No Group"}</title>
                     </>
                 ),

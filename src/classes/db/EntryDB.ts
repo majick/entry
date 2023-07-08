@@ -417,6 +417,27 @@ export default class EntryDB {
                     "This is already an existing paste group, please use the correct group password!",
                     PasteInfo,
                 ];
+
+            // check group name (again)
+            // it can't be anything that exists in Server.ts
+            // ...this is because of the thing we do after this!
+            // if we didn't check this and the paste had the group of admin or something,
+            // somebody could make a paste named "login" and the paste would have the URL
+            // of "/admin/login" which would make the real admin login page either inaccessible
+            // OR make the paste inaccessible!
+            const NotAllowed = ["admin", "api", "group"];
+
+            if (NotAllowed.includes(PasteInfo.GroupName))
+                return [
+                    false,
+                    `Group name cannot be any of the following: ${JSON.stringify(
+                        NotAllowed
+                    )}`,
+                    PasteInfo,
+                ];
+
+            // append group name to CustomURL
+            PasteInfo.CustomURL = `${PasteInfo.GroupName}/${PasteInfo.CustomURL}`;
         }
 
         // make sure a paste does not already exist with this custom URL
@@ -528,17 +549,22 @@ export default class EntryDB {
         const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
         if (!lengthsValid[0]) return [...lengthsValid, NewPasteInfo];
 
-        // make sure a paste exists
-        const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
-        if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
-
-        // check custom url
-        if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))
+        if (
+            !NewPasteInfo.CustomURL.match(EntryDB.URLRegex) &&
+            NewPasteInfo.CustomURL !== PasteInfo.CustomURL // we're doing this so that if
+            //                                                the custom url is invalid because
+            //                                                of the group name append thing,
+            //                                                users will still be able to edit this paste!
+        )
             return [
                 false,
                 `Custom URL does not pass test: ${EntryDB.URLRegex}`,
                 PasteInfo,
             ];
+
+        // make sure a paste exists
+        const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
+        if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
 
         // validate password
         // don't use NewPasteInfo to get the password because NewPasteInfo will automatically have the old password
@@ -549,6 +575,11 @@ export default class EntryDB {
         // PasteInfo will not have it, only NewPasteInfo will
         if (paste.EditPassword !== PasteInfo.EditPassword)
             return [false, "Invalid password!", NewPasteInfo];
+
+        // if custom url was changed, add the group back to it
+        // ...users cannot add the group manually because of the custom url regex
+        if (NewPasteInfo.CustomURL !== paste.CustomURL)
+            NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
 
         // rencrypt (if needed, again)
         if (NewPasteInfo.ViewPassword) {
@@ -569,8 +600,8 @@ export default class EntryDB {
                     result[1], // key
                     result[3], // code
                     NewPasteInfo.CustomURL, // update with new CustomURL
-                    NewPasteInfo.ViewPassword,
-                    PasteInfo.CustomURL, // use old custom URL to select encryption
+                    paste.ViewPassword,
+                    paste.CustomURL, // use old custom URL to select encryption
                 ],
                 use: "Prepare",
             });
@@ -587,7 +618,7 @@ export default class EntryDB {
                 NewPasteInfo.ViewPassword,
                 NewPasteInfo.PubDate,
                 NewPasteInfo.EditDate,
-                NewPasteInfo.CustomURL,
+                PasteInfo.CustomURL, // select by old CustomURL
             ],
             use: "Prepare",
         });
@@ -699,12 +730,13 @@ export default class EntryDB {
     private async ForwardRequest(
         server: string,
         endpoint: string,
-        body: string[]
+        body: string[],
+        method: string = "POST"
     ): Promise<[boolean, Response]> {
         // send request
         const request = fetch(`https://${server}/api/${endpoint}`, {
             body: body.join("&"),
-            method: "POST",
+            method,
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
@@ -891,6 +923,34 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public async GetAllPastesInGroup(group: string): Promise<Paste[]> {
+        // federation stuff
+        const server = group.split("@")[1];
+
+        if (server) {
+            const [isBad, record] = await this.ForwardRequest(
+                server,
+                `group/${group.split("@")[0]}`,
+                [],
+                "GET"
+            );
+
+            // check if promise rejected
+            if (isBad) return [];
+
+            // check error
+            const err = this.GetErrorFromResponse(record);
+            if (err) return [];
+
+            // add server to all returned pastes
+            const pastes = await record.json(); // /api/group/{group} returns [] even if the group doesn't exist
+
+            for (let i in pastes)
+                pastes[i].CustomURL = `${pastes[i].CustomURL}@${server}`;
+
+            // return
+            return pastes;
+        }
+
         // get pastes
         const pastes = await SQL.QueryOBJ({
             db: this.db,

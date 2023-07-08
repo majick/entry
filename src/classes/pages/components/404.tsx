@@ -3,6 +3,10 @@ import Renderer from "../_Render";
 
 import Footer from "./Footer";
 
+import EntryDB from "../../db/EntryDB";
+import { Config } from "../../..";
+const config = (await EntryDB.GetConfig()) as Config;
+
 /**
  * @export
  * @class _404Page
@@ -35,7 +39,7 @@ export default class _404Page implements Endpoint {
                     <Footer />
                 </main>,
                 <>
-                    <title>404 - Entry</title>
+                    <title>404 - {config.name}</title>
                 </>
             ),
             {

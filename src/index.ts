@@ -11,6 +11,7 @@ import path from "node:path";
 
 export type Config = {
     port: number;
+    name: string;
     admin: string;
 };
 
@@ -42,6 +43,7 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
     div();
 
     config.port = parseInt(optional("\x1b[92mEnter port\x1b[0m", 8080));
+    config.name = optional("\x1b[92mEnter application name\x1b[0m", "Entry");
     config.admin = required("\x1b[92mEnter admin password\x1b[0m");
 
     div();

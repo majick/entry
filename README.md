@@ -23,8 +23,8 @@ Manually launch once after installing to start the setup prompts. These will all
 Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
 
 | Rentry                                                                                                                       | Entry                                                                                                                                                                                                               |
-|------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| When deleting pastes, Rentry uses  `POST /api/edit` with `{ delete: "delete" }`                                              | Entry uses `POST /api/delete`                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| When deleting pastes, Rentry uses `POST /api/edit` with `{ delete: "delete" }`                                               | Entry uses `POST /api/delete`                                                                                                                                                                                       |
 | Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports a `GET /api/get` endpoint, which returns the saved record for the paste without the `EditPassword` hash. Any paste can be viewed raw just by clicking the "Edit" button when viewing the paste. |
 | Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews         |
 
@@ -105,6 +105,8 @@ html.purple-theme {
 ### Paste Groups
 
 Groups allow users to organize their pastes into different groups that are locked by a password. Anybody can view the pastes in an existing group, but in order to add a new paste to the group you must have the correct password. A group must not already exist with the requested name to create a new group. A group will become available once all the pastes inside of it are deleted.
+
+Adding a group name will append the group name to the beginning of your set custom URL. This means the custom URL "example" with the group "example-group" would look like "example-group/example" instead of just the custom URL. This means that, if you add a group, you can have any custom URL you want for your paste. Adding a group is not required.
 
 ## Why
 
