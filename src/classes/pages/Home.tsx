@@ -4,8 +4,8 @@ import Renderer from "./_Render";
 import DecryptionForm from "./components/DecryptionForm";
 import Footer from "./components/Footer";
 
+import { DecryptPaste, db, DefaultHeaders } from "./API";
 import EntryDB, { Paste } from "../db/EntryDB";
-import { DecryptPaste, db } from "./API";
 
 import { Config } from "../..";
 const config = (await EntryDB.GetConfig()) as Config;
@@ -559,6 +559,7 @@ export default class Home implements Endpoint {
             ),
             {
                 headers: {
+                    ...DefaultHeaders,
                     "Content-Type": "text/html",
                 },
             }

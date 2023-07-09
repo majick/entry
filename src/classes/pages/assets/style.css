@@ -16,6 +16,13 @@
         calc(var(--base-lit) + 4%)
     );
 
+    --background-surface1a: hsla(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) + 8%),
+        0.4
+    );
+
     --background-surface2: hsl(
         var(--base-hue),
         var(--base-sat),
@@ -43,43 +50,21 @@
     --red3: #ad0008;
 }
 
-@media (prefers-color-scheme: light) {
-    html.other-theme {
-        /* dark mode colors */
-        --base-lit: 11%;
-        --text-color: hsl(204, 4%, 80%);
-        --text-color-faded: hsl(207, 5%, 54%);
-        --blue: #5c8ca4;
-        --blue1: #2b383e;
-        --blue2: #4b99d1;
-        --green: #699269;
-        --green1: #2d3829;
-        --yellow: #d1bb94;
-        --yellow1: #4e4632;
-        --red: #bb8483;
-        --red1: #4c2a2a;
-        --red2: #a3717126;
-        --red3: #e0aeb4;
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    html:not(.other-theme) {
-        --base-lit: 11%;
-        --text-color: hsl(204, 4%, 80%);
-        --text-color-faded: hsl(207, 5%, 54%);
-        --blue: #5c8ca4;
-        --blue1: #2b383e;
-        --blue2: #4b99d1;
-        --green: #699269;
-        --green1: #2d3829;
-        --yellow: #d1bb94;
-        --yellow1: #4e4632;
-        --red: #bb8483;
-        --red1: #4c2a2a;
-        --red2: #a3717126;
-        --red3: #e0aeb4;
-    }
+html.dark-theme {
+    --base-lit: 11%;
+    --text-color: hsl(204, 4%, 80%);
+    --text-color-faded: hsl(207, 5%, 54%);
+    --blue: #5c8ca4;
+    --blue1: #2b383e;
+    --blue2: #4b99d1;
+    --green: #699269;
+    --green1: #2d3829;
+    --yellow: #d1bb94;
+    --yellow1: #4e4632;
+    --red: #bb8483;
+    --red1: #4c2a2a;
+    --red2: #a3717126;
+    --red3: #e0aeb4;
 }
 
 html.purple-theme {
@@ -139,6 +124,7 @@ main {
     max-height: 90vh;
     margin-bottom: 0.5rem;
     max-width: 100vw;
+    min-height: 15rem;
 }
 
 @media screen and (max-height: 950px) {
@@ -161,6 +147,7 @@ button {
     transition: all 0.1s;
     height: max-content;
     width: max-content;
+    font-weight: normal;
 }
 
 button.secondary {
@@ -347,14 +334,14 @@ img {
 
 hr {
     margin: 0.6rem 0;
-    border-color: var(--background-surface1);
-    border-top-width: 1px;
+    border: 0;
+    border-top: solid 1px var(--background-surface1);
 }
 
 .editor-tab hr {
     /* editor-tab really just means markdown preview, it has a lighter background that matches
        the normal color of hr, so we need to make hr brighter when it is inside of that */
-    border-color: var(--background-surface2);
+    border-color: rgba(120, 125, 125, 0.25);
 }
 
 span.highlight {
@@ -364,6 +351,8 @@ span.highlight {
 
 table {
     border-collapse: collapse;
+    max-width: max-content;
+    min-width: 100%;
 }
 
 table th {
@@ -384,6 +373,10 @@ table td:first-child {
 
 table tr {
     border-bottom: solid 1px rgba(120, 125, 125, 0.1);
+}
+
+table tr:nth-child(even) {
+    background: var(--background-surface1a);
 }
 
 table td:focus-within {
@@ -554,6 +547,7 @@ details hr {
 /* special elements */
 hue,
 sat,
-lit {
+lit,
+theme {
     display: none;
 }

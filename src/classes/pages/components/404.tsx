@@ -7,6 +7,8 @@ import EntryDB from "../../db/EntryDB";
 import { Config } from "../../..";
 const config = (await EntryDB.GetConfig()) as Config;
 
+import { DefaultHeaders } from "../API";
+
 /**
  * @export
  * @class _404Page
@@ -44,6 +46,7 @@ export default class _404Page implements Endpoint {
             ),
             {
                 headers: {
+                    ...DefaultHeaders,
                     "Content-Type": "text/html",
                 },
             }

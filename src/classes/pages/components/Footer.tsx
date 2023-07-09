@@ -35,17 +35,6 @@ export default function Footer() {
                     <a href="/v">version</a>
                 </li>
 
-                <li>
-                    <a id={"themeButton"} href={"javascript:toggleTheme()"}>
-                        {
-                            // this option only exists because some people might prefer their
-                            // paste be viewed in light/dark mode, so having the option to switch
-                            // the theme without going to browser settings is helpful
-                        }
-                        theme
-                    </a>
-                </li>
-
                 <style
                     dangerouslySetInnerHTML={{
                         __html: `.__footernav li:not(:first-child) {
@@ -69,8 +58,8 @@ export default function Footer() {
 
                 <script
                     dangerouslySetInnerHTML={{
-                        __html: `function toggleTheme() {
-                            document.documentElement.classList.toggle("other-theme");
+                        __html: `if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                            document.documentElement.classList.add("dark-theme");
                         }`,
                     }}
                 />

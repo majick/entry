@@ -61,6 +61,7 @@ export class _Server {
                             ).text(),
                             {
                                 headers: {
+                                    ...API.DefaultHeaders,
                                     "Content-Type":
                                         contentType(
                                             url.pathname.slice(

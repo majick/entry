@@ -23,7 +23,14 @@ const config = (await EntryDB.GetConfig()) as Config;
 
 // ...
 import { ParseMarkdown } from "./components/Markdown";
-import "./assets/ClientFixMD";
+
+// default headers
+export const DefaultHeaders = {
+    "Cache-Control": "public, max-age=604800, must-revalidate",
+    "X-Content-Type-Options": "nosniff",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    Vary: "Accept-Encoding",
+};
 
 /**
  * @function VerifyContentType
@@ -42,6 +49,7 @@ export function VerifyContentType(
         return new Response(`Expected ${expected}`, {
             status: 406,
             headers: {
+                ...DefaultHeaders,
                 Accept: expected,
             },
         });
@@ -76,6 +84,7 @@ export class CreatePaste implements Endpoint {
         return new Response(JSON.stringify(result), {
             status: 302,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
                 Location:
                     result[0] === true
@@ -162,7 +171,7 @@ export class GetPasteFromURL implements Endpoint {
                                         height: "max-content",
                                     }}
                                     dangerouslySetInnerHTML={{
-                                        __html: ParseMarkdown(result.Content),
+                                        __html: ParseMarkdown(result.Content, true),
                                     }}
                                 />
                             </div>
@@ -257,7 +266,7 @@ export class GetPasteFromURL implements Endpoint {
                             // P.S. I hate this
                             type="module"
                             dangerouslySetInnerHTML={{
-                                __html: `import fix from "/ClientFixMD.js"; fix();`,
+                                __html: `import fix from "/ClientFixMD.js"; fix(false);`,
                             }}
                         />
                     </>,
@@ -278,6 +287,7 @@ export class GetPasteFromURL implements Endpoint {
                 ),
                 {
                     headers: {
+                        ...DefaultHeaders,
                         "Content-Type": "text/html",
                     },
                 }
@@ -305,6 +315,7 @@ export class GetPasteRecord implements Endpoint {
         return new Response(JSON.stringify(paste || { Content: "404: Not Found" }), {
             status: paste ? 200 : 404,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
             },
         });
@@ -357,6 +368,7 @@ export class EditPaste implements Endpoint {
         return new Response(JSON.stringify(result), {
             status: 302,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
                 Location:
                     result[0] === true
@@ -402,6 +414,7 @@ export class DeletePaste implements Endpoint {
         return new Response(JSON.stringify(result), {
             status: 302,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
                 Location:
                     result[0] === true
@@ -480,6 +493,7 @@ export class GetAllPastes implements Endpoint {
         // return
         return new Response(JSON.stringify(pastes), {
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
             },
         });
@@ -504,6 +518,7 @@ export class GetAllPastesInGroup implements Endpoint {
         // return
         return new Response(JSON.stringify(pastes), {
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
             },
         });
@@ -623,6 +638,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
                 ),
                 {
                     headers: {
+                        ...DefaultHeaders,
                         "Content-Type": "text/html",
                     },
                 }
@@ -632,6 +648,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
 
 // default export
 export default {
+    DefaultHeaders,
     VerifyContentType,
     CreatePaste,
     GetPasteFromURL,

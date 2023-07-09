@@ -8,7 +8,7 @@ import { FormDataToJSON } from "../Server";
 import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
-import { VerifyContentType, db } from "./API";
+import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
@@ -129,6 +129,7 @@ export class Login implements Endpoint {
             ),
             {
                 headers: {
+                    ...DefaultHeaders,
                     "Content-Type": "text/html",
                 },
             }
@@ -265,6 +266,7 @@ export class ManagePastes implements Endpoint {
             ),
             {
                 headers: {
+                    ...DefaultHeaders,
                     "Content-Type": "text/html",
                 },
             }
@@ -307,6 +309,7 @@ export class APIDeletePaste implements Endpoint {
         return new Response(JSON.stringify(result), {
             status: 302,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
                 Location:
                     result[0] === true
@@ -415,6 +418,7 @@ export class ExportPastes implements Endpoint {
             ),
             {
                 headers: {
+                    ...DefaultHeaders,
                     "Content-Type": "text/html",
                 },
             }
@@ -470,6 +474,7 @@ export class APIExport implements Endpoint {
         // return
         return new Response(JSON.stringify(_export, undefined, 4), {
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
             },
         });
@@ -504,6 +509,7 @@ export class APIImport implements Endpoint {
         // return
         return new Response(JSON.stringify(output), {
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "application/json",
             },
         });

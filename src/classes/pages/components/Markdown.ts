@@ -1,3 +1,4 @@
+import * as html from "htmlparser2";
 import { marked } from "marked";
 import hljs from "highlight.js";
 
@@ -5,20 +6,21 @@ import hljs from "highlight.js";
  * @function ParseMarkdown
  *
  * @param {string} content
+ * @param {boolean} [server=false]
  * @return {string}
  */
-export function ParseMarkdown(content: string): string {
+export function ParseMarkdown(content: string, server: boolean = false): string {
     // we're going to use this on the server too!
     // update content to allow arrow element alignment, marked doesn't normally do this because it isn't in the markdown spec
     content = content.replaceAll(
         // -> <- (center)
-        /^(\-\>)(.*?)(\<\-)\s*$/gm,
+        /(\-\>)(.*?)(\<\-)\s*\.*/gs,
         '<p style="text-align: center;">$2</p>'
     );
 
     content = content.replaceAll(
         // -> -> (right)
-        /^(\-\>)(.*?)(\-\>)\s*$/gm,
+        /(\-\>)(.*?)(\-\>)\s*\.*/gs,
         '<p style="text-align: right;">$2</p>'
     );
 
@@ -26,6 +28,53 @@ export function ParseMarkdown(content: string): string {
     content = content.replaceAll(
         /(\=\=)(.*?)(\=\=)/g,
         '<span class="highlight">$2</span>'
+    );
+
+    // we have to do this ourselves because the next step would make it not work!
+    content = content.replaceAll(
+        /(\*\*\*)(.*?)(\*\*\*)/g,
+        "<strong><em>$2</em></strong>"
+    );
+
+    // replace *** with <hr /> (rentry uses *** for hr, that's dumb)
+    content = content.replaceAll("***", "<hr />");
+
+    // fix markdown (server only)
+    if (server) {
+        content = `<!-- USING SERVER RENDERER -->\n${content}`;
+
+        // create parser
+        const parser = new html.Parser({
+            ontext(data) {
+                if (!data.trim()) return;
+                content = content.replace(
+                    data,
+                    ParseMarkdown(data, false)
+                        // replace <p> with nothing, this is because marked returns everything
+                        // being a paragraph element (sometimes, we're doing this in the first place
+                        // because it's NOT doing that when it should), but a paragraph element for some
+                        // reason goes OUTSIDE of the parent element it SHOULD be in, but a span element
+                        // DOESN'T DO THAT???
+                        .replaceAll("<p>", "")
+                        .replaceAll("</p>", "")
+                );
+            },
+        });
+
+        // feed parse content
+        parser.write(content);
+
+        // end
+        parser.end();
+    }
+
+    // manual italics because i've noticed it doesn't work (partially)
+    content = content.replaceAll(/(\*)(.*?)(\*)/g, "<em>$2</em>");
+
+    // treat rentry.co links like links to federated entry servers
+    content = content.replaceAll(
+        /(href\=)\"(https:\/\/)(rentry\.co)\/(.*?)\"/g,
+        'href="/$4@rentry.co"'
     );
 
     // update content to allow notes/warnings
@@ -43,20 +92,11 @@ export function ParseMarkdown(content: string): string {
         '<div class="mdnote note-$2"><b class="mdnote-title">$3</b></div>'
     );
 
-    // we have to do this ourselves because the next step would make it not work!
-    content = content.replaceAll(
-        /(\*\*\*)(.*?)(\*\*\*)/g,
-        "<strong><em>$2</em></strong>"
-    );
-
-    // replace *** with <hr /> (rentry uses *** for hr, that's dumb)
-    content = content.replaceAll("***", "<hr />");
-
     // remove scripts, on[...] attributes and <link> elements
 
     // ...attributes
-    content = content.replaceAll(/(on)(.*)\=(.*)\"/g, "");
-    content = content.replaceAll(/(href)\=(.*)\"/g, "");
+    content = content.replaceAll(/^(on)(.*)\=(.*)\"$/gm, "");
+    content = content.replaceAll(/(href)\=\"(javascript\:)(.*)\"/g, "");
 
     // ...elements
     content = content.replaceAll(/(<script.*>)(.*?)(<\/script>)/gs, "");
@@ -75,7 +115,6 @@ export function ParseMarkdown(content: string): string {
     return marked.parse(content, {
         mangle: false,
         gfm: true,
-        breaks: true,
         silent: true,
     });
 }
@@ -86,9 +125,11 @@ export function ParseMarkdown(content: string): string {
  * @export
  * @param {HTMLElement} element
  */
-export function FixMarkdown(element: HTMLElement) {
+export function FixMarkdown(element: HTMLElement, _document?: Document) {
+    element.prepend(document.createComment("USING CLIENT RENDERER"));
+
     // run marked on all child elements of the preview tab
-    function SelectRule(rule: string) {
+    async function SelectRule(rule: string) {
         for (const _element of element.querySelectorAll(
             rule
         ) as any as HTMLElement[]) {
@@ -116,31 +157,8 @@ export function FixMarkdown(element: HTMLElement) {
     hljs.highlightAll();
 }
 
-/**
- * @function HandleCustomElements
- *
- * @export
- */
-export function HandleCustomElements() {
-    // handle style elements
-    let style = "";
-
-    // ...theme customization
-    const hue = document.querySelector("#editor-tab-preview hue") as HTMLElement;
-    const sat = document.querySelector("#editor-tab-preview sat") as HTMLElement;
-    const lit = document.querySelector("#editor-tab-preview lit") as HTMLElement;
-
-    if (hue) style += `--base-hue: ${hue.innerText};`;
-    if (sat) style += `--base-sat: ${sat.innerText};`;
-    if (lit) style += `--base-lit: ${lit.innerText};`;
-
-    // ...set style attribute
-    document.documentElement.setAttribute("style", style);
-}
-
 // default export
 export default {
     ParseMarkdown,
     FixMarkdown,
-    HandleCustomElements,
 };

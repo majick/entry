@@ -308,7 +308,10 @@ export default class EntryDB {
 
                 // just send an /api/get request to the other server
                 const request = fetch(
-                    `https://${server}/api/get/${PasteURL.split("@")[0]}`
+                    server !== "rentry.co"
+                        ? `https://${server}/api/get/${PasteURL.split("@")[0]}`
+                        : // rentry compatibility
+                          `https://${server}/api/raw/${PasteURL.split("@")[0]}`
                 );
 
                 // handle bad
@@ -319,6 +322,10 @@ export default class EntryDB {
                 // get record
                 const record = await request;
 
+                // rentry compatibility
+                if (server === "rentry.co")
+                    record.headers.set("Content-Type", "application/json");
+
                 // handle bad (again)
                 if (record.headers.get("Content-Type") !== "application/json")
                     return resolve(undefined);
@@ -326,6 +333,14 @@ export default class EntryDB {
                 // get body
                 const json = (await record.json()) as Paste;
                 json.HostServer = server;
+
+                // rentry compatibility
+                if (server === "rentry.co") {
+                    json.Content = (json as any).content;
+                    json.CustomURL = PasteURL.split("@")[0];
+                    json.PubDate = "?";
+                    json.EditDate = "?";
+                }
 
                 // return
                 if (record.ok) return resolve(json);

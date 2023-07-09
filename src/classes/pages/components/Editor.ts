@@ -27,7 +27,8 @@ import {
 } from "@codemirror/lang-markdown";
 import { tags } from "@lezer/highlight";
 
-import { ParseMarkdown, FixMarkdown, HandleCustomElements } from "./Markdown";
+import { HandleCustomElements } from "../assets/ClientFixMarkdown";
+import { ParseMarkdown, FixMarkdown } from "./Markdown";
 
 // create theme
 const hightlight = HighlightStyle.define([
@@ -100,24 +101,53 @@ function BasicCompletion(context: CompletionContext): any {
             // html special elements
             {
                 label: "<hue>",
-                type: "keyword",
+                type: "function",
                 info: "Controls page hue when your paste is viewed, integer",
                 apply: "<hue></hue>",
                 detail: "Special Elements",
             },
             {
                 label: "<sat>",
-                type: "keyword",
+                type: "function",
                 info: "Controls page saturation when your paste is viewed, percentage",
                 apply: "<sat></sat>",
                 detail: "Special Elements",
             },
             {
                 label: "<lit>",
-                type: "keyword",
+                type: "function",
                 info: "Controls page lightness when your paste is viewed, percentage",
                 apply: "<lit></lit>",
                 detail: "Special Elements",
+            },
+            // themes
+            {
+                label: "dark theme",
+                type: "variable",
+                info: "Sets the user's theme when viewing the paste to dark",
+                apply: "<theme>dark</theme>",
+                detail: "Themes",
+            },
+            {
+                label: "light theme",
+                type: "variable",
+                info: "Sets the user's theme when viewing the paste to light",
+                apply: "<theme>light</theme>",
+                detail: "Themes",
+            },
+            {
+                label: "purple theme",
+                type: "variable",
+                info: "Sets the user's theme when viewing the paste to purple",
+                apply: "<theme>purple</theme>",
+                detail: "Themes",
+            },
+            {
+                label: "blue theme",
+                type: "variable",
+                info: "Sets the user's theme when viewing the paste to blue",
+                apply: "<theme>blue</theme>",
+                detail: "Themes",
             },
             // markdown
             {
@@ -232,7 +262,7 @@ export default function CreateEditor(ElementID: string, content: string) {
                     const content = update.state.doc.toString();
                     window.sessionStorage.setItem("doc", content);
 
-                    const html = ParseMarkdown(content);
+                    const html = await ParseMarkdown(content);
                     window.sessionStorage.setItem("gen", html);
 
                     // update the hidden contentInput element so we can save the paste
@@ -274,7 +304,7 @@ export default function CreateEditor(ElementID: string, content: string) {
             }),
             autocompletion({
                 override: [BasicCompletion],
-                activateOnTyping: false,
+                activateOnTyping: window.location.search.includes("hints=true"),
             }),
         ],
     });
