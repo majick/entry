@@ -216,8 +216,9 @@ export default function CreateEditor(ElementID: string, content: string) {
     const startState = EditorState.create({
         doc:
             // display given content or the saved document if it is blank
-            (decodeURIComponent(content) || window.sessionStorage.getItem("doc")!) +
-            "\n",
+            decodeURIComponent(content) ||
+            window.sessionStorage.getItem("doc")! ||
+            "",
         extensions: [
             keymap.of(markdownKeymap),
             highlightSpecialChars(),
@@ -240,6 +241,32 @@ export default function CreateEditor(ElementID: string, content: string) {
                     ).value = encodeURIComponent(content); // encoded so we can send it through form
                 }
             }),
+            keymap.of([
+                // we're creating this keymap because of a weird issue in firefox where
+                // (if there is no text before or after), a new line is not created
+                // ...we're basically just manually inserting the new line here
+                {
+                    key: "Enter",
+                    run: (): boolean => {
+                        const cursor = view.state.selection.main.head;
+                        const transaction = view.state.update({
+                            changes: {
+                                from: cursor,
+                                insert: "\n",
+                            },
+                            selection: { anchor: cursor + 1 },
+                            scrollIntoView: true,
+                        });
+
+                        if (transaction) {
+                            view.dispatch(transaction);
+                        }
+
+                        // return
+                        return true;
+                    },
+                },
+            ]),
             // markdown
             syntaxHighlighting(hightlight),
             markdown({
