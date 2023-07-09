@@ -2,8 +2,11 @@
 // FixMarkdown will not be defined because the script will have already been minified
 // this is the code run to fix the markdown when viewing a paste
 
-import { FixMarkdown } from "../components/Markdown";
+import { FixMarkdown, HandleCustomElements } from "../components/Markdown";
+import hljs from "highlight.js";
 
 export default function ClientFixMD() {
     FixMarkdown(document.getElementById("editor-tab-preview")!);
+    HandleCustomElements();
+    hljs.highlightAll();
 }
