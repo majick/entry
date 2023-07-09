@@ -116,8 +116,31 @@ export function FixMarkdown(element: HTMLElement) {
     hljs.highlightAll();
 }
 
+/**
+ * @function HandleCustomElements
+ *
+ * @export
+ */
+export function HandleCustomElements() {
+    // handle style elements
+    let style = "";
+
+    // ...theme customization
+    const hue = document.querySelector("#editor-tab-preview hue") as HTMLElement;
+    const sat = document.querySelector("#editor-tab-preview sat") as HTMLElement;
+    const lit = document.querySelector("#editor-tab-preview lit") as HTMLElement;
+
+    if (hue) style += `--base-hue: ${hue.innerText};`;
+    if (sat) style += `--base-sat: ${sat.innerText};`;
+    if (lit) style += `--base-lit: ${lit.innerText};`;
+
+    // ...set style attribute
+    document.documentElement.setAttribute("style", style);
+}
+
 // default export
 export default {
     ParseMarkdown,
     FixMarkdown,
+    HandleCustomElements,
 };

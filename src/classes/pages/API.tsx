@@ -527,7 +527,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
         );
 
         // return
-        if (pastes.length === 0 || !pastes)
+        if (pastes.length === 0 || !pastes || !group)
             // show 404 because group does not exist
             return new _404Page().request(request);
         else
@@ -537,10 +537,12 @@ export class GetAllPastesInGroupPage implements Endpoint {
                         <main>
                             <div className="tab-container editor-tab">
                                 <h1>
-                                    Posts in {(group || "No Group").split("@")[0]}
+                                    Posts in groups/
+                                    {group.split("@")[0]}
                                 </h1>
 
                                 <table
+                                    class={"force-full"}
                                     style={{
                                         width: "100%",
                                     }}
@@ -606,18 +608,14 @@ export class GetAllPastesInGroupPage implements Endpoint {
 
                         <style
                             dangerouslySetInnerHTML={{
-                                __html: `tr { text-align: center; }
-                                th { min-width: max-content; }
-                                form button { margin: auto; }`,
+                                __html: `form button { margin: auto; }`,
                             }}
                         />
                     </>,
                     <>
                         <meta
                             name="description"
-                            content={`View pastes in ${group || "No Group"} on ${
-                                config.name
-                            } - A Markdown Pastebin`}
+                            content={`View pastes in groups/${group} on ${config.name} - A Markdown Pastebin`}
                         ></meta>
 
                         <title>Pastes in {group || "No Group"}</title>

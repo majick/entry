@@ -32,18 +32,18 @@ Entry supports all Rentry features with (almost) 1:1 compatibility. There are a 
 
 ### API
 
-- `POST /api/new`: Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword`
-- `POST /api/edit`: Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
-- `POST /api/delete`: Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
-- `POST /api/decrypt`: Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
-- `GET  /api/get/{paste}`: Get an existing paste
-- `GET  /api/group/{group}`: Get all pastes in specified group
+- `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword`
+- `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
+- `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
+- `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
+- `GET  /api/get/{paste}`, Get an existing paste
+- `GET  /api/group/{group}`, Get all pastes in specified group
 
 #### Admin Endpoints
 
-- `POST /admin/api/delete`: Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
-- `POST /admin/api/export`: Get JSON of all pastes in server (decrypted): `AdminPassword`
-- `POST /admin/api/import`: Import pastes JSON: `AdminPassword, pastes` (with `paste` being the JSON export from `/admin/api/export`)
+- `POST /admin/api/delete`, Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
+- `POST /admin/api/export`, Get JSON of all pastes in server (decrypted): `AdminPassword`
+- `POST /admin/api/import`, Import pastes JSON: `AdminPassword, pastes` (with `paste` being the JSON export from `/admin/api/export`)
 
 ### (very basic) Federation
 
@@ -87,11 +87,11 @@ Entry provides an admin panel that is locked behind a set password that allows t
 
 ### Customization
 
-Every color is customizable through simple CSS variables. You can customize the background using the `--base-hue`, `--base-sat` and `--base-lit` variables. The background is normally in `hsl` format, while other colors are in hex.
+Every color is customizable through simple CSS variables. You can customize the background using the `--base-hue`, `--base-sat` and `--base-lit` variables. The background is normally in `hsl` format, while other colors are in hex. Many of these values can be controlled using specific [Special Elements](#special-elements).
 
-- `--base-hue` - The base hue of the background (int)
-- `--base-sat` - The base saturation of the background (percentage)
-- `--base-lit` - The base lightness of the background (percentage)
+- `--base-hue`, The base hue of the background, `int`
+- `--base-sat`, The base saturation of the background, `percentage`
+- `--base-lit`, The base lightness of the background, `percentage`
 
 Some examples are includes in the base stylesheet. The example below creates a purple theme.
 
@@ -107,6 +107,14 @@ html.purple-theme {
 Groups allow users to organize their pastes into different groups that are locked by a password. Anybody can view the pastes in an existing group, but in order to add a new paste to the group you must have the correct password. A group must not already exist with the requested name to create a new group. A group will become available once all the pastes inside of it are deleted.
 
 Adding a group name will append the group name to the beginning of your set custom URL. This means the custom URL "example" with the group "example-group" would look like "example-group/example" instead of just the custom URL. This means that, if you add a group, you can have any custom URL you want for your paste. Adding a group is not required.
+
+### Special Elements
+
+You can customize the way your pastes are displayed using some custom elements.
+
+- `<hue>`, the hue element allows you to control the hue of the page when your paste is rendered. It expects an `integer`.
+- `<sat>`, the sat element allows you to control the saturation of the page when your paste is rendered. It expects a `percentage`.
+- `<lit>`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
 
 ## Why
 

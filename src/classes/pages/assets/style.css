@@ -35,8 +35,8 @@
     --blue2: #025fb1;
     --green: #346535;
     --green1: #dff0d8;
-    --yellow: #c09853;
-    --yellow1: #fcf8e3;
+    --yellow: #826430;
+    --yellow1: #f8edba;
     --red: #a6413f;
     --red1: #f2dede;
     --red2: #fdf6f6;
@@ -54,9 +54,9 @@
         --blue2: #4b99d1;
         --green: #699269;
         --green1: #2d3829;
-        --yellow: #a88548;
+        --yellow: #d1bb94;
         --yellow1: #4e4632;
-        --red: #ba8382;
+        --red: #bb8483;
         --red1: #4c2a2a;
         --red2: #a3717126;
         --red3: #e0aeb4;
@@ -71,9 +71,9 @@
         --blue: #5c8ca4;
         --blue1: #2b383e;
         --blue2: #4b99d1;
-        --green: #89a989;
+        --green: #699269;
         --green1: #2d3829;
-        --yellow: #a88548;
+        --yellow: #d1bb94;
         --yellow1: #4e4632;
         --red: #bb8483;
         --red1: #4c2a2a;
@@ -367,6 +367,7 @@ table {
 }
 
 table th {
+    min-width: max-content;
     padding: 6px 10px;
     background: var(--background-surface3);
     border: none;
@@ -387,6 +388,16 @@ table tr {
 
 table td:focus-within {
     box-shadow: inset 0 0 0 1px var(--blue2);
+}
+
+table.force-full tr {
+    text-align: center;
+}
+
+table.force-full td {
+    white-space: pre;
+    word-break: normal;
+    width: max-content;
 }
 
 blockquote {
@@ -488,14 +499,32 @@ details hr {
     outline: none;
 }
 
-.cm-line .ͼu.ͼt {
-    /* fix list links */
-    padding-left: inherit !important;
-    border-left: none !important;
-}
-
 .cm-scroller {
     overflow: auto;
+}
+
+.cm-tooltip {
+    background-color: var(--background-surface) !important;
+    padding: 0.4rem;
+    border-radius: 0.2rem;
+    border-color: var(--background-surface2) !important;
+    color: var(--text-color) !important;
+}
+
+.cm-tooltip.cm-completionInfo {
+    margin-left: 0.4rem;
+}
+
+.cm-tooltip-autocomplete li {
+    padding: 0.4rem !important;
+    border-radius: 0.2rem;
+    transition: all 0.1s;
+    color: var(--text-color) !important;
+}
+
+.cm-tooltip-autocomplete li[aria-selected="true"] {
+    background: var(--background-surface1) !important;
+    box-shadow: inset 0 0 0 2px var(--red);
 }
 
 /* highlight.js styles */
@@ -520,4 +549,11 @@ details hr {
 
 .hljs-string {
     color: var(--green);
+}
+
+/* special elements */
+hue,
+sat,
+lit {
+    display: none;
 }

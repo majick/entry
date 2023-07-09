@@ -41,6 +41,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                     justifyContent: "center",
                     alignItems: "center",
                     gap: "0.4rem",
+                    flexWrap: "wrap",
                 }}
             >
                 <form action="/admin/manage-pastes" method="POST">
@@ -169,6 +170,7 @@ export class ManagePastes implements Endpoint {
                             <AdminNav active="pastes" pass={body.AdminPassword} />
 
                             <table
+                                class={"force-full"}
                                 style={{
                                     width: "100%",
                                 }}
@@ -253,9 +255,7 @@ export class ManagePastes implements Endpoint {
 
                     <style
                         dangerouslySetInnerHTML={{
-                            __html: `tr { text-align: center; }
-                            th { min-width: max-content; }
-                            form button { margin: auto; }`,
+                            __html: `form button { margin: auto; }`,
                         }}
                     />
                 </>,
@@ -377,6 +377,7 @@ export class ExportPastes implements Endpoint {
                                     style={{
                                         display: "flex",
                                         gap: "0.4rem",
+                                        flexWrap: "wrap",
                                     }}
                                 >
                                     <input

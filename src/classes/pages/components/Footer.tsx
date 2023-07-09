@@ -54,6 +54,7 @@ export default function Footer() {
                         
                         .__footernav li {
                             list-style-type: "·";
+                            padding: 0 0.25rem;
                         }
 
                         .__footernav li:first-child {
