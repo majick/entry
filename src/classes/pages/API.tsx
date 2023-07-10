@@ -171,7 +171,7 @@ export class GetPasteFromURL implements Endpoint {
                                         height: "max-content",
                                     }}
                                     dangerouslySetInnerHTML={{
-                                        __html: ParseMarkdown(result.Content, true),
+                                        __html: ParseMarkdown(result.Content),
                                     }}
                                 />
                             </div>
@@ -266,7 +266,7 @@ export class GetPasteFromURL implements Endpoint {
                             // P.S. I hate this
                             type="module"
                             dangerouslySetInnerHTML={{
-                                __html: `import fix from "/ClientFixMD.js"; fix(false);`,
+                                __html: `import fix from "/ClientFixMarkdown.js"; fix();`,
                             }}
                         />
                     </>,

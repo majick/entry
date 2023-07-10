@@ -28,7 +28,7 @@ import {
 import { tags } from "@lezer/highlight";
 
 import { HandleCustomElements } from "../assets/ClientFixMarkdown";
-import { ParseMarkdown, FixMarkdown } from "./Markdown";
+import { ParseMarkdown } from "./Markdown";
 
 // create theme
 const hightlight = HighlightStyle.define([
@@ -118,6 +118,13 @@ function BasicCompletion(context: CompletionContext): any {
                 type: "function",
                 info: "Controls page lightness when your paste is viewed, percentage",
                 apply: "<lit></lit>",
+                detail: "Special Elements",
+            },
+            {
+                label: "comment",
+                type: "keyword",
+                info: "Invisible element",
+                apply: "<comment></comment>",
                 detail: "Special Elements",
             },
             // themes
@@ -364,7 +371,6 @@ document.getElementById("editor-open-tab-preview")!.addEventListener("click", ()
         .classList.remove("secondary");
 
     // fix markdown rendering
-    FixMarkdown(tab);
     HandleCustomElements();
 });
 

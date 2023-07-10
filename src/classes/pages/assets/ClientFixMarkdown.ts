@@ -10,6 +10,16 @@ import hljs from "highlight.js";
  * @export
  */
 export function HandleCustomElements() {
+    // treat rentro.co links as links to federared entry servers
+    for (let anchor of document.body.querySelectorAll(
+        "a"
+    ) as any as HTMLAnchorElement[]) {
+        anchor.href = anchor.href.replace("https://rentry.org", "https://rentry.co");
+        if (!anchor.href.split("https://rentry.co/")[1]) continue;
+        else
+            anchor.href = `/${anchor.href.split("https://rentry.co/")[1]}@rentry.co`;
+    }
+
     // handle style elements
     let style = "";
 
@@ -48,11 +58,6 @@ export function HandleCustomElements() {
  * @param {boolean} [DoFix=true]
  */
 export default async function ClientFixMarkdown(DoFix: boolean = true) {
-    if (DoFix) {
-        const { FixMarkdown } = await import("../components/Markdown");
-        FixMarkdown(document.getElementById("editor-tab-preview")!);
-    }
-
     HandleCustomElements();
     hljs.highlightAll();
 }

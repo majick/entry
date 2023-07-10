@@ -548,6 +548,11 @@ details hr {
 hue,
 sat,
 lit,
-theme {
+theme,
+comment {
     display: none;
+}
+
+r {
+    display: block;
 }
