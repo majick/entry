@@ -559,7 +559,9 @@ export default class Home implements Endpoint {
             ),
             {
                 headers: {
-                    ...DefaultHeaders,
+                    "Cache-Control": "private",
+                    "X-Content-Type-Options": "nosniff",
+                    Vary: "Accept-Encoding",
                     "Content-Type": "text/html",
                 },
             }
