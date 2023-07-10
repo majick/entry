@@ -24,11 +24,17 @@ const config = (await EntryDB.GetConfig()) as Config;
 // ...
 import { ParseMarkdown } from "./components/Markdown";
 
-// default headers
+// headers
 export const DefaultHeaders = {
     "Cache-Control": "public, max-age=604800, must-revalidate",
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    Vary: "Accept-Encoding",
+};
+
+export const PageHeaders = {
+    "Cache-Control": "private",
+    "X-Content-Type-Options": "nosniff",
     Vary: "Accept-Encoding",
 };
 
@@ -171,7 +177,7 @@ export class GetPasteFromURL implements Endpoint {
                                         height: "max-content",
                                     }}
                                     dangerouslySetInnerHTML={{
-                                        __html: ParseMarkdown(result.Content),
+                                        __html: await ParseMarkdown(result.Content),
                                     }}
                                 />
                             </div>

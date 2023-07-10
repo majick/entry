@@ -1,6 +1,6 @@
 # 📝 entry
 
-Entry is a lightweight [Rentry](https://rentry.co) re-creation written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion and custom URLs.
+Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion and custom URLs.
 
 Uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite).
 
@@ -20,13 +20,15 @@ Manually launch once after installing to start the setup prompts. These will all
 
 ## Compatibility
 
-Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
+Entry was originally written as a replacement for [Rentry](https://rentry.co). Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
 
 | Rentry                                                                                                                       | Entry                                                                                                                                                                                                               |
 | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | When deleting pastes, Rentry uses `POST /api/edit` with `{ delete: "delete" }`                                               | Entry uses `POST /api/delete`                                                                                                                                                                                       |
 | Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports a `GET /api/get` endpoint, which returns the saved record for the paste without the `EditPassword` hash. Any paste can be viewed raw just by clicking the "Edit" button when viewing the paste. |
 | Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews         |
+
+Entry supports extra features that Rentry does not support. They are detailed below.
 
 ## Features
 

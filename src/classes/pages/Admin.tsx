@@ -8,7 +8,7 @@ import { FormDataToJSON } from "../Server";
 import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
-import { VerifyContentType, db, DefaultHeaders } from "./API";
+import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./API";
 import { Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
@@ -266,7 +266,7 @@ export class ManagePastes implements Endpoint {
             ),
             {
                 headers: {
-                    ...DefaultHeaders,
+                    ...PageHeaders,
                     "Content-Type": "text/html",
                 },
             }
@@ -326,10 +326,10 @@ export class APIDeletePaste implements Endpoint {
 
 /**
  * @export
- * @class ExportPastes
+ * @class ExportPastesPage
  * @implements {Endpoint}
  */
-export class ExportPastes implements Endpoint {
+export class ExportPastesPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
@@ -418,7 +418,7 @@ export class ExportPastes implements Endpoint {
             ),
             {
                 headers: {
-                    ...DefaultHeaders,
+                    ...PageHeaders,
                     "Content-Type": "text/html",
                 },
             }
@@ -521,7 +521,7 @@ export default {
     Login,
     ManagePastes,
     APIDeletePaste,
-    ExportPastes,
+    ExportPastesPage,
     APIExport,
     APIImport,
 };

@@ -4,7 +4,7 @@ import Renderer from "./_Render";
 import DecryptionForm from "./components/DecryptionForm";
 import Footer from "./components/Footer";
 
-import { DecryptPaste, db, DefaultHeaders } from "./API";
+import { DecryptPaste, db, PageHeaders } from "./API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import { Config } from "../..";
@@ -559,9 +559,7 @@ export default class Home implements Endpoint {
             ),
             {
                 headers: {
-                    "Cache-Control": "private",
-                    "X-Content-Type-Options": "nosniff",
-                    Vary: "Accept-Encoding",
+                    ...PageHeaders,
                     "Content-Type": "text/html",
                 },
             }

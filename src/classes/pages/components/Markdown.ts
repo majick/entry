@@ -4,9 +4,9 @@ import { marked } from "marked";
  * @function ParseMarkdown
  *
  * @param {string} content
- * @return {string}
+ * @return {Promise<string>}
  */
-export function ParseMarkdown(content: string): string {
+export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
     // allowed elements
@@ -17,18 +17,43 @@ export function ParseMarkdown(content: string): string {
             .replaceAll("-&gt;", "->")
             .replaceAll("&lt;-", "<-");
 
+    // fix headers (they aren't picked up if the formatting is really bad)
+    // inserting a \n after each heading to make marked automatically make following text
+    // its own paragraph element, fixes a lot of formatting issues
+    content = content.replaceAll(/^(\#{6})\s*(.*)$/gm, "<h6>$2</h6>\n");
+    content = content.replaceAll(/^(\#{5})\s*(.*)$/gm, "<h5>$2</h5>\n");
+    content = content.replaceAll(/^(\#{4})\s*(.*)$/gm, "<h4>$2</h4>\n");
+    content = content.replaceAll(/^(\#{3})\s*(.*)$/gm, "<h3>$2</h3>\n");
+    content = content.replaceAll(/^(\#{2})\s*(.*)$/gm, "<h2>$2</h2>\n");
+    content = content.replaceAll(/^(\#{1})\s*(.*)$/gm, "<h1>$2</h1>\n");
+
+    // code blocks
+
+    // ...inline code block
+    content = content.replaceAll(/^(\`{3})(.*)(\`{3})$/gm, "<code>$2</code>"); // ```code```
+
+    // ...fenced code block
+    content = content.replaceAll(
+        /^(\`{3})(.*?)\n(.*?)(\`{3})$/gms, // $2: language, $3: code
+        '<pre><code class="language-$2">$3</code></pre>\n'
+    );
+
+    // ...inline code block
+    content = content.replaceAll(/^(\`{2})(.*)(\`{2})$/gm, "<code>$2</code>"); // ``code``
+    content = content.replaceAll(/^(\`{1})(.*)(\`{1})$/gm, "<code>$2</code>"); // `code`
+
     // update content to allow notes/warnings
     content = content.replaceAll(
-        /^(\!\!\!)\s(?<TYPE>.*?)\s(?<TITLE>.*?)\n(?<CONTENT>.*?)$/gm,
+        /^(\!{3})\s(?<TYPE>.*?)\s(?<TITLE>.*?)\n(?<CONTENT>.*?)$/gm,
         `<div class="mdnote note-$2">
-                <b class="mdnote-title">$3</b>
-                <p>$4</p>
-            </div>`
+            <b class="mdnote-title">$3</b>
+            <p>$4</p>
+        </div>`
     );
 
     content = content.replaceAll(
         // only title match
-        /^(\!\!\!)\s(?<TYPE>.*?)\s(?<TITLE>.*?)$/gm,
+        /^(\!{3})\s(?<TYPE>.*?)\s(?<TITLE>.*?)$/gm,
         '<div class="mdnote note-$2"><b class="mdnote-title">$3</b></div>'
     );
 
@@ -49,21 +74,22 @@ export function ParseMarkdown(content: string): string {
 
     // update content to allow highlighting
     content = content.replaceAll(
-        /(\=\=)(.*?)(\=\=)/g,
+        /(\={2})(.*?)(\={2})/g,
         '<span class="highlight">$2</span>'
     );
 
     // we have to do this ourselves because the next step would make it not work!
     content = content.replaceAll(
-        /(\*\*\*)(.*?)(\*\*\*)/g,
+        /(\*{3})(.*?)(\*{3})/g,
         "<strong><em>$2</em></strong>"
     );
 
     // replace *** with <hr /> (rentry uses *** for hr, that's dumb)
     content = content.replaceAll("***", "<hr />");
 
-    // manual italics because i've noticed it doesn't work (partially)
-    content = content.replaceAll(/(\*)(.*?)(\*)/g, "<em>$2</em>");
+    // manual italics/bold because i've noticed it doesn't work (partially)
+    content = content.replaceAll(/(\*{2})(.*?)(\*{2})/g, "<strong>$2</strong>");
+    content = content.replaceAll(/(\*{1})(.*?)(\*{1})/g, "<em>$2</em>");
 
     // treat rentry.co links like links to federated entry servers
     content = content.replaceAll(
@@ -91,10 +117,11 @@ export function ParseMarkdown(content: string): string {
     content = content.replaceAll(/(<style.*>)/gs, "");
 
     // parse content with marked and return
-    return marked.parse(content, {
-        mangle: false,
+    return await marked.parse(content, {
         gfm: true,
         silent: true,
+        breaks: true,
+        async: true,
     });
 }
 

@@ -121,7 +121,7 @@ export class _Server {
                     else if (url.pathname === "/admin/manage-pastes")
                         return await new Admin.ManagePastes().request(request);
                     else if (url.pathname === "/admin/export")
-                        return await new Admin.ExportPastes().request(request);
+                        return await new Admin.ExportPastesPage().request(request);
                     else if (url.pathname === "/admin/api/delete")
                         return await new Admin.APIDeletePaste().request(request);
                     else if (url.pathname === "/admin/api/export")

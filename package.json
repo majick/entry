@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -39,5 +39,6 @@
   },
   "bugs": {
     "url": "https://codeberg.org/hkau/entry/issues"
-  }
+  },
+  "homepage": "https://www.sentrytwo.com"
 }
