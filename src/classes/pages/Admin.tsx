@@ -9,7 +9,7 @@ import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
 import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./API";
-import { Decrypt } from "../db/Hash";
+import { CreateHash, Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
 import Footer from "./components/Footer";
@@ -164,7 +164,7 @@ export class ManagePastes implements Endpoint {
             return new Login().request(request);
 
         // fetch all pastes
-        const pastes = await db.GetAllPastes(true); // include encrypted pastes
+        const pastes = await db.GetAllPastes(true, false); // include encrypted pastes
 
         // return
         return new Response(
@@ -186,6 +186,7 @@ export class ManagePastes implements Endpoint {
                                         <th>Publish Date</th>
                                         <th>Edit Date</th>
                                         <th>Private</th>
+                                        <th>Editable</th>
                                         <th>Open</th>
                                         <th>Delete</th>
                                     </tr>
@@ -211,6 +212,13 @@ export class ManagePastes implements Endpoint {
                                                 <td>{paste.EditDate}</td>
                                                 <td>
                                                     {paste.ViewPassword === "exists"
+                                                        ? "yes"
+                                                        : "no"}
+                                                </td>
+                                                <td>
+                                                    {paste.EditPassword !==
+                                                        CreateHash("") &&
+                                                    paste.GroupName !== "server" // server pastes cannot be edited
                                                         ? "yes"
                                                         : "no"}
                                                 </td>

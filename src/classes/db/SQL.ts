@@ -16,20 +16,19 @@ export default class SQL {
     /**
      * @static
      * @param {string} name
+     * @param {string} data
      * @return {[Database, boolean]}
      * @memberof SQL
      */
-    public static CreateDB(name: string): [Database, boolean] {
-        if (!fs.existsSync(path.join(process.cwd(), "data")))
+    public static CreateDB(name: string, data: string): [Database, boolean] {
+        if (!fs.existsSync(data))
             // create data directory
-            fs.mkdirSync(path.join(process.cwd(), "data"));
+            fs.mkdirSync(data, { recursive: true });
 
-        const needToCreate = !fs.existsSync(
-            path.join(process.cwd(), "data", `${name}.sqlite`)
-        );
+        const needToCreate = !fs.existsSync(path.join(data, `${name}.sqlite`));
 
         // see: https://bun.sh/docs/api/sqlite
-        const db = new Database(path.join(process.cwd(), "data", `${name}.sqlite`), {
+        const db = new Database(path.join(data, `${name}.sqlite`), {
             create: true,
         });
 

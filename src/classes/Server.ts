@@ -75,7 +75,10 @@ export class _Server {
                     else if (url.pathname === "/robots.txt")
                         return new Response("User-agent: *\nAllow: /\nDisallow:");
                     // admin
-                    else if (url.pathname === "/admin/login")
+                    else if (
+                        url.pathname === "/admin/login" ||
+                        url.pathname === "/admin/login/"
+                    )
                         return await new Admin.Login().request(request);
                     // api
                     else if (url.pathname === "/api/all")

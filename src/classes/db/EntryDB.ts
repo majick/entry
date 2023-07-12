@@ -28,6 +28,7 @@ export type Paste = {
     //                        if it is valid, the paste is private and should have a
     //                        corresponding entry in the Encryption table
     HostServer?: string; // this is not actually stored in the record
+    IsEditable?: string; // this is not actually stored in the record
 };
 
 /**
@@ -35,7 +36,9 @@ export type Paste = {
  * @class EntryDB
  */
 export default class EntryDB {
-    public static DataDirectory = path.resolve(process.cwd(), "data");
+    public static DataDirectory =
+        process.env.DATA_LOCATION || path.resolve(process.cwd(), "data");
+
     public readonly db: Database;
 
     public static readonly MaxContentLength = 200000;
@@ -56,7 +59,11 @@ export default class EntryDB {
      */
     constructor() {
         // create db link
-        const [db, isNew] = SQL.CreateDB("entry");
+        const [db, isNew] = SQL.CreateDB(
+            "entry",
+            EntryDB.DataDirectory.replace(":cwd", process.cwd())
+        );
+
         EntryDB.isNew = isNew;
         this.db = db;
 
@@ -376,6 +383,10 @@ export default class EntryDB {
                 `Group name does not pass test: ${EntryDB.URLRegex}`,
                 PasteInfo,
             ];
+
+        // check for IsEditable, if it does not exist set EditPassword to "" so the paste
+        // cannot be changed
+        if (!PasteInfo.IsEditable) PasteInfo.EditPassword = "";
 
         // hash passwords
         if (!SkipHash) {

@@ -21,6 +21,10 @@ export default class Home implements Endpoint {
         const search = new URLSearchParams(url.search);
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
+        // form options
+        const UseSingleColumn: boolean =
+            process.env.USE_SINGLE_FORM_COLUMN !== "false"; // true is the default
+
         // get paste if search.mode === "edit"
         let paste: Paste | undefined;
 
@@ -133,7 +137,14 @@ export default class Home implements Endpoint {
                                             display: "flex",
                                             gap: "0.5rem",
                                             flexWrap: "wrap",
-                                            justifyContent: "center", // aha! this is for mobile :)
+                                            alignItems: UseSingleColumn
+                                                ? "center"
+                                                : "flex-start",
+                                            justifyContent: "center",
+                                            flexDirection: UseSingleColumn
+                                                ? "column"
+                                                : "row",
+                                            maxWidth: "100%",
                                         }}
                                     >
                                         <input
@@ -146,7 +157,10 @@ export default class Home implements Endpoint {
                                         <details
                                             id={"CreateFormRequired"}
                                             style={{
-                                                width: "20rem",
+                                                width: UseSingleColumn
+                                                    ? "25rem"
+                                                    : "20rem",
+                                                maxWidth: "100%",
                                             }}
                                         >
                                             <summary>
@@ -165,9 +179,13 @@ export default class Home implements Endpoint {
                                                     "details-flex-content-list-box"
                                                 }
                                             >
+                                                <label htmlFor="CustomURL">
+                                                    Custom URL
+                                                </label>
+
                                                 <input
                                                     type="text"
-                                                    placeholder={"Custom url"}
+                                                    placeholder={"Custom URL"}
                                                     maxLength={
                                                         EntryDB.MaxCustomURLLength
                                                     }
@@ -175,10 +193,39 @@ export default class Home implements Endpoint {
                                                         EntryDB.MinCustomURLLength
                                                     }
                                                     name={"CustomURL"}
+                                                    id={"CustomURL"}
                                                     autoComplete={"off"}
+                                                    value={crypto.randomUUID()}
                                                     required
                                                 />
 
+                                                <hr />
+
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent:
+                                                            "space-between",
+                                                        alignItems: "center",
+                                                        marginBottom: "0.5rem",
+                                                    }}
+                                                >
+                                                    <label htmlFor="IsEditable">
+                                                        Editable
+                                                    </label>
+
+                                                    <input
+                                                        type="checkbox"
+                                                        name={"IsEditable"}
+                                                        id={"IsEditable"}
+                                                        checked={true}
+                                                        value={"true"}
+                                                    />
+                                                </div>
+
+                                                <label htmlFor="EditPassword">
+                                                    Edit Password
+                                                </label>
                                                 <input
                                                     type="text"
                                                     placeholder={"Custom edit code"}
@@ -189,6 +236,7 @@ export default class Home implements Endpoint {
                                                         EntryDB.MinPasswordLength
                                                     }
                                                     name={"EditPassword"}
+                                                    id={"EditPassword"}
                                                     autoComplete={"off"}
                                                     required
                                                 />
@@ -197,7 +245,10 @@ export default class Home implements Endpoint {
 
                                         <details
                                             style={{
-                                                width: "20rem",
+                                                width: UseSingleColumn
+                                                    ? "25rem"
+                                                    : "20rem",
+                                                maxWidth: "100%",
                                             }}
                                         >
                                             <summary>
@@ -250,18 +301,10 @@ export default class Home implements Endpoint {
 
                                                 <p>
                                                     Groups cannot be made private.
-                                                    The code is only required when
-                                                    submitting to an existing group.
-                                                    If you provide a group name, the
-                                                    group post code{" "}
-                                                    <b>is required</b>! Adding a
-                                                    group name will append the group
-                                                    name to the beginning of your set
-                                                    custom URL. This means the custom
-                                                    URL "example" with the group
-                                                    "example-group" would look like
-                                                    "example-group/example" instead
-                                                    of just the custom URL.
+                                                    The group post code is only
+                                                    required when submitting to an
+                                                    existing group or creating a new
+                                                    group.
                                                 </p>
 
                                                 <input
@@ -305,7 +348,12 @@ export default class Home implements Endpoint {
                                             if (CreateFormSubmit && CreateFormRequired)
                                                 CreateFormSubmit.addEventListener("click", (e) => {
                                                     CreateFormRequired.toggleAttribute("open", true);
-                                                });`,
+                                                });
+                                                
+                                            // disable EditPassword when IsEditable is unchecked
+                                            document.getElementById("IsEditable").addEventListener("change", (e) => {
+                                                document.getElementById("EditPassword").toggleAttribute("disabled");
+                                            });`,
                                         }}
                                     />
                                 </form>
@@ -360,8 +408,8 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 {
-                                                    // we're going to provide the old custom URL as well because the server expects it
-                                                    // if we don't provide a new custom url, this will be used instead so we don't give up our url
+                                                    // we're going to provide the old Custom URL as well because the server expects it
+                                                    // if we don't provide a new Custom URL, this will be used instead so we don't give up our url
                                                 }
                                                 <input
                                                     type="hidden"
@@ -402,7 +450,7 @@ export default class Home implements Endpoint {
                                                         <input
                                                             type="text"
                                                             placeholder={
-                                                                "Change custom url - optional"
+                                                                "Change Custom URL - optional"
                                                             }
                                                             maxLength={
                                                                 EntryDB.MaxCustomURLLength

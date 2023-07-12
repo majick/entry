@@ -24,6 +24,34 @@ services:
             PORT: "8080" # optional, 8080 is default
             NAME: "Entry" # optional, Entry is default
             ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
+            DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default
+            USE_SINGLE_FORM_COLUMN: true # optional, makes paste information boxes display in the same column, true is default
 ```
 
 You can then run `docker-compose up -d` to start Entry locally. Visit the port you configured and you should see the Entry UI.
+
+### Change Data Directory
+
+You can configure the directory that data is stored in with the `DATA_LOCATION` environment variable. Always use an exact path when changing the `DATA_LOCATION`.
+
+```yml
+...
+        environment:
+            ...
+            DATA_LOCATION: "/path/to/data/directory"
+            ...
+```
+
+After you change the location, you must mount this location using `volumes`. It must match on both sides of the colon character.
+
+```yml
+...
+        environment:
+            ...
+            DATA_LOCATION: "/path/to/data/directory"
+            ...
+        volumes:
+            - /path/to/data/directory:/path/to/data/directory
+```
+
+Your Docker container will now store data in `/path/to/data/directory` instead of inside of the container.
