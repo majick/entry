@@ -30,8 +30,11 @@
   },
   "scripts": {
     "build": "bun run build.ts",
-    "start": "bun run build && bun run dist/index.js",
-    "format": "prettier src/ --write --config ./.prettierrc"
+    "start": "bun run build && bun run start:no-build",
+    "start:no-build": "bun run dist/index.js",
+    "format": "prettier src/ --write --config ./.prettierrc",
+    "build:docker": "bun run build && docker build --tag hkauxy/entrymd .",
+    "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 hkauxy/entrymd"
   },
   "repository": {
     "type": "git",

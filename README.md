@@ -12,6 +12,8 @@ Uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database 
 - Clone the repository and run `bun install` to install dependencies
 - Start the server with `bun run start`
 
+Entry can also be installed using Docker. Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.
+
 ## Usage
 
 Once installed you can start (and build) the server using `bun run start`, to just build do `bun run build`.

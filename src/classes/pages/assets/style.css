@@ -144,7 +144,7 @@ button {
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.1s;
+    transition: color 0.1s;
     height: max-content;
     width: max-content;
     font-weight: normal;

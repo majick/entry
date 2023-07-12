@@ -94,7 +94,6 @@ function AdminNav(props: { active: string; pass: string }): any {
  */
 export class Login implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        // this is the first page rendered for admin, so we only need to check for config here
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // we aren't actually using a login system, it's just a form for the configured
@@ -147,6 +146,8 @@ export class Login implements Endpoint {
  */
 export class ManagePastes implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
+
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -334,6 +335,8 @@ export class APIDeletePaste implements Endpoint {
  */
 export class ExportPastesPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
+
         // verify content type
         const WrongType = VerifyContentType(
             request,

@@ -21,6 +21,7 @@ export default function Footer() {
                     display: "flex",
                     gap: "0.25rem",
                     padding: "0",
+                    margin: "0"
                 }}
             >
                 <li>

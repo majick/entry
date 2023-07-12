@@ -1,0 +1,9 @@
+services:
+    web:
+        image: hkauxy/entrymd:latest
+        ports:
+            - "8080:8080" # match this (both sides) with your values from env.port
+        environment:
+            PORT: "8080" # optional, 8080 is default
+            NAME: "Entry" # optional, Entry is default
+            ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
