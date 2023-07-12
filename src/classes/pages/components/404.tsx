@@ -5,7 +5,7 @@ import Footer from "./Footer";
 
 import EntryDB from "../../db/EntryDB";
 import { Config } from "../../..";
-const config = (await EntryDB.GetConfig()) as Config;
+let config: Config;
 
 import { DefaultHeaders } from "../API";
 
@@ -16,6 +16,8 @@ import { DefaultHeaders } from "../API";
  */
 export default class _404Page implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
+
         return new Response(
             Renderer.Render(
                 <main>

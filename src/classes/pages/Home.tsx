@@ -8,7 +8,7 @@ import { DecryptPaste, db, PageHeaders } from "./API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import { Config } from "../..";
-const config = (await EntryDB.GetConfig()) as Config;
+let config: Config;
 
 /**
  * @export
@@ -19,6 +19,7 @@ export default class Home implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // get paste if search.mode === "edit"
         let paste: Paste | undefined;

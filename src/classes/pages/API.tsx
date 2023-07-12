@@ -19,7 +19,7 @@ import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 
 import { Config } from "../..";
-const config = (await EntryDB.GetConfig()) as Config;
+let config: Config;
 
 // ...
 import { ParseMarkdown } from "./components/Markdown";
@@ -542,6 +542,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const group = url.pathname.slice("/group/".length, url.pathname.length);
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // get pastes
         const pastes = await db.GetAllPastesInGroup(

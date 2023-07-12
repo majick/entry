@@ -13,9 +13,9 @@ import { Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
 import Footer from "./components/Footer";
-import { Config } from "../..";
 
-const config = (await EntryDB.GetConfig()) as Config;
+import { Config } from "../..";
+let config: Config;
 
 /**
  * @function AdminNav
@@ -94,6 +94,9 @@ function AdminNav(props: { active: string; pass: string }): any {
  */
 export class Login implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // this is the first page rendered for admin, so we only need to check for config here
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
+
         // we aren't actually using a login system, it's just a form for the configured
         // server admin password
 
