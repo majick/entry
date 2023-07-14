@@ -36,7 +36,7 @@ Entry supports extra features that Rentry does not support. They are detailed be
 
 ### API
 
-- `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword`
+- `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
 - `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
@@ -85,6 +85,10 @@ const record = (await SQL.QueryOBJ({
 
 Values are regenerated when an encrypted paste is edited.
 
+### Paste Expiration
+
+When creating a paste, you can set to have your paste expire at a given time and date. When this time comes, your paste will automatically be deleted by Entry. This is useful if you don't set an edit password on your paste and are unable to delete it. Information about expired pastes is not kept after their deletion, and their custom URL because open again once they expire.
+
 ### Admin Panel
 
 Entry provides an admin panel that is locked behind a set password that allows the server owner to manage pastes on their server quickly and easily. The admin password is set on initial configuration, and stored (plain text) in `data/config.json` with the key `admin`.
@@ -120,6 +124,19 @@ You can customize the way your pastes are displayed using some custom elements.
 - `<sat>`, the sat element allows you to control the saturation of the page when your paste is rendered. It expects a `percentage`.
 - `<lit>`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
 - `<theme>`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
+
+## Development
+
+1. Make sure you have [Bun](https://bun.sh) installed
+2. Clone the repository (`git clone https://codeberg.org/hkau/entry`)
+3. Install all dependencies (`bun i`)
+4. Run `bun run start` to start the server
+5. Before committing changes you should run `bun run format` to format all files
+6. You should also run `bun run test` to make sure your commit passes all tests first
+
+### Tests
+
+You can test your changes like you would a deployed version of Entry. You should also run the included tests before committing your changes. Run `bun test` to run the tests that are included in the repository. These tests test the memory and CPU usage of app usage. All tests should pass before you commit.
 
 ## Why
 

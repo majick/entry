@@ -25,7 +25,6 @@ services:
             NAME: "Entry" # optional, Entry is default
             ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
             DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default
-            USE_SINGLE_FORM_COLUMN: true # optional, makes paste information boxes display in the same column, true is default
 ```
 
 You can then run `docker-compose up -d` to start Entry locally. Visit the port you configured and you should see the Entry UI.

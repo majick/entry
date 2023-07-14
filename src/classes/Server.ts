@@ -10,6 +10,10 @@ import fs from "node:fs";
 
 import { contentType } from "mime-types";
 
+// create expiry
+import EntryDB from "./db/EntryDB";
+EntryDB.CreateExpiry();
+
 // import endpoints
 import _404Page from "./pages/components/404";
 import Admin from "./pages/Admin";
@@ -77,7 +81,9 @@ export class _Server {
                     // admin
                     else if (
                         url.pathname === "/admin/login" ||
-                        url.pathname === "/admin/login/"
+                        url.pathname === "/admin/login/" ||
+                        url.pathname === "/admin" ||
+                        url.pathname === "/admin/"
                     )
                         return await new Admin.Login().request(request);
                     // api

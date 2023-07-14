@@ -7,6 +7,8 @@ import Footer from "./components/Footer";
 import { DecryptPaste, db, PageHeaders } from "./API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
+import pack from "../../../package.json";
+
 import { Config } from "../..";
 let config: Config;
 
@@ -20,10 +22,6 @@ export default class Home implements Endpoint {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
         if (!config) config = (await EntryDB.GetConfig()) as Config;
-
-        // form options
-        const UseSingleColumn: boolean =
-            process.env.USE_SINGLE_FORM_COLUMN !== "false"; // true is the default
 
         // get paste if search.mode === "edit"
         let paste: Paste | undefined;
@@ -126,7 +124,7 @@ export default class Home implements Endpoint {
                                     action={"/api/new"}
                                 >
                                     <button
-                                        style={{ minWidth: "max-content" }}
+                                        style={{ minWidth: "5rem" }}
                                         id={"CreateFormSubmit"}
                                     >
                                         Go
@@ -137,83 +135,63 @@ export default class Home implements Endpoint {
                                             display: "flex",
                                             gap: "0.5rem",
                                             flexWrap: "wrap",
-                                            alignItems: UseSingleColumn
-                                                ? "center"
-                                                : "flex-start",
+                                            alignItems: "flex-start",
                                             justifyContent: "center",
-                                            flexDirection: UseSingleColumn
-                                                ? "column"
-                                                : "row",
                                             maxWidth: "100%",
                                         }}
                                     >
-                                        <input
-                                            type="hidden"
-                                            name={"Content"}
-                                            id={"contentInput"}
-                                            required
-                                        />
-
-                                        <details
-                                            id={"CreateFormRequired"}
+                                        <div
+                                            class={"PrimaryOptions"}
                                             style={{
-                                                width: UseSingleColumn
-                                                    ? "25rem"
-                                                    : "20rem",
-                                                maxWidth: "100%",
+                                                display: "flex",
+                                                gap: "0.5rem",
+                                                alignItems: "center",
+                                                flexWrap: "wrap",
+                                                justifyContent: "center",
                                             }}
                                         >
-                                            <summary>
-                                                Paste Information{" "}
-                                                <span
-                                                    style={{
-                                                        color: "var(--red3)",
-                                                    }}
-                                                >
-                                                    (required)
-                                                </span>
-                                            </summary>
+                                            <style
+                                                dangerouslySetInnerHTML={{
+                                                    __html: `.PrimaryOptions input:not([type="checkbox"]) {
+                                                                width: 18rem;
+                                                            }`,
+                                                }}
+                                            />
+
+                                            <input
+                                                type="hidden"
+                                                name={"Content"}
+                                                id={"contentInput"}
+                                                required
+                                            />
+
+                                            <input
+                                                type="text"
+                                                placeholder={"Custom URL"}
+                                                maxLength={
+                                                    EntryDB.MaxCustomURLLength
+                                                }
+                                                minLength={
+                                                    EntryDB.MinCustomURLLength
+                                                }
+                                                name={"CustomURL"}
+                                                id={"CustomURL"}
+                                                autoComplete={"off"}
+                                            />
 
                                             <div
-                                                class={
-                                                    "details-flex-content-list-box"
-                                                }
+                                                className="flex"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "flex-start",
+                                                    alignItems: "center",
+                                                }}
                                             >
-                                                <label htmlFor="CustomURL">
-                                                    Custom URL
-                                                </label>
-
-                                                <input
-                                                    type="text"
-                                                    placeholder={"Custom URL"}
-                                                    maxLength={
-                                                        EntryDB.MaxCustomURLLength
-                                                    }
-                                                    minLength={
-                                                        EntryDB.MinCustomURLLength
-                                                    }
-                                                    name={"CustomURL"}
-                                                    id={"CustomURL"}
-                                                    autoComplete={"off"}
-                                                    value={crypto.randomUUID()}
-                                                    required
-                                                />
-
-                                                <hr />
-
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent:
-                                                            "space-between",
-                                                        alignItems: "center",
-                                                        marginBottom: "0.5rem",
-                                                    }}
+                                                <label
+                                                    className="checkbox-container"
+                                                    for={"IsEditable"}
+                                                    title={"Toggle Editable"}
                                                 >
-                                                    <label htmlFor="IsEditable">
-                                                        Editable
-                                                    </label>
-
                                                     <input
                                                         type="checkbox"
                                                         name={"IsEditable"}
@@ -221,11 +199,30 @@ export default class Home implements Endpoint {
                                                         checked={true}
                                                         value={"true"}
                                                     />
-                                                </div>
 
-                                                <label htmlFor="EditPassword">
-                                                    Edit Password
+                                                    <div className="check">
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="18"
+                                                            height="18"
+                                                        >
+                                                            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+                                                        </svg>
+                                                    </div>
+
+                                                    <div className="x">
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="18"
+                                                            height="18"
+                                                        >
+                                                            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
+                                                        </svg>
+                                                    </div>
                                                 </label>
+
                                                 <input
                                                     type="text"
                                                     placeholder={"Custom edit code"}
@@ -241,25 +238,41 @@ export default class Home implements Endpoint {
                                                     required
                                                 />
                                             </div>
-                                        </details>
+                                        </div>
 
                                         <details
                                             style={{
-                                                width: UseSingleColumn
-                                                    ? "25rem"
-                                                    : "20rem",
+                                                width: "18rem",
                                                 maxWidth: "100%",
                                             }}
                                         >
-                                            <summary>
-                                                More Options (optional)
-                                            </summary>
+                                            <summary>More (optional)</summary>
 
                                             <div
                                                 class={
                                                     "details-flex-content-list-box"
                                                 }
                                             >
+                                                <h4
+                                                    style={{
+                                                        margin: "0",
+                                                    }}
+                                                >
+                                                    Paste Expiry
+                                                </h4>
+
+                                                <label htmlFor="ExpireOn">
+                                                    Delete Paste On
+                                                </label>
+
+                                                <input
+                                                    type={"datetime-local"}
+                                                    name={"ExpireOn"}
+                                                    id={"ExpireOn"}
+                                                />
+
+                                                <hr />
+
                                                 <h4
                                                     style={{
                                                         margin: "0",
@@ -373,7 +386,7 @@ export default class Home implements Endpoint {
                                         >
                                             <button
                                                 style={{
-                                                    minWidth: "max-content",
+                                                    minWidth: "5rem",
                                                 }}
                                             >
                                                 Save
@@ -587,7 +600,9 @@ export default class Home implements Endpoint {
                     <script
                         type="module"
                         dangerouslySetInnerHTML={{
-                            __html: `import CreateEditor from "/Editor.js";
+                            __html: `import CreateEditor from "/Editor.js?v=${
+                                pack.version
+                            }";
                             CreateEditor("editor-tab-text", \`${encodeURIComponent(
                                 (paste || { Content: "" })!.Content
                             )}\`);`,

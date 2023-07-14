@@ -8,6 +8,7 @@ import path from "node:path";
 
 import { Database } from "bun:sqlite";
 import { CreateHash, Encrypt, Decrypt } from "./Hash";
+import Expiry from "./Expiry";
 import SQL from "./SQL";
 
 import pack from "../../../package.json";
@@ -29,6 +30,7 @@ export type Paste = {
     //                        corresponding entry in the Encryption table
     HostServer?: string; // this is not actually stored in the record
     IsEditable?: string; // this is not actually stored in the record
+    ExpireOn?: string; //   this is not actually stored in the record
 };
 
 /**
@@ -40,6 +42,7 @@ export default class EntryDB {
         process.env.DATA_LOCATION || path.resolve(process.cwd(), "data");
 
     public readonly db: Database;
+    public static Expiry: Expiry; // hold expiry registry
 
     public static readonly MaxContentLength = 200000;
     public static readonly MaxPasswordLength = 256;
@@ -140,6 +143,27 @@ export default class EntryDB {
                 }
             }
         })();
+    }
+
+    /**
+     * @method CreateExpiry
+     *
+     * @static
+     * @return {Promise<void>}
+     * @memberof EntryDB
+     */
+    public static async CreateExpiry(): Promise<void> {
+        // check if expiry already exists
+        if (EntryDB.Expiry) return;
+
+        // create expiry
+        EntryDB.Expiry = new Expiry(new this());
+        await EntryDB.Expiry.Initialize(); // create expiry store
+
+        // run expiry clock
+        setInterval(async () => {
+            await EntryDB.Expiry.CheckExpiry();
+        }, 1000 * 60); // run every minute
     }
 
     /**
@@ -308,6 +332,10 @@ export default class EntryDB {
                     record.ENC_CODE = encryption.ENC_CODE;
                 }
 
+                // update expiry information
+                const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
+                if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
+
                 // return
                 return resolve(record);
             } else {
@@ -368,6 +396,9 @@ export default class EntryDB {
         PasteInfo: Paste,
         SkipHash: boolean = false
     ): Promise<[boolean, string, Paste]> {
+        // if custom url was not provided randomize it
+        if (!PasteInfo.CustomURL) PasteInfo.CustomURL = crypto.randomUUID();
+
         // check custom url
         if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))
             return [
@@ -501,6 +532,13 @@ export default class EntryDB {
             });
         }
 
+        // create expiry record if it is needed
+        if (PasteInfo.ExpireOn)
+            await EntryDB.Expiry.AddPasteExpiry(
+                PasteInfo.CustomURL,
+                PasteInfo.ExpireOn
+            );
+
         // create paste
         await SQL.QueryOBJ({
             db: this.db,
@@ -518,6 +556,9 @@ export default class EntryDB {
             transaction: true,
             use: "Prepare",
         });
+
+        // gc
+        Bun.gc(true);
 
         // return
         return [true, "Paste created!", PasteInfo];

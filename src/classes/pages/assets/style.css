@@ -40,7 +40,7 @@
     --blue: #2d6886;
     --blue1: #d9edf7;
     --blue2: #025fb1;
-    --green: #346535;
+    --green: #2b542c;
     --green1: #dff0d8;
     --yellow: #826430;
     --yellow1: #f8edba;
@@ -306,10 +306,6 @@ pre {
     height: max-content;
 }
 
-li a {
-    padding-left: 3.5px;
-}
-
 input {
     background: var(--background-surface1);
     color: currentColor;
@@ -335,6 +331,46 @@ input:disabled {
     opacity: 50%;
     box-shadow: inset 0 0 0 2px var(--background-surface3);
     filter: opacity(50%);
+}
+
+.checkbox-container {
+    background: var(--background-surface1);
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 2.5rem; /* should match the height of an input element */
+    width: 2.5rem;
+    cursor: pointer;
+}
+
+.checkbox-container + input {
+    width: calc(18rem - 2.5rem) !important; /* normal input width - checkbox width */
+}
+
+/* not checked */
+.checkbox-container input[type="checkbox"]:not(:checked) + .check,
+.checkbox-container input[type="checkbox"]:checked + * + .x {
+    display: none;
+}
+
+.checkbox-container input[type="checkbox"]:checked + .check,
+.checkbox-container input[type="checkbox"]:not(:checked) + * + .x {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkbox-container .check {
+    fill: var(--green);
+}
+
+.checkbox-container .x {
+    fill: var(--red3);
+}
+
+.checkbox-container input[type="checkbox"] {
+    display: none;
 }
 
 label {

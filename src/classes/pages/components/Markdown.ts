@@ -17,16 +17,6 @@ export async function ParseMarkdown(content: string): Promise<string> {
             .replaceAll("-&gt;", "->")
             .replaceAll("&lt;-", "<-");
 
-    // fix headers (they aren't picked up if the formatting is really bad)
-    // inserting a \n after each heading to make marked automatically make following text
-    // its own paragraph element, fixes a lot of formatting issues
-    content = content.replaceAll(/^(\#{6})\s*(.*)$/gm, "<h6>$2</h6>\n");
-    content = content.replaceAll(/^(\#{5})\s*(.*)$/gm, "<h5>$2</h5>\n");
-    content = content.replaceAll(/^(\#{4})\s*(.*)$/gm, "<h4>$2</h4>\n");
-    content = content.replaceAll(/^(\#{3})\s*(.*)$/gm, "<h3>$2</h3>\n");
-    content = content.replaceAll(/^(\#{2})\s*(.*)$/gm, "<h2>$2</h2>\n");
-    content = content.replaceAll(/^(\#{1})\s*(.*)$/gm, "<h1>$2</h1>\n");
-
     // code blocks
 
     // ...inline code block
@@ -41,6 +31,16 @@ export async function ParseMarkdown(content: string): Promise<string> {
     // ...inline code block
     content = content.replaceAll(/^(\`{2})(.*)(\`{2})$/gm, "<code>$2</code>"); // ``code``
     content = content.replaceAll(/^(\`{1})(.*)(\`{1})$/gm, "<code>$2</code>"); // `code`
+
+    // fix headers (they aren't picked up if the formatting is really bad)
+    // inserting a \n after each heading to make marked automatically make following text
+    // its own paragraph element, fixes a lot of formatting issues
+    content = content.replaceAll(/^(\#{6})\s*(.*)$/gm, "<h6>$2</h6>\n");
+    content = content.replaceAll(/^(\#{5})\s*(.*)$/gm, "<h5>$2</h5>\n");
+    content = content.replaceAll(/^(\#{4})\s*(.*)$/gm, "<h4>$2</h4>\n");
+    content = content.replaceAll(/^(\#{3})\s*(.*)$/gm, "<h3>$2</h3>\n");
+    content = content.replaceAll(/^(\#{2})\s*(.*)$/gm, "<h2>$2</h2>\n");
+    content = content.replaceAll(/^(\#{1})\s*(.*)$/gm, "<h1>$2</h1>\n");
 
     // update content to allow notes/warnings
     content = content.replaceAll(

@@ -18,6 +18,8 @@ import { CreateHash, Decrypt } from "../db/Hash";
 import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 
+import pack from "../../../package.json";
+
 import { Config } from "../..";
 let config: Config;
 
@@ -259,6 +261,10 @@ export class GetPasteFromURL implements Endpoint {
                                             textAlign: "right",
                                         }}
                                     >
+                                        {result.ExpireOn !== undefined && (
+                                            <span>Expires: {result.ExpireOn}</span>
+                                        )}
+                                        
                                         <span>Pub: {result.PubDate}</span>
                                         <span>Edit: {result.EditDate}</span>
                                     </div>
@@ -272,7 +278,7 @@ export class GetPasteFromURL implements Endpoint {
                             // P.S. I hate this
                             type="module"
                             dangerouslySetInnerHTML={{
-                                __html: `import fix from "/ClientFixMarkdown.js"; fix();`,
+                                __html: `import fix from "/ClientFixMarkdown.js?v=${pack.version}"; fix();`,
                             }}
                         />
                     </>,

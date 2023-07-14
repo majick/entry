@@ -1,14 +1,14 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
     "@types/highlight.js": "^10.1.0",
     "@types/marked": "^5.0.0",
     "@types/mime-types": "^2.1.1",
-    "bun-types": "0.6.13",
+    "bun-types": "latest",
     "prettier": "^3.0.0"
   },
   "peerDependencies": {

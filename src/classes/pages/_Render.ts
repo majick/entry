@@ -7,6 +7,7 @@
 import { renderToString } from "preact-render-to-string";
 import type { VNode } from "preact";
 
+import pack from "../../../package.json";
 import "./assets/style.css";
 
 export default class Renderer {
@@ -20,7 +21,7 @@ export default class Renderer {
 
                 ${head_vnode ? renderToString(head_vnode) : ""}
 
-                <link href="/style.css" rel="stylesheet" />
+                <link href="/style.css?v=${pack.version}" rel="stylesheet" />
             </head>
             <body>${renderToString(vnode)}</body>
         </html>`;
