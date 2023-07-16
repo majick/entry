@@ -1,4 +1,4 @@
-import EntryDB, { Paste } from "../../db/EntryDB";
+import EntryDB, { Paste } from "../../../db/EntryDB";
 
 export default function DecryptionForm(props: {
     paste: Paste;

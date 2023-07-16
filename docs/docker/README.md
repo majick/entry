@@ -18,6 +18,7 @@ Entry can be run by copying the [docker-compose.yml](https://codeberg.org/hkau/e
 services:
     web:
         image: hkauxy/entrymd:latest
+        restart: unless-stopped
         ports:
             - "8080:8080" # match this (both sides) with your values from env.port
         environment:
@@ -25,6 +26,7 @@ services:
             NAME: "Entry" # optional, Entry is default
             ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
             DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default
+            EDITABLE_BY_DEFAULT: true # optional, sets if pastes are editable by default, true is default
 ```
 
 You can then run `docker-compose up -d` to start Entry locally. Visit the port you configured and you should see the Entry UI.

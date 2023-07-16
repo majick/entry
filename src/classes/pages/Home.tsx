@@ -1,7 +1,7 @@
 import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
-import DecryptionForm from "./components/DecryptionForm";
+import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/Footer";
 
 import { DecryptPaste, db, PageHeaders } from "./API";
@@ -10,6 +10,8 @@ import EntryDB, { Paste } from "../db/EntryDB";
 import pack from "../../../package.json";
 
 import { Config } from "../..";
+import DateOptions from "./components/form/DateOptions";
+import Checkbox from "./components/form/Checkbox";
 let config: Config;
 
 /**
@@ -118,252 +120,279 @@ export default class Home implements Endpoint {
                                         display: "flex",
                                         justifyContent: "space-between",
                                         flexWrap: "wrap",
-                                        gap: "0.5rem",
+                                        // gap: "0.5rem",
+                                        flexDirection: "column",
                                     }}
                                     method={"POST"}
                                     action={"/api/new"}
                                 >
-                                    <button
-                                        style={{ minWidth: "5rem" }}
-                                        id={"CreateFormSubmit"}
-                                    >
-                                        Go
-                                    </button>
-
                                     <div
                                         style={{
                                             display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
                                             gap: "0.5rem",
+                                            flexDirection: "row",
                                             flexWrap: "wrap",
-                                            alignItems: "flex-start",
-                                            justifyContent: "center",
-                                            maxWidth: "100%",
                                         }}
                                     >
+                                        {
+                                            // top row
+                                        }
+
+                                        <button style={{ minWidth: "5rem" }}>
+                                            Go
+                                        </button>
+
                                         <div
-                                            class={"PrimaryOptions"}
                                             style={{
                                                 display: "flex",
                                                 gap: "0.5rem",
-                                                alignItems: "center",
                                                 flexWrap: "wrap",
+                                                alignItems: "flex-start",
                                                 justifyContent: "center",
-                                            }}
-                                        >
-                                            <style
-                                                dangerouslySetInnerHTML={{
-                                                    __html: `.PrimaryOptions input:not([type="checkbox"]) {
-                                                                width: 18rem;
-                                                            }`,
-                                                }}
-                                            />
-
-                                            <input
-                                                type="hidden"
-                                                name={"Content"}
-                                                id={"contentInput"}
-                                                required
-                                            />
-
-                                            <input
-                                                type="text"
-                                                placeholder={"Custom URL"}
-                                                maxLength={
-                                                    EntryDB.MaxCustomURLLength
-                                                }
-                                                minLength={
-                                                    EntryDB.MinCustomURLLength
-                                                }
-                                                name={"CustomURL"}
-                                                id={"CustomURL"}
-                                                autoComplete={"off"}
-                                            />
-
-                                            <div
-                                                className="flex"
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent: "flex-start",
-                                                    alignItems: "center",
-                                                }}
-                                            >
-                                                <label
-                                                    className="checkbox-container"
-                                                    for={"IsEditable"}
-                                                    title={"Toggle Editable"}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        name={"IsEditable"}
-                                                        id={"IsEditable"}
-                                                        checked={true}
-                                                        value={"true"}
-                                                    />
-
-                                                    <div className="check">
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="18"
-                                                            height="18"
-                                                        >
-                                                            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
-                                                        </svg>
-                                                    </div>
-
-                                                    <div className="x">
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="18"
-                                                            height="18"
-                                                        >
-                                                            <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
-                                                        </svg>
-                                                    </div>
-                                                </label>
-
-                                                <input
-                                                    type="text"
-                                                    placeholder={"Custom edit code"}
-                                                    maxLength={
-                                                        EntryDB.MaxPasswordLength
-                                                    }
-                                                    minLength={
-                                                        EntryDB.MinPasswordLength
-                                                    }
-                                                    name={"EditPassword"}
-                                                    id={"EditPassword"}
-                                                    autoComplete={"off"}
-                                                    required
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <details
-                                            style={{
-                                                width: "18rem",
                                                 maxWidth: "100%",
                                             }}
                                         >
-                                            <summary>More (optional)</summary>
-
                                             <div
-                                                class={
-                                                    "details-flex-content-list-box"
-                                                }
+                                                class={"PrimaryOptions"}
+                                                style={{
+                                                    display: "flex",
+                                                    gap: "0.5rem",
+                                                    alignItems: "center",
+                                                    flexWrap: "wrap",
+                                                    justifyContent: "center",
+                                                }}
                                             >
-                                                <h4
-                                                    style={{
-                                                        margin: "0",
+                                                <style
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: `.PrimaryOptions input:not([type="checkbox"]) {
+                                                            width: 18rem;
+                                                        }`,
                                                     }}
-                                                >
-                                                    Paste Expiry
-                                                </h4>
-
-                                                <label htmlFor="ExpireOn">
-                                                    Delete Paste On
-                                                </label>
-
-                                                <input
-                                                    type={"datetime-local"}
-                                                    name={"ExpireOn"}
-                                                    id={"ExpireOn"}
                                                 />
 
-                                                <hr />
-
-                                                <h4
-                                                    style={{
-                                                        margin: "0",
-                                                    }}
-                                                >
-                                                    Private Pastes
-                                                </h4>
-
-                                                <p>
-                                                    Providing a view code makes your
-                                                    paste private. The view code is
-                                                    used to decrypt your paste for
-                                                    viewing.
-                                                </p>
+                                                <input
+                                                    type="hidden"
+                                                    name={"Content"}
+                                                    id={"contentInput"}
+                                                    required
+                                                />
 
                                                 <input
                                                     type="text"
-                                                    placeholder={
-                                                        "View code - optional"
-                                                    }
-                                                    minLength={
-                                                        EntryDB.MinPasswordLength
-                                                    }
+                                                    placeholder={"Custom URL"}
                                                     maxLength={
-                                                        EntryDB.MaxPasswordLength
-                                                    }
-                                                    name={"ViewPassword"}
-                                                    autoComplete={"off"}
-                                                />
-
-                                                <hr />
-                                                <h4
-                                                    style={{
-                                                        margin: "0",
-                                                    }}
-                                                >
-                                                    Group Pastes
-                                                </h4>
-
-                                                <p>
-                                                    Groups cannot be made private.
-                                                    The group post code is only
-                                                    required when submitting to an
-                                                    existing group or creating a new
-                                                    group.
-                                                </p>
-
-                                                <input
-                                                    type="text"
-                                                    placeholder={
-                                                        "Group name - optional"
+                                                        EntryDB.MaxCustomURLLength
                                                     }
                                                     minLength={
                                                         EntryDB.MinCustomURLLength
                                                     }
-                                                    maxLength={
-                                                        EntryDB.MaxCustomURLLength
-                                                    }
-                                                    name={"GroupName"}
-                                                />
-
-                                                <input
-                                                    type="text"
-                                                    placeholder={
-                                                        "Group post code - optional"
-                                                    }
-                                                    minLength={
-                                                        EntryDB.MinPasswordLength
-                                                    }
-                                                    maxLength={
-                                                        EntryDB.MaxPasswordLength
-                                                    }
-                                                    name={"GroupSubmitPassword"}
+                                                    name={"CustomURL"}
+                                                    id={"CustomURL"}
                                                     autoComplete={"off"}
                                                 />
+
+                                                <div
+                                                    className="flex"
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "flex-start",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    <Checkbox
+                                                        name="IsEditable"
+                                                        title="Toggle Editable"
+                                                        checked={
+                                                            process.env
+                                                                .EDITABLE_BY_DEFAULT ===
+                                                            "true"
+                                                        }
+                                                    />
+
+                                                    <input
+                                                        type="text"
+                                                        placeholder={
+                                                            "Custom edit code"
+                                                        }
+                                                        maxLength={
+                                                            EntryDB.MaxPasswordLength
+                                                        }
+                                                        minLength={
+                                                            EntryDB.MinPasswordLength
+                                                        }
+                                                        name={"EditPassword"}
+                                                        id={"EditPassword"}
+                                                        autoComplete={"off"}
+                                                        disabled={
+                                                            process.env
+                                                                .EDITABLE_BY_DEFAULT !==
+                                                            "true"
+                                                        }
+                                                    />
+                                                </div>
                                             </div>
-                                        </details>
+                                        </div>
+                                    </div>
+
+                                    <hr style={{ margin: "0.25rem 0" }} />
+
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <h5
+                                            className="no-margin mobile-center"
+                                            style={{
+                                                height: "2.5rem",
+                                                display: "flex",
+                                                justifyContent: "flex-start",
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            Optional
+                                        </h5>
+
+                                        {
+                                            // bottom row
+                                        }
+
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: "0.5rem",
+                                                flexWrap: "wrap",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            <details class={"details-confined"}>
+                                                <summary>Private Pastes</summary>
+
+                                                <div className="details-flex-content-list-box ">
+                                                    <h4
+                                                        style={{
+                                                            margin: "0",
+                                                        }}
+                                                    >
+                                                        Private Pastes
+                                                    </h4>
+
+                                                    <p>
+                                                        Providing a view code makes
+                                                        your paste private. The view
+                                                        code is used to decrypt your
+                                                        paste for viewing.
+                                                    </p>
+
+                                                    <input
+                                                        type="text"
+                                                        placeholder={
+                                                            "View code - optional"
+                                                        }
+                                                        minLength={
+                                                            EntryDB.MinPasswordLength
+                                                        }
+                                                        maxLength={
+                                                            EntryDB.MaxPasswordLength
+                                                        }
+                                                        name={"ViewPassword"}
+                                                        autoComplete={"off"}
+                                                    />
+                                                </div>
+                                            </details>
+
+                                            <details class={"details-confined"}>
+                                                <summary>Group Pastes</summary>
+
+                                                <div className="details-flex-content-list-box ">
+                                                    <h4
+                                                        style={{
+                                                            margin: "0",
+                                                        }}
+                                                    >
+                                                        Group Pastes
+                                                    </h4>
+
+                                                    <p>
+                                                        Groups cannot be made
+                                                        private. The group post code
+                                                        is only required when
+                                                        submitting to an existing
+                                                        group or creating a new
+                                                        group.
+                                                    </p>
+
+                                                    <input
+                                                        type="text"
+                                                        placeholder={
+                                                            "Group name - optional"
+                                                        }
+                                                        minLength={
+                                                            EntryDB.MinCustomURLLength
+                                                        }
+                                                        maxLength={
+                                                            EntryDB.MaxCustomURLLength
+                                                        }
+                                                        name={"GroupName"}
+                                                    />
+
+                                                    <input
+                                                        type="text"
+                                                        placeholder={
+                                                            "Group post code - optional"
+                                                        }
+                                                        minLength={
+                                                            EntryDB.MinPasswordLength
+                                                        }
+                                                        maxLength={
+                                                            EntryDB.MaxPasswordLength
+                                                        }
+                                                        name={"GroupSubmitPassword"}
+                                                        autoComplete={"off"}
+                                                    />
+                                                </div>
+                                            </details>
+
+                                            <details class={"details-confined"}>
+                                                <summary>Paste Expiry</summary>
+
+                                                <div
+                                                    class={
+                                                        "details-flex-content-list-box"
+                                                    }
+                                                >
+                                                    <h4
+                                                        style={{
+                                                            margin: "0",
+                                                        }}
+                                                    >
+                                                        Paste Expiry
+                                                    </h4>
+
+                                                    <label htmlFor="ExpireOn">
+                                                        Delete Paste On
+                                                    </label>
+
+                                                    <input
+                                                        type={"datetime-local"}
+                                                        name={"ExpireOn"}
+                                                        id={"ExpireOn"}
+                                                    />
+
+                                                    <hr />
+                                                    <DateOptions />
+                                                </div>
+                                            </details>
+                                        </div>
                                     </div>
 
                                     <script
                                         dangerouslySetInnerHTML={{
-                                            __html: `// open CreateFormRequired on submit
-                                            const CreateFormRequired = document.getElementById("CreateFormRequired");
-                                            const CreateFormSubmit = document.getElementById("CreateFormSubmit");
-                                            
-                                            if (CreateFormSubmit && CreateFormRequired)
-                                                CreateFormSubmit.addEventListener("click", (e) => {
-                                                    CreateFormRequired.toggleAttribute("open", true);
-                                                });
-                                                
-                                            // disable EditPassword when IsEditable is unchecked
+                                            __html: `// disable EditPassword when IsEditable is unchecked
                                             document.getElementById("IsEditable").addEventListener("change", (e) => {
                                                 document.getElementById("EditPassword").toggleAttribute("disabled");
                                             });`,
@@ -397,7 +426,7 @@ export default class Home implements Endpoint {
                                                     display: "flex",
                                                     gap: "0.5rem",
                                                     flexWrap: "wrap",
-                                                    justifyContent: "right",
+                                                    justifyContent: "center",
                                                 }}
                                             >
                                                 <input
@@ -416,6 +445,9 @@ export default class Home implements Endpoint {
                                                     minLength={
                                                         EntryDB.MinPasswordLength
                                                     }
+                                                    style={{
+                                                        width: "18rem",
+                                                    }}
                                                     name={"OldEditPassword"}
                                                     required
                                                 />
@@ -433,7 +465,7 @@ export default class Home implements Endpoint {
 
                                                 <details
                                                     style={{
-                                                        width: "20rem",
+                                                        width: "18rem",
                                                     }}
                                                 >
                                                     <summary>
@@ -485,7 +517,7 @@ export default class Home implements Endpoint {
                                                 gap: "0.4rem",
                                                 justifyContent: "center",
                                                 alignItems: "center",
-                                                marginTop: "1rem",
+                                                marginTop: "0.5rem",
                                             }}
                                         >
                                             <a

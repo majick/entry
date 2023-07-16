@@ -133,7 +133,8 @@ main {
     }
 }
 
-button {
+button,
+.button {
     background: var(--background-surface1);
     cursor: pointer;
     border: none;
@@ -148,13 +149,16 @@ button {
     height: max-content;
     width: max-content;
     font-weight: normal;
+    text-decoration: none;
 }
 
-button.secondary {
+button.secondary,
+.button.secondary {
     background: var(--background-surface);
 }
 
-button:hover {
+button:hover,
+.button:hover {
     color: var(--blue);
 }
 
@@ -233,6 +237,15 @@ h6 {
     width: max-content;
 }
 
+h1.no-margin,
+h2.no-margin,
+h3.no-margin,
+h4.no-margin,
+h5.no-margin,
+h6.no-margin {
+    margin: 0;
+}
+
 h1 {
     margin-bottom: 2.5rem;
     margin-top: 3.5rem;
@@ -260,12 +273,18 @@ h6 {
     font-size: 1rem;
 }
 
+@media screen and (max-width: 800px) {
+    .mobile-center {
+        margin: auto !important;
+    }
+}
+
 ul > li,
 ol > li {
     margin-top: 0.25rem;
 }
 
-p:not(.mdnote p),
+p:not(.mdnote p):not(:last-of-type),
 pre,
 table,
 ul,
@@ -384,7 +403,7 @@ img {
 }
 
 hr {
-    margin: 0.6rem 0;
+    margin: 1rem 0;
     border: 0;
     border-top: solid 1px var(--background-surface1);
 }
@@ -486,6 +505,11 @@ details {
     outline: none;
     font-size: 16px;
     height: max-content;
+    max-width: 100%;
+}
+
+details.details-confined {
+    width: 18rem;
     max-width: 100%;
 }
 
@@ -604,6 +628,14 @@ comment {
     display: none;
 }
 
+hr + br {
+    display: none;
+}
+
 r {
     display: block;
+}
+
+r:not(:last-of-type) {
+    margin-bottom: 1rem;
 }

@@ -4,10 +4,11 @@
  * @license MIT
  */
 
+import crypto from "node:crypto";
 import path from "node:path";
 
 import { Database } from "bun:sqlite";
-import { CreateHash, Encrypt, Decrypt } from "./Hash";
+import { CreateHash, Encrypt } from "./Hash";
 import Expiry from "./Expiry";
 import SQL from "./SQL";
 
@@ -31,6 +32,7 @@ export type Paste = {
     HostServer?: string; // this is not actually stored in the record
     IsEditable?: string; // this is not actually stored in the record
     ExpireOn?: string; //   this is not actually stored in the record
+    UnhashedEditPassword?: string; // this should never be stored in the record! only used have paste creation
 };
 
 /**
@@ -396,8 +398,21 @@ export default class EntryDB {
         PasteInfo: Paste,
         SkipHash: boolean = false
     ): Promise<[boolean, string, Paste]> {
-        // if custom url was not provided randomize it
+        // if custom url was not provided, randomize it
         if (!PasteInfo.CustomURL) PasteInfo.CustomURL = crypto.randomUUID();
+
+        // if edit password was not provided, randomize it
+        if (!PasteInfo.EditPassword) {
+            PasteInfo.UnhashedEditPassword = crypto
+                .randomBytes(EntryDB.MinPasswordLength)
+                .toString("hex");
+
+            PasteInfo.EditPassword = `${PasteInfo.UnhashedEditPassword}`;
+
+            // check for PasteInfo.IsEditable, if it does not exist set UnhashedEditPassword to "paste is not editable!"
+            if (!PasteInfo.IsEditable)
+                PasteInfo.UnhashedEditPassword = "paste is not editable!";
+        }
 
         // check custom url
         if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))

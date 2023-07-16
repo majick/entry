@@ -9,7 +9,7 @@ import Endpoint from "./_Endpoint";
 import Renderer from "./_Render";
 
 // import components
-import DecryptionForm from "./components/DecryptionForm";
+import DecryptionForm from "./components/form/DecryptionForm";
 import _404Page from "./components/404";
 import Footer from "./components/Footer";
 
@@ -97,7 +97,7 @@ export class CreatePaste implements Endpoint {
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste
-                          `/${result[2].CustomURL}`
+                          `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}`,
             },
@@ -113,6 +113,7 @@ export class CreatePaste implements Endpoint {
 export class GetPasteFromURL implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
 
         // get paste name
         const name = url.pathname.slice(1, url.pathname.length);
@@ -161,6 +162,22 @@ export class GetPasteFromURL implements Endpoint {
                 Renderer.Render(
                     <>
                         <main>
+                            {search.get("UnhashedEditPassword") && (
+                                <div class="mdnote">
+                                    <b className="mdnote-title">
+                                        Don't forget your edit password!
+                                    </b>
+                                    <p>
+                                        You cannot edit or delete your paste if you
+                                        don't have your edit password. Please save it
+                                        somewhere safe:{" "}
+                                        <code>
+                                            {search.get("UnhashedEditPassword")}
+                                        </code>
+                                    </p>
+                                </div>
+                            )}
+
                             {result.ViewPassword && (
                                 <DecryptionForm paste={result} />
                             )}
@@ -264,7 +281,7 @@ export class GetPasteFromURL implements Endpoint {
                                         {result.ExpireOn !== undefined && (
                                             <span>Expires: {result.ExpireOn}</span>
                                         )}
-                                        
+
                                         <span>Pub: {result.PubDate}</span>
                                         <span>Edit: {result.EditDate}</span>
                                     </div>
