@@ -355,7 +355,6 @@ document.getElementById("editor-open-tab-text")!.addEventListener("click", () =>
     CloseAllTabs();
 
     document.getElementById("editor-open-tab-text")!.classList.remove("secondary");
-
     document.getElementById("editor-tab-text")!.style.display = "block";
 });
 
@@ -373,6 +372,34 @@ document.getElementById("editor-open-tab-preview")!.addEventListener("click", ()
     // fix markdown rendering
     HandleCustomElements();
 });
+
+document.querySelector(".tab-container")!.addEventListener("click", () => {
+    if (document.getElementById("editor-open-tab-text")!.style.display === "none")
+        return;
+
+    (document.querySelector(".cm-content")! as HTMLElement).focus();
+});
+
+// details auto focus
+for (let element of document.querySelectorAll(
+    "details"
+) as any as HTMLDetailsElement[]) {
+    // check if element has an input
+    const input = element.querySelector("input");
+    if (!input) continue;
+
+    // add event listener
+    element.querySelector("summary")!.addEventListener("click", () => {
+        if (element.getAttribute("open") !== null) return; // element must be open,
+        //                                                    should not have attribute
+        //                                                    already when event is fired
+
+        // auto focus input
+        setTimeout(() => {
+            input.focus();
+        }, 0);
+    });
+}
 
 // handle paste delete modal
 if (document.getElementById("editor-open-delete-modal"))

@@ -40,8 +40,9 @@ export type Paste = {
  * @class EntryDB
  */
 export default class EntryDB {
-    public static DataDirectory =
-        process.env.DATA_LOCATION || path.resolve(process.cwd(), "data");
+    public static DataDirectory = (
+        process.env.DATA_LOCATION || path.resolve(process.cwd(), "data")
+    ).replace(":cwd", process.cwd());
 
     public readonly db: Database;
     public static Expiry: Expiry; // hold expiry registry
@@ -64,10 +65,7 @@ export default class EntryDB {
      */
     constructor() {
         // create db link
-        const [db, isNew] = SQL.CreateDB(
-            "entry",
-            EntryDB.DataDirectory.replace(":cwd", process.cwd())
-        );
+        const [db, isNew] = SQL.CreateDB("entry", EntryDB.DataDirectory);
 
         EntryDB.isNew = isNew;
         this.db = db;
