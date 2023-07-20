@@ -4,8 +4,11 @@
  * @license MIT
  */
 
-import EntryDB from "./classes/db/EntryDB";
 import path from "node:path";
+
+// init EntryDB
+import EntryDB from "./classes/db/EntryDB";
+await EntryDB.CreateExpiry();
 
 // includes
 import "./classes/pages/assets/style.css";

@@ -389,14 +389,11 @@ export default class Home implements Endpoint {
                                         </div>
                                     </div>
 
-                                    <script
-                                        dangerouslySetInnerHTML={{
-                                            __html: `// disable EditPassword when IsEditable is unchecked
-                                            document.getElementById("IsEditable").addEventListener("change", (e) => {
-                                                document.getElementById("EditPassword").toggleAttribute("disabled");
-                                            });`,
-                                        }}
-                                    />
+                                    <script dangerouslySetInnerHTML={{
+                                        __html: `document.getElementById("IsEditable").addEventListener("change", (e) => {
+                                            document.getElementById("EditPassword").toggleAttribute("disabled");
+                                        });`
+                                    }} />
                                 </form>
                             )) ||
                                 (paste && search.get("mode") === "edit" && (

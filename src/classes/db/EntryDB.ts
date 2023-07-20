@@ -333,8 +333,8 @@ export default class EntryDB {
                 }
 
                 // update expiry information
-                // const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
-                // if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
+                const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
+                if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
 
                 // return
                 return resolve(record);
@@ -410,7 +410,7 @@ export default class EntryDB {
             // check for PasteInfo.IsEditable, if it does not exist set UnhashedEditPassword to "paste is not editable!"
             if (!PasteInfo.IsEditable)
                 PasteInfo.UnhashedEditPassword = "paste is not editable!";
-        }
+        } else PasteInfo.UnhashedEditPassword = `${PasteInfo.EditPassword}`;
 
         // check custom url
         if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))
