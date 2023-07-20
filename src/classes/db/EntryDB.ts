@@ -333,8 +333,8 @@ export default class EntryDB {
                 }
 
                 // update expiry information
-                const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
-                if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
+                // const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
+                // if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
 
                 // return
                 return resolve(record);
@@ -464,7 +464,7 @@ export default class EntryDB {
             ];
 
         // check if group already exists, i it does make sure the password matches
-        // groups don't really have a table for themselves, more of just if a post
+        // groups don't really have a table for themselves, more of just if a paste
         // with that group name already exists!
         if (PasteInfo.GroupName) {
             const GroupRecord = (await SQL.QueryOBJ({
@@ -728,7 +728,7 @@ export default class EntryDB {
             // we aren't checking for admin password here or anything because it shouldn't
             // be provided because the admin panel cannot show federated pastes
             // TODO: i do think it would be cool to allow the server admin to see an analytics panel
-            //       with the top viewed posts (maybe)
+            //       with the top viewed pastes (maybe)
 
             // send request
             const [isBad, record] = await this.ForwardRequest(server, "delete", [

@@ -21,7 +21,6 @@ export default class SQL {
      * @memberof SQL
      */
     public static CreateDB(name: string, data: string): [Database, boolean] {
-        console.log(data)
         if (!fs.existsSync(data))
             // create data directory
             fs.mkdirSync(data, { recursive: true });

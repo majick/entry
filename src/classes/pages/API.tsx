@@ -4,14 +4,13 @@
  * @license MIT
  */
 
-import { FormDataToJSON } from "../Server";
-import Endpoint from "./_Endpoint";
-import Renderer from "./_Render";
+import Honeybee, { Endpoint, Renderer } from "honeybee";
 
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import _404Page from "./components/404";
 import Footer from "./components/Footer";
+import Home from "./Home";
 
 // create database
 import { CreateHash, Decrypt } from "../db/Hash";
@@ -82,7 +81,7 @@ export class CreatePaste implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as Paste;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
         body.Content = decodeURIComponent(body.Content);
 
         // create paste
@@ -118,6 +117,9 @@ export class GetPasteFromURL implements Endpoint {
         // get paste name
         const name = url.pathname.slice(1, url.pathname.length);
 
+        // return home if name === ""
+        if (name === "") return new Home().request(request);
+
         // attempt to get paste
         const result = await db.GetPasteFromURL(name);
 
@@ -133,7 +135,7 @@ export class GetPasteFromURL implements Endpoint {
             if (WrongType) return WrongType;
 
             // get request body
-            const body = FormDataToJSON(await request.formData()) as any;
+            const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
             if (body.ViewPassword) {
                 const decrypted = await new DecryptPaste().GetDecrypted({
@@ -369,7 +371,7 @@ export class EditPaste implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
         body.OldContent = decodeURIComponent(body.OldContent);
         body.NewContent = decodeURIComponent(body.NewContent);
 
@@ -430,7 +432,7 @@ export class DeletePaste implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
         // body.password is automatically hashed in db.DeletePaste
 
         // delete paste
@@ -497,7 +499,7 @@ export class DecryptPaste implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as Paste;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
 
         // get drcrypted
         const decrypted = await this.GetDecrypted(body);

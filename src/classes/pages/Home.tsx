@@ -1,5 +1,4 @@
-import Endpoint from "./_Endpoint";
-import Renderer from "./_Render";
+import { Endpoint, Renderer } from "honeybee";
 
 import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/Footer";

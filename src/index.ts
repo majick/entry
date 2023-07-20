@@ -4,11 +4,13 @@
  * @license MIT
  */
 
-import { _Server } from "./classes/Server";
 import EntryDB from "./classes/db/EntryDB";
-
 import path from "node:path";
 
+// includes
+import "./classes/pages/assets/style.css";
+
+// ...
 export type Config = {
     port: number;
     name: string;
@@ -68,4 +70,52 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
 }
 
 // create server
-new _Server((await EntryDB.GetConfig())!.port || 8080);
+import Honeybee, { HoneybeeConfig } from "honeybee";
+
+// ...import endpoints
+import { _404Page } from "./classes/pages/components/404";
+import Admin from "./classes/pages/Admin";
+import API from "./classes/pages/API";
+
+// ...create config
+const config: HoneybeeConfig = {
+    Port: (await EntryDB.GetConfig())!.port || 8080,
+    AssetsDir: import.meta.dir,
+    NotFoundPage: _404Page(),
+    Pages: {
+        // GET group
+        "/group/": { Type: "begins", Page: API.GetAllPastesInGroupPage },
+        // GET admin
+        "/admin": { Page: Admin.Login },
+        "/admin/": { Page: Admin.Login },
+        "/admin/login": { Page: Admin.Login },
+        "/admin/login/": { Page: Admin.Login },
+        // GET api
+        "/api/all": { Page: API.GetAllPastes },
+        "/api/get": { Type: "begins", Page: API.GetPasteRecord },
+        "/api/group": { Type: "begins", Page: API.GetAllPastesInGroup },
+        // POST admin
+        "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
+        "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
+        "/admin/api/delete": { Method: "POST", Page: Admin.APIDeletePaste },
+        "/admin/api/export": { Method: "POST", Page: Admin.APIExport },
+        "/admin/api/import": { Method: "POST", Page: Admin.APIImport },
+        // POST api
+        "/api/new": { Method: "POST", Page: API.CreatePaste },
+        "/api/edit": { Method: "POST", Page: API.EditPaste },
+        "/api/delete": { Method: "POST", Page: API.DeletePaste },
+        "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
+        // GET root
+        "/": {
+            // return paste view, will return homepage if no paste is provided
+            // at the end so it tests this last because everything starts with /, which means
+            // everything will get matched by this if it doesn't come before it
+            Type: "begins",
+            Page: API.GetPasteFromURL,
+        },
+    },
+};
+
+// ...start server
+new Honeybee(config);
+console.log("\x1b[92m[entry] Started server on port:\x1b[0m", config.Port);

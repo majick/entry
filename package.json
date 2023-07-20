@@ -7,7 +7,6 @@
   "devDependencies": {
     "@types/highlight.js": "^10.1.0",
     "@types/marked": "^5.0.0",
-    "@types/mime-types": "^2.1.1",
     "bun-types": "latest",
     "prettier": "^3.0.0"
   },
@@ -23,15 +22,13 @@
     "@codemirror/view": "^6.14.0",
     "@lezer/highlight": "^1.1.6",
     "highlight.js": "^11.8.0",
-    "marked": "^5.1.0",
-    "mime-types": "^2.1.35",
-    "preact": "^10.15.1",
-    "preact-render-to-string": "^6.1.0"
+    "honeybee": "1.0.4",
+    "marked": "^5.1.0"
   },
   "scripts": {
     "build": "bun run build.ts",
     "start": "bun run build && bun run start:no-build",
-    "start:no-build": "bun run dist/index.js",
+    "start:no-build": "bun run dist/index.js --smol",
     "format": "prettier src/ --write --config ./.prettierrc",
     "build:docker": "bun run build && docker build --tag git.sentrytwo.com/hkau/entry:latest .",
     "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 git.sentrytwo.com/hkau/entry:latest",

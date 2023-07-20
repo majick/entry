@@ -2,12 +2,6 @@
 
 Make sure you have [Docker](https://www.docker.com/) installed before following this guide.
 
-Entry can be run using the following command.
-
-```bash
-docker run  --env PORT={your port} --env NAME={your application name} --env ADMIN_PASSWORD={!!!YOUR ADMIN PASSWORD!!!} -p {match PORT}:{match PORT} hkauxy/entrymd
-```
-
 ## Docker Compose
 
 Make sure you have [docker-compose](https://docs.docker.com/compose/install/) installed before following this guide.

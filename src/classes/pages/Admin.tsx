@@ -4,9 +4,7 @@
  * @license MIT
  */
 
-import { FormDataToJSON } from "../Server";
-import Endpoint from "./_Endpoint";
-import Renderer from "./_Render";
+import Honeybee, { Endpoint, Renderer } from "honeybee";
 
 import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./API";
 import { CreateHash, Decrypt } from "../db/Hash";
@@ -157,7 +155,7 @@ export class ManagePastes implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== config!.admin)
@@ -307,7 +305,7 @@ export class APIDeletePaste implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // delete paste
         const result = await db.DeletePaste(
@@ -354,7 +352,7 @@ export class ExportPastesPage implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== config!.admin)
@@ -456,7 +454,7 @@ export class APIExport implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== config!.admin)
@@ -511,7 +509,7 @@ export class APIImport implements Endpoint {
         if (WrongType) return WrongType;
 
         // get request body
-        const body = FormDataToJSON(await request.formData()) as any;
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== config!.admin)
