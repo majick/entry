@@ -58,6 +58,7 @@ export default class _404PageEndpoint implements Endpoint {
                 </>
             ),
             {
+                status: 404,
                 headers: {
                     ...DefaultHeaders,
                     "Content-Type": "text/html",

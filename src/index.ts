@@ -70,6 +70,8 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
         path.resolve(EntryDB.DataDirectory, "config.json"),
         JSON.stringify(config, undefined, 4)
     );
+
+    await EntryDB.GetConfig();
 }
 
 // create server

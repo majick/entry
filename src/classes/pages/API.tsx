@@ -123,6 +123,9 @@ export class GetPasteFromURL implements Endpoint {
         // attempt to get paste
         const result = await db.GetPasteFromURL(name);
 
+        // check if paste is editable
+        const editable = await db.CheckPasteEditable(name);
+
         // decrypt (if we can)
         let ViewPassword = "";
         if (request.method === "POST" && result) {
@@ -156,7 +159,7 @@ export class GetPasteFromURL implements Endpoint {
         }
 
         // return
-        if (!result)
+        if (!result || !editable[0])
             // show 404 because paste does not exist
             return new _404Page().request(request);
         else
@@ -164,21 +167,23 @@ export class GetPasteFromURL implements Endpoint {
                 Renderer.Render(
                     <>
                         <main>
-                            {search.get("UnhashedEditPassword") && (
-                                <div class="mdnote">
-                                    <b className="mdnote-title">
-                                        Don't forget your edit password!
-                                    </b>
-                                    <p>
-                                        You cannot edit or delete your paste if you
-                                        don't have your edit password. Please save it
-                                        somewhere safe:{" "}
-                                        <code>
-                                            {search.get("UnhashedEditPassword")}
-                                        </code>
-                                    </p>
-                                </div>
-                            )}
+                            {search.get("UnhashedEditPassword") &&
+                                search.get("UnhashedEditPassword") !==
+                                    "paste is not editable!" && (
+                                    <div class="mdnote">
+                                        <b className="mdnote-title">
+                                            Don't forget your edit password!
+                                        </b>
+                                        <p>
+                                            You cannot edit or delete your paste if
+                                            you don't have your edit password. Please
+                                            save it somewhere safe:{" "}
+                                            <code>
+                                                {search.get("UnhashedEditPassword")}
+                                            </code>
+                                        </p>
+                                    </div>
+                                )}
 
                             {result.ViewPassword && (
                                 <DecryptionForm paste={result} />
@@ -225,30 +230,32 @@ export class GetPasteFromURL implements Endpoint {
                                             gap: "0.5rem",
                                         }}
                                     >
-                                        <a
-                                            href={`/?mode=edit&OldURL=${
-                                                result.CustomURL
-                                            }${
-                                                // add host server (if it exists)
-                                                result.HostServer
-                                                    ? `&server=${result.HostServer}`
-                                                    : ""
-                                            }${
-                                                // add view password (if it exists)
-                                                // this is so content is automatically decrypted!
-                                                ViewPassword !== ""
-                                                    ? `&ViewPassword=${ViewPassword}`
-                                                    : ""
-                                            }`}
-                                        >
-                                            <button
-                                                style={{
-                                                    height: "max-content",
-                                                }}
+                                        {editable[2] === true && (
+                                            <a
+                                                href={`/?mode=edit&OldURL=${
+                                                    result.CustomURL
+                                                }${
+                                                    // add host server (if it exists)
+                                                    result.HostServer
+                                                        ? `&server=${result.HostServer}`
+                                                        : ""
+                                                }${
+                                                    // add view password (if it exists)
+                                                    // this is so content is automatically decrypted!
+                                                    ViewPassword !== ""
+                                                        ? `&ViewPassword=${ViewPassword}`
+                                                        : ""
+                                                }`}
                                             >
-                                                Edit
-                                            </button>
-                                        </a>
+                                                <button
+                                                    style={{
+                                                        height: "max-content",
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </a>
+                                        )}
 
                                         {result.GroupName && (
                                             <a

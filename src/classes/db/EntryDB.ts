@@ -146,6 +146,23 @@ export default class EntryDB {
     }
 
     /**
+     * @method GetConfig
+     *
+     * @static
+     * @return {Promise<Config>}
+     * @memberof EntryDB
+     */
+    public static async GetConfig(): Promise<Config | undefined> {
+        const ConfigPath = path.resolve(EntryDB.DataDirectory, "config.json");
+
+        // make sure config exists
+        if (!(await Bun.file(ConfigPath).exists())) return undefined;
+
+        // return config
+        return JSON.parse(await Bun.file(ConfigPath).text());
+    }
+
+    /**
      * @method CreateExpiry
      *
      * @static
@@ -164,23 +181,6 @@ export default class EntryDB {
         setInterval(async () => {
             await EntryDB.Expiry.CheckExpiry();
         }, 1000 * 60); // run every minute
-    }
-
-    /**
-     * @method GetConfig
-     *
-     * @static
-     * @return {Promise<Config>}
-     * @memberof EntryDB
-     */
-    public static async GetConfig(): Promise<Config | undefined> {
-        const ConfigPath = path.resolve(EntryDB.DataDirectory, "config.json");
-
-        // make sure config exists
-        if (!(await Bun.file(ConfigPath).exists())) return undefined;
-
-        // return config
-        return JSON.parse(await Bun.file(ConfigPath).text());
     }
 
     /**
@@ -1049,5 +1049,27 @@ export default class EntryDB {
 
         // return
         return pastes;
+    }
+
+    /**
+     * @method CheckPasteEditable
+     *
+     * @param {string} PasteURL
+     * @return {Promise<[boolean, string, boolean]>} success, message, editable
+     * @memberof EntryDB
+     */
+    public async CheckPasteEditable(
+        PasteURL: string
+    ): Promise<[boolean, string, boolean]> {
+        // get paste
+        const paste = await this.GetPasteFromURL(PasteURL);
+        if (!paste) return [false, "Paste does not exist", false];
+
+        // check if paste is editable
+        // non-editable pastes just have their edit password set to the hash of ""
+        const editable =
+            paste.EditPassword !== CreateHash("") && paste.EditPassword !== "";
+
+        return [true, "Editable status:", editable];
     }
 }
