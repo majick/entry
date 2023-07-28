@@ -312,6 +312,7 @@ pre,
 code,
 pre code span {
     font-family: monospace;
+    white-space: pre;
 }
 
 pre {

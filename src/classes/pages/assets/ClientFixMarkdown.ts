@@ -6,7 +6,6 @@ import hljs from "highlight.js";
 
 /**
  * @function HandleCustomElements
- *
  * @export
  */
 export function HandleCustomElements() {

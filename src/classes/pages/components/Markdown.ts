@@ -19,14 +19,14 @@ export async function ParseMarkdown(content: string): Promise<string> {
 
     // code blocks
 
-    // ...inline code block
-    content = content.replaceAll(/^(\`{3})(.*)(\`{3})$/gm, "<code>$2</code>"); // ```code```
-
     // ...fenced code block
     content = content.replaceAll(
         /^(\`{3})(.*?)\n(.*?)(\`{3})$/gms, // $2: language, $3: code
         '<pre><code class="language-$2">$3</code></pre>\n'
     );
+
+    // ...inline code block
+    content = content.replaceAll(/^(\`{3})(.*)(\`{3})$/gm, "<code>$2</code>"); // ```code```
 
     // ...inline code block
     content = content.replaceAll(/^(\`{2})(.*)(\`{2})$/gm, "<code>$2</code>"); // ``code``
