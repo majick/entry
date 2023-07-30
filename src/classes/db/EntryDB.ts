@@ -400,17 +400,20 @@ export default class EntryDB {
         if (!PasteInfo.CustomURL) PasteInfo.CustomURL = crypto.randomUUID();
 
         // if edit password was not provided, randomize it
-        if (!PasteInfo.EditPassword) {
-            PasteInfo.UnhashedEditPassword = crypto
-                .randomBytes(EntryDB.MinPasswordLength)
-                .toString("hex");
+        if (!SkipHash)
+            if (!PasteInfo.EditPassword) {
+                PasteInfo.UnhashedEditPassword = crypto
+                    .randomBytes(EntryDB.MinPasswordLength)
+                    .toString("hex");
 
-            PasteInfo.EditPassword = `${PasteInfo.UnhashedEditPassword}`;
+                PasteInfo.EditPassword = `${PasteInfo.UnhashedEditPassword}`;
 
-            // check for PasteInfo.IsEditable, if it does not exist set UnhashedEditPassword to "paste is not editable!"
-            if (!PasteInfo.IsEditable)
-                PasteInfo.UnhashedEditPassword = "paste is not editable!";
-        } else PasteInfo.UnhashedEditPassword = `${PasteInfo.EditPassword}`;
+                // check for PasteInfo.IsEditable, if it does not exist set UnhashedEditPassword to "paste is not editable!"
+                if (!PasteInfo.IsEditable)
+                    PasteInfo.UnhashedEditPassword = "paste is not editable!";
+            } else PasteInfo.UnhashedEditPassword = `${PasteInfo.EditPassword}`;
+        // if we don't need to hash the editpassword, just set unhashed to hashed
+        else PasteInfo.UnhashedEditPassword = PasteInfo.EditPassword;
 
         // check custom url
         if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))
@@ -430,7 +433,7 @@ export default class EntryDB {
 
         // check for IsEditable, if it does not exist set EditPassword to "" so the paste
         // cannot be changed
-        if (!PasteInfo.IsEditable) PasteInfo.EditPassword = "";
+        if (!PasteInfo.IsEditable && !SkipHash) PasteInfo.EditPassword = "";
 
         // hash passwords
         if (!SkipHash) {
@@ -484,7 +487,7 @@ export default class EntryDB {
             )
                 return [
                     false,
-                    "This is already an existing paste group, please use the correct group password!",
+                    "Please use the correct paste group password!",
                     PasteInfo,
                 ];
 
@@ -952,14 +955,15 @@ export default class EntryDB {
      */
     public async GetAllPastes(
         includePrivate: boolean = false,
-        removeInfo: boolean = true
+        removeInfo: boolean = true,
+        sql?: string
     ): Promise<Paste[]> {
         // get pastes
         const pastes = await SQL.QueryOBJ({
             db: this.db,
             query: `SELECT * From Pastes${
                 !includePrivate ? ' WHERE ViewPassword = ""' : ""
-            }`,
+            } ${`WHERE ${sql}` || ""}`,
             all: true,
             transaction: true,
             use: "Prepare",

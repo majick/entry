@@ -24,6 +24,7 @@ let config: Config;
 
 // ...
 import { ParseMarkdown } from "./components/Markdown";
+import PasteList from "./components/PasteList";
 
 // headers
 export const DefaultHeaders = {
@@ -597,66 +598,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
                                     {group.split("@")[0]}
                                 </h1>
 
-                                <table
-                                    class={"force-full"}
-                                    style={{
-                                        width: "100%",
-                                    }}
-                                >
-                                    <thead>
-                                        <tr>
-                                            <th>Custom URL</th>
-                                            <th>Publish Date</th>
-                                            <th>Edit Date</th>
-                                            <th>Private</th>
-                                            <th>Open</th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {pastes.map((paste) => {
-                                            return (
-                                                <tr>
-                                                    <td
-                                                        style={{
-                                                            maxWidth: "5rem",
-                                                            textOverflow: "ellipsis",
-                                                            overflow: "hidden",
-                                                            overflowWrap: "normal",
-                                                            wordBreak: "normal",
-                                                        }}
-                                                    >
-                                                        {paste.CustomURL.split(
-                                                            "@"
-                                                        )[0]
-                                                            // remove group name
-                                                            .replace(
-                                                                `${group}/`,
-                                                                ""
-                                                            )}
-                                                    </td>
-
-                                                    <td>{paste.PubDate}</td>
-                                                    <td>{paste.EditDate}</td>
-                                                    <td>
-                                                        {paste.ViewPassword ===
-                                                        "exists"
-                                                            ? "yes"
-                                                            : "no"}
-                                                    </td>
-
-                                                    <td>
-                                                        <a
-                                                            href={`/${paste.CustomURL}`}
-                                                        >
-                                                            View Paste
-                                                        </a>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
+                                <PasteList Pastes={pastes} />
                             </div>
 
                             <Footer />

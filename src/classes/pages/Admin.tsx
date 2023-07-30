@@ -10,6 +10,7 @@ import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./API";
 import { CreateHash, Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
+import PasteList from "./components/PasteList";
 import Footer from "./components/Footer";
 
 import { Config } from "../..";
@@ -162,103 +163,97 @@ export class ManagePastes implements Endpoint {
             return new Login().request(request);
 
         // fetch all pastes
-        const pastes = await db.GetAllPastes(true, false); // include encrypted pastes
+        const pastes = await db.GetAllPastes(true, false, body.sql);
 
         // return
         return new Response(
             Renderer.Render(
                 <>
                     <main>
-                        <div className="tab-container editor-tab">
+                        <div
+                            className="tab-container editor-tab"
+                            style={{
+                                height: "min-content",
+                                maxHeight: "85vh",
+                            }}
+                        >
                             <AdminNav active="pastes" pass={body.AdminPassword} />
 
-                            <table
-                                class={"force-full"}
-                                style={{
-                                    width: "100%",
-                                }}
-                            >
-                                <thead>
-                                    <tr>
-                                        <th>Custom URL</th>
-                                        <th>Publish Date</th>
-                                        <th>Edit Date</th>
-                                        <th>Private</th>
-                                        <th>Editable</th>
-                                        <th>Open</th>
-                                        <th>Delete</th>
-                                    </tr>
-                                </thead>
+                            <PasteList
+                                Pastes={pastes}
+                                ShowDelete={true}
+                                AdminPassword={body.AdminPassword}
+                                Selector={body.sql || "Content IS NOT NULL"}
+                            />
+                        </div>
 
-                                <tbody>
-                                    {pastes.map((paste) => {
-                                        return (
-                                            <tr>
-                                                <td
-                                                    style={{
-                                                        maxWidth: "5rem",
-                                                        textOverflow: "ellipsis",
-                                                        overflow: "hidden",
-                                                        overflowWrap: "normal",
-                                                        wordBreak: "normal",
-                                                    }}
-                                                >
-                                                    {paste.CustomURL}
-                                                </td>
+                        <Footer />
+                    </main>
 
-                                                <td>{paste.PubDate}</td>
-                                                <td>{paste.EditDate}</td>
-                                                <td>
-                                                    {paste.ViewPassword === "exists"
-                                                        ? "yes"
-                                                        : "no"}
-                                                </td>
-                                                <td>
-                                                    {paste.EditPassword !==
-                                                        CreateHash("") &&
-                                                    paste.GroupName !== "server" // server pastes cannot be edited
-                                                        ? "yes"
-                                                        : "no"}
-                                                </td>
+                    <style
+                        dangerouslySetInnerHTML={{
+                            __html: `form button { margin: auto; }`,
+                        }}
+                    />
+                </>,
+                <>
+                    <title>{config.name} Admin</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
 
-                                                <td>
-                                                    <a
-                                                        href={`/${paste.CustomURL}`}
-                                                        target="_blank"
-                                                    >
-                                                        View Paste
-                                                    </a>
-                                                </td>
+/**
+ * @export
+ * @class QueryPastesPage
+ * @implements {Endpoint}
+ */
+export class QueryPastesPage implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
 
-                                                <td>
-                                                    <form
-                                                        action="/admin/api/delete"
-                                                        method={"POST"}
-                                                    >
-                                                        <input
-                                                            type="hidden"
-                                                            required
-                                                            name="AdminPassword"
-                                                            value={
-                                                                body.AdminPassword
-                                                            }
-                                                        />
+        if (WrongType) return WrongType;
 
-                                                        <input
-                                                            type="hidden"
-                                                            required
-                                                            name={"CustomURL"}
-                                                            value={paste.CustomURL}
-                                                        />
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
-                                                        <button>Delete Paste</button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin || !body.sql)
+            return new Login().request(request);
+
+        // get pastes
+        const pastes = await db.GetAllPastes(true, false, body.sql);
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <main>
+                        <div
+                            className="tab-container editor-tab"
+                            style={{
+                                height: "min-content",
+                                maxHeight: "85vh",
+                            }}
+                        >
+                            <AdminNav active="pastes" pass={body.AdminPassword} />
+
+                            <PasteList
+                                Pastes={pastes}
+                                ShowDelete={true}
+                                AdminPassword={body.AdminPassword}
+                            />
                         </div>
 
                         <Footer />
