@@ -18,6 +18,12 @@ export type Config = {
     port: number;
     name: string;
     admin: string;
+    footer?: {
+        rows: Array<{
+            label: string;
+            href: string;
+        }[]>;
+    };
 };
 
 // check if database is new or config file does not exist

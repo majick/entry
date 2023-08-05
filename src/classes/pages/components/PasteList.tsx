@@ -86,7 +86,7 @@ export default function PasteList(props: {
                                         wordBreak: "normal",
                                     }}
                                 >
-                                    {paste.CustomURL.split("@")[0]}
+                                    {paste.CustomURL.split(":")[0]}
                                 </td>
 
                                 <td>{paste.PubDate}</td>

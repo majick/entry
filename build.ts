@@ -9,7 +9,11 @@ const output = await build({
         "./src/classes/pages/assets/ClientFixMarkdown.ts",
         "./src/classes/pages/components/Markdown.ts",
     ],
-    minify: true,
+    minify: {
+        identifiers: true,
+        syntax: true,
+        whitespace: true,
+    },
     target: "bun", // technically Editor.ts should have the "browser" target, but this hasn't caused any issues yet so it's fine!
     outdir: "dist",
     splitting: true,

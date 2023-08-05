@@ -2,7 +2,9 @@
 
 Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion and custom URLs.
 
-Uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite).
+Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite).
+
+The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic federation support provided by Entry.
 
 ## Install
 
@@ -41,6 +43,7 @@ Entry supports extra features that Rentry does not support. They are detailed be
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `GET  /api/get/{paste}`, Get an existing paste
+- `GET  /api/raw/{paste}`, Get raw paste content
 - `GET  /api/group/{group}`, Get all pastes in specified group
 
 #### Admin Endpoints
@@ -56,7 +59,7 @@ Federation does not work with encrypted pastes.
 
 Entry supports very basic federation, meaning you can view and edit pastes from other servers on your server.
 
-To view pastes from other servers, you open them the same way (`example.com/paste`) you normally do, but add an `@` symbol and then the hostname of the other server. Example: `example.com/paste@example2.com`
+To view pastes from other servers, you open them the same way (`example.com/paste`) you normally do, but add an `:` symbol and then the hostname of the other server. Example: `example.com/paste:example2.com`
 
 In this example, we are viewing the paste `paste` from the server `example2.com` on the server `example.com`. Editing and deleting pastes is also available for pastes from a different server. Federation **only** supports HTTPS, it is assumed that any secondary server provided is using HTTPS, and the request will fail if it is not.
 
@@ -124,6 +127,28 @@ You can customize the way your pastes are displayed using some custom elements.
 - `<sat>`, the sat element allows you to control the saturation of the page when your paste is rendered. It expects a `percentage`.
 - `<lit>`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
 - `<theme>`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
+
+### Custom Footer Links
+
+You can added custom footer links to your server by editing the `config.json` (`{DATA_DIRECTORY}/config.json`) and adding a `footer` section. All links should have a `label` and `href` value. Links are organized in different rows. Each new entry in the "rows" array creates a new row in the footer.
+
+Example:
+
+```json
+{
+    ...
+    "footer": {
+        "rows": [
+            [
+                {
+                    "label": "what",
+                    "href": "/what:www.sentrytwo.com"
+                }
+            ]
+        ]
+    }
+}
+```
 
 ## Development
 

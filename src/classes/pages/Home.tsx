@@ -32,7 +32,7 @@ export default class Home implements Endpoint {
 
         // if search.server, add server to paste.CustomURL
         if (search.get("server") && paste)
-            paste.CustomURL = `${paste.CustomURL}@${search.get("server")}`;
+            paste.CustomURL = `${paste.CustomURL}:${search.get("server")}`;
 
         // decrypt (if we can)
         if (search.get("ViewPassword") && paste) {
@@ -426,6 +426,13 @@ export default class Home implements Endpoint {
                                             >
                                                 <input
                                                     type="hidden"
+                                                    name={"OldURL"}
+                                                    value={paste.CustomURL}
+                                                    required
+                                                />
+
+                                                <input
+                                                    type="hidden"
                                                     name={"NewContent"}
                                                     id={"contentInput"}
                                                     required
@@ -550,7 +557,7 @@ export default class Home implements Endpoint {
                                         {
                                             // everything before @ so (if there is a server),
                                             // it isn't included here
-                                            paste!.CustomURL.split("@")[0]
+                                            paste!.CustomURL.split(":")[0]
                                         }
                                     </b>
                                     ) will be available

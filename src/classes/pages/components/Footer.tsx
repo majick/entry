@@ -1,5 +1,10 @@
 import ToggleTheme from "./ToggleTheme";
 
+import type { Config } from "../../..";
+import EntryDB from "../../db/EntryDB";
+
+const config: Config = (await EntryDB.GetConfig()) as Config;
+
 export default function Footer() {
     return (
         <div
@@ -41,28 +46,30 @@ export default function Footer() {
                 <li>
                     <ToggleTheme />
                 </li>
-
-                <style
-                    dangerouslySetInnerHTML={{
-                        __html: `.__footernav li:not(:first-child) {
-                            margin-left: 0.25rem;
-                        }
-                        
-                        .__footernav li {
-                            list-style-type: "·";
-                            padding: 0 0.25rem;
-                        }
-
-                        .__footernav li:first-child {
-                           margin-left: -0.25rem;
-                        }
-                        
-                        .__footernav li:first-child {
-                            list-style-type: none;
-                        }`,
-                    }}
-                />
             </ul>
+
+            {config.footer && (
+                <>
+                    {/* custom footer rows */}
+                    {config.footer.rows.map((row) => (
+                        <ul
+                            class={"__footernav"}
+                            style={{
+                                display: "flex",
+                                gap: "0.25rem",
+                                padding: "0",
+                                margin: "0",
+                            }}
+                        >
+                            {row.map((link) => (
+                                <li>
+                                    <a href={link.href}>{link.label}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    ))}
+                </>
+            )}
 
             <p
                 style={{
@@ -79,6 +86,23 @@ export default function Footer() {
                     - A Markdown Pastebin
                 </span>
             </p>
+
+            <style
+                dangerouslySetInnerHTML={{
+                    __html: `.__footernav li {
+                        list-style-type: "·";
+                        padding: 0 0.25rem;
+                    }
+
+                    .__footernav li:first-child {
+                       margin-left: -0.25rem;
+                    }
+                    
+                    .__footernav li:first-child {
+                        list-style-type: none;
+                    }`,
+                }}
+            />
         </div>
     );
 }

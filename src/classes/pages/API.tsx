@@ -263,7 +263,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 href={`/group/${result.GroupName}${
                                                     // add host server (if it exists)
                                                     result.HostServer
-                                                        ? `@${result.HostServer}`
+                                                        ? `:${result.HostServer}`
                                                         : ""
                                                 }`}
                                             >
@@ -281,7 +281,7 @@ export class GetPasteFromURL implements Endpoint {
                                             href={`/api/raw/${result.CustomURL}${
                                                 // add host server (if it exists)
                                                 result.HostServer
-                                                    ? `@${result.HostServer}`
+                                                    ? `:${result.HostServer}`
                                                     : ""
                                             }`}
                                         >
@@ -612,7 +612,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
                             <div className="tab-container editor-tab">
                                 <h1>
                                     Posts in groups/
-                                    {group.split("@")[0]}
+                                    {group.split(":")[0]}
                                 </h1>
 
                                 <PasteList Pastes={pastes} />

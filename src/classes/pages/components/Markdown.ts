@@ -91,12 +91,6 @@ export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/g, "<strong>$2</strong>");
     content = content.replaceAll(/(\*{1})(.*?)(\*{1})/g, "<em>$2</em>");
 
-    // treat rentry.co links like links to federated entry servers
-    content = content.replaceAll(
-        /(href\=)\"(https:\/\/)(rentry\.co)\/(.*?)\"/g,
-        'href="/$4@rentry.co"'
-    );
-
     // remove scripts, on[...] attributes and <link> elements
 
     // ...attributes

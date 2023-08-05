@@ -300,7 +300,7 @@ export default class EntryDB {
     public GetPasteFromURL(PasteURL: string): Promise<Paste | undefined> {
         return new Promise(async (resolve) => {
             // check if paste is from another server
-            const server = PasteURL.split("@")[1];
+            const server = PasteURL.split(":")[1];
 
             if (!server) {
                 // ...everything after this assumes paste is NOT from another server, as the
@@ -344,9 +344,9 @@ export default class EntryDB {
                 // just send an /api/get request to the other server
                 const request = fetch(
                     server !== "rentry.co"
-                        ? `https://${server}/api/get/${PasteURL.split("@")[0]}`
+                        ? `https://${server}/api/get/${PasteURL.split(":")[0]}`
                         : // rentry compatibility
-                          `https://${server}/api/raw/${PasteURL.split("@")[0]}`
+                          `https://${server}/api/raw/${PasteURL.split(":")[0]}`
                 );
 
                 // handle bad
@@ -372,7 +372,7 @@ export default class EntryDB {
                 // rentry compatibility
                 if (server === "rentry.co") {
                     json.Content = (json as any).content;
-                    json.CustomURL = PasteURL.split("@")[0];
+                    json.CustomURL = PasteURL.split(":")[0];
                     json.PubDate = "?";
                     json.EditDate = "?";
                 }
@@ -593,18 +593,18 @@ export default class EntryDB {
         NewPasteInfo: Paste
     ): Promise<[boolean, string, Paste]> {
         // check if paste is from another server
-        const server = PasteInfo.CustomURL.split("@")[1];
+        const server = PasteInfo.CustomURL.split(":")[1];
 
         if (server) {
             // send request
             const [isBad, record] = await this.ForwardRequest(server, "edit", [
                 `OldContent=${PasteInfo.Content}`,
                 `OldEditPassword=${PasteInfo.EditPassword}`,
-                `OldURL=${PasteInfo.CustomURL.split("@")[0]}`,
+                `OldURL=${PasteInfo.CustomURL.split(":")[0]}`,
                 // new
                 `NewContent=${NewPasteInfo.Content}`,
                 `NewEditPassword=${NewPasteInfo.EditPassword}`,
-                `NewURL=${NewPasteInfo.CustomURL.split("@")[0]}`,
+                `NewURL=${NewPasteInfo.CustomURL.split(":")[0]}`,
             ]);
 
             // check if promise rejected
@@ -725,7 +725,7 @@ export default class EntryDB {
         if (!PasteInfo.CustomURL) return [false, "Missing CustomURL", PasteInfo];
 
         // check if paste is from another server
-        const server = PasteInfo.CustomURL.split("@")[1];
+        const server = PasteInfo.CustomURL.split(":")[1];
 
         if (server) {
             // we aren't checking for admin password here or anything because it shouldn't
@@ -735,7 +735,7 @@ export default class EntryDB {
 
             // send request
             const [isBad, record] = await this.ForwardRequest(server, "delete", [
-                `CustomURL=${PasteInfo.CustomURL.split("@")[0]}`,
+                `CustomURL=${PasteInfo.CustomURL.split(":")[0]}`,
                 `password=${password}`,
             ]);
 
@@ -1008,12 +1008,12 @@ export default class EntryDB {
      */
     public async GetAllPastesInGroup(group: string): Promise<Paste[]> {
         // federation stuff
-        const server = group.split("@")[1];
+        const server = group.split(":")[1];
 
         if (server) {
             const [isBad, record] = await this.ForwardRequest(
                 server,
-                `group/${group.split("@")[0]}`,
+                `group/${group.split(":")[0]}`,
                 [],
                 "GET"
             );
@@ -1029,7 +1029,7 @@ export default class EntryDB {
             const pastes = await record.json(); // /api/group/{group} returns [] even if the group doesn't exist
 
             for (let i in pastes)
-                pastes[i].CustomURL = `${pastes[i].CustomURL}@${server}`;
+                pastes[i].CustomURL = `${pastes[i].CustomURL}:${server}`;
 
             // return
             return pastes;

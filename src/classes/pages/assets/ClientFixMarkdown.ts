@@ -16,7 +16,7 @@ export function HandleCustomElements() {
         anchor.href = anchor.href.replace("https://rentry.org", "https://rentry.co");
         if (!anchor.href.split("https://rentry.co/")[1]) continue;
         else
-            anchor.href = `/${anchor.href.split("https://rentry.co/")[1]}@rentry.co`;
+            anchor.href = `/${anchor.href.split("https://rentry.co/")[1]}:rentry.co`;
     }
 
     // treat sentrytwo.com links as federated entry servers
@@ -31,7 +31,7 @@ export function HandleCustomElements() {
         else
             anchor.href = `/${
                 anchor.href.split("https://sentrytwo.com/")[1]
-            }@sentrytwo.com`;
+            }:sentrytwo.com`;
     }
 
     // handle style elements
