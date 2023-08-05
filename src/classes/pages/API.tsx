@@ -276,6 +276,23 @@ export class GetPasteFromURL implements Endpoint {
                                                 </button>
                                             </a>
                                         )}
+
+                                        <a
+                                            href={`/api/raw/${result.CustomURL}${
+                                                // add host server (if it exists)
+                                                result.HostServer
+                                                    ? `@${result.HostServer}`
+                                                    : ""
+                                            }`}
+                                        >
+                                            <button
+                                                style={{
+                                                    height: "max-content",
+                                                }}
+                                            >
+                                                Raw
+                                            </button>
+                                        </a>
                                     </div>
 
                                     <div
@@ -629,6 +646,37 @@ export class GetAllPastesInGroupPage implements Endpoint {
     }
 }
 
+/**
+ * @method GetRawPaste
+ *
+ * @export
+ * @class GetRawPaste
+ * @implements {Endpoint}
+ */
+export class GetRawPaste implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // get paste name
+        const name = url.pathname.slice("/api/raw/".length, url.pathname.length);
+
+        // return home if name === ""
+        if (name === "") return new _404Page().request(request);
+
+        // attempt to get paste
+        const result = await db.GetPasteFromURL(name);
+
+        // return
+        return new Response(result!.Content, {
+            status: 202,
+            headers: {
+                "Content-Type": "text/plain",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -642,4 +690,5 @@ export default {
     GetAllPastes,
     GetAllPastesInGroup,
     GetAllPastesInGroupPage, // html form of the api (previous)
+    GetRawPaste,
 };

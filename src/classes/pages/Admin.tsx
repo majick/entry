@@ -111,14 +111,14 @@ export class Login implements Endpoint {
                             }}
                             method={"POST"}
                         >
-                            <button>Go</button>
-
                             <input
                                 type="password"
                                 name={"AdminPassword"}
                                 required
                                 placeholder={"Password"}
                             />
+
+                            <button>Go</button>
                         </form>
 
                         <Footer />
@@ -183,7 +183,7 @@ export class ManagePastes implements Endpoint {
                                 Pastes={pastes}
                                 ShowDelete={true}
                                 AdminPassword={body.AdminPassword}
-                                Selector={body.sql || "Content IS NOT NULL"}
+                                Selector={body.sql || "CustomURL IS NOT NULL"}
                             />
                         </div>
 

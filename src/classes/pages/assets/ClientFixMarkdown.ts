@@ -23,10 +23,15 @@ export function HandleCustomElements() {
     for (let anchor of document.body.querySelectorAll(
         "a"
     ) as any as HTMLAnchorElement[]) {
-        anchor.href = anchor.href.replace("https://www.sentrytwo.com", "https://sentrytwo.com");
+        anchor.href = anchor.href.replace(
+            "https://www.sentrytwo.com",
+            "https://sentrytwo.com"
+        );
         if (!anchor.href.split("https://sentrytwo.com/")[1]) continue;
         else
-            anchor.href = `/${anchor.href.split("https://sentrytwo.com/")[1]}@sentrytwo.com`;
+            anchor.href = `/${
+                anchor.href.split("https://sentrytwo.com/")[1]
+            }@sentrytwo.com`;
     }
 
     // handle style elements
@@ -45,18 +50,22 @@ export function HandleCustomElements() {
     document.documentElement.setAttribute("style", style);
 
     // handle class elements
-    const theme = document.querySelector("#editor-tab-preview theme") as HTMLElement;
+    const themes = document.querySelectorAll(
+        "#editor-tab-preview theme"
+    ) as any as HTMLElement[];
 
-    if (theme) {
+    if (themes.length > 0) {
         document.documentElement.classList.value = ""; // reset, we don't need to check for
         //                                                light theme, dark will be removed by this
 
-        if (theme.innerText === "dark")
-            document.documentElement.classList.add("dark-theme");
-        else if (theme.innerText === "purple")
-            document.documentElement.classList.add("purple-theme", "dark-theme");
-        else if (theme.innerText === "blue")
-            document.documentElement.classList.add("blue-theme", "dark-theme");
+        for (let theme of themes) {
+            if (theme.innerText === "dark")
+                document.documentElement.classList.add("dark-theme");
+            else if (theme.innerText === "purple")
+                document.documentElement.classList.add("purple-theme", "dark-theme");
+            else if (theme.innerText === "blue")
+                document.documentElement.classList.add("blue-theme", "dark-theme");
+        }
     }
 }
 

@@ -1,3 +1,5 @@
+import ToggleTheme from "./ToggleTheme";
+
 export default function Footer() {
     return (
         <div
@@ -36,6 +38,10 @@ export default function Footer() {
                     <a href="/v">version</a>
                 </li>
 
+                <li>
+                    <ToggleTheme />
+                </li>
+
                 <style
                     dangerouslySetInnerHTML={{
                         __html: `.__footernav li:not(:first-child) {
@@ -53,14 +59,6 @@ export default function Footer() {
                         
                         .__footernav li:first-child {
                             list-style-type: none;
-                        }`,
-                    }}
-                />
-
-                <script
-                    dangerouslySetInnerHTML={{
-                        __html: `if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-                            document.documentElement.classList.add("dark-theme");
                         }`,
                     }}
                 />

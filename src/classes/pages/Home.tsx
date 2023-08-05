@@ -399,7 +399,7 @@ export default class Home implements Endpoint {
                                 </form>
                             )) ||
                                 (paste && search.get("mode") === "edit" && (
-                                    // if mode is provided and it is "edit" show the paste edit form
+                                    // if mode is edit, show the paste edit form
                                     <div>
                                         <form
                                             style={{
@@ -411,21 +411,18 @@ export default class Home implements Endpoint {
                                             method={"POST"}
                                             action={"/api/edit"}
                                         >
-                                            <button
-                                                style={{
-                                                    minWidth: "5rem",
-                                                }}
-                                            >
-                                                Save
-                                            </button>
-
                                             <div
                                                 style={{
-                                                    display: "flex",
+                                                    display: "grid",
                                                     gap: "0.5rem",
                                                     flexWrap: "wrap",
+                                                    width: "100%",
                                                     justifyContent: "center",
+                                                    maxWidth: "100vw",
+                                                    gridTemplateColumns:
+                                                        "repeat(3, 1fr)",
                                                 }}
+                                                class={"mobile-flex"}
                                             >
                                                 <input
                                                     type="hidden"
@@ -443,9 +440,6 @@ export default class Home implements Endpoint {
                                                     minLength={
                                                         EntryDB.MinPasswordLength
                                                     }
-                                                    style={{
-                                                        width: "18rem",
-                                                    }}
                                                     name={"OldEditPassword"}
                                                     required
                                                 />
@@ -455,81 +449,78 @@ export default class Home implements Endpoint {
                                                     // if we don't provide a new Custom URL, this will be used instead so we don't give up our url
                                                 }
                                                 <input
-                                                    type="hidden"
-                                                    name={"OldURL"}
-                                                    value={paste!.CustomURL}
-                                                    required
+                                                    type="text"
+                                                    placeholder={
+                                                        "Change edit code - optional"
+                                                    }
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
+                                                    name={"NewEditPassword"}
+                                                    autoComplete={"off"}
                                                 />
 
-                                                <details
+                                                <input
+                                                    type="text"
+                                                    placeholder={
+                                                        "Change Custom URL - optional"
+                                                    }
+                                                    maxLength={
+                                                        EntryDB.MaxCustomURLLength
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinCustomURLLength
+                                                    }
+                                                    name={"NewURL"}
+                                                    autoComplete={"off"}
+                                                />
+                                            </div>
+
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    flexWrap: "wrap",
+                                                    width: "100%",
+                                                }}
+                                            >
+                                                <div
                                                     style={{
-                                                        width: "18rem",
+                                                        display: "flex",
+                                                        gap: "0.5rem",
                                                     }}
                                                 >
-                                                    <summary>
-                                                        Change Settings (optional)
-                                                    </summary>
-
-                                                    <div
-                                                        class={
-                                                            "details-flex-content-list-box"
-                                                        }
+                                                    <button
+                                                        style={{
+                                                            minWidth: "5rem",
+                                                        }}
                                                     >
-                                                        <input
-                                                            type="text"
-                                                            placeholder={
-                                                                "Change edit code - optional"
-                                                            }
-                                                            maxLength={
-                                                                EntryDB.MaxPasswordLength
-                                                            }
-                                                            minLength={
-                                                                EntryDB.MinPasswordLength
-                                                            }
-                                                            name={"NewEditPassword"}
-                                                            autoComplete={"off"}
-                                                        />
+                                                        Save
+                                                    </button>
 
-                                                        <input
-                                                            type="text"
-                                                            placeholder={
-                                                                "Change Custom URL - optional"
-                                                            }
-                                                            maxLength={
-                                                                EntryDB.MaxCustomURLLength
-                                                            }
-                                                            minLength={
-                                                                EntryDB.MinCustomURLLength
-                                                            }
-                                                            name={"NewURL"}
-                                                            autoComplete={"off"}
-                                                        />
-                                                    </div>
-                                                </details>
+                                                    <a
+                                                        href={`/${
+                                                            search.get("OldURL") ||
+                                                            ""
+                                                        }`}
+                                                        class={"button"}
+                                                    >
+                                                        Back
+                                                    </a>
+                                                </div>
+
+                                                <a
+                                                    id={"editor-open-delete-modal"}
+                                                    class={"button"}
+                                                    href={"javascript:"}
+                                                >
+                                                    Delete
+                                                </a>
                                             </div>
                                         </form>
-
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                gap: "0.4rem",
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                                marginTop: "0.5rem",
-                                            }}
-                                        >
-                                            <a
-                                                href={`/${
-                                                    search.get("OldURL") || ""
-                                                }`}
-                                            >
-                                                <button>Back</button>
-                                            </a>
-
-                                            <button id={"editor-open-delete-modal"}>
-                                                Delete Paste
-                                            </button>
-                                        </div>
                                     </div>
                                 ))}
                         </div>

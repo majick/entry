@@ -963,7 +963,7 @@ export default class EntryDB {
             db: this.db,
             query: `SELECT * From Pastes${
                 !includePrivate ? ' WHERE ViewPassword = ""' : ""
-            } ${`WHERE ${sql}` || ""}`,
+            } WHERE ${sql || "CustomURL IS NOT NULL"}`,
             all: true,
             transaction: true,
             use: "Prepare",

@@ -1,0 +1,22 @@
+name: Feature Request
+about: Request a feature
+title: "[feature]: "
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for creating this feature request. Please make sure the feature you are requesting is valid and within the scope of Entry.
+    - type: textarea
+      id: details
+      attributes:
+          label: Please explain the feature you are requesting in detail.
+          placeholder: I think it would be good if Entry had/supported...
+      validations:
+          required: true
+    - type: input
+      id: "version"
+      attributes:
+          label: Entry Version
+          description: This can be found by visiting /v on your Entry server.
+      validations:
+          required: true

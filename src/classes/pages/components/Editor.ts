@@ -11,7 +11,6 @@ import {
 import {
     HighlightStyle,
     syntaxHighlighting,
-    syntaxTree,
 } from "@codemirror/language";
 
 import {
@@ -25,6 +24,7 @@ import {
     markdownKeymap,
     markdownLanguage,
 } from "@codemirror/lang-markdown";
+import { history } from "@codemirror/commands";
 import { tags } from "@lezer/highlight";
 
 import { HandleCustomElements } from "../assets/ClientFixMarkdown";
@@ -263,6 +263,7 @@ export default function CreateEditor(ElementID: string, content: string) {
             rectangularSelection(),
             EditorView.lineWrapping,
             closeBrackets(),
+            history(),
             EditorView.updateListener.of(async (update) => {
                 if (update.docChanged) {
                     // basic session save
@@ -410,3 +411,9 @@ if (document.getElementById("editor-open-delete-modal"))
                 document.getElementById("editor-modal-delete") as HTMLDialogElement
             ).showModal();
         });
+
+// clear stored content on form submit
+document.querySelector("form")!.addEventListener("submit", () => {
+    window.sessionStorage.removeItem("doc");
+    window.sessionStorage.removeItem("gen");
+});

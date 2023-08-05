@@ -1,0 +1,22 @@
+name: Bug Report
+about: Report a bug
+title: "[bug]: "
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thank you for creating this bug report. Please make sure the bug you are reporting is valid, and has not already been reported.
+    - type: textarea
+      id: details
+      attributes:
+          label: Please explain your issue and provide a screenshot if possible. Make sure to explain the expected result, if there is one.
+          placeholder: Issue Details
+      validations:
+          required: true
+    - type: input
+      id: "version"
+      attributes:
+          label: Entry Version
+          description: This can be found by visiting /v on your Entry server.
+      validations:
+          required: true

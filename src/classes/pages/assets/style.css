@@ -3,6 +3,7 @@
     --base-hue: 0;
     --base-sat: 0%;
     --base-lit: 93%;
+    --mod: -;
 
     --background-surface: hsl(
         var(--base-hue),
@@ -52,6 +53,7 @@
 
 html.dark-theme {
     --base-lit: 11%;
+
     --text-color: hsl(204, 4%, 80%);
     --text-color-faded: hsl(207, 5%, 54%);
     --blue: #5c8ca4;
@@ -560,7 +562,7 @@ details hr {
 }
 
 .cm-selectionBackground {
-    background: var(--background-surface) !important;
+    background: var(--red1) !important;
 }
 
 .cm-editor.cm-focused {
@@ -617,6 +619,14 @@ details hr {
 
 .hljs-string {
     color: var(--green);
+}
+
+/* extras */
+
+@media screen and (max-width: 800px) {
+    .mobile-flex {
+        display: flex !important;
+    }
 }
 
 /* special elements */
