@@ -139,12 +139,9 @@ Example:
     ...
     "footer": {
         "rows": [
-            [
-                {
-                    "label": "what",
-                    "href": "/what:www.sentrytwo.com"
-                }
-            ]
+            {
+                "what": "/what:www.sentrytwo.com"
+            }
         ]
     }
 }

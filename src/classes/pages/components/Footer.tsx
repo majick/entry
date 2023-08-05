@@ -61,9 +61,9 @@ export default function Footer() {
                                 margin: "0",
                             }}
                         >
-                            {row.map((link) => (
+                            {Object.entries(row).map((link) => (
                                 <li>
-                                    <a href={link.href}>{link.label}</a>
+                                    <a href={link[1]}>{link[0]}</a>
                                 </li>
                             ))}
                         </ul>

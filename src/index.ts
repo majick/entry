@@ -20,9 +20,8 @@ export type Config = {
     admin: string;
     footer?: {
         rows: Array<{
-            label: string;
-            href: string;
-        }[]>;
+            [key: string]: string
+        }>;
     };
 };
 
