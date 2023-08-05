@@ -19,21 +19,6 @@ export function HandleCustomElements() {
             anchor.href = `/${anchor.href.split("https://rentry.co/")[1]}:rentry.co`;
     }
 
-    // treat sentrytwo.com links as federated entry servers
-    for (let anchor of document.body.querySelectorAll(
-        "a"
-    ) as any as HTMLAnchorElement[]) {
-        anchor.href = anchor.href.replace(
-            "https://www.sentrytwo.com",
-            "https://sentrytwo.com"
-        );
-        if (!anchor.href.split("https://sentrytwo.com/")[1]) continue;
-        else
-            anchor.href = `/${
-                anchor.href.split("https://sentrytwo.com/")[1]
-            }:sentrytwo.com`;
-    }
-
     // handle style elements
     let style = "";
 

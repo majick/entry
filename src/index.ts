@@ -20,7 +20,7 @@ export type Config = {
     admin: string;
     footer?: {
         rows: Array<{
-            [key: string]: string
+            [key: string]: string;
         }>;
     };
 };
@@ -77,6 +77,13 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
     );
 
     await EntryDB.GetConfig();
+
+    // exit
+    console.log(
+        "\x1b[92m[exit]\x1b[0m Please restart the Entry server, this is to prevent bugs relating to how fast the disk writes the config file."
+    );
+
+    process.exit(0);
 }
 
 // create server

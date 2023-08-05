@@ -993,7 +993,12 @@ export default class EntryDB {
         let outputs: [boolean, string, Paste][] = [];
 
         // create each paste
-        for (let paste of _export) outputs.push(await this.CreatePaste(paste, true));
+        for (let paste of _export) {
+            if (paste.GroupName)
+                paste.CustomURL = paste.CustomURL.replace(`${paste.GroupName}/`, "");
+                
+            outputs.push(await this.CreatePaste(paste, true));
+        }
 
         // return
         return outputs;

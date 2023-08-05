@@ -611,7 +611,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
                         <main>
                             <div className="tab-container editor-tab">
                                 <h1>
-                                    Posts in groups/
+                                    Pastes in groups/
                                     {group.split(":")[0]}
                                 </h1>
 

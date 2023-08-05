@@ -84,8 +84,10 @@ export async function ParseMarkdown(content: string): Promise<string> {
         "<strong><em>$2</em></strong>"
     );
 
-    // replace *** with <hr /> (rentry uses *** for hr, that's dumb)
-    content = content.replaceAll("***", "<hr />");
+    // horizontal rule
+    content = content.replaceAll(/^\*{3}$/gm, "<hr />");
+    content = content.replaceAll(/^-{3}$/gm, "<hr />");
+    content = content.replaceAll(/^_{3}$/gm, "<hr />");
 
     // manual italics/bold because i've noticed it doesn't work (partially)
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/g, "<strong>$2</strong>");
