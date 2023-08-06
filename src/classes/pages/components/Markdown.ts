@@ -9,10 +9,6 @@ import { marked } from "marked";
 export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
-    // better paragraph spacing
-    // matches everything with two spaces before and after as a new paragraph
-    content = content.replaceAll(/(\n{2})(.*?)(\n{2})/gs, "<p>$2</p>");
-
     // allowed elements
     for (let element of ["hue", "sat", "lit", "theme", "comment", "p", "span"])
         content = content
