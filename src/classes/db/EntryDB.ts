@@ -72,32 +72,33 @@ export default class EntryDB {
 
         // check if we need to create tables
         (async () => {
+            await SQL.QueryOBJ({
+                db,
+                query: `CREATE TABLE IF NOT EXISTS Pastes (
+                    Content varchar(${EntryDB.MaxContentLength}),
+                    EditPassword varchar(${EntryDB.MaxPasswordLength}),
+                    CustomURL varchar(${EntryDB.MaxCustomURLLength}),
+                    ViewPassword varchar(${EntryDB.MaxPasswordLength}),
+                    PubDate datetime DEFAULT CURRENT_TIMESTAMP,
+                    EditDate datetime DEFAULT CURRENT_TIMESTAMP,
+                    GroupName varchar(${EntryDB.MaxCustomURLLength}),
+                    GroupSubmitPassword varchar(${EntryDB.MaxPasswordLength})
+                )`,
+            });
+
+            await SQL.QueryOBJ({
+                db,
+                query: `CREATE TABLE IF NOT EXISTS Encryption (
+                    ViewPassword varchar(${EntryDB.MaxPasswordLength}),
+                    CustomURL varchar(${EntryDB.MaxCustomURLLength}),
+                    ENC_IV varchar(24),
+                    ENC_KEY varchar(64),
+                    ENC_CODE varchar(32)
+                )`,
+            });
+
+            // ...
             if (isNew) {
-                await SQL.QueryOBJ({
-                    db,
-                    query: `CREATE TABLE Pastes (
-                        Content varchar(${EntryDB.MaxContentLength}),
-                        EditPassword varchar(${EntryDB.MaxPasswordLength}),
-                        CustomURL varchar(${EntryDB.MaxCustomURLLength}),
-                        ViewPassword varchar(${EntryDB.MaxPasswordLength}),
-                        PubDate datetime DEFAULT CURRENT_TIMESTAMP,
-                        EditDate datetime DEFAULT CURRENT_TIMESTAMP,
-                        GroupName varchar(${EntryDB.MaxCustomURLLength}),
-                        GroupSubmitPassword varchar(${EntryDB.MaxPasswordLength})
-                    )`,
-                });
-
-                await SQL.QueryOBJ({
-                    db,
-                    query: `CREATE TABLE Encryption (
-                        ViewPassword varchar(${EntryDB.MaxPasswordLength}),
-                        CustomURL varchar(${EntryDB.MaxCustomURLLength}),
-                        ENC_IV varchar(24),
-                        ENC_KEY varchar(64),
-                        ENC_CODE varchar(32)
-                    )`,
-                });
-
                 // create version paste
                 // this is used to check if the server is outdated
                 await SQL.QueryOBJ({
@@ -963,7 +964,7 @@ export default class EntryDB {
             db: this.db,
             query: `SELECT * From Pastes${
                 !includePrivate ? ' WHERE ViewPassword = ""' : ""
-            } WHERE ${sql || "CustomURL IS NOT NULL"}`,
+            } WHERE ${sql || "CustomURL IS NOT NULL LIMIT 1000"}`,
             all: true,
             transaction: true,
             use: "Prepare",
@@ -996,7 +997,7 @@ export default class EntryDB {
         for (let paste of _export) {
             if (paste.GroupName)
                 paste.CustomURL = paste.CustomURL.replace(`${paste.GroupName}/`, "");
-                
+
             outputs.push(await this.CreatePaste(paste, true));
         }
 
@@ -1080,5 +1081,27 @@ export default class EntryDB {
             paste.EditPassword !== CreateHash("") && paste.EditPassword !== "";
 
         return [true, "Editable status:", editable];
+    }
+
+    /**
+     * @method DeletePastes
+     *
+     * @param {Paste[]} Pastes
+     * @param {string} password
+     * @return {Promise<[boolean, string, Partial<Paste>][]>} success, message, pastes
+     * @memberof EntryDB
+     */
+    public async DeletePastes(
+        Pastes: Paste[],
+        password: string
+    ): Promise<[boolean, string, Partial<Paste>][]> {
+        const outputs = [];
+
+        // delete pastes
+        for (let paste of Pastes)
+            outputs.push(await this.DeletePaste(paste, password));
+
+        // return
+        return outputs;
     }
 }

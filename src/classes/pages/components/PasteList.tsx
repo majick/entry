@@ -15,6 +15,8 @@ export default function PasteList(props: {
                     justifyContent: "space-between",
                     alignItems: "center",
                     marginBottom: "1rem",
+                    flexWrap: "wrap",
+                    gap: "0.5rem",
                 }}
             >
                 {(props.Selector && (
@@ -24,9 +26,9 @@ export default function PasteList(props: {
                             method={"POST"}
                             style={{
                                 display: "flex",
-                                justifyContent: "center",
                                 alignItems: "center",
                                 gap: "0.5rem",
+                                flexWrap: "wrap",
                             }}
                         >
                             <input
@@ -42,7 +44,7 @@ export default function PasteList(props: {
                                 placeholder={"Query"}
                                 value={props.Selector}
                                 style={{
-                                    background: "var(--background-surface)"
+                                    background: "var(--background-surface)",
                                 }}
                             />
 
@@ -51,91 +53,132 @@ export default function PasteList(props: {
                     </>
                 )) || <span></span>}
 
-                <span>{props.Pastes.length} results</span>
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "0.5rem",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    {props.ShowDelete && props.AdminPassword && (
+                        <form action="/admin/api/mass-delete" method={"POST"}>
+                            <input
+                                type="hidden"
+                                required
+                                name="AdminPassword"
+                                value={props.AdminPassword}
+                            />
+
+                            <input
+                                type="hidden"
+                                required
+                                name={"pastes"}
+                                value={JSON.stringify(props.Pastes)}
+                            />
+
+                            <button>Delete Results</button>
+                        </form>
+                    )}
+
+                    <span>{props.Pastes.length} results</span>
+                </div>
             </div>
 
-            <table
-                class={"force-full"}
+            <div
                 style={{
-                    width: "100%",
+                    maxWidth: "100vw",
+                    overflow: "auto",
                 }}
             >
-                <thead>
-                    <tr>
-                        <th>Custom URL</th>
-                        <th>Publish Date</th>
-                        <th>Edit Date</th>
-                        <th>Private</th>
-                        <th>Editable</th>
-                        <th>Open</th>
-                        {props.ShowDelete && <th>Delete</th>}
-                    </tr>
-                </thead>
+                <table
+                    class={"force-full"}
+                    style={{
+                        width: "100%",
+                    }}
+                >
+                    <thead>
+                        <tr>
+                            <th>Custom URL</th>
+                            <th>Publish Date</th>
+                            <th>Edit Date</th>
+                            <th>Private</th>
+                            <th>Editable</th>
+                            <th>Open</th>
+                            {props.ShowDelete && <th>Delete</th>}
+                        </tr>
+                    </thead>
 
-                <tbody>
-                    {props.Pastes.map((paste) => {
-                        return (
-                            <tr>
-                                <td
-                                    title={paste.CustomURL}
-                                    style={{
-                                        maxWidth: "5rem",
-                                        textOverflow: "ellipsis",
-                                        overflow: "hidden",
-                                        overflowWrap: "normal",
-                                        wordBreak: "normal",
-                                    }}
-                                >
-                                    {paste.CustomURL.split(":")[0]}
-                                </td>
-
-                                <td>{paste.PubDate}</td>
-                                <td>{paste.EditDate}</td>
-                                <td>
-                                    {paste.ViewPassword === "exists" ? "yes" : "no"}
-                                </td>
-                                <td>
-                                    {paste.EditPassword !== CreateHash("") &&
-                                    paste.GroupName !== "server" // server pastes cannot be edited
-                                        ? "yes"
-                                        : "no"}
-                                </td>
-
-                                <td>
-                                    <a href={`/${paste.CustomURL}`} target="_blank">
-                                        View Paste
-                                    </a>
-                                </td>
-
-                                {props.ShowDelete && (
-                                    <td>
-                                        <form
-                                            action="/admin/api/delete"
-                                            method={"POST"}
-                                        >
-                                            <input
-                                                type="hidden"
-                                                required
-                                                name="AdminPassword"
-                                                value={props.AdminPassword}
-                                            />
-
-                                            <input
-                                                type="hidden"
-                                                required
-                                                name={"CustomURL"}
-                                                value={paste.CustomURL}
-                                            />
-
-                                            <button>Delete Paste</button>
-                                        </form>
+                    <tbody>
+                        {props.Pastes.map((paste) => {
+                            return (
+                                <tr>
+                                    <td
+                                        title={paste.CustomURL}
+                                        style={{
+                                            maxWidth: "5rem",
+                                            textOverflow: "ellipsis",
+                                            overflow: "hidden",
+                                            overflowWrap: "normal",
+                                            wordBreak: "normal",
+                                        }}
+                                    >
+                                        {paste.CustomURL.split(":")[0]}
                                     </td>
-                                )}
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+
+                                    <td>{paste.PubDate}</td>
+                                    <td>{paste.EditDate}</td>
+                                    <td>
+                                        {paste.ViewPassword === "exists"
+                                            ? "yes"
+                                            : "no"}
+                                    </td>
+                                    <td>
+                                        {paste.EditPassword !== CreateHash("") &&
+                                        paste.GroupName !== "server" // server pastes cannot be edited
+                                            ? "yes"
+                                            : "no"}
+                                    </td>
+
+                                    <td>
+                                        <a
+                                            href={`/${paste.CustomURL}`}
+                                            target="_blank"
+                                        >
+                                            View Paste
+                                        </a>
+                                    </td>
+
+                                    {props.ShowDelete && (
+                                        <td>
+                                            <form
+                                                action="/admin/api/delete"
+                                                method={"POST"}
+                                            >
+                                                <input
+                                                    type="hidden"
+                                                    required
+                                                    name="AdminPassword"
+                                                    value={props.AdminPassword}
+                                                />
+
+                                                <input
+                                                    type="hidden"
+                                                    required
+                                                    name={"CustomURL"}
+                                                    value={paste.CustomURL}
+                                                />
+
+                                                <button>Delete Paste</button>
+                                            </form>
+                                        </td>
+                                    )}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

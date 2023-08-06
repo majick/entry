@@ -9,6 +9,10 @@ import { marked } from "marked";
 export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
+    // better paragraph spacing
+    // matches everything with two spaces before and after as a new paragraph
+    content = content.replaceAll(/(\n{2})(.*?)(\n{2})/gs, "<p>$2</p>");
+
     // allowed elements
     for (let element of ["hue", "sat", "lit", "theme", "comment", "p", "span"])
         content = content
@@ -41,6 +45,11 @@ export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll(/^(\#{3})\s*(.*)$/gm, "<h3>$2</h3>\n");
     content = content.replaceAll(/^(\#{2})\s*(.*)$/gm, "<h2>$2</h2>\n");
     content = content.replaceAll(/^(\#{1})\s*(.*)$/gm, "<h1>$2</h1>\n");
+
+    // horizontal rule
+    content = content.replaceAll(/^\*{3}$/gm, "\n<hr />\n");
+    content = content.replaceAll(/^-{3}$/gm, "\n<hr />\n");
+    content = content.replaceAll(/^_{3}$/gm, "\n<hr />\n");
 
     // update content to allow notes/warnings
     content = content.replaceAll(
@@ -83,11 +92,6 @@ export async function ParseMarkdown(content: string): Promise<string> {
         /(\*{3})(.*?)(\*{3})/g,
         "<strong><em>$2</em></strong>"
     );
-
-    // horizontal rule
-    content = content.replaceAll(/^\*{3}$/gm, "<hr />");
-    content = content.replaceAll(/^-{3}$/gm, "<hr />");
-    content = content.replaceAll(/^_{3}$/gm, "<hr />");
 
     // manual italics/bold because i've noticed it doesn't work (partially)
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/g, "<strong>$2</strong>");

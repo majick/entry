@@ -183,7 +183,9 @@ export class ManagePastes implements Endpoint {
                                 Pastes={pastes}
                                 ShowDelete={true}
                                 AdminPassword={body.AdminPassword}
-                                Selector={body.sql || "CustomURL IS NOT NULL"}
+                                Selector={
+                                    body.sql || "CustomURL IS NOT NULL LIMIT 1000"
+                                }
                             />
                         </div>
 
@@ -383,11 +385,13 @@ export class ExportPastesPage implements Endpoint {
 
                                 <form
                                     action="/admin/api/import"
+                                    encType={"multipart/form-data"}
                                     method="POST"
                                     style={{
                                         display: "flex",
                                         gap: "0.4rem",
                                         flexWrap: "wrap",
+                                        alignItems: "center",
                                     }}
                                 >
                                     <input
@@ -398,7 +402,7 @@ export class ExportPastesPage implements Endpoint {
                                     />
 
                                     <input
-                                        type="text"
+                                        type="file"
                                         name={"pastes"}
                                         required
                                         placeholder={"Exported Pastes JSON"}
@@ -479,10 +483,11 @@ export class APIExport implements Endpoint {
             } else continue;
 
         // return
-        return new Response(JSON.stringify(_export, undefined, 4), {
+        return new Response(JSON.stringify(_export), {
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "text/plain",
+                "Content-Disposition": `attachment; filename="entry-${new Date().toISOString()}.json"`,
             },
         });
     }
@@ -494,6 +499,45 @@ export class APIExport implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIImport implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(request, "multipart/form-data");
+
+        if (
+            WrongType &&
+            !(request.headers.get("content-type") || "").includes(
+                "multipart/form-data"
+            )
+        )
+            return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        body.pastes = await (body.pastes as Blob).text();
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // get pastes
+        const output = await db.ImportPastes(JSON.parse(body.pastes) || []);
+
+        // return
+        return new Response(JSON.stringify(output), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class APIMassDelete
+ * @implements {Endpoint}
+ */
+export class APIMassDelete implements Endpoint {
     public async request(request: Request): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
@@ -511,7 +555,10 @@ export class APIImport implements Endpoint {
             return new Login().request(request);
 
         // get pastes
-        const output = await db.ImportPastes(JSON.parse(body.pastes) || []);
+        const output = await db.DeletePastes(
+            JSON.parse(body.pastes),
+            body.AdminPassword
+        );
 
         // return
         return new Response(JSON.stringify(output), {
@@ -531,4 +578,5 @@ export default {
     ExportPastesPage,
     APIExport,
     APIImport,
+    APIMassDelete,
 };

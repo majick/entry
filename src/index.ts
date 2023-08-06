@@ -118,6 +118,7 @@ const config: HoneybeeConfig = {
         "/admin/api/delete": { Method: "POST", Page: Admin.APIDeletePaste },
         "/admin/api/export": { Method: "POST", Page: Admin.APIExport },
         "/admin/api/import": { Method: "POST", Page: Admin.APIImport },
+        "/admin/api/mass-delete": { Method: "POST", Page: Admin.APIMassDelete },
         // POST api
         "/api/new": { Method: "POST", Page: API.CreatePaste },
         "/api/edit": { Method: "POST", Page: API.EditPaste },

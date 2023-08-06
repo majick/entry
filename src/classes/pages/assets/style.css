@@ -51,7 +51,9 @@
     --red3: #ad0008;
 }
 
-html.dark-theme {
+html.dark-theme,
+html.purple-theme,
+html.blue-theme {
     --base-lit: 11%;
 
     --text-color: hsl(204, 4%, 80%);
@@ -286,7 +288,7 @@ ol > li {
     margin-top: 0.25rem;
 }
 
-p:not(.mdnote p):not(:last-of-type),
+p:not(.mdnote p),
 pre,
 table,
 ul,
@@ -335,7 +337,10 @@ input {
     padding: 0.5rem 0.75rem;
     font-size: 16px;
     height: max-content;
-    transition: all 0.15s;
+    transition:
+        box-shadow 0.15s,
+        opacity 0.15s,
+        filter 0.15s;
 }
 
 input:invalid:required {
@@ -423,8 +428,9 @@ span.highlight {
 
 table {
     border-collapse: collapse;
-    max-width: max-content;
-    min-width: 100%;
+    max-width: 100vw;
+    min-width: max-content;
+    overflow: auto;
 }
 
 table th {
@@ -644,8 +650,4 @@ hr + br {
 
 r {
     display: block;
-}
-
-r:not(:last-of-type) {
-    margin-bottom: 1rem;
 }
