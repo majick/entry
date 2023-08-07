@@ -113,7 +113,9 @@ export class WellKnown implements Endpoint {
                         activeHalfyear: 0,
                     },
                     // this, however, we can supply
-                    localPosts: (await db.GetAllPastes(true, true)).length,
+                    localPosts: (
+                        await db.GetAllPastes(true, true, "CustomURL IS NOT NULL")
+                    ).length,
                 },
                 openRegistrations: false, // there is no registration at all
                 metadata: {},
@@ -336,22 +338,65 @@ export class GetPasteFromURL implements Endpoint {
                                             </a>
                                         )}
 
-                                        <a
-                                            href={`/api/raw/${result.CustomURL}${
-                                                // add host server (if it exists)
-                                                result.HostServer
-                                                    ? `:${result.HostServer}`
-                                                    : ""
-                                            }`}
-                                        >
-                                            <button
-                                                style={{
-                                                    height: "max-content",
-                                                }}
+                                        <details>
+                                            <summary>Export</summary>
+
+                                            <div
+                                                class={
+                                                    "details-flex-content-list-box"
+                                                }
                                             >
-                                                Raw
-                                            </button>
-                                        </a>
+                                                <a
+                                                    class={"button secondary"}
+                                                    target={"_blank"}
+                                                    style={{
+                                                        width: "100%",
+                                                    }}
+                                                    href={`/api/raw/${
+                                                        result.CustomURL
+                                                    }${
+                                                        // add host server (if it exists)
+                                                        result.HostServer
+                                                            ? `:${result.HostServer}`
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    Raw
+                                                </a>
+
+                                                <a
+                                                    class={"button secondary"}
+                                                    style={{
+                                                        width: "100%",
+                                                    }}
+                                                    href="javascript:renderHTMLBlob()"
+                                                >
+                                                    HTML
+                                                </a>
+
+                                                <script
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: `window.renderHTMLBlob = () => {
+                                                            fetch("/api/raw/${result.CustomURL}").then((res) => res.text()).then((raw) => {
+                                                                fetch("/api/markdown", {
+                                                                    method: "POST",
+                                                                    headers: {
+                                                                        "Content-Type": "text/markdown"
+                                                                    },
+                                                                    body: raw,
+                                                                }).then((res) => res.text()).then((html) => {
+                                                                    const blob = new Blob([html + \`<style>hue,
+                                                                        sat, lit, theme, comment { display: none; }
+                                                                        r { display: block; }
+                                                                    </style>\`], { type: "text/html" });
+                                                                    window.open(URL.createObjectURL(blob));
+                                                                });
+                                                            })
+                                                        }`.replaceAll("\n", ""),
+                                                    }}
+                                                />
+                                            </div>
+                                        </details>
                                     </div>
 
                                     <div
@@ -651,6 +696,7 @@ export class GetAllPastesInGroupPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const group = url.pathname.slice("/group/".length, url.pathname.length);
+
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // get pastes
@@ -669,9 +715,26 @@ export class GetAllPastesInGroupPage implements Endpoint {
                     <>
                         <main>
                             <div className="tab-container editor-tab">
-                                <h1>
-                                    Pastes in groups/
-                                    {group.split(":")[0]}
+                                <h1
+                                    style={{
+                                        display: "flex",
+                                        gap: "1rem",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                    }}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="48"
+                                        height="48"
+                                        aria-label={"Open Folder Filled Symbol"}
+                                    >
+                                        <path d="M.513 1.513A1.75 1.75 0 0 1 1.75 1h3.5c.55 0 1.07.26 1.4.7l.9 1.2a.25.25 0 0 0 .2.1H13a1 1 0 0 1 1 1v.5H2.75a.75.75 0 0 0 0 1.5h11.978a1 1 0 0 1 .994 1.117L15 13.25A1.75 1.75 0 0 1 13.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75c0-.464.184-.91.513-1.237Z"></path>
+                                    </svg>
+
+                                    <span>{group.split(":")[0]}</span>
                                 </h1>
 
                                 <PasteList Pastes={pastes} />
@@ -728,7 +791,7 @@ export class GetRawPaste implements Endpoint {
 
         // return
         return new Response(result!.Content, {
-            status: 202,
+            status: 200,
             headers: {
                 "Content-Type": "text/plain",
             },

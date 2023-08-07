@@ -7,7 +7,7 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 
 import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./API";
-import { CreateHash, Decrypt } from "../db/Hash";
+import { Decrypt } from "../db/Hash";
 import EntryDB from "../db/EntryDB";
 
 import PasteList from "./components/PasteList";
@@ -28,10 +28,26 @@ function AdminNav(props: { active: string; pass: string }): any {
         <>
             <h1
                 style={{
+                    display: "flex",
+                    gap: "1rem",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexWrap: "wrap",
                     width: "100%",
                 }}
             >
-                {config.name} Admin
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="48"
+                    height="48"
+                    aria-label={"Server Symbol"}
+                >
+                    <path d="M10.75 6.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5ZM6 7.25a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 6 7.25Zm4 9a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Zm-3.25-.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5h-.5Z"></path>
+                    <path d="M3.25 2h17.5c.966 0 1.75.784 1.75 1.75v7c0 .372-.116.716-.314 1 .198.284.314.628.314 1v7a1.75 1.75 0 0 1-1.75 1.75H3.25a1.75 1.75 0 0 1-1.75-1.75v-7c0-.358.109-.707.314-1a1.741 1.741 0 0 1-.314-1v-7C1.5 2.784 2.284 2 3.25 2Zm0 10.5a.25.25 0 0 0-.25.25v7c0 .138.112.25.25.25h17.5a.25.25 0 0 0 .25-.25v-7a.25.25 0 0 0-.25-.25Zm0-1.5h17.5a.25.25 0 0 0 .25-.25v-7a.25.25 0 0 0-.25-.25H3.25a.25.25 0 0 0-.25.25v7c0 .138.112.25.25.25Z"></path>
+                </svg>
+
+                <span>{config.name} Admin</span>
             </h1>
 
             <div
@@ -52,7 +68,20 @@ function AdminNav(props: { active: string; pass: string }): any {
                         value={props.pass}
                     />
 
-                    <button class={props.active === "pastes" ? "active" : ""}>
+                    <button
+                        class={`secondary${
+                            props.active === "pastes" ? " active" : ""
+                        }`}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            height="16"
+                            aria-label={"Database Symbol"}
+                        >
+                            <path d="M1 3.5c0-.626.292-1.165.7-1.59.406-.422.956-.767 1.579-1.041C4.525.32 6.195 0 8 0c1.805 0 3.475.32 4.722.869.622.274 1.172.62 1.578 1.04.408.426.7.965.7 1.591v9c0 .626-.292 1.165-.7 1.59-.406.422-.956.767-1.579 1.041C11.476 15.68 9.806 16 8 16c-1.805 0-3.475-.32-4.721-.869-.623-.274-1.173-.62-1.579-1.04-.408-.426-.7-.965-.7-1.591Zm1.5 0c0 .133.058.318.282.551.227.237.591.483 1.101.707C4.898 5.205 6.353 5.5 8 5.5c1.646 0 3.101-.295 4.118-.742.508-.224.873-.471 1.1-.708.224-.232.282-.417.282-.55 0-.133-.058-.318-.282-.551-.227-.237-.591-.483-1.101-.707C11.102 1.795 9.647 1.5 8 1.5c-1.646 0-3.101.295-4.118.742-.508.224-.873.471-1.1.708-.224.232-.282.417-.282.55Zm0 4.5c0 .133.058.318.282.551.227.237.591.483 1.101.707C4.898 9.705 6.353 10 8 10c1.646 0 3.101-.295 4.118-.742.508-.224.873-.471 1.1-.708.224-.232.282-.417.282-.55V5.724c-.241.15-.503.286-.778.407C11.475 6.68 9.805 7 8 7c-1.805 0-3.475-.32-4.721-.869a6.15 6.15 0 0 1-.779-.407Zm0 2.225V12.5c0 .133.058.318.282.55.227.237.592.484 1.1.708 1.016.447 2.471.742 4.118.742 1.647 0 3.102-.295 4.117-.742.51-.224.874-.47 1.101-.707.224-.233.282-.418.282-.551v-2.275c-.241.15-.503.285-.778.406-1.247.549-2.917.869-4.722.869-1.805 0-3.475-.32-4.721-.869a6.327 6.327 0 0 1-.779-.406Z"></path>
+                        </svg>{" "}
                         Manage Pastes
                     </button>
                 </form>
@@ -65,20 +94,42 @@ function AdminNav(props: { active: string; pass: string }): any {
                         value={props.pass}
                     />
 
-                    <button class={props.active === "export" ? "active" : ""}>
+                    <button
+                        class={`secondary${
+                            props.active === "export" ? " active" : ""
+                        }`}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            height="16"
+                            aria-label={"Download Symbol"}
+                        >
+                            <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                            <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                        </svg>{" "}
                         Export/Import
                     </button>
                 </form>
 
-                <a href="https://codeberg.org/hkau/entry">
-                    <button>View Source</button>
+                <a href="https://codeberg.org/hkau/entry" class={"button secondary"}>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Code Symbol"}
+                    >
+                        <path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path>
+                    </svg>{" "}
+                    View Source
                 </a>
             </div>
 
             <style
                 dangerouslySetInnerHTML={{
-                    __html: `button { background: var(--background-surface); }
-                    button.active { box-shadow: 0 0 1px var(--blue2); }`,
+                    __html: "button.active { box-shadow: 0 0 1px var(--blue2); }",
                 }}
             />
 
@@ -248,7 +299,7 @@ export class ManagePastes implements Endpoint {
                                             disabled
                                         />
 
-                                        <button>Query</button>
+                                        <button class={"secondary"}>Query</button>
                                     </div>
                                 </form>
                             </div>
@@ -452,7 +503,19 @@ export class ExportPastesPage implements Endpoint {
                                         value={body.AdminPassword}
                                     />
 
-                                    <button>Export Pastes</button>
+                                    <button class={"secondary"}>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Export Symbol"}
+                                        >
+                                            <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                            <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                                        </svg>{" "}
+                                        Export Pastes
+                                    </button>
                                 </form>
 
                                 <hr style={{ width: "100%" }} />
@@ -483,7 +546,19 @@ export class ExportPastesPage implements Endpoint {
                                         minLength={2}
                                     />
 
-                                    <button>Import Pastes</button>
+                                    <button class={"secondary"}>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Upload Symbol"}
+                                        >
+                                            <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                            <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
+                                        </svg>{" "}
+                                        Import Pastes
+                                    </button>
                                 </form>
                             </div>
                         </div>

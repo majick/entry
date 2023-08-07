@@ -24,6 +24,12 @@
         0.4
     );
 
+    --background-surface1-5: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) + 12.5%)
+    );
+
     --background-surface2: hsl(
         var(--base-hue),
         var(--base-sat),
@@ -36,7 +42,7 @@
         calc(var(--base-lit) + 23%)
     );
 
-    --text-color: hsl(208, 7%, 42%);
+    --text-color: hsl(208, 7%, `%);
     --text-color-faded: hsl(208, 7%, 38%);
     --blue: #2d6886;
     --blue1: #d9edf7;
@@ -120,6 +126,10 @@ main {
     margin-bottom: 0.5rem;
 }
 
+svg {
+    fill: currentColor;
+}
+
 .tab-container {
     background: var(--background-surface1);
     padding: 1.5rem;
@@ -149,11 +159,14 @@ button,
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: color 0.1s;
+    transition:
+        color 0.1s,
+        background 0.1s;
     height: max-content;
     width: max-content;
     font-weight: normal;
     text-decoration: none;
+    gap: 0.5rem;
 }
 
 button.secondary,
@@ -163,7 +176,13 @@ button.secondary,
 
 button:hover,
 .button:hover {
+    background: var(--background-surface1-5);
+}
+
+button.secondary:hover,
+.button.secondary:hover {
     color: var(--blue);
+    background: var(--background-surface);
 }
 
 .tabbar {
@@ -173,6 +192,10 @@ button:hover,
 .tabbar button {
     padding: 0.5rem 1rem;
     border-radius: 0.4rem 0.4rem 0 0;
+}
+
+.tabbar button:not(.secondary):hover {
+    background: var(--background-surface1);
 }
 
 .mdnote {
@@ -402,14 +425,6 @@ textarea.secondary {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-.checkbox-container .check {
-    fill: var(--green);
-}
-
-.checkbox-container .x {
-    fill: var(--red3);
 }
 
 .checkbox-container input[type="checkbox"] {

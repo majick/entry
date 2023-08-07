@@ -499,12 +499,20 @@ export default class EntryDB {
             // somebody could make a paste named "login" and the paste would have the URL
             // of "/admin/login" which would make the real admin login page either inaccessible
             // OR make the paste inaccessible!
-            const NotAllowed = ["admin", "api", "group"];
+            const NotAllowed = ["admin", "api", "group", "new", ""];
 
             if (NotAllowed.includes(PasteInfo.GroupName))
                 return [
                     false,
                     `Group name cannot be any of the following: ${JSON.stringify(
+                        NotAllowed
+                    )}`,
+                    PasteInfo,
+                ];
+            else if (NotAllowed.includes(PasteInfo.CustomURL))
+                return [
+                    false,
+                    `Paste name cannot be any of the following: ${JSON.stringify(
                         NotAllowed
                     )}`,
                     PasteInfo,
