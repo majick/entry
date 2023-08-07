@@ -1104,4 +1104,42 @@ export default class EntryDB {
         // return
         return outputs;
     }
+
+    /**
+     * @method DirectSQL
+     *
+     * @param {string} sql
+     * @param {boolean} [get=false]
+     * @param {boolean} [all=false]
+     * @param {string} password
+     * @return {Promise<[boolean, string, any?]>}
+     * @memberof EntryDB
+     */
+    public async DirectSQL(
+        sql: string,
+        get: boolean = false,
+        all: boolean = false,
+        password: string
+    ): Promise<[boolean, string, any?]> {
+        // verify password
+        if (password !== (await EntryDB.GetConfig())?.admin)
+            return [false, "Invalid password"];
+
+        // ...
+        if (get) all = false;
+        else if (all) get = false;
+
+        // run query
+        const result = await SQL.QueryOBJ({
+            db: this.db,
+            query: sql,
+            transaction: true,
+            use: "Prepare",
+            get,
+            all,
+        });
+
+        // return
+        return [true, "Ran query", result];
+    }
 }

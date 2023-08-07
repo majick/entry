@@ -329,7 +329,8 @@ pre {
     height: max-content;
 }
 
-input {
+input,
+textarea {
     background: var(--background-surface1);
     color: currentColor;
     border: none;
@@ -337,26 +338,41 @@ input {
     padding: 0.5rem 0.75rem;
     font-size: 16px;
     height: max-content;
+    max-width: 100%;
     transition:
         box-shadow 0.15s,
         opacity 0.15s,
         filter 0.15s;
 }
 
-input:invalid:required {
+input:invalid:required,
+textarea:invalid:required {
     box-shadow: inset 0 0 0 2px var(--red);
 }
 
-input:invalid {
+input:invalid,
+textarea:invalid {
     /* so, the idea behind this is because the input is technically wrong... but it isn't required,
        we're only going to show a yellow "border" thing! */
     box-shadow: inset 0 0 0 2px var(--yellow);
 }
 
-input:disabled {
+input:disabled,
+textarea:disabled,
+.checkbox-container.disabled {
     opacity: 50%;
     box-shadow: inset 0 0 0 2px var(--background-surface3);
     filter: opacity(50%);
+    cursor: not-allowed !important;
+}
+
+input.secondary,
+textarea.secondary {
+    background: var(--background-surface);
+}
+
+.checkbox-container.secondary {
+    background: var(--background-surface);
 }
 
 .checkbox-container {
@@ -368,6 +384,7 @@ input:disabled {
     height: 2.5rem; /* should match the height of an input element */
     width: 2.5rem;
     cursor: pointer;
+    gap: 0.5rem;
 }
 
 .checkbox-container + input {

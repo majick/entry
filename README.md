@@ -52,6 +52,8 @@ Entry supports extra features that Rentry does not support. They are detailed be
 - `POST /admin/api/delete`, Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
 - `POST /admin/api/export`, Get JSON of all pastes in server (decrypted): `AdminPassword`
 - `POST /admin/api/import`, Import pastes JSON: `AdminPassword, pastes` (with `paste` being the JSON export from `/admin/api/export`)
+- `POST /admin/api/mass-delete`, delete pastes by sql query: `AdminPassword, pastes`
+- `POST /admin/api/sql`, directly run sql on the server: `AdminPassword, sql, get, all` (`get` and `all` represent the type of operation, `get` returns one result while `all` returns... all results)
 
 ### (very basic) Federation
 

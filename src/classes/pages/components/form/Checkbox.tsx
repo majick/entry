@@ -2,12 +2,20 @@ export default function Checkbox(props: {
     name: string;
     title?: string;
     checked?: boolean;
+    disabled?: boolean;
+    label?: boolean;
+    secondary?: boolean;
 }) {
     return (
         <label
-            className="checkbox-container"
+            className={`checkbox-container${props.secondary ? " secondary" : ""}${
+                props.disabled ? " disabled" : ""
+            }`}
             for={props.name}
             title={props.title || "Checkbox"}
+            style={{
+                width: props.label ? "fit-content" : "2.5rem",
+            }}
         >
             <input
                 type="checkbox"
@@ -15,6 +23,7 @@ export default function Checkbox(props: {
                 id={props.name}
                 checked={props.checked || false}
                 value={"true"}
+                disabled={props.disabled}
             />
 
             <div className="check">
@@ -38,6 +47,8 @@ export default function Checkbox(props: {
                     <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
                 </svg>
             </div>
+
+            {props.label && <span class={"checkbox-label"}>{props.title}</span>}
         </label>
     );
 }

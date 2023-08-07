@@ -14,6 +14,7 @@ import PasteList from "./components/PasteList";
 import Footer from "./components/Footer";
 
 import { Config } from "../..";
+import Checkbox from "./components/form/Checkbox";
 let config: Config;
 
 /**
@@ -179,6 +180,85 @@ export class ManagePastes implements Endpoint {
                         >
                             <AdminNav active="pastes" pass={body.AdminPassword} />
 
+                            <p>
+                                <b>Direct SQL</b>
+                            </p>
+
+                            <div>
+                                <form
+                                    action="/admin/api/sql"
+                                    method={"POST"}
+                                    target={"_blank"}
+                                    style={{
+                                        display: "flex",
+                                        gap: "0.5rem",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                    }}
+                                >
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name="AdminPassword"
+                                        value={body.AdminPassword}
+                                    />
+
+                                    <input
+                                        type="text"
+                                        name={"sql"}
+                                        id={"sql"}
+                                        placeholder={
+                                            "SELECT * FROM Pastes LIMIT 100"
+                                        }
+                                        className="secondary"
+                                        autoComplete={"off"}
+                                        style={{
+                                            width: "40rem",
+                                        }}
+                                    />
+
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "0.5rem",
+                                            flexWrap: "wrap",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <Checkbox
+                                            name="get"
+                                            title="get"
+                                            label={true}
+                                            secondary={true}
+                                        />
+
+                                        <Checkbox
+                                            name="all"
+                                            title="all"
+                                            label={true}
+                                            secondary={true}
+                                        />
+
+                                        <Checkbox
+                                            name="cache"
+                                            title="cache"
+                                            label={true}
+                                            secondary={true}
+                                            disabled
+                                        />
+
+                                        <button>Query</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <hr />
+
+                            <p>
+                                <b>Paste Search</b>
+                            </p>
+
                             <PasteList
                                 Pastes={pastes}
                                 ShowDelete={true}
@@ -191,12 +271,6 @@ export class ManagePastes implements Endpoint {
 
                         <Footer />
                     </main>
-
-                    <style
-                        dangerouslySetInnerHTML={{
-                            __html: `form button { margin: auto; }`,
-                        }}
-                    />
                 </>,
                 <>
                     <title>{config.name} Admin</title>
@@ -570,6 +644,46 @@ export class APIMassDelete implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class APISQL
+ * @implements {Endpoint}
+ */
+export class APISQL implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // run query
+        const output = await db.DirectSQL(
+            body.sql,
+            body.get !== undefined,
+            body.all !== undefined,
+            body.AdminPassword
+        );
+
+        // return
+        return new Response(JSON.stringify(output), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     Login,
@@ -579,4 +693,5 @@ export default {
     APIExport,
     APIImport,
     APIMassDelete,
+    APISQL,
 };
