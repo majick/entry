@@ -135,9 +135,7 @@ export default class Home implements Endpoint {
                                             flexWrap: "wrap",
                                         }}
                                     >
-                                        {
-                                            // top row
-                                        }
+                                        {/* top row */}
 
                                         <button style={{ minWidth: "5rem" }}>
                                             Go
@@ -236,7 +234,7 @@ export default class Home implements Endpoint {
                                     </div>
 
                                     <hr style={{ margin: "0.25rem 0" }} />
-
+                                    
                                     <div
                                         style={{
                                             display: "flex",
@@ -256,9 +254,7 @@ export default class Home implements Endpoint {
                                             Optional
                                         </h5>
 
-                                        {
-                                            // bottom row
-                                        }
+                                        {/* bottom row */}
 
                                         <div
                                             style={{

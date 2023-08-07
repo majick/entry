@@ -23,6 +23,9 @@ export async function ParseMarkdown(content: string): Promise<string> {
             .replaceAll("-&gt;", "->")
             .replaceAll("&lt;-", "<-");
 
+    // allow html escapes (prefixed by &E)
+    content = content.replaceAll(/(&!)(.*?);/g, "&$2;");
+
     // code blocks
 
     // ...fenced code block
@@ -81,6 +84,12 @@ export async function ParseMarkdown(content: string): Promise<string> {
         // -> -> (right)
         /(\-\>)(.*?)(\-\>)\s*\.*/gs,
         '<r style="text-align: right;">$2</r>'
+    );
+
+    // ...catch-all solution
+    content = content.replaceAll(
+        /(!!)(?<DIRECTION>.*?)(!!)(.*?)(!!)/gs,
+        '<r style="text-align: $<DIRECTION>;">$4</r>'
     );
 
     // update content to allow highlighting
