@@ -42,6 +42,7 @@ Entry supports extra features that Rentry does not support. They are detailed be
 - `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
+- `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
 - `GET  /api/group/{group}`, Get all pastes in specified group

@@ -526,7 +526,7 @@ export class DecryptPaste implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
 
-        // get drcrypted
+        // get decrypted
         const decrypted = await this.GetDecrypted(body);
         if (!decrypted)
             return new Response("Failed to decrypt", {
@@ -677,6 +677,34 @@ export class GetRawPaste implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class RenderMarkdown
+ * @implements {Endpoint}
+ */
+export class RenderMarkdown implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(request, "text/markdown");
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = await request.text();
+
+        // render
+        const rendered = await ParseMarkdown(body);
+
+        // return
+        return new Response(rendered, {
+            status: 200,
+            headers: {
+                "Content-Type": "text/html",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -691,4 +719,5 @@ export default {
     GetAllPastesInGroup,
     GetAllPastesInGroupPage, // html form of the api (previous)
     GetRawPaste,
+    RenderMarkdown,
 };

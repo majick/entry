@@ -124,6 +124,7 @@ const config: HoneybeeConfig = {
         "/api/edit": { Method: "POST", Page: API.EditPaste },
         "/api/delete": { Method: "POST", Page: API.DeletePaste },
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
+        "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
         // GET root
         "/": {
             // return paste view, will return homepage if no paste is provided
