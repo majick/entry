@@ -127,6 +127,7 @@ const config: HoneybeeConfig = {
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
         "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
         // GET root
+        "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/": {
             // return paste view, will return homepage if no paste is provided
             // at the end so it tests this last because everything starts with /, which means
@@ -134,6 +135,8 @@ const config: HoneybeeConfig = {
             Type: "begins",
             Page: API.GetPasteFromURL,
         },
+        // POST root
+        "/paste/dec/": { Method: "POST", Type: "begins", Page: API.GetPasteFromURL },
     },
 };
 

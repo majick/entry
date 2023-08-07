@@ -1,3 +1,9 @@
+/**
+ * @file Handle Markdown
+ * @name Markdown.ts
+ * @license MIT
+ */
+
 import { marked } from "marked";
 
 /**
@@ -118,6 +124,7 @@ export async function ParseMarkdown(content: string): Promise<string> {
         silent: true,
         breaks: true,
         async: true,
+        mangle: false,
     });
 }
 

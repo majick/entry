@@ -129,7 +129,7 @@ export default function PasteList(props: {
                                     <td>{paste.PubDate}</td>
                                     <td>{paste.EditDate}</td>
                                     <td>
-                                        {paste.ViewPassword === "exists"
+                                        {paste.ViewPassword !== ""
                                             ? "yes"
                                             : "no"}
                                     </td>

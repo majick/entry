@@ -68,6 +68,64 @@ export function VerifyContentType(
 
 /**
  * @export
+ * @class WellKnown
+ * @implements {Endpoint}
+ */
+export class WellKnown implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        function ReturnJSON(json: { [key: string]: any }): Response {
+            return new Response(JSON.stringify(json), {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        }
+
+        // nodeinfo
+        if (url.pathname === "/.well-known/nodeinfo")
+            return ReturnJSON({
+                links: [
+                    {
+                        rel: "http://nodeinfo.diaspora.software/ns/schema/2.0",
+                        href: `${url.origin}/.well-known/nodeinfo/2.0`,
+                    },
+                ],
+            });
+        else if (url.pathname === "/.well-known/nodeinfo/2.0")
+            return ReturnJSON({
+                version: "2.0",
+                software: {
+                    name: "entry",
+                    version: pack.version,
+                },
+                protocols: ["entry"],
+                services: {
+                    outbound: [],
+                    inbound: [],
+                },
+                usage: {
+                    users: {
+                        // entry is completely anonymous, user count is forever 0
+                        total: 0,
+                        activeMonth: 0,
+                        activeHalfyear: 0,
+                    },
+                    // this, however, we can supply
+                    localPosts: (await db.GetAllPastes(true, true)).length,
+                },
+                openRegistrations: false, // there is no registration at all
+                metadata: {},
+            });
+
+        // default
+        return new _404Page().request(request);
+    }
+}
+
+/**
+ * @export
  * @class CreatePaste
  * @implements {Endpoint}
  */
@@ -116,7 +174,8 @@ export class GetPasteFromURL implements Endpoint {
         const search = new URLSearchParams(url.search);
 
         // get paste name
-        const name = url.pathname.slice(1, url.pathname.length);
+        let name = url.pathname.slice(1, url.pathname.length);
+        if (name.startsWith("paste/dec/")) name = name.split("paste/dec/")[1];
 
         // return home if name === ""
         if (name === "") return new Home().request(request);
@@ -709,6 +768,7 @@ export class RenderMarkdown implements Endpoint {
 export default {
     DefaultHeaders,
     VerifyContentType,
+    WellKnown,
     CreatePaste,
     GetPasteFromURL,
     GetPasteRecord, // json form of the page (previous)

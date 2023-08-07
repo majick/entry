@@ -1140,6 +1140,6 @@ export default class EntryDB {
         });
 
         // return
-        return [true, "Ran query", result];
+        return [true, sql, result];
     }
 }
