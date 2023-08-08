@@ -103,6 +103,14 @@ export default function Footer() {
                     }`,
                 }}
             />
+
+            {/* localize dates */}
+            <script
+                dangerouslySetInnerHTML={{
+                    __html: `for (const element of document.querySelectorAll(".utc-date-to-localize"))
+                                element.innerText = new Date(element.innerText).toLocaleString();`,
+                }}
+            />
         </div>
     );
 }

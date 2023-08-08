@@ -362,6 +362,7 @@ textarea {
     font-size: 16px;
     height: max-content;
     max-width: 100%;
+    border-radius: 0 !important;
     transition:
         box-shadow 0.15s,
         opacity 0.15s,

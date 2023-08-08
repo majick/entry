@@ -339,7 +339,13 @@ export class GetPasteFromURL implements Endpoint {
                                         )}
 
                                         <details>
-                                            <summary>Export</summary>
+                                            <summary
+                                                style={{
+                                                    fontWeight: "normal",
+                                                }}
+                                            >
+                                                Export
+                                            </summary>
 
                                             <div
                                                 class={
@@ -413,8 +419,19 @@ export class GetPasteFromURL implements Endpoint {
                                             <span>Expires: {result.ExpireOn}</span>
                                         )}
 
-                                        <span>Pub: {result.PubDate}</span>
-                                        <span>Edit: {result.EditDate}</span>
+                                        <span title={result.PubDate}>
+                                            Pub:{" "}
+                                            <span className="utc-date-to-localize">
+                                                {result.PubDate}
+                                            </span>
+                                        </span>
+
+                                        <span title={result.EditDate}>
+                                            Edit:{" "}
+                                            <span className="utc-date-to-localize">
+                                                {result.EditDate}
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>

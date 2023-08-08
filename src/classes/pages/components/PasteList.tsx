@@ -74,7 +74,9 @@ export default function PasteList(props: {
                                 type="hidden"
                                 required
                                 name={"pastes"}
-                                value={JSON.stringify(props.Pastes)}
+                                value={JSON.stringify(
+                                    props.Pastes.map((p) => p.CustomURL)
+                                )}
                             />
 
                             <button class={"secondary"}>Delete Results</button>
@@ -101,7 +103,9 @@ export default function PasteList(props: {
 
                         <span>
                             <b>{props.Pastes.length}</b> result
-                            {props.Pastes.length > 1 ? "s" : ""}
+                            {props.Pastes.length > 1 || props.Pastes.length === 0
+                                ? "s"
+                                : ""}
                         </span>
                     </div>
                 </div>
@@ -148,8 +152,19 @@ export default function PasteList(props: {
                                         {paste.CustomURL.split(":")[0]}
                                     </td>
 
-                                    <td title={paste.PubDate}>{paste.PubDate}</td>
-                                    <td title={paste.EditDate}>{paste.EditDate}</td>
+                                    <td
+                                        class="utc-date-to-localize"
+                                        title={paste.PubDate}
+                                    >
+                                        {paste.PubDate}
+                                    </td>
+
+                                    <td
+                                        class="utc-date-to-localize"
+                                        title={paste.EditDate}
+                                    >
+                                        {paste.EditDate}
+                                    </td>
 
                                     <td>
                                         {paste.ViewPassword !== "" ? "yes" : "no"}

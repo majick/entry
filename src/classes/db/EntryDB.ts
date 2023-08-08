@@ -1094,20 +1094,28 @@ export default class EntryDB {
     /**
      * @method DeletePastes
      *
-     * @param {Paste[]} Pastes
+     * @param {string[]} Pastes array of customurls to delete
      * @param {string} password
      * @return {Promise<[boolean, string, Partial<Paste>][]>} success, message, pastes
      * @memberof EntryDB
      */
     public async DeletePastes(
-        Pastes: Paste[],
+        Pastes: string[],
         password: string
     ): Promise<[boolean, string, Partial<Paste>][]> {
         const outputs = [];
 
         // delete pastes
         for (let paste of Pastes)
-            outputs.push(await this.DeletePaste(paste, password));
+            outputs.push(
+                await this.DeletePaste(
+                    {
+                        CustomURL: paste,
+                        EditPassword: password,
+                    },
+                    password
+                )
+            );
 
         // return
         return outputs;
