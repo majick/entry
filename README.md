@@ -26,11 +26,11 @@ Manually launch once after installing to start the setup prompts. These will all
 
 Entry was originally written as a replacement for [Rentry](https://rentry.co). Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
 
-| Rentry                                                                                                                       | Entry                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| When deleting pastes, Rentry uses `POST /api/edit` with `{ delete: "delete" }`                                               | Entry uses `POST /api/delete`                                                                                                                                                                                       |
-| Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports a `GET /api/get` endpoint, which returns the saved record for the paste without the `EditPassword` hash. Any paste can be viewed raw just by clicking the "Edit" button when viewing the paste. |
-| Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews         |
+| Rentry                                                                                                                       | Entry                                                                                                                                                                                                       |
+|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| When deleting pastes, Rentry uses `POST /api/edit` with `{ delete: "delete" }`                                               | Entry uses `POST /api/delete`                                                                                                                                                                               |
+| Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports exporting as a raw Markdown file or a rendered HTML file                                                                                                                                |
+| Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews |
 
 Entry supports extra features that Rentry does not support. They are detailed below.
 
@@ -45,6 +45,7 @@ Entry supports extra features that Rentry does not support. They are detailed be
 - `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
+- `GET  /api/html/{paste}`, Get rendered paste content
 - `GET  /api/group/{group}`, Get all pastes in specified group
 
 #### Admin Endpoints

@@ -112,6 +112,7 @@ const config: HoneybeeConfig = {
         "/api/get": { Type: "begins", Page: API.GetPasteRecord },
         "/api/group": { Type: "begins", Page: API.GetAllPastesInGroup },
         "/api/raw": { Type: "begins", Page: API.GetRawPaste },
+        "/api/html": { Type: "begins", Page: API.GetPasteHTML },
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },

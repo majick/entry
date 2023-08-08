@@ -275,13 +275,13 @@ export class GetPasteFromURL implements Endpoint {
                                     marginTop: "0.5rem",
                                     display: "flex",
                                     justifyContent: "space-between",
-                                    alignContent: "center",
                                 }}
                             >
                                 <div
                                     style={{
                                         display: "flex",
                                         justifyContent: "space-between",
+                                        alignItems: "flex-start",
                                         gap: "0.5rem",
                                         width: "100%",
                                     }}
@@ -290,6 +290,7 @@ export class GetPasteFromURL implements Endpoint {
                                         style={{
                                             display: "flex",
                                             gap: "0.5rem",
+                                            flexWrap: "wrap",
                                         }}
                                     >
                                         {editable[2] === true && (
@@ -375,32 +376,18 @@ export class GetPasteFromURL implements Endpoint {
                                                     style={{
                                                         width: "100%",
                                                     }}
-                                                    href="javascript:renderHTMLBlob()"
+                                                    href={`/api/html/${
+                                                        result.CustomURL
+                                                    }${
+                                                        // add host server (if it exists)
+                                                        result.HostServer
+                                                            ? `:${result.HostServer}`
+                                                            : ""
+                                                    }`}
+                                                    target={"_blank"}
                                                 >
                                                     HTML
                                                 </a>
-
-                                                <script
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: `window.renderHTMLBlob = () => {
-                                                            fetch("/api/raw/${result.CustomURL}").then((res) => res.text()).then((raw) => {
-                                                                fetch("/api/markdown", {
-                                                                    method: "POST",
-                                                                    headers: {
-                                                                        "Content-Type": "text/markdown"
-                                                                    },
-                                                                    body: raw,
-                                                                }).then((res) => res.text()).then((html) => {
-                                                                    const blob = new Blob([html + \`<style>hue,
-                                                                        sat, lit, theme, comment { display: none; }
-                                                                        r { display: block; }
-                                                                    </style>\`], { type: "text/html" });
-                                                                    window.open(URL.createObjectURL(blob));
-                                                                });
-                                                            })
-                                                        }`.replaceAll("\n", ""),
-                                                    }}
-                                                />
                                             </div>
                                         </details>
                                     </div>
@@ -786,8 +773,6 @@ export class GetAllPastesInGroupPage implements Endpoint {
 }
 
 /**
- * @method GetRawPaste
- *
  * @export
  * @class GetRawPaste
  * @implements {Endpoint}
@@ -844,6 +829,53 @@ export class RenderMarkdown implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetPasteHTML
+ * @implements {Endpoint}
+ */
+export class GetPasteHTML implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get paste name
+        const name = url.pathname.slice("/api/html/".length, url.pathname.length);
+
+        // return home if name === ""
+        if (name === "") return new _404Page().request(request);
+
+        // attempt to get paste
+        const result = await db.GetPasteFromURL(name);
+        if (!result) return new _404Page().request(request);
+
+        result.Content = `<comment>
+            HTML export includes a reference to the Entry stylesheet for styles (/style.css)
+            You can take that too by copying the contents of https://www.sentrytwo.com/style.css into
+            a style tag in the head of this document, instead of the link to the stylesheet
+        </comment>\n${result.Content}`;
+
+        // render
+        const rendered = Renderer.Render(
+            <div
+                dangerouslySetInnerHTML={{
+                    __html: await ParseMarkdown(result.Content),
+                }}
+            />,
+            <>
+                <title>{result.CustomURL}</title>
+            </>
+        );
+
+        // return
+        return new Response(rendered, {
+            status: 200,
+            headers: {
+                "Content-Type": "text/html",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -860,4 +892,5 @@ export default {
     GetAllPastesInGroupPage, // html form of the api (previous)
     GetRawPaste,
     RenderMarkdown,
+    GetPasteHTML,
 };

@@ -169,6 +169,7 @@ export default function PasteList(props: {
                                     <td>
                                         {paste.ViewPassword !== "" ? "yes" : "no"}
                                     </td>
+                                    
                                     <td>
                                         {paste.EditPassword !== CreateHash("") &&
                                         paste.GroupName !== "server" // server pastes cannot be edited
