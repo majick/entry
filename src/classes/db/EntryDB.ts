@@ -298,7 +298,7 @@ export default class EntryDB {
      * @return {(Promise<Paste | undefined>)}
      * @memberof EntryDB
      */
-    public GetPasteFromURL(PasteURL: string): Promise<Paste | undefined> {
+    public GetPasteFromURL(PasteURL: string): Promise<Partial<Paste> | undefined> {
         return new Promise(async (resolve) => {
             // check if paste is from another server
             const server = PasteURL.split(":")[1];
@@ -344,10 +344,7 @@ export default class EntryDB {
 
                 // just send an /api/get request to the other server
                 const request = fetch(
-                    server !== "rentry.co"
-                        ? `https://${server}/api/get/${PasteURL.split(":")[0]}`
-                        : // rentry compatibility
-                          `https://${server}/api/raw/${PasteURL.split(":")[0]}`
+                    `https://${server}/api/raw/${PasteURL.split(":")[0]}`
                 );
 
                 // handle bad
@@ -358,28 +355,28 @@ export default class EntryDB {
                 // get record
                 const record = await request;
 
-                // rentry compatibility
-                if (server === "rentry.co")
-                    record.headers.set("Content-Type", "application/json");
-
                 // handle bad (again)
-                if (record.headers.get("Content-Type") !== "application/json")
+                if (!record.headers.get("Content-Type")!.includes("text/plain"))
                     return resolve(undefined);
 
                 // get body
-                const json = (await record.json()) as Paste;
-                json.HostServer = server;
-
-                // rentry compatibility
-                if (server === "rentry.co") {
-                    json.Content = (json as any).content;
-                    json.CustomURL = PasteURL.split(":")[0];
-                    json.PubDate = "?";
-                    json.EditDate = "?";
-                }
+                const text =
+                    server !== "rentry.co"
+                        ? await record.text()
+                        : (await record.json()).content;
 
                 // return
-                if (record.ok) return resolve(json);
+                if (record.ok)
+                    return resolve({
+                        CustomURL: PasteURL,
+                        Content: text,
+                        PubDate:
+                            (await request).headers.get("X-Paste-PubDate") ||
+                            new Date().toUTCString(),
+                        EditDate:
+                            (await request).headers.get("X-Paste-EditDate") ||
+                            new Date().toUTCString(),
+                    });
                 else return resolve(undefined);
             }
         });

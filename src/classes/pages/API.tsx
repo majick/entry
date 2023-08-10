@@ -183,7 +183,7 @@ export class GetPasteFromURL implements Endpoint {
         if (name === "") return new Home().request(request);
 
         // attempt to get paste
-        const result = await db.GetPasteFromURL(name);
+        const result = (await db.GetPasteFromURL(name)) as Paste;
 
         // check if paste is editable
         const editable = await db.CheckPasteEditable(name);
@@ -471,9 +471,9 @@ export class GetPasteRecord implements Endpoint {
         const url = new URL(request.url);
 
         // get paste
-        let paste = await db.GetPasteFromURL(
+        let paste = (await db.GetPasteFromURL(
             url.pathname.slice("/api/get/".length, url.pathname.length)
-        );
+        )) as Paste;
 
         if (paste) paste = db.CleanPaste(paste); // <- this is VERY important, we don't want to send passwords back!!!
 
@@ -524,7 +524,7 @@ export class EditPaste implements Endpoint {
                 Content: body.NewContent,
                 EditPassword: body.NewEditPassword || body.OldEditPassword,
                 CustomURL: body.NewURL || body.OldURL,
-                PubDate: (paste || { PubDate: "" }).PubDate,
+                PubDate: (paste || { PubDate: "" }).PubDate!,
                 EditDate: new Date().toUTCString(),
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             }
@@ -607,7 +607,7 @@ export class DecryptPaste implements Endpoint {
         if (!body.CustomURL) return undefined;
 
         // get paste
-        const paste = await db.GetPasteFromURL(body.CustomURL);
+        const paste = (await db.GetPasteFromURL(body.CustomURL)) as Paste;
         if (!paste) return undefined;
 
         // get encryption information
@@ -789,13 +789,15 @@ export class GetRawPaste implements Endpoint {
         if (name === "") return new _404Page().request(request);
 
         // attempt to get paste
-        const result = await db.GetPasteFromURL(name);
+        const result = (await db.GetPasteFromURL(name)) as Paste;
 
         // return
         return new Response(result!.Content, {
             status: 200,
             headers: {
                 "Content-Type": "text/plain",
+                "X-Paste-PubDate": result.PubDate,
+                "X-Paste-EditDate": result.EditDate,
             },
         });
     }
@@ -845,14 +847,8 @@ export class GetPasteHTML implements Endpoint {
         if (name === "") return new _404Page().request(request);
 
         // attempt to get paste
-        const result = await db.GetPasteFromURL(name);
+        const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
-
-        result.Content = `<comment>
-            HTML export includes a reference to the Entry stylesheet for styles (/style.css)
-            You can take that too by copying the contents of https://www.sentrytwo.com/style.css into
-            a style tag in the head of this document, instead of the link to the stylesheet
-        </comment>\n${result.Content}`;
 
         // render
         const rendered = Renderer.Render(

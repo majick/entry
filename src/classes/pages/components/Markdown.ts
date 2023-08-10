@@ -108,6 +108,30 @@ export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/g, "<strong>$2</strong>");
     content = content.replaceAll(/(\*{1})(.*?)(\*{1})/g, "<em>$2</em>");
 
+    // named links
+    // added because marked kept missing some when rendering as HTML
+
+    // ...image
+    content = content.replaceAll(
+        /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)\n/g,
+        '<img alt="$<TEXT>" src="$<URL>" /><br />'
+    );
+
+    content = content.replaceAll(
+        /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)/g,
+        '<img alt="$<TEXT>" src="$<URL>" />'
+    );
+
+    // ...normal
+    content = content.replaceAll(
+        /\[(?<TEXT>.*?)\]\((?<URL>.*?)\)/g,
+        '<a href="$<URL>">$<TEXT></a>'
+    );
+
+    // remove mistakes
+    content = content.replaceAll("<r></r>", "");
+    content = content.replaceAll("<p></p>", "");
+
     // remove scripts, on[...] attributes and <link> elements
 
     // ...attributes
