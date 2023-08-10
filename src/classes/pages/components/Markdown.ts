@@ -112,15 +112,20 @@ export async function ParseMarkdown(content: string): Promise<string> {
     // added because marked kept missing some when rendering as HTML
 
     // ...image
-    content = content.replaceAll(
-        /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)\n/g,
-        '<img alt="$<TEXT>" src="$<URL>" /><br />'
-    );
-
+    // these are actually so fragile, and the ordering of all of these operations matters
     content = content.replaceAll(
         /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)/g,
         '<img alt="$<TEXT>" src="$<URL>" />'
     );
+
+    // ...broken images
+    content = content.replaceAll('" />', ")"); // this happens a lot, for some reason (?)
+    content = content.replaceAll(
+        /(<img)\s(alt=")(?<TEXT>.*?)\"\s(src=")(?<URL>.*?)\)/g,
+        '<img alt="$<TEXT>" src="$<URL>" />'
+    );
+
+    content = content.replaceAll(/^(<img)(.*?)(\/\>)$\n/gm, "<img $2 /><br />"); // <- VERY important (for soem reason (?))
 
     // ...normal
     content = content.replaceAll(
