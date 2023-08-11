@@ -25,7 +25,7 @@ export default class Home implements Endpoint {
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // get paste if search.mode === "edit"
-        let paste: Paste | undefined;
+        let paste: Partial<Paste> | undefined;
 
         if (search.get("mode") === "edit" && search.get("OldURL"))
             paste = await db.GetPasteFromURL(search.get("OldURL")!);
@@ -56,13 +56,23 @@ export default class Home implements Endpoint {
                 <>
                     <main>
                         {(search.get("err") && (
-                            <div class={"mdnote note-error"}>
+                            <div
+                                class={"mdnote note-error"}
+                                style={{
+                                    marginBottom: "0.5rem",
+                                }}
+                            >
                                 <b class={"mdnote-title"}>Application Error</b>
                                 <p>{decodeURIComponent(search.get("err")!)}</p>
                             </div>
                         )) ||
                             (search.get("msg") && (
-                                <div class={"mdnote note-note"}>
+                                <div
+                                    class={"mdnote note-note"}
+                                    style={{
+                                        marginBottom: "0.5rem",
+                                    }}
+                                >
                                     <b class={"mdnote-title"}>Application Message</b>
                                     <p>{decodeURIComponent(search.get("msg")!)}</p>
                                 </div>
@@ -70,35 +80,85 @@ export default class Home implements Endpoint {
 
                         {paste && paste.ViewPassword && (
                             <DecryptionForm
-                                paste={paste}
+                                paste={paste as Paste}
                                 urlName="OldURL"
                                 isEdit={true}
                             />
                         )}
 
                         <noscript>
-                            <div class={"mdnote note-error"}>
+                            <div
+                                class={"mdnote note-error"}
+                                style={{
+                                    marginBottom: "0.5rem",
+                                }}
+                            >
                                 <b class={"mdnote-title"}>JavaScript Disabled</b>
                                 <p>
                                     Without JavaScript enabled, the paste editor will
-                                    not work. This means you cannot create pastes
-                                    without JavaScript. Every other feature of Entry
-                                    will still function without JavaScript. This
-                                    includes the admin panel, paste viewing, paste
-                                    decryption and group viewing. Special Markdown
-                                    will not work with JavaScript disabled.
+                                    not work. This means you cannot create pastes.
+                                    JavaScript access is not required to view pastes,
+                                    and you can still copy the raw/rendered verison
+                                    of the paste without JavaScript access.
                                 </p>
                             </div>
                         </noscript>
 
-                        <div className="tabbar">
-                            <button id={"editor-open-tab-text"}>Text</button>
-                            <button
-                                id={"editor-open-tab-preview"}
-                                class={"secondary"}
-                            >
-                                Preview
-                            </button>
+                        <div
+                            className="tabbar"
+                            style={{
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <div class={"tabbar"}>
+                                <button id={"editor-open-tab-text"}>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Pencil Symbol"}
+                                    >
+                                        <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                    </svg>
+                                    Text
+                                </button>
+
+                                <button
+                                    id={"editor-open-tab-preview"}
+                                    class={"secondary"}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"File Symbol"}
+                                    >
+                                        <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                    </svg>
+                                    Preview
+                                </button>
+                            </div>
+
+                            {config.app && config.app.info && (
+                                <a
+                                    href={`/${config.app.info}`}
+                                    class={"button secondary"}
+                                    target={"_blank"}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Info Symbol"}
+                                    >
+                                        <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                                    </svg>
+                                    Info
+                                </a>
+                            )}
                         </div>
 
                         <div class={"tab-container"}>
@@ -234,7 +294,7 @@ export default class Home implements Endpoint {
                                     </div>
 
                                     <hr style={{ margin: "0.25rem 0" }} />
-                                    
+
                                     <div
                                         style={{
                                             display: "flex",
@@ -553,7 +613,7 @@ export default class Home implements Endpoint {
                                         {
                                             // everything before @ so (if there is a server),
                                             // it isn't included here
-                                            paste!.CustomURL.split(":")[0]
+                                            paste!.CustomURL!.split(":")[0]
                                         }
                                     </b>
                                     ) will be available
@@ -628,7 +688,7 @@ export default class Home implements Endpoint {
                                 pack.version
                             }";
                             CreateEditor("editor-tab-text", \`${encodeURIComponent(
-                                (paste || { Content: "" })!.Content
+                                (paste || { Content: "" })!.Content!
                             )}\`);`,
                         }}
                     />

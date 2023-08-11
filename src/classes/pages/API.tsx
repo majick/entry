@@ -174,6 +174,7 @@ export class GetPasteFromURL implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
+        config = (await EntryDB.GetConfig()) as Config;
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length);
@@ -232,7 +233,12 @@ export class GetPasteFromURL implements Endpoint {
                             {search.get("UnhashedEditPassword") &&
                                 search.get("UnhashedEditPassword") !==
                                     "paste is not editable!" && (
-                                    <div class="mdnote">
+                                    <div
+                                        class="mdnote"
+                                        style={{
+                                            marginBottom: "0.5rem",
+                                        }}
+                                    >
                                         <b className="mdnote-title">
                                             Don't forget your edit password!
                                         </b>
@@ -250,6 +256,30 @@ export class GetPasteFromURL implements Endpoint {
                             {result.ViewPassword && (
                                 <DecryptionForm paste={result} />
                             )}
+
+                            {config.app &&
+                                config.app.info &&
+                                config.app.info === result.CustomURL && (
+                                    <div
+                                        class="mdnote note-info"
+                                        style={{
+                                            marginBottom: "0.5rem",
+                                        }}
+                                    >
+                                        <b className="mdnote-title">
+                                            Information Page
+                                        </b>
+
+                                        <p>
+                                            This page will provide information about
+                                            the server and current announcements.{" "}
+                                            <b>
+                                                It is maintained by server
+                                                administrators.
+                                            </b>
+                                        </p>
+                                    </div>
+                                )}
 
                             <div
                                 class={"tab-container"}

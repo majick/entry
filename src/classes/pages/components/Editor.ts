@@ -8,10 +8,7 @@ import {
     rectangularSelection,
 } from "@codemirror/view";
 
-import {
-    HighlightStyle,
-    syntaxHighlighting,
-} from "@codemirror/language";
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
 
 import {
     CompletionContext,

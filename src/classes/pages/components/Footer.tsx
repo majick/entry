@@ -48,10 +48,10 @@ export default function Footer() {
                 </li>
             </ul>
 
-            {config.footer && (
+            {config.app && config.app.footer && (
                 <>
                     {/* custom footer rows */}
-                    {config.footer.rows.map((row) => (
+                    {config.app.footer.rows.map((row) => (
                         <ul
                             class={"__footernav"}
                             style={{

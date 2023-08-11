@@ -18,10 +18,13 @@ export type Config = {
     port: number;
     name: string;
     admin: string;
-    footer?: {
-        rows: Array<{
-            [key: string]: string;
-        }>;
+    app?: {
+        info?: string;
+        footer?: {
+            rows: Array<{
+                [key: string]: string;
+            }>;
+        };
     };
 };
 

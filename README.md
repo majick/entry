@@ -141,12 +141,33 @@ Example:
 ```json
 {
     ...
-    "footer": {
-        "rows": [
-            {
-                "what": "/what:www.sentrytwo.com"
-            }
-        ]
+    "app": {
+        ...
+        "footer": {
+            "rows": [
+                {
+                    "what": "/what:www.sentrytwo.com"
+                }
+            ]
+        }
+        ...
+    }
+}
+```
+
+### Info Page
+
+You can add an info page that is automatically rendered into a third editor tab named *info*. This tab is only shown if the `info` key exists. This page will be opened whenever the *info* tab is selected. This page is intended for server information and announcements, but it can be used for anything.
+
+Example:
+
+```json
+{
+    ...
+    "app": {
+        ...
+        "info": "/info:www.sentrytwo.com"
+        ...
     }
 }
 ```

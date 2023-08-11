@@ -149,7 +149,10 @@ export default function PasteList(props: {
                                             wordBreak: "normal",
                                         }}
                                     >
-                                        {paste.CustomURL.split(":")[0]}
+                                        {paste.CustomURL.split(":")[0].replace(
+                                            `${paste.GroupName}/`,
+                                            ""
+                                        )}
                                     </td>
 
                                     <td
@@ -169,7 +172,7 @@ export default function PasteList(props: {
                                     <td>
                                         {paste.ViewPassword !== "" ? "yes" : "no"}
                                     </td>
-                                    
+
                                     <td>
                                         {paste.EditPassword !== CreateHash("") &&
                                         paste.GroupName !== "server" // server pastes cannot be edited
