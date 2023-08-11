@@ -1,10 +1,20 @@
 # 📝 entry
 
-Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion and custom URLs.
+Certain features of this README only work on Entry! You can view this README [here](https://www.sentrytwo.com/what)
+
+***
+
+Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs and [many more features](#features).
 
 Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite).
 
-The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic federation support provided by Entry.
+The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support provided by Entry.
+
+***
+
+[TOC]
+
+***
 
 ## Install
 
@@ -56,18 +66,20 @@ Entry supports extra features that Rentry does not support. They are detailed be
 - `POST /admin/api/mass-delete`, delete pastes by sql query: `AdminPassword, pastes`
 - `POST /admin/api/sql`, directly run sql on the server: `AdminPassword, sql, get, all` (`get` and `all` represent the type of operation, `get` returns one result while `all` returns... all results)
 
-### (very basic) Federation
+### (very basic) Decentralization
 
 !!! note Encryption
-Federation does not work with encrypted pastes.
+Decentralization does not work with encrypted pastes.
 
-Entry supports very basic federation, meaning you can view and edit pastes from other servers on your server.
+Entry supports very basic decentralization, meaning you can view and edit pastes from other servers on your server.
 
 To view pastes from other servers, you open them the same way (`example.com/paste`) you normally do, but add an `:` symbol and then the hostname of the other server. Example: `example.com/paste:example2.com`
 
-In this example, we are viewing the paste `paste` from the server `example2.com` on the server `example.com`. Editing and deleting pastes is also available for pastes from a different server. Federation **only** supports HTTPS, it is assumed that any secondary server provided is using HTTPS, and the request will fail if it is not.
+In this example, we are viewing the paste `paste` from the server `example2.com` on the server `example.com`. Editing and deleting pastes is also available for pastes from a different server. Decentralization **only** supports HTTPS, it is assumed that any secondary server provided is using HTTPS, and the request will fail if it is not.
 
 Pastes cannot normally include any special characters besides `-` and `_`, meaning there should not be any URL conflicts.
+
+Entry servers also export a [nodeinfo](http://nodeinfo.diaspora.software/) file. An example can be seen [here](https://www.sentrytwo.com/.well-known/nodeinfo/2.0). This file details information about the server to other distributed servers, such as the number of pastes created.
 
 ### Encryption
 
@@ -117,13 +129,7 @@ html.purple-theme {
 }
 ```
 
-### Paste Groups
-
-Groups allow users to organize their pastes into different groups that are locked by a password. Anybody can view the pastes in an existing group, but in order to add a new paste to the group you must have the correct password. A group must not already exist with the requested name to create a new group. A group will become available once all the pastes inside of it are deleted.
-
-Adding a group name will append the group name to the beginning of your set custom URL. This means the custom URL "example" with the group "example-group" would look like "example-group/example" instead of just the custom URL. This means that, if you add a group, you can have any custom URL you want for your paste. Adding a group is not required.
-
-### Special Elements
+#### Special Elements
 
 You can customize the way your pastes are displayed using some custom elements.
 
@@ -132,7 +138,7 @@ You can customize the way your pastes are displayed using some custom elements.
 - `<lit>`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
 - `<theme>`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
 
-### Custom Footer Links
+#### Custom Footer Links
 
 You can added custom footer links to your server by editing the `config.json` (`{DATA_DIRECTORY}/config.json`) and adding a `footer` section. All links should have a `label` and `href` value. Links are organized in different rows. Each new entry in the "rows" array creates a new row in the footer.
 
@@ -155,7 +161,7 @@ Example:
 }
 ```
 
-### Info Page
+#### Info Page
 
 You can add an info page that is automatically rendered into a third editor tab named *info*. This tab is only shown if the `info` key exists. This page will be opened whenever the *info* tab is selected. This page is intended for server information and announcements, but it can be used for anything.
 
@@ -171,6 +177,16 @@ Example:
     }
 }
 ```
+
+### Paste Groups
+
+Groups allow users to organize their pastes into different groups that are locked by a password. Anybody can view the pastes in an existing group, but in order to add a new paste to the group you must have the correct password. A group must not already exist with the requested name to create a new group. A group will become available once all the pastes inside of it are deleted.
+
+Adding a group name will append the group name to the beginning of your set custom URL. This means the custom URL "example" with the group "example-group" would look like "example-group/example" instead of just the custom URL. This means that, if you add a group, you can have any custom URL you want for your paste. Adding a group is not required.
+
+### Special Markdown
+
+Entry supports some custom Markdown features that aren't included in the Markdown specification. These allow you to create more advanced pastes much quicker. Information about these can be found [here](https://www.sentrytwo.com/pub/markdown)!
 
 ## Development
 

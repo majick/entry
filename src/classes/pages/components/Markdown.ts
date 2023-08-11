@@ -6,6 +6,15 @@
 
 import { marked } from "marked";
 
+// types
+export type Heading = {
+    Text: string;
+    Type: number;
+    ID: string;
+};
+
+export type TableOfContents = Heading[];
+
 /**
  * @function ParseMarkdown
  *
@@ -13,6 +22,10 @@ import { marked } from "marked";
  * @return {Promise<string>}
  */
 export async function ParseMarkdown(content: string): Promise<string> {
+    // table of contents base
+    const TOC: TableOfContents = [];
+
+    // escape < and >
     content = content.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
     // allowed elements
@@ -44,12 +57,53 @@ export async function ParseMarkdown(content: string): Promise<string> {
     // fix headers (they aren't picked up if the formatting is really bad)
     // inserting a \n after each heading to make marked automatically make following text
     // its own paragraph element, fixes a lot of formatting issues
-    content = content.replaceAll(/^(\#{6})\s*(.*)$/gm, "<h6>$2</h6>\n");
-    content = content.replaceAll(/^(\#{5})\s*(.*)$/gm, "<h5>$2</h5>\n");
-    content = content.replaceAll(/^(\#{4})\s*(.*)$/gm, "<h4>$2</h4>\n");
-    content = content.replaceAll(/^(\#{3})\s*(.*)$/gm, "<h3>$2</h3>\n");
-    content = content.replaceAll(/^(\#{2})\s*(.*)$/gm, "<h2>$2</h2>\n");
-    content = content.replaceAll(/^(\#{1})\s*(.*)$/gm, "<h1>$2</h1>\n");
+    // ...all headings need to be matched in one regex so that the toc goes by order of match!
+    content = content.replaceAll(
+        /^(\#.*?)\s(.*)$/gm,
+        (match: string, offset: string, string: string): string => {
+            const HeadingType = offset.length; // offset = hashtags before heading
+
+            // get suffix
+            // (get all headings with the same text, suffix is the number of those)
+            // (helps prevent duplicate ids)
+            let suffix = TOC.filter((h) => h.Text === string).length.toString();
+
+            if (suffix !== "0") suffix = `-${suffix}`;
+            else suffix = "";
+
+            // add to toc
+            const heading: Heading = {
+                Text: string,
+                Type: HeadingType,
+                ID: `${string
+                    .toLowerCase()
+                    .replaceAll(" ", "-")
+                    .replaceAll("(", "")
+                    .replaceAll(")", "")}${suffix}`,
+            };
+
+            TOC.push(heading);
+
+            // return
+            return `<h${heading.Type} id="${heading.ID}">${string}</h${heading.Type}>\n`;
+        }
+    );
+
+    // table of contents
+    const TOC_Regex = /^\[(TOC)\]$/gm;
+
+    // ...only spend time creating toc if [TOC] exists
+    if (content.match(TOC_Regex)) {
+        let TOC_Content = "";
+
+        for (const heading of TOC)
+            TOC_Content += `${"    ".repeat(heading.Type - 1)} 1. [${
+                heading.Text
+            }](#${heading.ID})\n`;
+
+        // add table to content
+        content = content.replaceAll(TOC_Regex, TOC_Content);
+    }
 
     // horizontal rule
     content = content.replaceAll(/^\*{3}$/gm, "\n<hr />\n");

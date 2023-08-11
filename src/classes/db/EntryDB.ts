@@ -1018,7 +1018,7 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public async GetAllPastesInGroup(group: string): Promise<Paste[]> {
-        // federation stuff
+        // decentralization stuff
         const server = group.split(":")[1];
 
         if (server) {
