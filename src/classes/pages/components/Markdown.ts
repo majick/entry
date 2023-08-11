@@ -110,9 +110,10 @@ export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll(/^-{3}$/gm, "\n<hr />\n");
     content = content.replaceAll(/^_{3}$/gm, "\n<hr />\n");
 
-    // update content to allow notes/warnings
+    // admonitions
     content = content.replaceAll(
-        /^(\!{3})\s(?<TYPE>.*?)\s(?<TITLE>.*?)\n(?<CONTENT>.*?)$/gm,
+        // title and content
+        /^(\!{3})\s(?<TYPE>.*?)\s(?<TITLE>.+)\n(?<CONTENT>.+)$/gm,
         `<div class="mdnote note-$2">
             <b class="mdnote-title">$3</b>
             <p>$4</p>
