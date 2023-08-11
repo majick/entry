@@ -353,7 +353,8 @@ pre {
 }
 
 input,
-textarea {
+textarea,
+select {
     background: var(--background-surface1);
     color: currentColor;
     border: none;
@@ -370,12 +371,14 @@ textarea {
 }
 
 input:invalid:required,
-textarea:invalid:required {
+textarea:invalid:required,
+select:invalid:required {
     box-shadow: inset 0 0 0 2px var(--red);
 }
 
 input:invalid,
-textarea:invalid {
+textarea:invalid,
+select:invalid {
     /* so, the idea behind this is because the input is technically wrong... but it isn't required,
        we're only going to show a yellow "border" thing! */
     box-shadow: inset 0 0 0 2px var(--yellow);
@@ -383,7 +386,8 @@ textarea:invalid {
 
 input:disabled,
 textarea:disabled,
-.checkbox-container.disabled {
+.checkbox-container.disabled,
+select:disabled {
     opacity: 50%;
     box-shadow: inset 0 0 0 2px var(--background-surface3);
     filter: opacity(50%);
@@ -391,7 +395,8 @@ textarea:disabled,
 }
 
 input.secondary,
-textarea.secondary {
+textarea.secondary,
+select.secondary {
     background: var(--background-surface);
 }
 
@@ -476,6 +481,11 @@ table th {
 table td {
     border-left: solid 1px rgba(120, 125, 125, 0.1);
     padding: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    overflow-wrap: normal;
+    word-break: normal;
+    width: max-content;
 }
 
 table td:first-child {

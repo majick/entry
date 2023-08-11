@@ -1,5 +1,5 @@
 import { Paste } from "../../db/EntryDB";
-import { CreateHash } from "../../db/Hash";
+import { CreateHash } from "../../db/helpers/Hash";
 
 export default function PasteList(props: {
     Pastes: Paste[];
@@ -143,10 +143,6 @@ export default function PasteList(props: {
                                         title={paste.CustomURL}
                                         style={{
                                             maxWidth: "5rem",
-                                            textOverflow: "ellipsis",
-                                            overflow: "hidden",
-                                            overflowWrap: "normal",
-                                            wordBreak: "normal",
                                         }}
                                     >
                                         {paste.CustomURL.split(":")[0].replace(

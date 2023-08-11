@@ -13,7 +13,7 @@ import Footer from "./components/Footer";
 import Home from "./Home";
 
 // create database
-import { CreateHash, Decrypt } from "../db/Hash";
+import { CreateHash, Decrypt } from "../db/helpers/Hash";
 import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 

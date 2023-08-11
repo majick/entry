@@ -10,6 +10,8 @@ import path from "node:path";
 import EntryDB from "./classes/db/EntryDB";
 await EntryDB.CreateExpiry();
 
+import type { LogEvent } from "./classes/db/LogDB";
+
 // includes
 import "./classes/pages/assets/style.css";
 
@@ -25,6 +27,10 @@ export type Config = {
                 [key: string]: string;
             }>;
         };
+    };
+    log?: {
+        clear_on_start: boolean;
+        events: LogEvent[];
     };
 };
 
@@ -119,6 +125,7 @@ const config: HoneybeeConfig = {
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
+        "/admin/logs": { Method: "POST", Page: Admin.LogsPage },
         "/admin/api/delete": { Method: "POST", Page: Admin.APIDeletePaste },
         "/admin/api/export": { Method: "POST", Page: Admin.APIExport },
         "/admin/api/import": { Method: "POST", Page: Admin.APIImport },

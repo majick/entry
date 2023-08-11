@@ -112,6 +112,30 @@ When creating a paste, you can set to have your paste expire at a given time and
 
 Entry provides an admin panel that is locked behind a set password that allows the server owner to manage pastes on their server quickly and easily. The admin password is set on initial configuration, and stored (plain text) in `data/config.json` with the key `admin`.
 
+#### Logs
+
+Through the admin panel, you can view certain logs that are automatically saved whenever the event occurs on the server. These logs are not sent from the client. Logs can be set to automatically be deleted when the server exists using the `log.clear_on_start` option in the server `config.json` file. No events are enabled by default.
+
+The following options can be used as events:
+
+- create_paste, fires when a paste is created on the server (`Content` is the paste CustomURL)
+- edit_paste, fires when a paste is edited on the server (`Content` is the old CustomURL and the new CustomURL)
+- delete_paste, fires when a paste is deleted on the server (`Content` is the paste CustomURL)
+- generic, random events (most likely never used)
+
+An example that doesn't clear logs on restart and has all events enabled looks like this:
+
+```json
+{
+    ...
+    "log": {
+        "clear_on_start": false,
+        "events": ["create_paste", "edit_paste", "delete_paste", "generic"]
+    }
+    ...
+}
+```
+
 ### Customization
 
 Every color is customizable through simple CSS variables. You can customize the background using the `--base-hue`, `--base-sat` and `--base-lit` variables. The background is normally in `hsl` format, while other colors are in hex. Many of these values can be controlled using specific [Special Elements](#special-elements).
@@ -158,6 +182,7 @@ Example:
         }
         ...
     }
+    ...
 }
 ```
 

@@ -8,9 +8,10 @@ import crypto from "node:crypto";
 import path from "node:path";
 
 import { Database } from "bun:sqlite";
-import { CreateHash, Encrypt } from "./Hash";
+import { CreateHash, Encrypt } from "./helpers/Hash";
+import SQL from "./helpers/SQL";
 import Expiry from "./Expiry";
-import SQL from "./SQL";
+import LogDB from "./LogDB";
 
 import pack from "../../../package.json";
 import type { Config } from "../..";
@@ -46,6 +47,7 @@ export default class EntryDB {
 
     public readonly db: Database;
     public static Expiry: Expiry; // hold expiry registry
+    public static Logs: LogDB; // hold log db
 
     public static readonly MaxContentLength = 200000;
     public static readonly MaxPasswordLength = 256;
@@ -70,7 +72,6 @@ export default class EntryDB {
         EntryDB.isNew = isNew;
         this.db = db;
 
-        // check if we need to create tables
         (async () => {
             await SQL.QueryOBJ({
                 db,
@@ -143,6 +144,9 @@ export default class EntryDB {
                     });
                 }
             }
+
+            // init logs
+            EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
         })();
     }
 
@@ -579,6 +583,17 @@ export default class EntryDB {
             use: "Prepare",
         });
 
+        // get server config
+        const config = (await EntryDB.GetConfig()) as Config;
+
+        // register event
+        if (config.log && config.log.events.includes("create_paste"))
+            await EntryDB.Logs.CreateLog({
+                Content: PasteInfo.CustomURL,
+                Type: "create_paste",
+                Admin: true,
+            });
+
         // gc
         Bun.gc(true);
 
@@ -712,6 +727,17 @@ export default class EntryDB {
             use: "Prepare",
         });
 
+        // get server config
+        const config = (await EntryDB.GetConfig()) as Config;
+
+        // register event
+        if (config.log && config.log.events.includes("edit_paste"))
+            await EntryDB.Logs.CreateLog({
+                Content: `${PasteInfo.CustomURL}->${NewPasteInfo.CustomURL}`,
+                Type: "edit_paste",
+                Admin: true,
+            });
+
         // return
         return [true, "Paste updated!", NewPasteInfo];
     }
@@ -771,13 +797,13 @@ export default class EntryDB {
             return [false, "Cannot delete version paste!", PasteInfo];
 
         // get server config
-        const config = await EntryDB.GetConfig();
+        const config = (await EntryDB.GetConfig()) as Config;
 
         // validate password
         // ...password can be either the paste EditPassword or the server admin password
         // ...if the custom url is v, then no password can be used (that's the version file, it is required)
         if (
-            (password !== config!.admin &&
+            (password !== config.admin &&
                 CreateHash(password) !== paste.EditPassword) ||
             paste.CustomURL === "v"
         )
@@ -800,6 +826,14 @@ export default class EntryDB {
             params: [PasteInfo.CustomURL],
             use: "Prepare",
         });
+
+        // register event
+        if (config.log && config.log.events.includes("delete_paste"))
+            await EntryDB.Logs.CreateLog({
+                Content: PasteInfo.CustomURL,
+                Type: "delete_paste",
+                Admin: true,
+            });
 
         // return
         return [true, "Paste deleted!", PasteInfo];

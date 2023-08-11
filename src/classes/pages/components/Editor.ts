@@ -233,6 +233,27 @@ function BasicCompletion(context: CompletionContext): any {
                 apply: new Date().toUTCString(),
                 detail: "Extras",
             },
+            {
+                label: "table of contents",
+                type: "function",
+                info: "Add a table of contents to the paste",
+                apply: "[TOC]",
+                detail: "extras",
+            },
+            {
+                label: "center",
+                type: "function",
+                info: "Center paste content",
+                apply: "!!center!! ...content here... !!",
+                detail: "extras",
+            },
+            {
+                label: "right",
+                type: "function",
+                info: "Align paste content to the right",
+                apply: "!!right!! ...content here... !!",
+                detail: "extras",
+            },
         ],
     };
 }
