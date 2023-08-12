@@ -189,12 +189,15 @@ button.secondary:hover,
     display: flex;
 }
 
-.tabbar button {
+.tabbar button,
+.tabbar .button {
     padding: 0.5rem 1rem;
     border-radius: 0.4rem 0.4rem 0 0;
+    height: 40px; /* fixes weird webkit sizing issue (?) which caused the height to be calculated wrong */
 }
 
-.tabbar button:not(.secondary):hover {
+.tabbar button:not(.secondary):hover,
+.tabbar .button:not(.secondary):hover {
     background: var(--background-surface1);
 }
 

@@ -8,7 +8,7 @@ import { Config } from "../..";
  * @class Expiry
  */
 export default class Expiry {
-    public static ExpiryFileLocation = path.resolve(process.cwd(), "data", "expiry");
+    public static ExpiryFileLocation = path.resolve(EntryDB.DataDirectory, "expiry");
 
     private static config: Config;
     private readonly db: EntryDB;

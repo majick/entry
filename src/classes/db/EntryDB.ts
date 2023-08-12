@@ -6,6 +6,7 @@
 
 import crypto from "node:crypto";
 import path from "node:path";
+import fs from "node:fs";
 
 import { Database } from "bun:sqlite";
 import { CreateHash, Encrypt } from "./helpers/Hash";
@@ -45,6 +46,10 @@ export default class EntryDB {
         process.env.DATA_LOCATION || path.resolve(process.cwd(), "data")
     ).replace(":cwd", process.cwd());
 
+    public static ConfigLocation = (
+        process.env.CONFIG_LOCATION || ":cwd/data/config.json"
+    ).replace(":cwd", process.cwd());
+
     public readonly db: Database;
     public static Expiry: Expiry; // hold expiry registry
     public static Logs: LogDB; // hold log db
@@ -66,6 +71,14 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     constructor() {
+        // set datadirectory based on config file
+        if (fs.existsSync(EntryDB.ConfigLocation))
+            EntryDB.DataDirectory = (
+                JSON.parse(
+                    fs.readFileSync(EntryDB.ConfigLocation).toString()
+                ) as Config
+            ).data.replace(":cwd", process.cwd());
+
         // create db link
         const [db, isNew] = SQL.CreateDB("entry", EntryDB.DataDirectory);
 
@@ -144,9 +157,6 @@ export default class EntryDB {
                     });
                 }
             }
-
-            // init logs
-            EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
         })();
     }
 
@@ -158,13 +168,11 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public static async GetConfig(): Promise<Config | undefined> {
-        const ConfigPath = path.resolve(EntryDB.DataDirectory, "config.json");
-
         // make sure config exists
-        if (!(await Bun.file(ConfigPath).exists())) return undefined;
+        if (!(await Bun.file(EntryDB.ConfigLocation).exists())) return undefined;
 
         // return config
-        return JSON.parse(await Bun.file(ConfigPath).text());
+        return JSON.parse(await Bun.file(EntryDB.ConfigLocation).text());
     }
 
     /**
@@ -186,6 +194,19 @@ export default class EntryDB {
         setInterval(async () => {
             await EntryDB.Expiry.CheckExpiry();
         }, 1000 * 60); // run every minute
+    }
+
+    /**
+     * @method InitLogs
+     * @description Create LogDB
+     *
+     * @static
+     * @return {Promise<void>}
+     * @memberof EntryDB
+     */
+    public static async InitLogs(): Promise<void> {
+        // init logs
+        EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
     }
 
     /**

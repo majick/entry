@@ -19,32 +19,46 @@ services:
             PORT: "8080" # optional, 8080 is default
             NAME: "Entry" # optional, Entry is default
             ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
-            DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default
+            DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default, only used during first setup
+            #                            edit within config file, this value is only used to prefill the value in config.json
+            CONFIG_LOCATION: ":cwd/data/config.json" # optional, :cwd/data/config.json is default
             EDITABLE_BY_DEFAULT: true # optional, sets if pastes are editable by default, true is default
 ```
 
 You can then run `docker-compose up -d` to start Entry locally. Visit the port you configured and you should see the Entry UI.
 
+Note the `DATA_LOCATION` field is not required, and is just used to fill the value in the config file. You can create the config file yourself to skip this step.
+
+```jsonc
+// $CONFIG_LOCATION
+{
+    "port": 8080,
+    "name": "Entry",
+    "data": ":cwd/data",
+    "config": ":cwd/data/config.json",
+    "admin": "supersecretpassword"
+}
+```
+
+This example config file fills all values that are filled by the environment variables, allowing you to not include any environment variables in the `docker-compose.yml` file if you do not want to.
+
 ### Change Data Directory
 
-You can configure the directory that data is stored in with the `DATA_LOCATION` environment variable. Always use an exact path when changing the `DATA_LOCATION`.
+You can configure the data directory by changing the value of the `data` field in the server config. The path to the config file can be found within your `docker-compose.yml` file.
 
-```yml
-...
-        environment:
-            ...
-            DATA_LOCATION: "/path/to/data/directory"
-            ...
+```jsonc
+// $CONFIG_LOCATION
+{
+    ...
+    "data": ":cwd/data"
+    ...
+}
 ```
 
 After you change the location, you must mount this location using `volumes`. It must match on both sides of the colon character.
 
 ```yml
 ...
-        environment:
-            ...
-            DATA_LOCATION: "/path/to/data/directory"
-            ...
         volumes:
             - /path/to/data/directory:/path/to/data/directory
 ```

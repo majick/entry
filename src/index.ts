@@ -20,6 +20,8 @@ export type Config = {
     port: number;
     name: string;
     admin: string;
+    data: string;
+    config: string;
     app?: {
         info?: string;
         footer?: {
@@ -75,16 +77,25 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
 
     config.port = parseInt(optional("\x1b[92mEnter port\x1b[0m", 8080, "PORT"));
     config.name = optional("\x1b[92mEnter application name\x1b[0m", "Entry", "NAME");
+
+    config.data = optional(
+        "\x1b[92mEnter data location\x1b[0m",
+        ":cwd/data",
+        "DATA_LOCATION"
+    );
+
+    config.config = optional(
+        "\x1b[92mEnter config location\x1b[0m",
+        ":cwd/data/config.json",
+        "CONFIG_LOCATION"
+    );
+
     config.admin = required("\x1b[92mEnter admin password\x1b[0m", "ADMIN_PASSWORD");
 
     div();
 
     // save file
-    await Bun.write(
-        path.resolve(EntryDB.DataDirectory, "config.json"),
-        JSON.stringify(config, undefined, 4)
-    );
-
+    await Bun.write(EntryDB.ConfigLocation, JSON.stringify(config, undefined, 4));
     await EntryDB.GetConfig();
 
     // exit
@@ -102,6 +113,9 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 import { _404Page } from "./classes/pages/components/404";
 import Admin from "./classes/pages/Admin";
 import API from "./classes/pages/API";
+
+// init logs
+await EntryDB.InitLogs();
 
 // ...create config
 const config: HoneybeeConfig = {
