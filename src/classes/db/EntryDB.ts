@@ -869,23 +869,29 @@ export default class EntryDB {
      * @param {string} server
      * @param {string} endpoint
      * @param {string[]} body
+     * @param [method="POST"]
+     * @param [https=true]
      * @return {Promise<[boolean, Response]>} [isBad, record]
      * @memberof EntryDB
      */
-    private async ForwardRequest(
+    public async ForwardRequest(
         server: string,
         endpoint: string,
         body: string[],
-        method: string = "POST"
+        method: string = "POST",
+        https: boolean = true
     ): Promise<[boolean, Response]> {
         // send request
-        const request = fetch(`https://${server}/api/${endpoint}`, {
-            body: body.join("&"),
-            method,
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        });
+        const request = fetch(
+            `${https === true ? "https" : "http"}://${server}/api/${endpoint}`,
+            {
+                body: body.join("&"),
+                method,
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            }
+        );
 
         // handle bad
         let isBad = false;

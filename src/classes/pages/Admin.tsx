@@ -536,28 +536,62 @@ export class ExportPastesPage implements Endpoint {
                                     alignItems: "center",
                                 }}
                             >
-                                <form action="/admin/api/export" method="POST">
-                                    <input
-                                        type="hidden"
-                                        required
-                                        name="AdminPassword"
-                                        value={body.AdminPassword}
-                                    />
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        gap: "0.5rem",
+                                        flexWrap: "wrap",
+                                    }}
+                                >
+                                    <form action="/admin/api/export" method="POST">
+                                        <input
+                                            type="hidden"
+                                            required
+                                            name="AdminPassword"
+                                            value={body.AdminPassword}
+                                        />
 
-                                    <button class={"secondary"}>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            aria-label={"Export Symbol"}
-                                        >
-                                            <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                            <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
-                                        </svg>{" "}
-                                        Export Pastes
-                                    </button>
-                                </form>
+                                        <button class={"secondary"}>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Export Symbol"}
+                                            >
+                                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                                <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                                            </svg>{" "}
+                                            Export Pastes
+                                        </button>
+                                    </form>
+
+                                    <form
+                                        action="/admin/api/logs/export"
+                                        method="POST"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            required
+                                            name="AdminPassword"
+                                            value={body.AdminPassword}
+                                        />
+
+                                        <button class={"secondary"}>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Export Symbol"}
+                                            >
+                                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                                <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                                            </svg>{" "}
+                                            Export Logs
+                                        </button>
+                                    </form>
+                                </div>
 
                                 <hr style={{ width: "100%" }} />
 
@@ -1016,6 +1050,42 @@ export class LogsPage implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class APIExportLogs
+ * @implements {Endpoint}
+ */
+export class APIExportLogs implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // get logs
+        const _export = await EntryDB.Logs.QueryLogs("ID IS NOT NULL");
+
+        // return
+        return new Response(JSON.stringify(_export[2]), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "text/plain",
+                "Content-Disposition": `attachment; filename="entry-logs-${new Date().toISOString()}.json"`,
+            },
+        });
+    }
+}
+
 // default export
 export default {
     Login,
@@ -1027,4 +1097,5 @@ export default {
     APIMassDelete,
     APISQL,
     LogsPage,
+    APIExportLogs,
 };

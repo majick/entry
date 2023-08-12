@@ -145,12 +145,14 @@ const config: HoneybeeConfig = {
         "/admin/api/import": { Method: "POST", Page: Admin.APIImport },
         "/admin/api/mass-delete": { Method: "POST", Page: Admin.APIMassDelete },
         "/admin/api/sql": { Method: "POST", Page: Admin.APISQL },
+        "/admin/api/logs/export": { Method: "POST", Page: Admin.APIExportLogs },
         // POST api
         "/api/new": { Method: "POST", Page: API.CreatePaste },
         "/api/edit": { Method: "POST", Page: API.EditPaste },
         "/api/delete": { Method: "POST", Page: API.DeletePaste },
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
         "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
+        "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/": {

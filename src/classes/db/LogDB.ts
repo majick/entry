@@ -20,7 +20,8 @@ export type LogEvent =
     | "create_paste"
     | "edit_paste"
     | "delete_paste"
-    | "access_admin";
+    | "access_admin"
+    | "user_agent";
 
 export type Log = {
     Content: string;

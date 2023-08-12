@@ -148,6 +148,15 @@ export class CreatePaste implements Endpoint {
         // create paste
         const result = await db.CreatePaste(body);
 
+        // log UA
+        if (config.log && config.log.events.includes("user_agent"))
+            await EntryDB.Logs.CreateLog({
+                Content: `create_paste:${result[2].CustomURL};${
+                    request.headers.get("User-Agent") || "?"
+                }`,
+                Type: "user_agent",
+            });
+
         // return
         return new Response(JSON.stringify(result), {
             status: 302,
@@ -842,7 +851,6 @@ export class RenderMarkdown implements Endpoint {
     public async request(request: Request): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(request, "text/markdown");
-
         if (WrongType) return WrongType;
 
         // get request body
@@ -902,6 +910,41 @@ export class GetPasteHTML implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class JSONAPI
+ * @description Forward API requests from JSON to formdata
+ * @implements {Endpoint}
+ */
+export class JSONAPI implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(request, "application/json");
+        if (WrongType) return WrongType;
+
+        // get url
+        const url = new URL(request.url);
+
+        // create formdata body
+        let body: string[] = [];
+
+        // ...fill formdata body
+        for (const [key, value] of Object.entries(await request.json()))
+            body.push(`${key}=${value}`);
+
+        // forward request
+        const res = await db.ForwardRequest(
+            url.host,
+            url.pathname.substring("/api/json/".length),
+            body,
+            request.method,
+            url.protocol.includes("https")
+        );
+
+        return res[1];
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -919,4 +962,5 @@ export default {
     GetRawPaste,
     RenderMarkdown,
     GetPasteHTML,
+    JSONAPI,
 };

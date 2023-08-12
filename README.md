@@ -48,6 +48,8 @@ Entry supports extra features that Rentry does not support. They are detailed be
 
 ### API
 
+All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
+
 - `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
 - `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
@@ -122,6 +124,7 @@ The following options can be used as events:
 - `edit_paste`, fires when a paste is edited on the server (`Content` is the old CustomURL and the new CustomURL)
 - `delete_paste`, fires when a paste is deleted on the server (`Content` is the paste CustomURL)
 - `access_admin`, fires when the admin panel is accessed (`Content` is the value of the `User-Agent` header, will be "?" if no UA exists)
+- `user_agent`, fires after an API event (`Content` is the reason the event was fired and the `User-Agent` header)
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:
@@ -132,10 +135,11 @@ An example that doesn't clear logs on restart and has all events enabled looks l
     "log": {
         "clear_on_start": false,
         "events": [
-            "create_paste", 
-            "edit_paste", 
-            "delete_paste", 
-            "access_admin", 
+            "create_paste",
+            "edit_paste",
+            "delete_paste",
+            "access_admin",
+            "user_agent",
             "generic"
         ]
     }
