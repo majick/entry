@@ -188,7 +188,11 @@ export default class EntryDB {
 
         // create expiry
         EntryDB.Expiry = new Expiry(new this());
-        await EntryDB.Expiry.Initialize(); // create expiry store
+
+        // create expiry store
+        await EntryDB.Expiry.Initialize(
+            path.resolve(EntryDB.DataDirectory, "expiry")
+        );
 
         // run expiry clock
         setInterval(async () => {

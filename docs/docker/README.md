@@ -29,7 +29,7 @@ You can then run `docker-compose up -d` to start Entry locally. Visit the port y
 
 Note the `DATA_LOCATION` field is not required, and is just used to fill the value in the config file. You can create the config file yourself to skip this step.
 
-```jsonc
+```json
 // $CONFIG_LOCATION
 {
     "port": 8080,
@@ -40,13 +40,13 @@ Note the `DATA_LOCATION` field is not required, and is just used to fill the val
 }
 ```
 
-This example config file fills all values that are filled by the environment variables, allowing you to not include any environment variables in the `docker-compose.yml` file if you do not want to.
+This example config file fills all values that are filled by the environment variables, allowing you to only include the `CONFIG_LOCATION` variable if you would like.
 
 ### Change Data Directory
 
 You can configure the data directory by changing the value of the `data` field in the server config. The path to the config file can be found within your `docker-compose.yml` file.
 
-```jsonc
+```json
 // $CONFIG_LOCATION
 {
     ...

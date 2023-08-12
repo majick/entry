@@ -8,7 +8,7 @@ import { Config } from "../..";
  * @class Expiry
  */
 export default class Expiry {
-    public static ExpiryFileLocation = path.resolve(EntryDB.DataDirectory, "expiry");
+    public static ExpiryFileLocation = "";
 
     private static config: Config;
     private readonly db: EntryDB;
@@ -27,7 +27,9 @@ export default class Expiry {
      * @return {Promise<void>}
      * @memberof Expiry
      */
-    public async Initialize(): Promise<void> {
+    public async Initialize(location: string): Promise<void> {
+        Expiry.ExpiryFileLocation = location;
+
         // read config
         Expiry.config = (await EntryDB.GetConfig()) as Config;
 
