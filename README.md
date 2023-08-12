@@ -118,10 +118,11 @@ Through the admin panel, you can view certain logs that are automatically saved 
 
 The following options can be used as events:
 
-- create_paste, fires when a paste is created on the server (`Content` is the paste CustomURL)
-- edit_paste, fires when a paste is edited on the server (`Content` is the old CustomURL and the new CustomURL)
-- delete_paste, fires when a paste is deleted on the server (`Content` is the paste CustomURL)
-- generic, random events (most likely never used)
+- `create_paste`, fires when a paste is created on the server (`Content` is the paste CustomURL)
+- `edit_paste`, fires when a paste is edited on the server (`Content` is the old CustomURL and the new CustomURL)
+- `delete_paste`, fires when a paste is deleted on the server (`Content` is the paste CustomURL)
+- `access_admin`, fires when the admin panel is accessed (`Content` is the value of the `User-Agent` header, will be "?" if no UA exists)
+- `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:
 
@@ -130,7 +131,13 @@ An example that doesn't clear logs on restart and has all events enabled looks l
     ...
     "log": {
         "clear_on_start": false,
-        "events": ["create_paste", "edit_paste", "delete_paste", "generic"]
+        "events": [
+            "create_paste", 
+            "edit_paste", 
+            "delete_paste", 
+            "access_admin", 
+            "generic"
+        ]
     }
     ...
 }

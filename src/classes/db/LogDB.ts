@@ -15,14 +15,18 @@ import EntryDB from "./EntryDB";
 import { Config } from "../..";
 
 // types
-export type LogEvent = "generic" | "create_paste" | "edit_paste" | "delete_paste";
+export type LogEvent =
+    | "generic"
+    | "create_paste"
+    | "edit_paste"
+    | "delete_paste"
+    | "access_admin";
 
 export type Log = {
     Content: string;
     Timestamp: string;
     Type: LogEvent;
     ID: string;
-    Admin: boolean; // states that the event should only be viewed by admins
 };
 
 /**
@@ -55,8 +59,7 @@ export default class LogDB {
                     Content varchar(${EntryDB.MaxContentLength}),
                     Timestamp datetime DEFAULT CURRENT_TIMESTAMP,
                     Type varchar(255),
-                    ID varchar(256),
-                    Admin boolean
+                    ID varchar(256)
                 )`,
             });
         })();
@@ -76,14 +79,13 @@ export default class LogDB {
             Timestamp: log.Timestamp || new Date().toUTCString(),
             Type: log.Type || "generic",
             ID: log.ID || ComputeRandomObjectHash(),
-            Admin: log.Admin || false,
         };
 
         // create entry
         await SQL.QueryOBJ({
             db: this.db,
-            query: "INSERT INTO Logs VALUES (?, ?, ?, ?, ?)",
-            params: [_log.Content, _log.Timestamp, _log.Type, _log.ID, _log.Admin],
+            query: "INSERT INTO Logs VALUES (?, ?, ?, ?)",
+            params: [_log.Content, _log.Timestamp, _log.Type, _log.ID],
             use: "Prepare",
         });
 

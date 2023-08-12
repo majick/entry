@@ -591,7 +591,6 @@ export default class EntryDB {
             await EntryDB.Logs.CreateLog({
                 Content: PasteInfo.CustomURL,
                 Type: "create_paste",
-                Admin: true,
             });
 
         // gc
@@ -735,7 +734,6 @@ export default class EntryDB {
             await EntryDB.Logs.CreateLog({
                 Content: `${PasteInfo.CustomURL}->${NewPasteInfo.CustomURL}`,
                 Type: "edit_paste",
-                Admin: true,
             });
 
         // return
@@ -832,7 +830,6 @@ export default class EntryDB {
             await EntryDB.Logs.CreateLog({
                 Content: PasteInfo.CustomURL,
                 Type: "delete_paste",
-                Admin: true,
             });
 
         // return

@@ -474,7 +474,7 @@ table {
 table th {
     min-width: max-content;
     padding: 6px 10px;
-    background: var(--background-surface3);
+    background: var(--background-surface2);
     border: none;
 }
 

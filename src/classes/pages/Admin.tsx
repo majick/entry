@@ -241,6 +241,20 @@ export class ManagePastes implements Endpoint {
         if (!body.AdminPassword || body.AdminPassword !== config!.admin)
             return new Login().request(request);
 
+        // log event (only on first access)
+        const RefURL = new URL(request.headers.get("Referer")!);
+
+        if (
+            (request.headers.get("Referer") && RefURL.pathname === "/admin") ||
+            RefURL.pathname === "/admin/" ||
+            RefURL.pathname === "/admin/login" ||
+            RefURL.pathname === "/admin/login/"
+        )
+            await EntryDB.Logs.CreateLog({
+                Content: request.headers.get("User-Agent") || "?",
+                Type: "access_admin",
+            });
+
         // fetch all pastes
         const pastes = await db.GetAllPastes(true, false, body.sql);
 
@@ -822,7 +836,13 @@ export class LogsPage implements Endpoint {
             Renderer.Render(
                 <>
                     <main>
-                        <div className="tab-container editor-tab">
+                        <div
+                            className="tab-container editor-tab"
+                            style={{
+                                height: "min-content",
+                                maxHeight: "85vh",
+                            }}
+                        >
                             <AdminNav active="logs" pass={body.AdminPassword} />
 
                             <div>
@@ -932,7 +952,6 @@ export class LogsPage implements Endpoint {
                                                 <th>Timestamp</th>
                                                 <th>Event Type</th>
                                                 <th>ID</th>
-                                                <th>Admin Only</th>
                                             </tr>
                                         </thead>
 
@@ -965,8 +984,6 @@ export class LogsPage implements Endpoint {
                                                         >
                                                             {log.ID}
                                                         </td>
-
-                                                        <td>{log.Admin}</td>
                                                     </tr>
                                                 );
                                             })}

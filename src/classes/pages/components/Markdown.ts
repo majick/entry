@@ -143,7 +143,7 @@ export async function ParseMarkdown(content: string): Promise<string> {
 
     // ...catch-all solution
     content = content.replaceAll(
-        /(!!)(?<DIRECTION>.*?)(!!)(.*?)(!!)/gs,
+        /(!!)(?<DIRECTION>.+)(!!)(.*?)(!!)/gs,
         '<r style="text-align: $<DIRECTION>;">$4</r>'
     );
 
