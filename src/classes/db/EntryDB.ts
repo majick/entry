@@ -73,11 +73,16 @@ export default class EntryDB {
     constructor() {
         // set datadirectory based on config file
         if (fs.existsSync(EntryDB.ConfigLocation))
-            EntryDB.DataDirectory = (
-                JSON.parse(
-                    fs.readFileSync(EntryDB.ConfigLocation).toString()
-                ) as Config
-            ).data.replace(":cwd", process.cwd());
+            EntryDB.DataDirectory =
+                // if config file doesn't include a data entry, don't change datadirectory at all...
+                // STILL ACCEPTS PROCESS.ENV.DATA_DIRECTORY!!! (just prefers config file version)
+                (
+                    (
+                        JSON.parse(
+                            fs.readFileSync(EntryDB.ConfigLocation).toString()
+                        ) as Config
+                    ).data || EntryDB.DataDirectory
+                ).replace(":cwd", process.cwd());
 
         // create db link
         const [db, isNew] = SQL.CreateDB("entry", EntryDB.DataDirectory);
