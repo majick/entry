@@ -103,15 +103,16 @@ export async function Session(request: Request): Promise<string> {
 
         session = `session-id=${
             ses_log[2].ID // add newest token
-        }; SameSite=Strict; Secure; Path=/; Max-Age=${60 * 60 * 24 * 365}`;
+        }; SameSite=Lax; Secure; Path=/; HostOnly=true; Max-Age=${
+            60 * 60 * 24 * 365
+        }`;
     } else {
         // validate session
         const ses_log = await EntryDB.Logs.GetLog(session);
 
         // set token to expire if log no longer exists
         if (!ses_log[0])
-            session =
-                "session-id=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0";
+            session = "session-id=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0";
         // otherwise, return nothing (no need to set cookie, it already exists)
         else session = "";
     }
@@ -201,15 +202,6 @@ export class CreatePaste implements Endpoint {
 
         // create paste
         const result = await db.CreatePaste(body);
-
-        // log UA
-        if (config.log && config.log.events.includes("user_agent"))
-            await EntryDB.Logs.CreateLog({
-                Content: `create_paste:${result[2].CustomURL};${
-                    request.headers.get("User-Agent") || "?"
-                }`,
-                Type: "user_agent",
-            });
 
         // return
         return new Response(JSON.stringify(result), {
@@ -627,15 +619,6 @@ export class EditPaste implements Endpoint {
             }
         );
 
-        // log UA
-        if (config.log && config.log.events.includes("user_agent"))
-            await EntryDB.Logs.CreateLog({
-                Content: `edit_paste:${result[2].CustomURL};${
-                    request.headers.get("User-Agent") || "?"
-                }`,
-                Type: "user_agent",
-            });
-
         // return
         return new Response(JSON.stringify(result), {
             status: 302,
@@ -681,15 +664,6 @@ export class DeletePaste implements Endpoint {
             },
             body.password
         );
-
-        // log UA
-        if (config.log && config.log.events.includes("user_agent"))
-            await EntryDB.Logs.CreateLog({
-                Content: `delete_paste:${result[2].CustomURL};${
-                    request.headers.get("User-Agent") || "?"
-                }`,
-                Type: "user_agent",
-            });
 
         // return
         return new Response(JSON.stringify(result), {

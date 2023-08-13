@@ -21,7 +21,6 @@ export type LogEvent =
     | "edit_paste"
     | "delete_paste"
     | "access_admin"
-    | "user_agent"
     | "session";
 
 export type Log = {
