@@ -383,7 +383,7 @@ export class PastesSearch implements Endpoint {
             // get pastes
             const query = `CustomURL LIKE "%${search
                 .get("q")!
-                .replaceAll('"', "'")}%" ORDER BY LENGTH(Content) DESC LIMIT 100`;
+                .replaceAll('"', "'")}%" LIMIT 100`;
 
             const pastes =
                 search.get("group") === null

@@ -4,6 +4,5 @@
     "tabWidth": 4,
     "trailingComma": "es5",
     "printWidth": 85,
-    "pluginSearchDirs": ["."],
     "semi": true
 }

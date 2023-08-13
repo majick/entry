@@ -412,6 +412,7 @@ export default class EntryDB {
                             new Date().toUTCString(),
                         GroupName:
                             (await request).headers.get("X-Paste-GroupName") || "",
+                        HostServer: server,
                     });
                 else return resolve(undefined);
             }

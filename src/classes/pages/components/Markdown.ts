@@ -59,7 +59,7 @@ export async function ParseMarkdown(content: string): Promise<string> {
     // its own paragraph element, fixes a lot of formatting issues
     // ...all headings need to be matched in one regex so that the toc goes by order of match!
     content = content.replaceAll(
-        /^(\#.*?)\s(.*)$/gm,
+        /^(\#+)\s(.*)$/gm,
         (match: string, offset: string, string: string): string => {
             const HeadingType = offset.length; // offset = hashtags before heading
 
@@ -79,7 +79,10 @@ export async function ParseMarkdown(content: string): Promise<string> {
                     .toLowerCase()
                     .replaceAll(" ", "-")
                     .replaceAll("(", "")
-                    .replaceAll(")", "")}${suffix}`,
+                    .replaceAll(")", "")
+                    .replaceAll(">", "")
+                    .replaceAll("<", "")
+                    .replaceAll("=", "")}${suffix}`,
             };
 
             TOC.push(heading);
@@ -130,7 +133,6 @@ export async function ParseMarkdown(content: string): Promise<string> {
     // using the (custom) <r> element makes marked for some reason work??? I'VE BEEN DOING THIS FOR 5 1/2 HOURS AND THIS
     // IS THE SOLUTION TO MARKED NOT PARSING THESE ELEMENTS??????
     content = content.replaceAll(
-        // -> -> (right)
         /(\-\>)(.*?)(\-\>|\<\-)\s*\.*/gs,
         (match: string, offset: string, string: string): string => {
             const trim = match.trim();
