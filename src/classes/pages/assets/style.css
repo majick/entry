@@ -697,3 +697,7 @@ hr + br {
 r {
     display: block;
 }
+
+br:not(.cm-line br) {
+    display: block;
+}

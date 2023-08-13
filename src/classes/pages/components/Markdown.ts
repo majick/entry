@@ -16,12 +16,12 @@ export type Heading = {
 export type TableOfContents = Heading[];
 
 /**
- * @function ParseMarkdown
+ * @function ParseMarkdownSync
  *
  * @param {string} content
- * @return {Promise<string>}
+ * @return {string}
  */
-export async function ParseMarkdown(content: string): Promise<string> {
+export function ParseMarkdownSync(content: string): string {
     // table of contents base
     const TOC: TableOfContents = [];
 
@@ -78,11 +78,7 @@ export async function ParseMarkdown(content: string): Promise<string> {
                 ID: `${string
                     .toLowerCase()
                     .replaceAll(" ", "-")
-                    .replaceAll("(", "")
-                    .replaceAll(")", "")
-                    .replaceAll(">", "")
-                    .replaceAll("<", "")
-                    .replaceAll("=", "")}${suffix}`,
+                    .replaceAll(/[^A-Za-z0-9]/g, "")}${suffix}`,
             };
 
             TOC.push(heading);
@@ -109,7 +105,7 @@ export async function ParseMarkdown(content: string): Promise<string> {
     }
 
     // horizontal rule
-    content = content.replaceAll(/^\*{3}$/gm, "\n<hr />\n");
+    content = content.replaceAll(/^\*{3}\s*$/gm, "\n<hr />\n");
     content = content.replaceAll(/^-{3}$/gm, "\n<hr />\n");
     content = content.replaceAll(/^_{3}$/gm, "\n<hr />\n");
 
@@ -129,21 +125,6 @@ export async function ParseMarkdown(content: string): Promise<string> {
         '<div class="mdnote note-$2"><b class="mdnote-title">$3</b></div>'
     );
 
-    // update content to allow arrow element alignment, marked doesn't normally do this because it isn't in the markdown spec
-    // using the (custom) <r> element makes marked for some reason work??? I'VE BEEN DOING THIS FOR 5 1/2 HOURS AND THIS
-    // IS THE SOLUTION TO MARKED NOT PARSING THESE ELEMENTS??????
-    content = content.replaceAll(
-        /(\-\>)(.*?)(\-\>|\<\-)\s*\.*/gs,
-        (match: string, offset: string, string: string): string => {
-            const trim = match.trim();
-            return `<r style="text-align: ${
-                // if last character is the end of an arrow, set align to right...
-                // otherwise, set align to center
-                trim[trim.length - 1] === ">" ? "right" : "center"
-            };">${string}</r>`;
-        }
-    );
-
     // update content to allow highlighting
     content = content.replaceAll(
         /(\={2})(.*?)(\={2})/g,
@@ -157,8 +138,11 @@ export async function ParseMarkdown(content: string): Promise<string> {
     );
 
     // manual italics/bold because i've noticed it doesn't work (partially)
-    content = content.replaceAll(/(\*{2})(.*?)(\*{2})/g, "<strong>$2</strong>");
-    content = content.replaceAll(/(\*{1})(.*?)(\*{1})/g, "<em>$2</em>");
+    content = content.replaceAll(/(\*{2})(.*?)(\*{2})/gs, "<strong>$2</strong>");
+    content = content.replaceAll(/(\*{1})(.*?)(\*{1})/gs, "<em>$2</em>");
+
+    // strikethrough
+    content = content.replaceAll(/(\~{2})(.*?)(\~{2})/gs, "<del>$2</del>");
 
     // named links
     // added because marked kept missing some when rendering as HTML
@@ -177,7 +161,7 @@ export async function ParseMarkdown(content: string): Promise<string> {
         '<img alt="$<TEXT>" src="$<URL>" />'
     );
 
-    content = content.replaceAll(/^(<img)(.*?)(\/\>)$\n/gm, "<img $2 /><br />"); // <- VERY important (for soem reason (?))
+    content = content.replaceAll(/^(<img)(.*?)(\/\>)$\n/gm, "<img $2 /><br />"); // <- VERY important (for some reason (?))
 
     // ...normal
     content = content.replaceAll(
@@ -185,9 +169,25 @@ export async function ParseMarkdown(content: string): Promise<string> {
         '<a href="$<URL>">$<TEXT></a>'
     );
 
-    // remove mistakes
+    // update content to allow arrow element alignment, marked doesn't normally do this because it isn't in the markdown spec
+    // using the (custom) <r> element makes marked for some reason work??? I'VE BEEN DOING THIS FOR 5 1/2 HOURS AND THIS
+    // IS THE SOLUTION TO MARKED NOT PARSING THESE ELEMENTS??????
+    content = content.replaceAll(
+        /(\-\>)(.*?)(\-\>|\<\-)/gs,
+        (match: string, offset: string, string: string): string => {
+            const trim = match.trim();
+            return `<r style="text-align: ${
+                // if last character is the end of an arrow, set align to right...
+                // otherwise, set align to center
+                trim[trim.length - 1] === ">" ? "right" : "center"
+            };">${string}</r>`;
+        }
+    );
+
+    // remove/fix mistakes
     content = content.replaceAll("<r></r>", "");
     content = content.replaceAll("<p></p>", "");
+    content = content.replaceAll("<p>\n</p>", "");
 
     // remove scripts, on[...] attributes and <link> elements
 
@@ -208,17 +208,44 @@ export async function ParseMarkdown(content: string): Promise<string> {
     content = content.replaceAll(/(<style.*>)(.*?)(<\/style>)/gs, "");
     content = content.replaceAll(/(<style.*>)/gs, "");
 
+    // return
+    return content;
+}
+
+/**
+ * @function ParseMarkdown
+ *
+ * @export
+ * @param {string} content
+ * @return {Promise<string>}
+ */
+export async function ParseMarkdown(content: string): Promise<string> {
+    content = ParseMarkdownSync(content);
+
     // parse content with marked and return
-    return await marked.parse(content, {
+    content = await marked.parse(content, {
         gfm: true,
         silent: true,
         breaks: true,
         async: true,
         mangle: false,
     });
+
+    // AUTO-PARAGRAPH!!!
+    content = content.replaceAll(
+        /^(.*?)\n\n/gms,
+        (match: string, offset: string): string => {
+            // return
+            return `<p>\n${match}\n</p>`;
+        }
+    );
+
+    // return
+    return content;
 }
 
 // default export
 export default {
+    ParseMarkdownSync,
     ParseMarkdown,
 };
