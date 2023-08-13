@@ -3,7 +3,7 @@ import { Endpoint, Renderer } from "honeybee";
 import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/Footer";
 
-import { DecryptPaste, db, PageHeaders } from "./API";
+import { DecryptPaste, db, PageHeaders, Session } from "./API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import pack from "../../../package.json";
@@ -49,6 +49,9 @@ export default class Home implements Endpoint {
                 delete paste.ViewPassword; // don't show decrypt form!
             }
         }
+
+        // manage session
+        const SessionCookie = await Session(request);
 
         // return
         return new Response(
@@ -709,6 +712,7 @@ export default class Home implements Endpoint {
                 headers: {
                     ...PageHeaders,
                     "Content-Type": "text/html",
+                    "Set-Cookie": SessionCookie,
                 },
             }
         );

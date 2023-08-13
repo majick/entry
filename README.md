@@ -124,7 +124,8 @@ The following options can be used as events:
 - `edit_paste`, fires when a paste is edited on the server (`Content` is the old CustomURL and the new CustomURL)
 - `delete_paste`, fires when a paste is deleted on the server (`Content` is the paste CustomURL)
 - `access_admin`, fires when the admin panel is accessed (`Content` is the value of the `User-Agent` header, will be "?" if no UA exists)
-- `user_agent`, fires after an API event (`Content` is the reason the event was fired and the `User-Agent` header)
+- `user_agent`, fires after an API event that interacts with the database is triggered (`Content` is the reason the event was fired and the `User-Agent` header)
+- `session`, fires when a new session is created (`Content` is the session `User-Agent` header)
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:

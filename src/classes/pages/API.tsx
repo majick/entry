@@ -67,6 +67,60 @@ export function VerifyContentType(
 }
 
 /**
+ * @function GetCookie
+ *
+ * @export
+ * @param {string} cookie full cookie string
+ * @param {string} key key to search for
+ * @return {(string | undefined)}
+ */
+export function GetCookie(cookie: string, key: string): string | undefined {
+    const value = cookie.split(`${key}=`)[1];
+    if (!value) return undefined;
+    return value.split(";")[0];
+}
+
+/**
+ * @function Session
+ * @description Manage session on request
+ *
+ * @export
+ * @param {Request} request
+ * @return {Promise<string>}
+ */
+export async function Session(request: Request): Promise<string> {
+    const config = (await EntryDB.GetConfig()) as Config;
+    if (!config.log || !config.log.events.includes("session")) return ""; // sessions are disabled
+
+    // generate session if it doesn't exist
+    let session = GetCookie(request.headers.get("Cookie") || "", "session-id");
+
+    if (!session) {
+        const ses_log = await EntryDB.Logs.CreateLog({
+            Content: request.headers.get("User-Agent") || "?",
+            Type: "session",
+        });
+
+        session = `session-id=${
+            ses_log[2].ID // add newest token
+        }; SameSite=Strict; Secure; Path=/; Max-Age=${60 * 60 * 24 * 365}`;
+    } else {
+        // validate session
+        const ses_log = await EntryDB.Logs.GetLog(session);
+
+        // set token to expire if log no longer exists
+        if (!ses_log[0])
+            session =
+                "session-id=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0";
+        // otherwise, return nothing (no need to set cookie, it already exists)
+        else session = "";
+    }
+
+    // return
+    return session;
+}
+
+/**
  * @export
  * @class WellKnown
  * @implements {Endpoint}
@@ -229,6 +283,9 @@ export class GetPasteFromURL implements Endpoint {
                 }
             }
         }
+
+        // manage session
+        const SessionCookie = await Session(request);
 
         // return
         if (!result || !editable[0])
@@ -494,6 +551,7 @@ export class GetPasteFromURL implements Endpoint {
                         "X-Content-Type-Options": "nosniff",
                         Vary: "Accept-Encoding",
                         "Content-Type": "text/html",
+                        "Set-Cookie": SessionCookie,
                     },
                 }
             );
@@ -569,6 +627,15 @@ export class EditPaste implements Endpoint {
             }
         );
 
+        // log UA
+        if (config.log && config.log.events.includes("user_agent"))
+            await EntryDB.Logs.CreateLog({
+                Content: `edit_paste:${result[2].CustomURL};${
+                    request.headers.get("User-Agent") || "?"
+                }`,
+                Type: "user_agent",
+            });
+
         // return
         return new Response(JSON.stringify(result), {
             status: 302,
@@ -614,6 +681,15 @@ export class DeletePaste implements Endpoint {
             },
             body.password
         );
+
+        // log UA
+        if (config.log && config.log.events.includes("user_agent"))
+            await EntryDB.Logs.CreateLog({
+                Content: `delete_paste:${result[2].CustomURL};${
+                    request.headers.get("User-Agent") || "?"
+                }`,
+                Type: "user_agent",
+            });
 
         // return
         return new Response(JSON.stringify(result), {
