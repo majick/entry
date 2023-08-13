@@ -221,7 +221,9 @@ export class GetPasteFromURL implements Endpoint {
 
                                         {result.GroupName && (
                                             <a
-                                                href={`/group/${result.GroupName}${
+                                                href={`/search?q=${
+                                                    result.GroupName
+                                                }%2F&group=${result.GroupName}${
                                                     // add host server (if it exists)
                                                     result.HostServer
                                                         ? `:${result.HostServer}`
@@ -363,87 +365,6 @@ export class GetPasteFromURL implements Endpoint {
 
 /**
  * @export
- * @class GetAllPastesInGroupPage
- * @implements {Endpoint}
- */
-export class GetAllPastesInGroupPage implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        const url = new URL(request.url);
-        const group = url.pathname.slice("/group/".length, url.pathname.length);
-
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
-
-        // get pastes
-        const pastes = await db.GetAllPastesInGroup(
-            // if no group is provided this will return all pastes with no group
-            group || ""
-        );
-
-        // return
-        if (pastes.length === 0 || !pastes || !group)
-            // show 404 because group does not exist
-            return new _404Page().request(request);
-        else
-            return new Response(
-                Renderer.Render(
-                    <>
-                        <main>
-                            <div className="tab-container editor-tab">
-                                <h1
-                                    style={{
-                                        display: "flex",
-                                        gap: "1rem",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        flexWrap: "wrap",
-                                    }}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="48"
-                                        height="48"
-                                        aria-label={"Open Folder Filled Symbol"}
-                                    >
-                                        <path d="M.513 1.513A1.75 1.75 0 0 1 1.75 1h3.5c.55 0 1.07.26 1.4.7l.9 1.2a.25.25 0 0 0 .2.1H13a1 1 0 0 1 1 1v.5H2.75a.75.75 0 0 0 0 1.5h11.978a1 1 0 0 1 .994 1.117L15 13.25A1.75 1.75 0 0 1 13.25 15H1.75A1.75 1.75 0 0 1 0 13.25V2.75c0-.464.184-.91.513-1.237Z"></path>
-                                    </svg>
-
-                                    <span>{group.split(":")[0]}</span>
-                                </h1>
-
-                                <PasteList Pastes={pastes} />
-                            </div>
-
-                            <Footer />
-                        </main>
-
-                        <style
-                            dangerouslySetInnerHTML={{
-                                __html: `form button { margin: auto; }`,
-                            }}
-                        />
-                    </>,
-                    <>
-                        <meta
-                            name="description"
-                            content={`View pastes in groups/${group} on ${config.name} - A Markdown Pastebin`}
-                        ></meta>
-
-                        <title>Pastes in {group || "No Group"}</title>
-                    </>
-                ),
-                {
-                    headers: {
-                        ...DefaultHeaders,
-                        "Content-Type": "text/html",
-                    },
-                }
-            );
-    }
-}
-
-/**
- * @export
  * @class PastesSearch
  * @implements {Endpoint}
  */
@@ -460,13 +381,16 @@ export class PastesSearch implements Endpoint {
         // ...
         if (search.get("q")) {
             // get pastes
-            const pastes = await db.GetAllPastes(
-                false,
-                true,
-                `CustomURL LIKE "%${search
-                    .get("q")!
-                    .replaceAll('"', "'")}%" LIMIT 100`
-            );
+            const query = `CustomURL LIKE "%${search
+                .get("q")!
+                .replaceAll('"', "'")}%" ORDER BY LENGTH(Content) DESC LIMIT 100`;
+
+            const pastes =
+                search.get("group") === null
+                    ? // search all pastes
+                      await db.GetAllPastes(false, true, query)
+                    : // search within group
+                      await db.GetAllPastesInGroup(search.get("group") as string);
 
             // return
             return new Response(
@@ -537,19 +461,13 @@ export class PastesSearch implements Endpoint {
                             <style
                                 dangerouslySetInnerHTML={{
                                     __html: `.search-result:hover {
-                                        box-shadow: 0 0 4px var(--background-surface3);
+                                        outline: 1px solid var(--text-color-faded);
                                     }`,
                                 }}
                             />
 
                             <Footer />
                         </main>
-
-                        <style
-                            dangerouslySetInnerHTML={{
-                                __html: `form button { margin: auto; }`,
-                            }}
-                        />
                     </>,
                     <>
                         <title>Results for "{search.get("q")}"</title>
@@ -618,6 +536,5 @@ export class PastesSearch implements Endpoint {
 // default export
 export default {
     GetPasteFromURL,
-    GetAllPastesInGroupPage,
     PastesSearch,
 };

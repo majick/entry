@@ -410,6 +410,8 @@ export default class EntryDB {
                         EditDate:
                             (await request).headers.get("X-Paste-EditDate") ||
                             new Date().toUTCString(),
+                        GroupName:
+                            (await request).headers.get("X-Paste-GroupName") || "",
                     });
                 else return resolve(undefined);
             }

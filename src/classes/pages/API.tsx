@@ -485,6 +485,7 @@ export class GetRawPaste implements Endpoint {
                 "Content-Type": "text/plain",
                 "X-Paste-PubDate": result.PubDate,
                 "X-Paste-EditDate": result.EditDate,
+                "X-Paste-GroupName": result.GroupName || "",
             },
         });
     }

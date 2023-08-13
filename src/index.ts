@@ -125,8 +125,6 @@ const config: HoneybeeConfig = {
     AssetsDir: import.meta.dir,
     NotFoundPage: _404Page(),
     Pages: {
-        // GET group
-        "/group/": { Type: "begins", Page: Pages.GetAllPastesInGroupPage },
         // GET admin
         "/admin": { Page: Admin.Login },
         "/admin/": { Page: Admin.Login },
