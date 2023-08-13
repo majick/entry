@@ -130,21 +130,16 @@ export async function ParseMarkdown(content: string): Promise<string> {
     // using the (custom) <r> element makes marked for some reason work??? I'VE BEEN DOING THIS FOR 5 1/2 HOURS AND THIS
     // IS THE SOLUTION TO MARKED NOT PARSING THESE ELEMENTS??????
     content = content.replaceAll(
-        // -> <- (center)
-        /(\-\>)(.*?)(\<\-)\s*\.*/gs,
-        '<r style="text-align: center;">$2</r>'
-    );
-
-    content = content.replaceAll(
         // -> -> (right)
-        /(\-\>)(.*?)(\-\>)\s*\.*/gs,
-        '<r style="text-align: right;">$2</r>'
-    );
-
-    // ...catch-all solution
-    content = content.replaceAll(
-        /(!!)(?<DIRECTION>.+)(!!)(.*?)(!!)/gs,
-        '<r style="text-align: $<DIRECTION>;">$4</r>'
+        /(\-\>)(.*?)(\-\>|\<\-)\s*\.*/gs,
+        (match: string, offset: string, string: string): string => {
+            const trim = match.trim();
+            return `<r style="text-align: ${
+                // if last character is the end of an arrow, set align to right...
+                // otherwise, set align to center
+                trim[trim.length - 1] === ">" ? "right" : "center"
+            };">${string}</r>`;
+        }
     );
 
     // update content to allow highlighting
