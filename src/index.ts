@@ -4,8 +4,6 @@
  * @license MIT
  */
 
-import path from "node:path";
-
 // init EntryDB
 import EntryDB from "./classes/db/EntryDB";
 await EntryDB.CreateExpiry();
@@ -22,9 +20,11 @@ export type Config = {
     admin: string;
     data: string;
     config: string;
+    env?: "production" | "development";
     app?: {
         info?: string;
         footer?: {
+            show_search?: boolean;
             rows: Array<{
                 [key: string]: string;
             }>;
@@ -112,19 +112,21 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 // ...import endpoints
 import { _404Page } from "./classes/pages/components/404";
 import Admin from "./classes/pages/Admin";
+import Pages from "./classes/pages/Pages";
 import API from "./classes/pages/API";
 
 // init logs
 await EntryDB.InitLogs();
 
 // ...create config
+const ServerConfig = await EntryDB.GetConfig();
 const config: HoneybeeConfig = {
-    Port: (await EntryDB.GetConfig())!.port || 8080,
+    Port: ServerConfig!.port || 8080,
     AssetsDir: import.meta.dir,
     NotFoundPage: _404Page(),
     Pages: {
         // GET group
-        "/group/": { Type: "begins", Page: API.GetAllPastesInGroupPage },
+        "/group/": { Type: "begins", Page: Pages.GetAllPastesInGroupPage },
         // GET admin
         "/admin": { Page: Admin.Login },
         "/admin/": { Page: Admin.Login },
@@ -157,6 +159,8 @@ const config: HoneybeeConfig = {
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
         "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
+        // GET search
+        "/search": { Page: Pages.PastesSearch },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/": {
@@ -164,10 +168,14 @@ const config: HoneybeeConfig = {
             // at the end so it tests this last because everything starts with /, which means
             // everything will get matched by this if it doesn't come before it
             Type: "begins",
-            Page: API.GetPasteFromURL,
+            Page: Pages.GetPasteFromURL,
         },
         // POST root
-        "/paste/dec/": { Method: "POST", Type: "begins", Page: API.GetPasteFromURL },
+        "/paste/dec/": {
+            Method: "POST",
+            Type: "begins",
+            Page: Pages.GetPasteFromURL,
+        },
     },
 };
 

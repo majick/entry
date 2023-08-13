@@ -8,6 +8,8 @@ import { Database } from "bun:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
+import EntryDB from "../EntryDB";
+
 /**
  * @export
  * @class SQL

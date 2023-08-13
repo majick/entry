@@ -211,6 +211,7 @@ Example:
         "info": "/info:www.sentrytwo.com"
         ...
     }
+    ...
 }
 ```
 
@@ -223,6 +224,26 @@ Adding a group name will append the group name to the beginning of your set cust
 ### Special Markdown
 
 Entry supports some custom Markdown features that aren't included in the Markdown specification. These allow you to create more advanced pastes much quicker. Information about these can be found [here](https://www.sentrytwo.com/pub/markdown)!
+
+### Paste Search
+
+Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results are limited to 100 results per query and resulting pastes must be public. You can hide the search page from the footer through the `show_search` key in your server config.
+
+```json
+{
+    ...
+    "app": {
+        ...
+        "footer": {
+            ...
+            "show_search": true // set to false to disable
+            ...
+        }
+        ...
+    }
+    ...
+}
+```
 
 ## Development
 

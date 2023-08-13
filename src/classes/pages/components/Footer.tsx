@@ -43,6 +43,14 @@ export default function Footer() {
                     <a href="/v">version</a>
                 </li>
 
+                {config.app &&
+                    config.app.footer &&
+                    config.app.footer.show_search !== false && (
+                        <li>
+                            <a href="/search">search</a>
+                        </li>
+                    )}
+
                 <li>
                     <ToggleTheme />
                 </li>

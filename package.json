@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -22,7 +22,7 @@
     "@codemirror/view": "^6.14.0",
     "@lezer/highlight": "^1.1.6",
     "highlight.js": "^11.8.0",
-    "honeybee": "1.0.5",
+    "honeybee": "1.0.6",
     "marked": "^5.1.0"
   },
   "scripts": {
@@ -41,5 +41,5 @@
   "bugs": {
     "url": "https://codeberg.org/hkau/entry/issues"
   },
-  "homepage": "https://www.sentrytwo.com"
+  "homepage": "https://sentrytwo.com"
 }

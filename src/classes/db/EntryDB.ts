@@ -1034,9 +1034,9 @@ export default class EntryDB {
         // get pastes
         const pastes = await SQL.QueryOBJ({
             db: this.db,
-            query: `SELECT * From Pastes${
-                !includePrivate ? ' WHERE ViewPassword = ""' : ""
-            } WHERE ${sql || "CustomURL IS NOT NULL LIMIT 1000"}`,
+            query: `SELECT * From Pastes WHERE ${
+                sql || "CustomURL IS NOT NULL LIMIT 1000"
+            }`,
             all: true,
             transaction: true,
             use: "Prepare",
@@ -1048,6 +1048,16 @@ export default class EntryDB {
                 paste = this.CleanPaste(paste);
                 pastes[pastes.indexOf(paste)] = paste;
             }
+
+        // remove private pastes
+        if (!includePrivate)
+            for (let paste of pastes as Paste[])
+                if (
+                    paste.ViewPassword !== "" &&
+                    paste.ViewPassword !== CreateHash("") &&
+                    paste.ViewPassword !== "exists"
+                )
+                    (pastes as Paste[]).splice(pastes.indexOf(paste));
 
         // return
         return pastes;
