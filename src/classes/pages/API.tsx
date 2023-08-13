@@ -203,6 +203,7 @@ export class CreatePaste implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
         body.Content = decodeURIComponent(body.Content);
+        body.CustomURL = body.CustomURL.toLowerCase();
 
         // create paste
         const result = await db.CreatePaste(body);
@@ -271,6 +272,9 @@ export class EditPaste implements Endpoint {
         body.OldContent = decodeURIComponent(body.OldContent);
         body.NewContent = decodeURIComponent(body.NewContent);
 
+        body.OldURL = body.OldURL.toLowerCase();
+        body.NewURL = body.NewURL.toLowerCase();
+
         // get paste
         const paste = await db.GetPasteFromURL(body.OldURL);
 
@@ -330,6 +334,7 @@ export class DeletePaste implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
         // body.password is automatically hashed in db.DeletePaste
+        body.CustomURL = body.CustomURL.toLowerCase();
 
         // delete paste
         const result = await db.DeletePaste(

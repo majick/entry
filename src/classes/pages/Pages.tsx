@@ -43,7 +43,7 @@ export class GetPasteFromURL implements Endpoint {
         config = (await EntryDB.GetConfig()) as Config;
 
         // get paste name
-        let name = url.pathname.slice(1, url.pathname.length);
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
         if (name.startsWith("paste/dec/")) name = name.split("paste/dec/")[1];
 
         // return home if name === ""
