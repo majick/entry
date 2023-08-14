@@ -48,11 +48,11 @@ export function ParseMarkdownSync(content: string): string {
     );
 
     // ...inline code block
-    content = content.replaceAll(/(\`{3})(.*)(\`{3})/gm, "<code>$2</code>"); // ```code```
+    content = content.replaceAll(/(\`{3})(.*?)(\`{3})/gm, "<code>$2</code>"); // ```code```
 
     // ...inline code block
-    content = content.replaceAll(/(\`{2})(.*)(\`{2})/g, "<code>$2</code>"); // ``code``
-    content = content.replaceAll(/(\`{1})(.*)(\`{1})/g, "<code>$2</code>"); // `code`
+    content = content.replaceAll(/(\`{2})(.*?)(\`{2})/g, "<code>$2</code>"); // ``code``
+    content = content.replaceAll(/(\`{1})(.*?)(\`{1})/g, "<code>$2</code>"); // `code`
 
     // fix headers (they aren't picked up if the formatting is really bad)
     // inserting a \n after each heading to make marked automatically make following text
@@ -155,6 +155,9 @@ export function ParseMarkdownSync(content: string): string {
                 }">`;
             // ...close block
             else if (_class === "close") result = `</span>`;
+            // hsl block
+            else if (_class === "hsl")
+                result = `<${attributes[0]}>${attributes[1]}</${attributes[0]}>`;
 
             // return
             return result;
@@ -191,7 +194,7 @@ export function ParseMarkdownSync(content: string): string {
 
     // manual italics/bold because i've noticed it doesn't work (partially)
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/gs, "<strong>$2</strong>");
-    content = content.replaceAll(/(\*{1})(.*?)(`)/gs, "&!temp-ast;$2`");
+    content = content.replaceAll(/(\*{1})(.*?)(\<\/code\>)/gs, "&!temp-ast;$2</code>`");
     content = content.replaceAll(/(\*{1})(.*?)(\*{1})/gs, "<em>$2</em>");
     content = content.replaceAll("&!temp-ast;", "*"); // look, I know this is stupid but... it works?
     //                   (we need this to stop italics matching when the asterisk is in a code block)

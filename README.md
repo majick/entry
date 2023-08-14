@@ -171,10 +171,10 @@ html.purple-theme {
 
 You can customize the way your pastes are displayed using some custom elements.
 
-- `<hue>`, the hue element allows you to control the hue of the page when your paste is rendered. It expects an `integer`.
-- `<sat>`, the sat element allows you to control the saturation of the page when your paste is rendered. It expects a `percentage`.
-- `<lit>`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
-- `<theme>`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
+- `&!lt;hue&!gt;`, the hue element allows you to control the hue of the page when your paste is rendered. It expects an `integer`.
+- `&!lt;sat&!gt;`, the sat element allows you to control the saturation of the page when your paste is rendered. It expects a `percentage`.
+- `&!lt;lit&!gt;`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
+- `&!lt;theme&!gt;`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
 
 Entry also supports an easier syntax, allowing you to shorten elements.
 
