@@ -5,7 +5,7 @@ export default function SearchForm(props: { query?: string }) {
         <form
             style={{
                 display: "flex",
-                width: "max-content",
+                width: "30rem",
                 gap: "0.5rem",
                 maxWidth: "100%",
                 justifyContent: "center",

@@ -476,7 +476,13 @@ export class PastesSearch implements Endpoint {
                                             padding: "1rem",
                                         }}
                                     >
-                                        <a href={`/${paste.CustomURL}`}>
+                                        <a
+                                            href={`/${
+                                                paste.CustomURL.startsWith("/")
+                                                    ? paste.CustomURL.slice(1)
+                                                    : paste.CustomURL
+                                            }`}
+                                        >
                                             {paste.CustomURL}
                                         </a>
 

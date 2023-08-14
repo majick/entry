@@ -55,7 +55,7 @@ export default function Footer() {
                 </li>
             </ul>
 
-            {config.app && config.app.footer && (
+            {config.app && config.app.footer && config.app.footer.rows && (
                 <>
                     {/* custom footer rows */}
                     {config.app.footer.rows.map((row) => (
