@@ -113,7 +113,9 @@ export class GetPasteFromURL implements Endpoint {
                     await EntryDB.Logs.QueryLogs(
                         `Content = "${result.CustomURL};${SessionCookieValue}"`
                     )
-                )[2].length === 0
+                )[2].length === 0 &&
+                // make sure session id is valid
+                !SessionCookie.startsWith("session-id=refresh;")
             )
                 await EntryDB.Logs.CreateLog({
                     Type: "view_paste",
