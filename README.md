@@ -219,7 +219,7 @@ The animation element also supports more attributes to allow you to customize yo
 - Repeat (`infinite` makes the animation repeat forever)
 - Inline (Set to `inline` to make the animation block fit with text)
 
-An example using all of these would look like this:
+An example using all of these would look like:
 
 ```html
 <&!percnt; animation Float 1s 0s infinite inline &!percnt;> floating text! <&!percnt; close animation &!percnt;>

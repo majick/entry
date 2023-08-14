@@ -48,11 +48,11 @@ export function ParseMarkdownSync(content: string): string {
     );
 
     // ...inline code block
-    content = content.replaceAll(/^(\`{3})(.*)(\`{3})$/gm, "<code>$2</code>"); // ```code```
+    content = content.replaceAll(/(\`{3})(.*)(\`{3})/gm, "<code>$2</code>"); // ```code```
 
     // ...inline code block
-    content = content.replaceAll(/^(\`{2})(.*)(\`{2})$/gm, "<code>$2</code>"); // ``code``
-    content = content.replaceAll(/^(\`{1})(.*)(\`{1})$/gm, "<code>$2</code>"); // `code`
+    content = content.replaceAll(/(\`{2})(.*)(\`{2})/g, "<code>$2</code>"); // ``code``
+    content = content.replaceAll(/(\`{1})(.*)(\`{1})/g, "<code>$2</code>"); // `code`
 
     // fix headers (they aren't picked up if the formatting is really bad)
     // inserting a \n after each heading to make marked automatically make following text
@@ -149,7 +149,9 @@ export function ParseMarkdownSync(content: string): string {
                     attributes[4] === "inline" ? "inline-block" : "block"
                 }; ${
                     // set width to max-content if display is not inline
-                    attributes[4] === "inline" ? "" : "width: max-content;"
+                    attributes[4] === "inline"
+                        ? ""
+                        : "width: max-content; max-width: 100%;"
                 }">`;
             // ...close block
             else if (_class === "close") result = `</span>`;
@@ -240,8 +242,6 @@ export function ParseMarkdownSync(content: string): string {
 
     // remove/fix mistakes
     content = content.replaceAll("<r></r>", "");
-    content = content.replaceAll("<p></p>", "");
-    content = content.replaceAll("<p><br /></p>", "");
 
     // remove scripts, on[...] attributes and <link> elements
 
@@ -293,6 +293,10 @@ export async function ParseMarkdown(content: string): Promise<string> {
             return `<p>\n${match}\n</p>`;
         }
     );
+
+    // fix mistakes (again)
+    content = content.replaceAll("<p></p>", "");
+    content = content.replaceAll("</p><p>", "");
 
     // return
     return content;
