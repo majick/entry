@@ -22,7 +22,8 @@ export type LogEvent =
     | "delete_paste"
     | "access_admin"
     | "session"
-    | "error";
+    | "error"
+    | "view_paste";
 
 export type Log = {
     Content: string;

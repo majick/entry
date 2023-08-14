@@ -30,6 +30,7 @@ export default function SearchForm(props: { query?: string }) {
                 style={{
                     width: "35%",
                 }}
+                class={"mobile-max"}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

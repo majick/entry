@@ -153,7 +153,7 @@ button,
     cursor: pointer;
     border: none;
     outline: none;
-    color: var(--text-color-faded1);
+    color: inherit;
     font-size: 16px;
     padding: 0.5rem 0.75rem;
     display: flex;
@@ -306,6 +306,10 @@ h6 {
 @media screen and (max-width: 800px) {
     .mobile-center {
         margin: auto !important;
+    }
+
+    .mobile-max {
+        width: 100% !important;
     }
 }
 
@@ -576,6 +580,7 @@ details summary {
     padding: 0.5rem 0.75rem;
     cursor: pointer;
     font-weight: 600;
+    height: 40px; /* WHY is it normally 40.5px??? WHEN EVERTHING ELSE IS JUST 40!!! */
 }
 
 details[open] summary:not(details details summary) {

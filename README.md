@@ -125,6 +125,8 @@ The following options can be used as events:
 - `delete_paste`, fires when a paste is deleted on the server (`Content` is the paste CustomURL)
 - `access_admin`, fires when the admin panel is accessed (`Content` is the value of the `User-Agent` header, will be "?" if no UA exists)
 - `session`, fires when a new session is created (`Content` is the session `User-Agent` header)
+- `view_paste`, fires when a paste is viewed (`Content` is the paste CustomURL and the session ID of the viewer)
+    - A "Views" counter is added to pastes when this event is enabled
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:
@@ -140,6 +142,7 @@ An example that doesn't clear logs on restart and has all events enabled looks l
             "delete_paste",
             "access_admin",
             "session",
+            "view_paste",
             "generic"
         ]
     }

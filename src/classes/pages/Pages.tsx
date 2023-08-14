@@ -22,7 +22,13 @@ import pack from "../../../package.json";
 import { Config } from "../..";
 let config: Config;
 
-import { VerifyContentType, DecryptPaste, Session, DefaultHeaders } from "./API";
+import {
+    VerifyContentType,
+    DecryptPaste,
+    Session,
+    DefaultHeaders,
+    GetCookie,
+} from "./API";
 
 // ...
 import { ParseMarkdown } from "./components/Markdown";
@@ -89,6 +95,31 @@ export class GetPasteFromURL implements Endpoint {
 
         // manage session
         const SessionCookie = await Session(request);
+
+        // count view
+        if (result) {
+            const SessionCookieValue = GetCookie(
+                request.headers.get("Cookie") || "",
+                "session-id"
+            );
+
+            if (
+                SessionCookieValue &&
+                config.log &&
+                config.log.events.includes("view_paste") &&
+                // make sure we haven't already added this view
+                // (make sure length of query for log is 0)
+                (
+                    await EntryDB.Logs.QueryLogs(
+                        `Content = "${result.CustomURL};${SessionCookieValue}"`
+                    )
+                )[2].length === 0
+            )
+                await EntryDB.Logs.CreateLog({
+                    Type: "view_paste",
+                    Content: `${result.CustomURL};${SessionCookieValue}`,
+                });
+        }
 
         // return
         if (!result || !editable[0])
@@ -320,6 +351,11 @@ export class GetPasteFromURL implements Endpoint {
                                                 {result.EditDate}
                                             </span>
                                         </span>
+
+                                        {config.log &&
+                                            config.log.events.includes(
+                                                "view_paste"
+                                            ) && <span>Views: {result.Views}</span>}
                                     </div>
                                 </div>
                             </div>

@@ -35,6 +35,7 @@ export type Paste = {
     IsEditable?: string; // this is not actually stored in the record
     ExpireOn?: string; //   this is not actually stored in the record
     UnhashedEditPassword?: string; // this should never be stored in the record! only used have paste creation
+    Views?: number; // this is not actually stored in the record! amount of log records LIKE "%{CustomURL}%"
 };
 
 /**
@@ -61,6 +62,8 @@ export default class EntryDB {
     public static readonly MinContentLength = 1;
     public static readonly MinPasswordLength = 5;
     public static readonly MinCustomURLLength = 2;
+
+    public static config: Config;
 
     private static readonly URLRegex = /^[\w\_\-]+$/gm; // custom urls must match this to be accepted
 
@@ -176,8 +179,14 @@ export default class EntryDB {
         // make sure config exists
         if (!(await Bun.file(EntryDB.ConfigLocation).exists())) return undefined;
 
+        // get config
+        const config = JSON.parse(await Bun.file(EntryDB.ConfigLocation).text());
+
+        // store config
+        EntryDB.config = config;
+
         // return config
-        return JSON.parse(await Bun.file(EntryDB.ConfigLocation).text());
+        return config;
     }
 
     /**
@@ -371,6 +380,18 @@ export default class EntryDB {
                 const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
                 if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
 
+                // count views
+                if (
+                    EntryDB.config.log &&
+                    EntryDB.config.log.events.includes("view_paste") &&
+                    EntryDB.Logs
+                )
+                    record.Views = (
+                        await EntryDB.Logs.QueryLogs(
+                            `Content LIKE "%${record.CustomURL};%"`
+                        )
+                    )[2].length;
+
                 // return
                 return resolve(record);
             } else {
@@ -413,6 +434,7 @@ export default class EntryDB {
                         GroupName:
                             (await request).headers.get("X-Paste-GroupName") || "",
                         HostServer: server,
+                        Views: 0,
                     });
                 else return resolve(undefined);
             }
