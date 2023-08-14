@@ -150,6 +150,10 @@ const config: HoneybeeConfig = {
             Method: "POST",
             Page: Admin.APIMassDeleteLogs,
         },
+        "/admin/api/config.json": {
+            Method: "POST",
+            Page: Admin.APIExportConfig,
+        },
         // POST api
         "/api/new": { Method: "POST", Page: API.CreatePaste },
         "/api/edit": { Method: "POST", Page: API.EditPaste },

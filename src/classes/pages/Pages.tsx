@@ -97,7 +97,7 @@ export class GetPasteFromURL implements Endpoint {
         const SessionCookie = await Session(request);
 
         // count view
-        if (result) {
+        if (result && !result.HostServer) {
             const SessionCookieValue = GetCookie(
                 request.headers.get("Cookie") || "",
                 "session-id"
