@@ -736,8 +736,18 @@ export default class EntryDB {
 
         // if custom url was changed, add the group back to it
         // ...users cannot add the group manually because of the custom url regex
-        if (NewPasteInfo.CustomURL !== paste.CustomURL)
-            NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
+        if (NewPasteInfo.CustomURL !== paste.CustomURL) {
+            if (paste.GroupName)
+                NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
+
+            // ALSO... delete all view_paste logs that have to do with the old URL
+            await SQL.QueryOBJ({
+                db: EntryDB.Logs.db,
+                query: "DELETE FROM Logs WHERE Content LIKE ?",
+                params: [`%${paste.CustomURL}%`],
+                use: "Prepare",
+            });
+        }
 
         // rencrypt (if needed, again)
         if (NewPasteInfo.ViewPassword) {
