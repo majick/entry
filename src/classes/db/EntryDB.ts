@@ -225,6 +225,29 @@ export default class EntryDB {
     public static async InitLogs(): Promise<void> {
         // init logs
         EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
+
+        // start logs interval
+        // runs every day, checks sessions to see if it has been more than a year
+        // since they were created. deletes session if it's expired
+        setInterval(
+            async () => {
+                for (const log of (
+                    await EntryDB.Logs.QueryLogs('Type = "session"')
+                )[2]) {
+                    // get dates
+                    const Created = new Date(log.Timestamp);
+                    const Now = new Date();
+
+                    // subtract milliseconds
+                    const Difference = Now.getTime() - Created.getTime();
+
+                    // if difference is more than a year, delete log (invalidating the session)
+                    if (Difference > 1000 * 60 * 60 * 24 * 365)
+                        await EntryDB.Logs.DeleteLog(log.ID);
+                }
+            },
+            1000 * 60 * 60 * 24
+        );
     }
 
     /**

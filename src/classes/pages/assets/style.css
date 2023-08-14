@@ -460,6 +460,10 @@ hr {
     border-top: solid 1px var(--background-surface1);
 }
 
+html:not(.dark-theme) hr {
+    border-color: hsl(var(--base-hue), var(--base-sat), calc(var(--base-lit) - 14%));
+}
+
 .editor-tab hr {
     /* editor-tab really just means markdown preview, it has a lighter background that matches
        the normal color of hr, so we need to make hr brighter when it is inside of that */

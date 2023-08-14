@@ -7,10 +7,7 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 
 // import components
-import DecryptionForm from "./components/form/DecryptionForm";
 import _404Page from "./components/404";
-import Footer from "./components/Footer";
-import Home from "./Home";
 
 // create database
 import { CreateHash, Decrypt } from "../db/helpers/Hash";
@@ -18,13 +15,10 @@ import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 
 import pack from "../../../package.json";
-
 import { Config } from "../..";
-let config: Config;
 
 // ...
 import { ParseMarkdown } from "./components/Markdown";
-import PasteList from "./components/PasteList";
 
 // headers
 export const DefaultHeaders = {

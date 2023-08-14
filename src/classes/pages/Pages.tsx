@@ -13,7 +13,6 @@ import Footer from "./components/Footer";
 import Home from "./Home";
 
 // create database
-import { CreateHash, Decrypt } from "../db/helpers/Hash";
 import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 
@@ -33,7 +32,6 @@ import {
 // ...
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
-import PasteList from "./components/PasteList";
 
 // ...
 
@@ -416,10 +414,6 @@ export class PastesSearch implements Endpoint {
         // manage session
         const SessionCookie = await Session(request);
 
-        // return 404 if search is disabled
-        if (EntryDB.config.app && EntryDB.config.app.enable_search === false)
-            return new _404Page().request(request);
-
         // ...
         if (search.get("q")) {
             // get pastes
@@ -433,6 +427,15 @@ export class PastesSearch implements Endpoint {
                       await db.GetAllPastes(false, true, query)
                     : // search within group
                       await db.GetAllPastesInGroup(search.get("group") as string);
+
+            // if search is disabled, a value for "group" is required
+            // ...if we don't have one, 404!
+            if (
+                EntryDB.config.app &&
+                EntryDB.config.app.enable_search === false &&
+                search.get("group") === null
+            )
+                return new _404Page().request(request);
 
             // return
             return new Response(
@@ -448,7 +451,11 @@ export class PastesSearch implements Endpoint {
                                     marginBottom: "0.5rem",
                                 }}
                             >
-                                <SearchForm query={search.get("q") || ""} />
+                                {/* hide the search bar if search is disabled */}
+                                {!EntryDB.config.app ||
+                                    (EntryDB.config.app.enable_search !== false && (
+                                        <SearchForm query={search.get("q") || ""} />
+                                    ))}
 
                                 <span class={"mobile-center"}>
                                     <b>{pastes.length}</b> result
@@ -530,6 +537,10 @@ export class PastesSearch implements Endpoint {
                 }
             );
         } else {
+            // return 404 if search is disabled
+            if (EntryDB.config.app && EntryDB.config.app.enable_search === false)
+                return new _404Page().request(request);
+
             // show search home
             return new Response(
                 Renderer.Render(
