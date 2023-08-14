@@ -44,7 +44,17 @@ export function ParseMarkdownSync(content: string): string {
     // ...fenced code block
     content = content.replaceAll(
         /^(\`{3})(.*?)\n(.*?)(\`{3})$/gms, // $2: language, $3: code
-        '<pre><code class="language-$2">$3</code></pre>\n'
+        (match: string, offset: string, string: string) => {
+            const lang = string;
+            let code = match.slice(`\`\`\`${lang}\n`.length).split("```")[0];
+
+            // run replacements
+            code = code.replaceAll("*", "&!temp-ast;");
+            code = code.replaceAll("`", "&!temp-back;");
+
+            // return
+            return `<pre><code class="language-${lang}">${code}</code></pre>\n`;
+        }
     );
 
     // ...inline code block
@@ -194,11 +204,11 @@ export function ParseMarkdownSync(content: string): string {
 
     // manual italics/bold because i've noticed it doesn't work (partially)
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/gs, "<strong>$2</strong>");
-    content = content.replaceAll(/(\*{1})(.*?)(\<\/code\>)/gs, "&!temp-ast;$2</code>`");
     content = content.replaceAll(/(\*{1})(.*?)(\*{1})/gs, "<em>$2</em>");
     content = content.replaceAll("&!temp-ast;", "*"); // look, I know this is stupid but... it works?
     //                   (we need this to stop italics matching when the asterisk is in a code block)
     //      (essentially just replaces it and then runs the italics match and then replaces it again)
+    content = content.replaceAll("&!temp-back;", "`");
 
     // strikethrough
     content = content.replaceAll(/(\~{2})(.*?)(\~{2})/gs, "<del>$2</del>");
