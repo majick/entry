@@ -416,6 +416,10 @@ export class PastesSearch implements Endpoint {
         // manage session
         const SessionCookie = await Session(request);
 
+        // return 404 if search is disabled
+        if (EntryDB.config.app && EntryDB.config.app.enable_search === false)
+            return new _404Page().request(request);
+
         // ...
         if (search.get("q")) {
             // get pastes

@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.0.18-rev-3",
+  "version": "1.0.18-rev-4",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {

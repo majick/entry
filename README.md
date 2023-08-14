@@ -230,18 +230,14 @@ Entry supports some custom Markdown features that aren't included in the Markdow
 
 ### Paste Search
 
-Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results are limited to 100 results per query and resulting pastes must be public. You can hide the search page from the footer through the `show_search` key in your server config.
+Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results are limited to 100 results per query and resulting pastes must be public.You can disable the search page by adding the `app.enable_search` key to your server config.
 
 ```json
 {
     ...
     "app": {
         ...
-        "footer": {
-            ...
-            "show_search": true // set to false to disable
-            ...
-        }
+        "enable_search": false // enabled by default
         ...
     }
     ...

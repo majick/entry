@@ -139,7 +139,11 @@ export function ParseMarkdownSync(content: string): string {
 
     // manual italics/bold because i've noticed it doesn't work (partially)
     content = content.replaceAll(/(\*{2})(.*?)(\*{2})/gs, "<strong>$2</strong>");
+    content = content.replaceAll(/(\*{1})(.*?)(`)/gs, "&!temp-ast;$2`");
     content = content.replaceAll(/(\*{1})(.*?)(\*{1})/gs, "<em>$2</em>");
+    content = content.replaceAll("&!temp-ast;", "*"); // look, I know this is stupid but... it works?
+    //                   (we need this to stop italics matching when the asterisk is in a code block)
+    //      (essentially just replaces it and then runs the italics match and then replaces it again)
 
     // strikethrough
     content = content.replaceAll(/(\~{2})(.*?)(\~{2})/gs, "<del>$2</del>");

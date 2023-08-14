@@ -44,8 +44,7 @@ export default function Footer() {
                 </li>
 
                 {config.app &&
-                    config.app.footer &&
-                    config.app.footer.show_search !== false && (
+                    config.app.enable_search !== false && (
                         <li>
                             <a href="/search">search</a>
                         </li>

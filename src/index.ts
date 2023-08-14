@@ -23,8 +23,8 @@ export type Config = {
     env?: "production" | "development";
     app?: {
         info?: string;
+        enable_search?: boolean;
         footer?: {
-            show_search?: boolean;
             rows: Array<{
                 [key: string]: string;
             }>;
