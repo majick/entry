@@ -176,6 +176,59 @@ You can customize the way your pastes are displayed using some custom elements.
 - `<lit>`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
 - `<theme>`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
 
+Entry also supports an easier syntax, allowing you to shorten elements.
+
+```html
+<&!percnt; theme dark &!percnt;>
+```
+
+##### Animations
+
+!!! info This is an advanced use of special elements!
+
+You can add special animations around blocks of text. These are customizable animations that make pastes more interactive.
+
+These are the currently available animations:
+
+- FadeIn
+- FadeOut
+- Float
+- GrowShrink (grow/shrink)
+- Blink
+
+You can create an animation by adding the "animation" class to a special element, followed by the name of the animation.
+
+```html
+<&!percnt; animation FadeIn &!percnt;>
+content goes here!
+```
+
+Animation elements must be closed using a `close` block.
+
+```html
+<&!percnt; animation FadeIn &!percnt;>
+content goes here!
+<&!percnt; close animation &!percnt;>
+```
+
+The animation element also supports more attributes to allow you to customize your animation. Each attribute requires the attributes before to be present.
+
+- Animation Name
+- Duration
+- Delay
+- Repeat (`infinite` makes the animation repeat forever)
+- Inline (Set to `inline` to make the animation block fit with text)
+
+An example using all of these would look like this:
+
+```html
+<&!percnt; animation Float 1s 0s infinite inline &!percnt;> floating text! <&!percnt; close animation &!percnt;>
+```
+
+This creates an animation with the type `Float`, has a duration of 1s, delay of 0s, repeats forever and is inline with text.
+
+When rendered, it would look like <% animation Float 1s 0s infinite inline %> this <% close animation %>!
+
 #### Custom Footer Links
 
 You can added custom footer links to your server by editing the `config.json` (`{DATA_DIRECTORY}/config.json`) and adding a `footer` section. All links should have a `label` and `href` value. Links are organized in different rows. Each new entry in the "rows" array creates a new row in the footer.

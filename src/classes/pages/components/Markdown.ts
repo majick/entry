@@ -109,6 +109,56 @@ export function ParseMarkdownSync(content: string): string {
     content = content.replaceAll(/^-{3}$/gm, "\n<hr />\n");
     content = content.replaceAll(/^_{3}$/gm, "\n<hr />\n");
 
+    // special custom element syntax!
+    content = content.replaceAll(
+        /(\&lt\;\%)\s(?<CLASS>.*?)\s(?<ATTRIBUTES>.*?)(\s\%\&gt;)\s*/gm,
+        (match: string, offset: string, string: string): string => {
+            const _class = string;
+
+            // get attributes
+            const attributes = match
+                .slice(`${offset} ${_class} `.length)
+                .split(" %&gt;")[0]
+                .split(" ");
+
+            // build result
+            // (error message by default)
+            let result = `\n!!! error parsing error: invalid element class\n${match.replace(
+                _class,
+                `<b>&gt;&gt; ${_class} &lt;&lt;</b>`
+            )}`;
+
+            // ...theme
+            if (_class === "theme") result = `<theme>${attributes[0]}</theme>`;
+            // ...animation
+            else if (_class === "animation")
+                result = `<span style="animation: ${
+                    // animation name
+                    attributes[0]
+                } ${
+                    // duration
+                    attributes[1] || "1s"
+                } ${
+                    // delay
+                    attributes[2] || "0s"
+                } ease-in-out ${
+                    // "infinite" is like the only option here
+                    attributes[3] || ""
+                } forwards running; margin: auto; display: ${
+                    // inline display
+                    attributes[4] === "inline" ? "inline-block" : "block"
+                }; ${
+                    // set width to max-content if display is not inline
+                    attributes[4] === "inline" ? "" : "width: max-content;"
+                }">`;
+            // ...close block
+            else if (_class === "close") result = `</span>`;
+
+            // return
+            return result;
+        }
+    );
+
     // admonitions
     content = content.replaceAll(
         // title and content
@@ -191,7 +241,7 @@ export function ParseMarkdownSync(content: string): string {
     // remove/fix mistakes
     content = content.replaceAll("<r></r>", "");
     content = content.replaceAll("<p></p>", "");
-    content = content.replaceAll("<p>\n</p>", "");
+    content = content.replaceAll("<p><br /></p>", "");
 
     // remove scripts, on[...] attributes and <link> elements
 

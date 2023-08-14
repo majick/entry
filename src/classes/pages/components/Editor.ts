@@ -129,28 +129,28 @@ function BasicCompletion(context: CompletionContext): any {
                 label: "dark theme",
                 type: "variable",
                 info: "Sets the user's theme when viewing the paste to dark",
-                apply: "<theme>dark</theme>",
+                apply: "<% theme dark %>",
                 detail: "Themes",
             },
             {
                 label: "light theme",
                 type: "variable",
                 info: "Sets the user's theme when viewing the paste to light",
-                apply: "<theme>light</theme>",
+                apply: "<% theme light %>",
                 detail: "Themes",
             },
             {
                 label: "purple theme",
                 type: "variable",
                 info: "Sets the user's theme when viewing the paste to purple",
-                apply: "<theme>purple</theme>",
+                apply: "<% theme purple %>",
                 detail: "Themes",
             },
             {
                 label: "blue theme",
                 type: "variable",
                 info: "Sets the user's theme when viewing the paste to blue",
-                apply: "<theme>blue</theme>",
+                apply: "<% theme blue %>",
                 detail: "Themes",
             },
             // markdown
@@ -254,6 +254,37 @@ function BasicCompletion(context: CompletionContext): any {
                 apply: "!!right!! ...content here... !!",
                 detail: "extras",
             },
+            // animations
+            {
+                label: "fade in animation",
+                type: "function",
+                apply: "<% animation FadeIn 1s %>\nContent goes here!\n\n<% close animation %>",
+                detail: "Animations",
+            },
+            {
+                label: "fade out animation",
+                type: "function",
+                apply: "<% animation FadeOut 1s %>\nContent goes here!\n\n<% close animation %>",
+                detail: "Animations",
+            },
+            {
+                label: "float animation",
+                type: "function",
+                apply: "<% animation Float 1s 0s infinite inline %>\nContent goes here!\n\n<% close animation %>",
+                detail: "Animations",
+            },
+            {
+                label: "grow/shrink animation",
+                type: "function",
+                apply: "<% animation GrowShrink 1s 0s infinite %>\nContent goes here!\n\n<% close animation %>",
+                detail: "Animations",
+            },
+            {
+                label: "blink animation",
+                type: "function",
+                apply: "<% animation Blink 1s 0s infinite inline %>\nContent goes here!\n\n<% close animation %>",
+                detail: "Animations",
+            },
         ],
     };
 }
@@ -270,9 +301,9 @@ export default function CreateEditor(ElementID: string, content: string) {
     // create editor
     const startState = EditorState.create({
         doc:
-            // display given content or the saved document if it is blank
-            decodeURIComponent(content) ||
+            // display the saved document or given content
             window.sessionStorage.getItem("doc")! ||
+            decodeURIComponent(content) ||
             "",
         extensions: [
             keymap.of(markdownKeymap),
@@ -430,8 +461,19 @@ if (document.getElementById("editor-open-delete-modal"))
             ).showModal();
         });
 
-// clear stored content on form submit
-document.querySelector("form")!.addEventListener("submit", () => {
+// clear stored content only if ref isn't the homepage (meaning the paste was created properly)
+if (
+    !document.referrer.endsWith(`${window.location.host}/`) && // homepage
+    !document.referrer.endsWith("%20already%20exists!") && // already exists error (still homepage)
+    !document.referrer.startsWith(
+        // edit mode
+        `${window.location.protocol}//${window.location.host}/?mode=edit`
+    ) &&
+    !document.referrer.startsWith(
+        // edit error
+        `${window.location.protocol}//${window.location.host}/?err=Invalid`
+    )
+) {
     window.sessionStorage.removeItem("doc");
     window.sessionStorage.removeItem("gen");
-});
+}
