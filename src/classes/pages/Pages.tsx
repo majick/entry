@@ -27,6 +27,7 @@ import {
     Session,
     DefaultHeaders,
     GetCookie,
+    PageHeaders,
 } from "./API";
 
 // ...
@@ -388,9 +389,7 @@ export class GetPasteFromURL implements Endpoint {
                 ),
                 {
                     headers: {
-                        "Cache-Control": "private",
-                        "X-Content-Type-Options": "nosniff",
-                        Vary: "Accept-Encoding",
+                        ...PageHeaders,
                         "Content-Type": "text/html",
                         "Set-Cookie": SessionCookie,
                     },

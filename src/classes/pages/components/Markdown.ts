@@ -88,7 +88,7 @@ export function ParseMarkdownSync(content: string): string {
                 ID: `${string
                     .toLowerCase()
                     .replaceAll(" ", "-")
-                    .replaceAll(/[^A-Za-z0-9]/g, "")}${suffix}`,
+                    .replaceAll(/[^A-Za-z0-9-]/g, "")}${suffix}`,
             };
 
             TOC.push(heading);
@@ -153,7 +153,8 @@ export function ParseMarkdownSync(content: string): string {
                     attributes[2] || "0s"
                 } ease-in-out ${
                     // "infinite" is like the only option here
-                    attributes[3] || ""
+                    // ...use "1" for 1 iteration
+                    attributes[3] || "1"
                 } forwards running; margin: auto; display: ${
                     // inline display
                     attributes[4] === "inline" ? "inline-block" : "block"

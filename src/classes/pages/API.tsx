@@ -26,12 +26,21 @@ export const DefaultHeaders = {
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     Vary: "Accept-Encoding",
+    "Content-Security-Policy": [
+        "default-src 'self' 'strict-dynamic'",
+        "img-src *",
+        "style-src 'unsafe-inline' 'self'",
+        "script-src 'self' 'unsafe-inline'",
+        "upgrade-insecure-requests",
+    ].join("; "),
+    "X-Entry-Version": pack.version,
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "same-origin",
 };
 
 export const PageHeaders = {
+    ...DefaultHeaders,
     "Cache-Control": "private",
-    "X-Content-Type-Options": "nosniff",
-    Vary: "Accept-Encoding",
 };
 
 /**
@@ -97,7 +106,7 @@ export async function Session(request: Request): Promise<string> {
 
         session = `session-id=${
             ses_log[2].ID // add newest token
-        }; SameSite=Lax; Secure; Path=/; HostOnly=true; Max-Age=${
+        }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
             60 * 60 * 24 * 365
         }`;
     } else {
