@@ -285,6 +285,31 @@ function BasicCompletion(context: CompletionContext): any {
                 apply: "<% animation Blink 1s 0s infinite inline %>\nContent goes here!\n\n<% close animation %>",
                 detail: "Animations",
             },
+            // align
+            {
+                label: "align center (row)",
+                type: "function",
+                apply: "-> align center <-",
+                detail: "Alignments",
+            },
+            {
+                label: "align right (row)",
+                type: "function",
+                apply: "-> align right ->",
+                detail: "Alignments",
+            },
+            {
+                label: "align center (row flex)",
+                type: "function",
+                apply: "->> align center <<-",
+                detail: "Alignments",
+            },
+            {
+                label: "align right (row flex)",
+                type: "function",
+                apply: "->> align right ->>",
+                detail: "Alignments",
+            },
         ],
     };
 }

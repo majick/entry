@@ -33,6 +33,8 @@ export function ParseMarkdownSync(content: string): string {
         content = content
             .replaceAll(`&lt;${element}&gt;`, `<${element}>`)
             .replaceAll(`&lt;/${element}&gt;`, `</${element}>`)
+            .replaceAll("-&gt;&gt;", "->>")
+            .replaceAll("&lt;&lt;-", "<<-")
             .replaceAll("-&gt;", "->")
             .replaceAll("&lt;-", "<-");
 
@@ -243,7 +245,21 @@ export function ParseMarkdownSync(content: string): string {
     // using the (custom) <r> element makes marked for some reason work??? I'VE BEEN DOING THIS FOR 5 1/2 HOURS AND THIS
     // IS THE SOLUTION TO MARKED NOT PARSING THESE ELEMENTS??????
     content = content.replaceAll(
-        /(\-\>)(.*?)(\-\>|\<\-)/gs,
+        // row flex
+        /(\-\>{2})(.*?)(\-\>{2}|\<{2}\-)/gs,
+        (match: string, offset: string, string: string): string => {
+            const trim = match.trim();
+            return `<rf style="justify-content: ${
+                // if last character is the end of an arrow, set align to right...
+                // otherwise, set align to center
+                trim[trim.length - 1] === ">" ? "right" : "center"
+            };">${string}</rf>`;
+        }
+    );
+
+    content = content.replaceAll(
+        // row
+        /(\-\>{1})(.*?)(\-\>{1}|\<{1}\-)/gs,
         (match: string, offset: string, string: string): string => {
             const trim = match.trim();
             return `<r style="text-align: ${

@@ -27,7 +27,7 @@ export const DefaultHeaders = {
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
     Vary: "Accept-Encoding",
     "Content-Security-Policy": [
-        "default-src 'self' 'strict-dynamic'",
+        "default-src 'self'",
         "img-src *",
         "style-src 'unsafe-inline' 'self'",
         "script-src 'self' 'unsafe-inline'",

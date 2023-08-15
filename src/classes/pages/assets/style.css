@@ -711,7 +711,14 @@ hr + br {
 }
 
 r {
+    /* row */
     display: block;
+}
+
+rf {
+    /* row flow */
+    display: flex;
+    align-items: center;
 }
 
 br:not(.cm-line br) {
