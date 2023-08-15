@@ -157,7 +157,7 @@ export function ParseMarkdownSync(content: string): string {
                     attributes[3] || "1"
                 } forwards running; display: ${
                     // inline display
-                    attributes[4] === "inline" ? "inline" : "block"
+                    attributes[4] === "inline" ? "inline-block" : "block"
                 }; ${
                     // set width to max-content if display is not inline
                     attributes[4] === "inline"
@@ -246,7 +246,7 @@ export function ParseMarkdownSync(content: string): string {
         /(\-\>)(.*?)(\-\>|\<\-)/gs,
         (match: string, offset: string, string: string): string => {
             const trim = match.trim();
-            return `<r style="justify-content: ${
+            return `<r style="text-align: ${
                 // if last character is the end of an arrow, set align to right...
                 // otherwise, set align to center
                 trim[trim.length - 1] === ">" ? "right" : "center"

@@ -225,7 +225,7 @@ An example using all of these would look like:
 <&!percnt; animation Float 1s 0s infinite inline &!percnt;> floating text! <&!percnt; close animation &!percnt;>
 ```
 
-This creates an animation with the type `Float`, has a duration of 1s, delay of 0s, repeats forever and is inline with text.
+This creates an animation with that has a type of `Float`, a duration of 1s, delay of 0s, repeats forever and is inline with text.
 
 When rendered, it would look like <% animation Float 1s 0s infinite inline %> this <% close animation %>!
 
