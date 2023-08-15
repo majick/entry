@@ -24,6 +24,9 @@ export type Config = {
     app?: {
         info?: string;
         enable_search?: boolean;
+        enable_private_pastes?: boolean;
+        enable_groups?: boolean;
+        enable_expiry?: boolean;
         footer?: {
             rows: Array<{
                 [key: string]: string;

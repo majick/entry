@@ -208,6 +208,12 @@ export default class EntryDB {
             path.resolve(EntryDB.DataDirectory, "expiry")
         );
 
+        // check if expiry is disabled
+        // we're still going to create the expiry store if expiry is disabled,
+        // we just won't run any checks on it
+        await EntryDB.GetConfig();
+        if (EntryDB.config.app && EntryDB.config.app.enable_expiry === false) return;
+
         // run expiry clock
         setInterval(async () => {
             await EntryDB.Expiry.CheckExpiry();
