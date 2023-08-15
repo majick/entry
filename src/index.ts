@@ -20,6 +20,7 @@ export type Config = {
     admin: string;
     data: string;
     config: string;
+    force_https?: boolean;
     env?: "production" | "development";
     app?: {
         info?: string;

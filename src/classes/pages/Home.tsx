@@ -25,7 +25,11 @@ export default class Home implements Endpoint {
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // force https
-        if (url.hostname !== "localhost" && url.protocol === "http:")
+        if (
+            EntryDB.config.force_https === true &&
+            url.hostname !== "localhost" &&
+            url.protocol === "http:"
+        )
             return new Response("Please use HTTPS", {
                 status: 301,
                 headers: {
