@@ -104,6 +104,8 @@ export async function Session(request: Request): Promise<string> {
             Type: "session",
         });
 
+        if (ses_log[0] === false) return (session = ""); // failed to make session, set session nothing
+
         session = `session-id=${
             ses_log[2].ID // add newest token
         }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${

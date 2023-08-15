@@ -84,6 +84,22 @@ export default class LogDB {
             ID: log.ID || ComputeRandomObjectHash(),
         };
 
+        // return false if this log already exists (same content, timestamp, type)
+        // since sessions are stored as logs, this should prevent duplicated being created
+        // at the exact same time from the exact same device
+        const ExistingLog = await SQL.QueryOBJ({
+            db: this.db,
+            query: "SELECT * FROM Logs WHERE Content = ? AND Timestamp = ? AND Type = ?",
+            params: [_log.Content, _log.Timestamp, _log.Type],
+            get: true,
+            use: "Prepare",
+            transaction: true,
+        });
+
+        // return false so two different users with the exact same user-agent don't end up
+        // sharing the same session, one of them just has to try again later
+        if (ExistingLog) return [false, "Log exists", ExistingLog];
+
         // create entry
         await SQL.QueryOBJ({
             db: this.db,

@@ -34,7 +34,7 @@ export type Paste = {
     HostServer?: string; // this is not actually stored in the record
     IsEditable?: string; // this is not actually stored in the record
     ExpireOn?: string; //   this is not actually stored in the record
-    UnhashedEditPassword?: string; // this should never be stored in the record! only used have paste creation
+    UnhashedEditPassword?: string; // this should never be stored in the record! only used on paste creation
     Views?: number; // this is not actually stored in the record! amount of log records LIKE "%{CustomURL}%"
 };
 
@@ -578,7 +578,7 @@ export default class EntryDB {
             // somebody could make a paste named "login" and the paste would have the URL
             // of "/admin/login" which would make the real admin login page either inaccessible
             // OR make the paste inaccessible!
-            const NotAllowed = ["admin", "api", "group", "new", ""];
+            const NotAllowed = ["admin", "api", "search", "new", "paste"];
 
             if (NotAllowed.includes(PasteInfo.GroupName))
                 return [
