@@ -711,7 +711,8 @@ hr + br {
 }
 
 r {
-    display: block;
+    display: flex;
+    align-items: center;
 }
 
 br:not(.cm-line br) {

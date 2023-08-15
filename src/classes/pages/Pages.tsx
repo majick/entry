@@ -227,7 +227,7 @@ export class GetPasteFromURL implements Endpoint {
                                         {editable[2] === true && (
                                             <a
                                                 href={`/?mode=edit&OldURL=${
-                                                    result.CustomURL
+                                                    result.CustomURL.split(":")[0]
                                                 }${
                                                     // add host server (if it exists)
                                                     result.HostServer

@@ -694,19 +694,31 @@ export default class EntryDB {
         const server = PasteInfo.CustomURL.split(":")[1];
 
         if (server) {
+            PasteInfo.CustomURL = PasteInfo.CustomURL.split(":")[0];
+            NewPasteInfo.CustomURL = NewPasteInfo.CustomURL.split(":")[0];
+
             // send request
-            const [isBad, record] = await this.ForwardRequest(server, "edit", [
-                `OldContent=${PasteInfo.Content}`,
-                `OldEditPassword=${PasteInfo.EditPassword}`,
-                `OldURL=${PasteInfo.CustomURL.split(":")[0]}`,
-                // new
-                `NewContent=${NewPasteInfo.Content}`,
-                `NewEditPassword=${NewPasteInfo.EditPassword}`,
-                `NewURL=${NewPasteInfo.CustomURL.split(":")[0]}`,
-            ]);
+            const [isBad, record] = await this.ForwardRequest(
+                server,
+                "edit",
+                [
+                    `OldContent=${PasteInfo.Content}`,
+                    `OldEditPassword=${PasteInfo.EditPassword}`,
+                    `OldURL=${PasteInfo.CustomURL}`,
+                    // new
+                    `NewContent=${NewPasteInfo.Content}`,
+                    `NewEditPassword=${NewPasteInfo.EditPassword}`,
+                    `NewURL=${NewPasteInfo.CustomURL.split(":")[0]}`,
+                ],
+                "POST",
+                true
+            );
 
             // check if promise rejected
             if (isBad) return [false, "Connection failed", NewPasteInfo];
+
+            // add host back to custom url
+            NewPasteInfo.CustomURL = `${NewPasteInfo.CustomURL}:${server}`;
 
             // return
             const err = this.GetErrorFromResponse(record);
@@ -852,10 +864,16 @@ export default class EntryDB {
             //       with the top viewed pastes (maybe)
 
             // send request
-            const [isBad, record] = await this.ForwardRequest(server, "delete", [
-                `CustomURL=${PasteInfo.CustomURL.split(":")[0]}`,
-                `password=${password}`,
-            ]);
+            const [isBad, record] = await this.ForwardRequest(
+                server,
+                "delete",
+                [
+                    `CustomURL=${PasteInfo.CustomURL.split(":")[0]}`,
+                    `password=${password}`,
+                ],
+                "POST",
+                true
+            );
 
             // check if promise rejected
             if (isBad) return [false, "Connection failed", PasteInfo];
@@ -1161,7 +1179,8 @@ export default class EntryDB {
                 server,
                 `group/${group.split(":")[0]}`,
                 [],
-                "GET"
+                "GET",
+                true
             );
 
             // check if promise rejected

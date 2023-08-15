@@ -272,8 +272,12 @@ export class EditPaste implements Endpoint {
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-        body.OldContent = decodeURIComponent(body.OldContent);
-        body.NewContent = decodeURIComponent(body.NewContent);
+
+        if (body.OldContent) body.OldContent = decodeURIComponent(body.OldContent);
+        else body.OldContent = decodeURIComponent(body.NewContent);
+
+        if (body.NewContent) body.NewContent = decodeURIComponent(body.NewContent);
+        else body.NewContent = decodeURIComponent(body.OldContent);
 
         body.OldURL = body.OldURL.toLowerCase();
         body.NewURL = body.NewURL.toLowerCase();
@@ -289,6 +293,7 @@ export class EditPaste implements Endpoint {
                 CustomURL: body.OldURL,
                 PubDate: "",
                 EditDate: "",
+                ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             },
             {
                 Content: body.NewContent,

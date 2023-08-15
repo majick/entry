@@ -24,15 +24,15 @@ export default class Home implements Endpoint {
         const search = new URLSearchParams(url.search);
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
+        // if search.server, add server to paste.CustomURL
+        if (search.get("server"))
+            search.set("OldURL", `${search.get("OldURL")}:${search.get("server")}`);
+
         // get paste if search.mode === "edit"
         let paste: Partial<Paste> | undefined;
 
         if (search.get("mode") === "edit" && search.get("OldURL"))
             paste = await db.GetPasteFromURL(search.get("OldURL")!);
-
-        // if search.server, add server to paste.CustomURL
-        if (search.get("server") && paste)
-            paste.CustomURL = `${paste.CustomURL}:${search.get("server")}`;
 
         // decrypt (if we can)
         if (search.get("ViewPassword") && paste) {

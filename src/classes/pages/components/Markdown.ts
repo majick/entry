@@ -155,9 +155,9 @@ export function ParseMarkdownSync(content: string): string {
                     // "infinite" is like the only option here
                     // ...use "1" for 1 iteration
                     attributes[3] || "1"
-                } forwards running; margin: auto; display: ${
+                } forwards running; display: ${
                     // inline display
-                    attributes[4] === "inline" ? "inline-block" : "block"
+                    attributes[4] === "inline" ? "inline" : "block"
                 }; ${
                     // set width to max-content if display is not inline
                     attributes[4] === "inline"
@@ -165,7 +165,7 @@ export function ParseMarkdownSync(content: string): string {
                         : "width: max-content; max-width: 100%;"
                 }">`;
             // ...close block
-            else if (_class === "close") result = `</span>`;
+            else if (_class === "close") result = "</span>";
             // hsl block
             else if (_class === "hsl")
                 result = `<${attributes[0]}>${attributes[1]}</${attributes[0]}>`;
@@ -246,7 +246,7 @@ export function ParseMarkdownSync(content: string): string {
         /(\-\>)(.*?)(\-\>|\<\-)/gs,
         (match: string, offset: string, string: string): string => {
             const trim = match.trim();
-            return `<r style="text-align: ${
+            return `<r style="justify-content: ${
                 // if last character is the end of an arrow, set align to right...
                 // otherwise, set align to center
                 trim[trim.length - 1] === ">" ? "right" : "center"
