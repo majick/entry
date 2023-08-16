@@ -753,7 +753,7 @@ export default class Home implements Endpoint {
                                         minLength={EntryDB.MinPasswordLength}
                                         maxLength={EntryDB.MaxPasswordLength}
                                         placeholder={"Edit code"}
-                                        name={"password"}
+                                        name={"EditPassword"}
                                         autoComplete={"off"}
                                     />
 
@@ -802,10 +802,12 @@ export default class Home implements Endpoint {
                 </>
             ),
             {
+                status: search.get("err") === null ? 200 : 400,
                 headers: {
                     ...PageHeaders,
                     "Content-Type": "text/html",
                     "Set-Cookie": SessionCookie,
+                    "X-Entry-Error": search.get("err") || "",
                 },
             }
         );

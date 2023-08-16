@@ -26,6 +26,8 @@ The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com),
 
 Entry can also be installed using Docker. Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.
 
+The main Entry repository also includes the source for Entry related packages. These can be found in the [/packages](https://codeberg.org/hkau/entry/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
+
 ## Usage
 
 Once installed you can start (and build) the server using `bun run start`, to just build do `bun run build`.
@@ -50,7 +52,7 @@ Entry supports extra features that Rentry does not support. They are detailed be
 
 All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
 
-- `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
+- `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
 - `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
@@ -65,8 +67,11 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /admin/api/delete`, Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
 - `POST /admin/api/export`, Get JSON of all pastes in server (decrypted): `AdminPassword`
 - `POST /admin/api/import`, Import pastes JSON: `AdminPassword, pastes` (with `paste` being the JSON export from `/admin/api/export`)
-- `POST /admin/api/mass-delete`, delete pastes by sql query: `AdminPassword, pastes`
-- `POST /admin/api/sql`, directly run sql on the server: `AdminPassword, sql, get, all` (`get` and `all` represent the type of operation, `get` returns one result while `all` returns... all results)
+- `POST /admin/api/mass-delete`, Delete pastes by sql query: `AdminPassword, pastes`
+- `POST /admin/api/sql`, Directly run sql on the server: `AdminPassword, sql, get, all` (`get` and `all` represent the type of operation, `get` returns one result while `all` returns... all results)
+- `POST /admin/api/logs/export`, Get all server logs: `AdminPassword`
+- `POST /admin/api/logs/mass-delete`, Delete logs by sql query: `AdminPassword, logs`
+- `POST /admin/api/config.json`, Get server config file contents: `AdminPassword`
 
 ### (very basic) Decentralization
 

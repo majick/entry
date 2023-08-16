@@ -253,6 +253,8 @@ export function ParseMarkdownSync(content: string): string {
                 // if last character is the end of an arrow, set align to right...
                 // otherwise, set align to center
                 trim[trim.length - 1] === ">" ? "right" : "center"
+            }; text-align: ${
+                trim[trim.length - 1] === ">" ? "right" : "center"
             };">${string}</rf>`;
         }
     );

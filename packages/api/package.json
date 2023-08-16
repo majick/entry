@@ -1,0 +1,25 @@
+{
+  "name": "entrymd",
+  "version": "1.0.19",
+  "module": "index.js",
+  "type": "module",
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/hkau/entry",
+    "directory": "packages/api"
+  },
+  "scripts": {
+    "build": "bunx tsc",
+    "watch": "bunx tsc -w",
+    "format": "prettier src/ --write --config ../../.prettierrc",
+    "test": "bun run test/index.test.ts"
+  },
+  "license": "MIT",
+  "homepage": "https://sentrytwo.com/docs/api"
+}

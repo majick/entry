@@ -99,8 +99,14 @@ export async function Session(request: Request): Promise<string> {
     let session = GetCookie(request.headers.get("Cookie") || "", "session-id");
 
     if (!session) {
+        const UA = request.headers.get("User-Agent") || "?";
+
+        // if UA includes "Bun/" or is a question mark, return
+        if (UA.includes("Bun/") || UA === "?") return (session = "");
+
+        // create log
         const ses_log = await EntryDB.Logs.CreateLog({
-            Content: request.headers.get("User-Agent") || "?",
+            Content: UA,
             Type: "session",
         });
 
@@ -225,6 +231,7 @@ export class CreatePaste implements Endpoint {
                           `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}`,
+                "X-Entry-Error": result[1],
             },
         });
     }
@@ -282,7 +289,7 @@ export class EditPaste implements Endpoint {
         else body.NewContent = decodeURIComponent(body.OldContent);
 
         body.OldURL = body.OldURL.toLowerCase();
-        body.NewURL = body.NewURL.toLowerCase();
+        if (body.NewURL) body.NewURL = body.NewURL.toLowerCase();
 
         // get paste
         const paste = await db.GetPasteFromURL(body.OldURL);
@@ -321,6 +328,7 @@ export class EditPaste implements Endpoint {
                           `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
                               result[2].CustomURL
                           }`,
+                "X-Entry-Error": result[1],
             },
         });
     }
@@ -351,7 +359,7 @@ export class DeletePaste implements Endpoint {
             {
                 CustomURL: body.CustomURL,
             },
-            body.password
+            body.EditPassword
         );
 
         // return
@@ -368,6 +376,7 @@ export class DeletePaste implements Endpoint {
                           `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
                               result[2].CustomURL
                           }`,
+                "X-Entry-Error": result[1],
             },
         });
     }
@@ -417,6 +426,9 @@ export class DecryptPaste implements Endpoint {
         if (!decrypted)
             return new Response("Failed to decrypt", {
                 status: 400,
+                headers: {
+                    "X-Entry-Error": "Failed to decrypt",
+                },
             });
 
         // return
@@ -600,6 +612,7 @@ export class JSONAPI implements Endpoint {
             url.protocol.includes("https")
         );
 
+        // return
         return res[1];
     }
 }
