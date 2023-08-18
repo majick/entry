@@ -224,7 +224,7 @@ export class CreatePaste implements Endpoint {
             status: 302,
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste
@@ -258,7 +258,7 @@ export class GetPasteRecord implements Endpoint {
             status: paste ? 200 : 404,
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
             },
         });
     }
@@ -319,7 +319,7 @@ export class EditPaste implements Endpoint {
             status: 302,
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste
@@ -367,7 +367,7 @@ export class DeletePaste implements Endpoint {
             status: 302,
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
                 Location:
                     result[0] === true
                         ? // if successful, redirect to home
@@ -450,7 +450,7 @@ export class GetAllPastes implements Endpoint {
         return new Response(JSON.stringify(pastes), {
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
             },
         });
     }
@@ -475,7 +475,7 @@ export class GetAllPastesInGroup implements Endpoint {
         return new Response(JSON.stringify(pastes), {
             headers: {
                 ...DefaultHeaders,
-                "Content-Type": "application/json",
+                "Content-Type": "application/json; charset=utf-8",
             },
         });
     }
@@ -504,7 +504,7 @@ export class GetRawPaste implements Endpoint {
         return new Response(result!.Content, {
             status: 200,
             headers: {
-                "Content-Type": "text/plain",
+                "Content-Type": "text/plain; charset=utf-8",
                 "X-Paste-PubDate": result.PubDate,
                 "X-Paste-EditDate": result.EditDate,
                 "X-Paste-GroupName": result.GroupName || "",
@@ -524,17 +524,27 @@ export class RenderMarkdown implements Endpoint {
         const WrongType = VerifyContentType(request, "text/markdown");
         if (WrongType) return WrongType;
 
+        // get url
+        const url = new URL(request.url);
+
         // get request body
         const body = await request.text();
 
         // render
-        const rendered = await ParseMarkdown(body);
+        const rendered =
+            url.searchParams.get("toc") !== "true"
+                ? // only render markdown
+                  await ParseMarkdown(body)
+                : // only render toc
+                  (
+                      await ParseMarkdown(`[TOC]\n{{@TABLE_OF_CONTENTS}}\n${body}`)
+                  ).split("{{@TABLE_OF_CONTENTS}}")[0];
 
         // return
         return new Response(rendered, {
             status: 200,
             headers: {
-                "Content-Type": "text/html",
+                "Content-Type": "text/html; charset=utf-8",
             },
         });
     }
@@ -575,7 +585,7 @@ export class GetPasteHTML implements Endpoint {
         return new Response(rendered, {
             status: 200,
             headers: {
-                "Content-Type": "text/html",
+                "Content-Type": "text/html; charset=utf-8",
             },
         });
     }

@@ -21,5 +21,5 @@
     "test": "bun run test/index.test.ts"
   },
   "license": "MIT",
-  "homepage": "https://sentrytwo.com/docs/api"
+  "homepage": "https://sentrytwo.com/docs/api-client"
 }

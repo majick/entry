@@ -4,10 +4,8 @@
  * @license MIT
  */
 
-// init EntryDB
+// ...EntryDB
 import EntryDB from "./classes/db/EntryDB";
-await EntryDB.CreateExpiry();
-
 import type { LogEvent } from "./classes/db/LogDB";
 
 // includes
@@ -118,9 +116,6 @@ import { _404Page } from "./classes/pages/components/404";
 import Admin from "./classes/pages/Admin";
 import Pages from "./classes/pages/Pages";
 import API from "./classes/pages/API";
-
-// init logs
-await EntryDB.InitLogs();
 
 // ...create config
 const ServerConfig = await EntryDB.GetConfig();

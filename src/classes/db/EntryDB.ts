@@ -38,6 +38,8 @@ export type Paste = {
     Views?: number; // this is not actually stored in the record! amount of log records LIKE "%{CustomURL}%"
 };
 
+let StaticInit = false;
+
 /**
  * @export
  * @class EntryDB
@@ -94,6 +96,13 @@ export default class EntryDB {
         this.db = db;
 
         (async () => {
+            if (StaticInit) return;
+            StaticInit = true;
+
+            await EntryDB.CreateExpiry();
+            await EntryDB.InitLogs();
+
+            // ...
             await SQL.QueryOBJ({
                 db,
                 query: `CREATE TABLE IF NOT EXISTS Pastes (
@@ -406,8 +415,13 @@ export default class EntryDB {
                 }
 
                 // update expiry information
-                const expires = await EntryDB.Expiry.GetExpiryDate(record.CustomURL);
-                if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
+                if (EntryDB.Expiry && StaticInit) {
+                    const expires = await EntryDB.Expiry.GetExpiryDate(
+                        record.CustomURL
+                    );
+
+                    if (expires[0]) record.ExpireOn = expires[1]!.toUTCString();
+                }
 
                 // count views
                 if (
