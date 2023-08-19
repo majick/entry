@@ -24,7 +24,7 @@ import { ParseMarkdown } from "./components/Markdown";
 export const DefaultHeaders = {
     "Cache-Control": "public, max-age=604800, must-revalidate",
     "X-Content-Type-Options": "nosniff",
-    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     Vary: "Accept-Encoding",
     "Content-Security-Policy": [
         "default-src 'self'",
@@ -34,7 +34,7 @@ export const DefaultHeaders = {
         "upgrade-insecure-requests",
     ].join("; "),
     "X-Entry-Version": pack.version,
-    "X-Frame-Options": "DENY",
+    "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "same-origin",
 };
 
@@ -508,6 +508,7 @@ export class GetRawPaste implements Endpoint {
                 "X-Paste-PubDate": result.PubDate,
                 "X-Paste-EditDate": result.EditDate,
                 "X-Paste-GroupName": result.GroupName || "",
+                "X-Frame-Options": "",
             },
         });
     }
@@ -544,7 +545,9 @@ export class RenderMarkdown implements Endpoint {
         return new Response(rendered, {
             status: 200,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "text/html; charset=utf-8",
+                "X-Frame-Options": "",
             },
         });
     }
@@ -585,7 +588,9 @@ export class GetPasteHTML implements Endpoint {
         return new Response(rendered, {
             status: 200,
             headers: {
+                ...DefaultHeaders,
                 "Content-Type": "text/html; charset=utf-8",
+                "X-Frame-Options": "",
             },
         });
     }

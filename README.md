@@ -48,6 +48,8 @@ Entry supports extra features that Rentry does not support. They are detailed be
 
 ## Features
 
+Many features are able to be disabled or enabled through the server configuration file. An example file can be seen [here](https://sentrytwo.com/config). It is the file used in the primary Entry instance.
+
 ### API
 
 All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.

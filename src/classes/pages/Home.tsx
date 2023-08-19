@@ -745,6 +745,8 @@ export default class Home implements Endpoint {
                                         display: "flex",
                                         flexWrap: "wrap",
                                         justifyContent: "right",
+                                        maxWidth: "100%",
+                                        gap: "0.5rem"
                                     }}
                                 >
                                     <input
