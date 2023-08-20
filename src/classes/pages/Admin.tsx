@@ -242,18 +242,20 @@ export class ManagePastes implements Endpoint {
             return new Login().request(request);
 
         // log event (only on first access)
-        const RefURL = new URL(request.headers.get("Referer")!);
+        if (request.headers.get("Referer")!) {
+            const RefURL = new URL(request.headers.get("Referer")!);
 
-        if (
-            (request.headers.get("Referer") && RefURL.pathname === "/admin") ||
-            RefURL.pathname === "/admin/" ||
-            RefURL.pathname === "/admin/login" ||
-            RefURL.pathname === "/admin/login/"
-        )
-            await EntryDB.Logs.CreateLog({
-                Content: request.headers.get("User-Agent") || "?",
-                Type: "access_admin",
-            });
+            if (
+                (request.headers.get("Referer") && RefURL.pathname === "/admin") ||
+                RefURL.pathname === "/admin/" ||
+                RefURL.pathname === "/admin/login" ||
+                RefURL.pathname === "/admin/login/"
+            )
+                await EntryDB.Logs.CreateLog({
+                    Content: request.headers.get("User-Agent") || "?",
+                    Type: "access_admin",
+                });
+        }
 
         // fetch all pastes
         const pastes = await db.GetAllPastes(true, false, body.sql);

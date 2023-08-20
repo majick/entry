@@ -431,7 +431,7 @@ export default class EntryDB {
                 )
                     record.Views = (
                         await EntryDB.Logs.QueryLogs(
-                            `Content LIKE "%${record.CustomURL};%"`
+                            `Content LIKE "${record.CustomURL};%"`
                         )
                     )[2].length;
 

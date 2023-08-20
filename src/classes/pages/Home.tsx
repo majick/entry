@@ -727,6 +727,7 @@ export default class Home implements Endpoint {
                                 <form
                                     method="POST"
                                     action={"/api/delete"}
+                                    class={"mobile-max"}
                                     style={{
                                         display: "flex",
                                         flexWrap: "wrap",
@@ -743,6 +744,7 @@ export default class Home implements Endpoint {
                                         placeholder={"Edit code"}
                                         name={"EditPassword"}
                                         autoComplete={"off"}
+                                        class={"mobile-max"}
                                     />
 
                                     <input
