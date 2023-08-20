@@ -104,6 +104,14 @@ export async function Session(request: Request): Promise<string> {
         // if UA includes "Bun/" or is a question mark, return
         if (UA.includes("Bun/") || UA === "?") return (session = "");
 
+        // UA must start with "Mozilla/5.0" and must NOT start with "Mozilla/5.0 (compatible"
+        // if something doesn't match these rules, it is likely a bot and shouldn't be given a session
+        if (
+            !UA.startsWith("Mozilla/5.0") ||
+            UA.startsWith("Mozilla/5.0 (compatible")
+        )
+            return (session = "");
+
         // create log
         const ses_log = await EntryDB.Logs.CreateLog({
             Content: UA,
