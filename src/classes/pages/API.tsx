@@ -574,11 +574,21 @@ export class GetPasteHTML implements Endpoint {
 
         // render
         const rendered = Renderer.Render(
-            <div
-                dangerouslySetInnerHTML={{
-                    __html: await ParseMarkdown(result.Content),
-                }}
-            />,
+            <>
+                <div
+                    id={"editor-tab-preview"}
+                    dangerouslySetInnerHTML={{
+                        __html: await ParseMarkdown(result.Content),
+                    }}
+                />
+
+                <script
+                    type="module"
+                    dangerouslySetInnerHTML={{
+                        __html: `import fix from "/ClientFixMarkdown.js?v=${pack.version}"; fix();`,
+                    }}
+                />
+            </>,
             <>
                 <title>{result.CustomURL}</title>
             </>

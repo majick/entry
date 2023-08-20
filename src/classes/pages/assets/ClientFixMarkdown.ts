@@ -56,11 +56,9 @@ export function HandleCustomElements() {
 
 /**
  * @function ClientFixMarkdown
- *
  * @export
- * @param {boolean} [DoFix=true]
  */
-export default async function ClientFixMarkdown(DoFix: boolean = true) {
+export default async function ClientFixMarkdown() {
     HandleCustomElements();
     hljs.highlightAll();
 }

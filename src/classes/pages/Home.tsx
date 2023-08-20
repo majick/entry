@@ -160,7 +160,7 @@ export default class Home implements Endpoint {
                             {config.app && config.app.info && (
                                 <a
                                     href={`/${config.app.info}`}
-                                    class={"button secondary"}
+                                    class={"button secondary has-tooltip"}
                                     target={"_blank"}
                                 >
                                     <svg
@@ -173,6 +173,9 @@ export default class Home implements Endpoint {
                                         <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
                                     </svg>
                                     Info
+                                    <span className="tooltip">
+                                        Server Info & Announcements
+                                    </span>
                                 </a>
                             )}
                         </div>
@@ -213,7 +216,10 @@ export default class Home implements Endpoint {
                                     >
                                         {/* top row */}
 
-                                        <button style={{ minWidth: "5rem" }}>
+                                        <button
+                                            style={{ minWidth: "5rem" }}
+                                            class={"mobile-center"}
+                                        >
                                             Go
                                         </button>
 
@@ -320,31 +326,17 @@ export default class Home implements Endpoint {
                                                 EntryDB.config.app.enable_expiry !==
                                                     false)) && (
                                             <>
-                                                <hr
-                                                    style={{ margin: "0.25rem 0" }}
-                                                />
+                                                <div style={{ margin: "0.25rem 0" }}>
+                                                    <hr class={"mobile-only"} />
+                                                </div>
 
                                                 <div
                                                     style={{
                                                         display: "flex",
-                                                        justifyContent:
-                                                            "space-between",
+                                                        justifyContent: "flex-end",
                                                         flexWrap: "wrap",
                                                     }}
                                                 >
-                                                    <h5
-                                                        className="no-margin mobile-center"
-                                                        style={{
-                                                            height: "2.5rem",
-                                                            display: "flex",
-                                                            justifyContent:
-                                                                "flex-start",
-                                                            alignItems: "center",
-                                                        }}
-                                                    >
-                                                        Optional
-                                                    </h5>
-
                                                     {/* bottom row */}
 
                                                     <div
@@ -652,11 +644,7 @@ export default class Home implements Endpoint {
                                                         gap: "0.5rem",
                                                     }}
                                                 >
-                                                    <button
-                                                        style={{
-                                                            minWidth: "5rem",
-                                                        }}
-                                                    >
+                                                    <button class={"green"}>
                                                         Save
                                                     </button>
 
@@ -673,7 +661,7 @@ export default class Home implements Endpoint {
 
                                                 <a
                                                     id={"editor-open-delete-modal"}
-                                                    class={"button"}
+                                                    class={"button red"}
                                                     href={"javascript:"}
                                                 >
                                                     Delete
@@ -724,18 +712,16 @@ export default class Home implements Endpoint {
                                     alignItems: "center",
                                     flexWrap: "wrap",
                                     gap: "1rem",
-                                    paddingTop: "1rem",
                                 }}
                             >
-                                <form method="dialog">
-                                    <button
-                                        style={{
-                                            boxShadow: "0 0 4px var(--green)",
-                                            color: "var(--green)",
-                                        }}
-                                    >
+                                <form method="dialog" class={"mobile-max"}>
+                                    <button class={"green mobile-max"}>
                                         Cancel
                                     </button>
+
+                                    <div style={{ margin: "0.25rem 0" }}>
+                                        <hr class={"mobile-only"} />
+                                    </div>
                                 </form>
 
                                 <form
@@ -746,7 +732,7 @@ export default class Home implements Endpoint {
                                         flexWrap: "wrap",
                                         justifyContent: "right",
                                         maxWidth: "100%",
-                                        gap: "0.5rem"
+                                        gap: "0.5rem",
                                     }}
                                 >
                                     <input
@@ -766,14 +752,7 @@ export default class Home implements Endpoint {
                                         value={paste!.CustomURL}
                                     />
 
-                                    <button
-                                        style={{
-                                            boxShadow: "0 0 4px var(--red3)",
-                                            color: "var(--red3)",
-                                        }}
-                                    >
-                                        Delete
-                                    </button>
+                                    <button class={"red mobile-max"}>Delete</button>
                                 </form>
                             </div>
                         </dialog>

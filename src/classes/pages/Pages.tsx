@@ -109,6 +109,7 @@ export class GetPasteFromURL implements Endpoint {
         const SessionCookie = await Session(request);
 
         // count view
+        let Viewed = false;
         if (result && !result.HostServer) {
             const SessionCookieValue = GetCookie(
                 request.headers.get("Cookie") || "",
@@ -133,6 +134,7 @@ export class GetPasteFromURL implements Endpoint {
                     Type: "view_paste",
                     Content: `${result.CustomURL};${SessionCookieValue}`,
                 });
+            else Viewed = true;
         }
 
         // return
@@ -239,6 +241,7 @@ export class GetPasteFromURL implements Endpoint {
                                     >
                                         {editable[2] === true && (
                                             <a
+                                                class={"button"}
                                                 href={`/?mode=edit&OldURL=${
                                                     result.CustomURL.split(":")[0]
                                                 }${
@@ -254,18 +257,13 @@ export class GetPasteFromURL implements Endpoint {
                                                         : ""
                                                 }`}
                                             >
-                                                <button
-                                                    style={{
-                                                        height: "max-content",
-                                                    }}
-                                                >
-                                                    Edit
-                                                </button>
+                                                Edit
                                             </a>
                                         )}
 
                                         {result.GroupName && (
                                             <a
+                                                class={"button"}
                                                 href={`/search?q=${
                                                     result.GroupName
                                                 }%2F&group=${result.GroupName}${
@@ -275,13 +273,7 @@ export class GetPasteFromURL implements Endpoint {
                                                         : ""
                                                 }`}
                                             >
-                                                <button
-                                                    style={{
-                                                        height: "max-content",
-                                                    }}
-                                                >
-                                                    View Group
-                                                </button>
+                                                View Group
                                             </a>
                                         )}
 
@@ -305,14 +297,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     style={{
                                                         width: "100%",
                                                     }}
-                                                    href={`/api/raw/${
-                                                        result.CustomURL
-                                                    }${
-                                                        // add host server (if it exists)
-                                                        result.HostServer
-                                                            ? `:${result.HostServer}`
-                                                            : ""
-                                                    }`}
+                                                    href={`/api/raw/${result.CustomURL}`}
                                                 >
                                                     Raw
                                                 </a>
@@ -322,14 +307,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     style={{
                                                         width: "100%",
                                                     }}
-                                                    href={`/api/html/${
-                                                        result.CustomURL
-                                                    }${
-                                                        // add host server (if it exists)
-                                                        result.HostServer
-                                                            ? `:${result.HostServer}`
-                                                            : ""
-                                                    }`}
+                                                    href={`/api/html/${result.CustomURL}`}
                                                     target={"_blank"}
                                                 >
                                                     HTML
@@ -343,7 +321,7 @@ export class GetPasteFromURL implements Endpoint {
                                             display: "flex",
                                             flexDirection: "column",
                                             justifyContent: "center",
-                                            alignItems: "right",
+                                            alignItems: "flex-end",
                                             color: "var(--text-color-faded)",
                                             textAlign: "right",
                                         }}
@@ -369,7 +347,38 @@ export class GetPasteFromURL implements Endpoint {
                                         {config.log &&
                                             config.log.events.includes(
                                                 "view_paste"
-                                            ) && <span>Views: {result.Views}</span>}
+                                            ) && (
+                                                <span
+                                                    style={{
+                                                        display: "flex",
+                                                        justifyContent: "right",
+                                                        alignItems: "center",
+                                                        gap: "0.25rem",
+                                                        width: "max-content",
+                                                    }}
+                                                    class={"has-tooltip"}
+                                                >
+                                                    {Viewed === true && (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Sparkle Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
+                                                        </svg>
+                                                    )}
+                                                    Views: {result.Views}
+                                                    <span className="tooltip">
+                                                        {Viewed === true
+                                                            ? "Paste Viewed Before"
+                                                            : "Pasted Viewed Just Now"}
+                                                    </span>
+                                                </span>
+                                            )}
                                     </div>
                                 </div>
                             </div>

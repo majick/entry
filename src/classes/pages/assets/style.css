@@ -27,7 +27,7 @@
     --background-surface1-5: hsl(
         var(--base-hue),
         var(--base-sat),
-        calc(var(--base-lit) + 12.5%)
+        calc(var(--base-lit) + 6%)
     );
 
     --background-surface2: hsl(
@@ -49,6 +49,8 @@
     --blue2: #025fb1;
     --green: #2b542c;
     --green1: #dff0d8;
+    --green2: #f8fdf6;
+    --green3: #0a7c00;
     --yellow: #826430;
     --yellow1: #f8edba;
     --red: #a6413f;
@@ -69,6 +71,8 @@ html.blue-theme {
     --blue2: #4b99d1;
     --green: #699269;
     --green1: #2d3829;
+    --green2: #75a37126;
+    --green3: #aee0ae;
     --yellow: #d1bb94;
     --yellow1: #4e4632;
     --red: #bb8483;
@@ -187,12 +191,23 @@ button.secondary,
 button:hover,
 .button:hover {
     background: var(--background-surface1-5);
+    text-decoration: none;
 }
 
 button.secondary:hover,
 .button.secondary:hover {
     color: var(--blue);
     background: var(--background-surface);
+}
+
+button.green,
+.button.green {
+    color: var(--green3);
+}
+
+button.red,
+.button.red {
+    color: var(--red3);
 }
 
 .tabbar {
@@ -202,8 +217,12 @@ button.secondary:hover,
 .tabbar button,
 .tabbar .button {
     padding: 0.5rem 1rem;
-    border-radius: 0.4rem 0.4rem 0 0;
     height: 40px; /* fixes weird webkit sizing issue (?) which caused the height to be calculated wrong */
+}
+
+.tabbar button.secondary,
+.tabbar .button.secondary {
+    color: var(--text-color-faded);
 }
 
 .tabbar button:not(.secondary):hover,
@@ -313,6 +332,39 @@ h6 {
     font-size: 1rem;
 }
 
+.htag {
+    color: var(--text-color-faded);
+    position: absolute;
+    margin-left: 5px;
+    opacity: 0;
+    transition: opacity 0.1s, transform 0.1s;
+    transform: scale(0);
+}
+
+.htag:hover {
+    color: var(--blue);
+}
+
+h1:hover .htag,
+h2:hover .htag,
+h3:hover .htag,
+h4:hover .htag,
+h5:hover .htag,
+h6:hover .htag,
+h1:focus .htag,
+h2:focus .htag,
+h3:focus .htag,
+h4:focus .htag,
+h5:focus .htag,
+h6:focus .htag {
+    opacity: 100%;
+    transform: scale(1);
+}
+
+.mobile-only {
+    display: none;
+}
+
 @media screen and (max-width: 800px) {
     .mobile-center {
         margin: auto !important;
@@ -320,6 +372,14 @@ h6 {
 
     .mobile-max {
         width: 100% !important;
+    }
+
+    .mobile-only {
+        display: block;
+    }
+
+    .mobile-flex {
+        display: flex !important;
     }
 }
 
@@ -566,6 +626,7 @@ dialog h4 {
 
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
 }
 
 .editor-tab h1,
@@ -589,6 +650,8 @@ details {
     font-size: 16px;
     height: max-content;
     max-width: 100%;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 details.details-confined {
@@ -612,7 +675,10 @@ details[open] summary:not(details details summary) {
     margin-bottom: 0.5rem;
 }
 
-details summary:hover,
+details summary:hover {
+    background: var(--background-surface1-5);
+}
+
 details[open] summary {
     background: var(--background-surface);
     box-shadow: inset 0 0 0 2px var(--background-surface1);
@@ -703,11 +769,42 @@ details hr {
     color: var(--green);
 }
 
-/* extras */
+/* tooltip */
+*.has-tooltip {
+    position: relative;
+}
 
-@media screen and (max-width: 800px) {
-    .mobile-flex {
-        display: flex !important;
+*.has-tooltip .tooltip {
+    left: 50%;
+    transform: translate(-50%, 100%) scale(0);
+    position: absolute;
+    bottom: 0;
+    background: var(--background-surface1-5);
+    box-shadow: 0 0 2px var(--background-surface3);
+    opacity: 0%;
+    transition:
+        opacity 0.25s,
+        transform 0.25s;
+    padding: 0.25rem;
+    border-radius: 0.4rem;
+    cursor: default;
+    width: max-content;
+    text-align: center;
+    user-select: none;
+    font-size: medium;
+    font-weight: normal;
+    color: var(--text-color-faded);
+}
+
+*.has-tooltip:hover .tooltip,
+*.has-tooltip:focus .tooltip {
+    opacity: 100%;
+    transform: translate(-50%, 100%) scale(1);
+}
+
+@media screen and (max-width: 800%) {
+    *.has-tooltip .tooltip {
+        max-width: 100%;
     }
 }
 

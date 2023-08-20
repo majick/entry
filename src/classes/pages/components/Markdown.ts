@@ -96,7 +96,10 @@ export function ParseMarkdownSync(content: string): string {
             TOC.push(heading);
 
             // return
-            return `<h${heading.Type} id="${heading.ID}">${string}</h${heading.Type}>\n`;
+            return `<h${heading.Type} id="${heading.ID}">
+                ${string}
+                <a class="htag" href="#${heading.ID}" title="Permanent Link">#</a>
+            </h${heading.Type}>\n`;
         }
     );
 
