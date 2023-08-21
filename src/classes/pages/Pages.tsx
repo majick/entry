@@ -36,6 +36,24 @@ import SearchForm from "./components/form/SearchForm";
 
 // ...
 
+export function InformationPageNote() {
+    return (
+        <div
+            class="mdnote note-info"
+            style={{
+                marginBottom: "0.5rem",
+            }}
+        >
+            <b className="mdnote-title">Information Page</b>
+
+            <p>
+                This page will provide information about the server and current
+                announcements. <b>It is maintained by server administrators.</b>
+            </p>
+        </div>
+    );
+}
+
 /**
  * @export
  * @class GetPasteFromURL
@@ -179,27 +197,8 @@ export class GetPasteFromURL implements Endpoint {
 
                             {config.app &&
                                 config.app.info &&
-                                config.app.info === result.CustomURL && (
-                                    <div
-                                        class="mdnote note-info"
-                                        style={{
-                                            marginBottom: "0.5rem",
-                                        }}
-                                    >
-                                        <b className="mdnote-title">
-                                            Information Page
-                                        </b>
-
-                                        <p>
-                                            This page will provide information about
-                                            the server and current announcements.{" "}
-                                            <b>
-                                                It is maintained by server
-                                                administrators.
-                                            </b>
-                                        </p>
-                                    </div>
-                                )}
+                                config.app.info.split("?")[0] === result.CustomURL &&
+                                InformationPageNote()}
 
                             <div
                                 class={"tab-container"}
@@ -487,25 +486,33 @@ export class PasteDocView implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <div
-                            style={{
-                                display: "flex",
-                                height: "100vh",
-                                width: "100vw",
-                            }}
-                        >
+                        <div class={"sidebar-layout-wrapper"}>
                             <div class={"sidebar"}>
-                                <div
-                                    dangerouslySetInnerHTML={{
-                                        __html: TableOfContents,
-                                    }}
-                                />
+                                <div>
+                                    {config.app &&
+                                        config.app.info &&
+                                        config.app.info.split("?")[0] ===
+                                            result.CustomURL &&
+                                        InformationPageNote()}
+
+                                    <div
+                                        dangerouslySetInnerHTML={{
+                                            __html: TableOfContents,
+                                        }}
+                                    />
+                                </div>
 
                                 <Footer />
                             </div>
 
                             <details className="sidebar-mobile">
                                 <summary>Document</summary>
+
+                                {config.app &&
+                                    config.app.info &&
+                                    config.app.info.split("?")[0] ===
+                                        result.CustomURL &&
+                                    InformationPageNote()}
 
                                 <div
                                     dangerouslySetInnerHTML={{
@@ -514,16 +521,7 @@ export class PasteDocView implements Endpoint {
                                 />
                             </details>
 
-                            <div
-                                class={"tab-container editor-tab"}
-                                style={{
-                                    height: "100vh",
-                                    maxHeight: "initial",
-                                    overflow: "auto",
-                                    width: "100%",
-                                    paddingBottom: "4rem",
-                                }}
-                            >
+                            <div class={"tab-container editor-tab page-content"}>
                                 <div
                                     id="editor-tab-preview"
                                     class="editor-tab"
@@ -544,7 +542,7 @@ export class PasteDocView implements Endpoint {
                                         justifyContent: "center",
                                         alignItems: "center",
                                         flexWrap: "wrap",
-                                        padding: "0"
+                                        padding: "0",
                                     }}
                                 >
                                     <li>

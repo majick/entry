@@ -10,12 +10,6 @@ Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite dat
 
 The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support provided by Entry.
 
-***
-
-[TOC]
-
-***
-
 ## Install
 
 - Make sure you have [Bun installed](https://bun.sh/docs/installation)

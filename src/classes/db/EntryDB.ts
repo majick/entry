@@ -1147,7 +1147,7 @@ export default class EntryDB {
         const pastes = await SQL.QueryOBJ({
             db: this.db,
             query: `SELECT * From Pastes WHERE ${
-                sql || "CustomURL IS NOT NULL LIMIT 1000"
+                sql || "CustomURL IS NOT NULL LIMIT 500"
             }`,
             all: true,
             transaction: true,

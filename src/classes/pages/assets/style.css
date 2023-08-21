@@ -5,6 +5,12 @@
     --base-lit: 93%;
     --mod: -;
 
+    --background-surface-1: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) - 2%)
+    );
+
     --background-surface: hsl(
         var(--base-hue),
         var(--base-sat),
@@ -197,8 +203,7 @@ button:hover,
 
 button.secondary:hover,
 .button.secondary:hover {
-    color: var(--blue);
-    background: var(--background-surface);
+    background: var(--background-surface-1);
 }
 
 button.green,
@@ -778,6 +783,7 @@ details hr {
 .sidebar {
     height: 100vh;
     width: 30%;
+    min-width: 325px; /* just before the footer starts wrapping */
     overflow: auto;
     border-right: solid 1px var(--background-surface2);
     display: flex;
@@ -807,8 +813,24 @@ details hr {
 }
 
 .sidebar-mobile[open] summary {
-    position: sticky;
     top: 0;
+    position: sticky;
+    box-shadow: none;
+    border-bottom: solid 1px var(--background-surface2);
+}
+
+.page-content {
+    height: 100vh;
+    max-height: initial;
+    overflow: auto;
+    width: 100%;
+    padding-bottom: 4rem;
+}
+
+.sidebar-layout-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
 }
 
 @media screen and (max-width: 800px) {

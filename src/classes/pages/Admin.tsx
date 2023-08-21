@@ -17,6 +17,8 @@ import { Config } from "../..";
 import Checkbox from "./components/form/Checkbox";
 let config: Config;
 
+import pack from "../../../package.json";
+
 /**
  * @function AdminNav
  *
@@ -50,13 +52,15 @@ function AdminNav(props: { active: string; pass: string }): any {
                 <span>{config.name} Admin</span>
             </h1>
 
+            <hr />
+
             <div
                 style={{
                     width: "100%",
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    gap: "0.4rem",
+                    gap: "0.5rem",
                     flexWrap: "wrap",
                 }}
             >
@@ -68,11 +72,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                         value={props.pass}
                     />
 
-                    <button
-                        class={`secondary${
-                            props.active === "pastes" ? " active" : ""
-                        }`}
-                    >
+                    <button class={props.active === "pastes" ? " active" : ""}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -94,11 +94,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                         value={props.pass}
                     />
 
-                    <button
-                        class={`secondary${
-                            props.active === "export" ? " active" : ""
-                        }`}
-                    >
+                    <button class={props.active === "export" ? " active" : ""}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -121,11 +117,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                         value={props.pass}
                     />
 
-                    <button
-                        class={`secondary${
-                            props.active === "logs" ? " active" : ""
-                        }`}
-                    >
+                    <button class={props.active === "logs" ? " active" : ""}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -140,7 +132,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                     </button>
                 </form>
 
-                <a href="https://codeberg.org/hkau/entry" class={"button secondary"}>
+                <a href="https://codeberg.org/hkau/entry" class={"button"}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 16 16"
@@ -156,12 +148,35 @@ function AdminNav(props: { active: string; pass: string }): any {
 
             <style
                 dangerouslySetInnerHTML={{
-                    __html: "button.active { box-shadow: 0 0 1px var(--blue2); }",
+                    __html: "button.active { box-shadow: 0 0 1px var(--blue2); color: var(--blue2); }",
                 }}
             />
 
             <hr />
         </>
+    );
+}
+
+function AdminLayout(props: { children: any; body: any; page: string }) {
+    return (
+        <div class="sidebar-layout-wrapper">
+            <div className="sidebar">
+                <div>
+                    <AdminNav active={props.page} pass={props.body.AdminPassword} />
+                </div>
+
+                <Footer />
+            </div>
+
+            <details className="sidebar-mobile">
+                <summary>Menu</summary>
+                <AdminNav active={props.page} pass={props.body.AdminPassword} />
+            </details>
+
+            <div className="tab-container editor-tab page-content">
+                {props.children}
+            </div>
+        </div>
     );
 }
 
@@ -263,109 +278,91 @@ export class ManagePastes implements Endpoint {
         // return
         return new Response(
             Renderer.Render(
-                <>
-                    <main>
-                        <div
-                            className="tab-container editor-tab"
+                <AdminLayout body={body} page="pastes">
+                    <p>
+                        <b>Direct SQL</b>
+                    </p>
+
+                    <div>
+                        <form
+                            action="/admin/api/sql"
+                            method={"POST"}
+                            target={"_blank"}
                             style={{
-                                height: "min-content",
-                                maxHeight: "85vh",
+                                display: "flex",
+                                gap: "0.5rem",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                flexWrap: "wrap",
                             }}
                         >
-                            <AdminNav active="pastes" pass={body.AdminPassword} />
-
-                            <p>
-                                <b>Direct SQL</b>
-                            </p>
-
-                            <div>
-                                <form
-                                    action="/admin/api/sql"
-                                    method={"POST"}
-                                    target={"_blank"}
-                                    style={{
-                                        display: "flex",
-                                        gap: "0.5rem",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        flexWrap: "wrap",
-                                    }}
-                                >
-                                    <input
-                                        type="hidden"
-                                        required
-                                        name="AdminPassword"
-                                        value={body.AdminPassword}
-                                    />
-
-                                    <input
-                                        type="text"
-                                        name={"sql"}
-                                        id={"sql"}
-                                        placeholder={
-                                            "SELECT * FROM Pastes LIMIT 100"
-                                        }
-                                        className="secondary"
-                                        autoComplete={"off"}
-                                        style={{
-                                            width: "40rem",
-                                        }}
-                                    />
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            gap: "0.5rem",
-                                            flexWrap: "wrap",
-                                            justifyContent: "center",
-                                        }}
-                                    >
-                                        <Checkbox
-                                            name="get"
-                                            title="get"
-                                            label={true}
-                                            secondary={true}
-                                        />
-
-                                        <Checkbox
-                                            name="all"
-                                            title="all"
-                                            label={true}
-                                            secondary={true}
-                                        />
-
-                                        <Checkbox
-                                            name="cache"
-                                            title="cache"
-                                            label={true}
-                                            secondary={true}
-                                            disabled
-                                        />
-
-                                        <button class={"secondary"}>Query</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <hr />
-
-                            <p>
-                                <b>Paste Search</b>
-                            </p>
-
-                            <PasteList
-                                Pastes={pastes}
-                                ShowDelete={true}
-                                AdminPassword={body.AdminPassword}
-                                Selector={
-                                    body.sql || "CustomURL IS NOT NULL LIMIT 1000"
-                                }
+                            <input
+                                type="hidden"
+                                required
+                                name="AdminPassword"
+                                value={body.AdminPassword}
                             />
-                        </div>
 
-                        <Footer />
-                    </main>
-                </>,
+                            <input
+                                type="text"
+                                name={"sql"}
+                                id={"sql"}
+                                placeholder={"SELECT * FROM Pastes LIMIT 100"}
+                                className="secondary"
+                                autoComplete={"off"}
+                                style={{
+                                    width: "40rem",
+                                }}
+                            />
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "0.5rem",
+                                    flexWrap: "wrap",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Checkbox
+                                    name="get"
+                                    title="get"
+                                    label={true}
+                                    secondary={true}
+                                />
+
+                                <Checkbox
+                                    name="all"
+                                    title="all"
+                                    label={true}
+                                    secondary={true}
+                                />
+
+                                <Checkbox
+                                    name="cache"
+                                    title="cache"
+                                    label={true}
+                                    secondary={true}
+                                    disabled
+                                />
+
+                                <button class={"secondary"}>Query</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <hr />
+
+                    <p>
+                        <b>Paste Search</b>
+                    </p>
+
+                    <PasteList
+                        Pastes={pastes}
+                        ShowDelete={true}
+                        AdminPassword={body.AdminPassword}
+                        Selector={body.sql || "CustomURL IS NOT NULL LIMIT 500"}
+                    />
+                </AdminLayout>,
                 <>
                     <title>{config.name} Admin</title>
                 </>
@@ -526,155 +523,136 @@ export class ExportPastesPage implements Endpoint {
         // return
         return new Response(
             Renderer.Render(
-                <>
-                    <main>
-                        <div className="tab-container editor-tab">
-                            <AdminNav active="export" pass={body.AdminPassword} />
+                <AdminLayout body={body} page="export">
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                        }}
+                    >
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "0.5rem",
+                                flexWrap: "wrap",
+                            }}
+                        >
+                            <form action="/admin/api/export" method="POST">
+                                <input
+                                    type="hidden"
+                                    required
+                                    name="AdminPassword"
+                                    value={body.AdminPassword}
+                                />
 
-                            <div
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        gap: "0.5rem",
-                                        flexWrap: "wrap",
-                                    }}
-                                >
-                                    <form action="/admin/api/export" method="POST">
-                                        <input
-                                            type="hidden"
-                                            required
-                                            name="AdminPassword"
-                                            value={body.AdminPassword}
-                                        />
-
-                                        <button class={"secondary"}>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Export Symbol"}
-                                            >
-                                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                                <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
-                                            </svg>{" "}
-                                            Export Pastes
-                                        </button>
-                                    </form>
-
-                                    <form
-                                        action="/admin/api/logs/export"
-                                        method="POST"
+                                <button class={"secondary"}>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Export Symbol"}
                                     >
-                                        <input
-                                            type="hidden"
-                                            required
-                                            name="AdminPassword"
-                                            value={body.AdminPassword}
-                                        />
+                                        <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                        <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                                    </svg>{" "}
+                                    Export Pastes
+                                </button>
+                            </form>
 
-                                        <button class={"secondary"}>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Export Symbol"}
-                                            >
-                                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                                <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
-                                            </svg>{" "}
-                                            Export Logs
-                                        </button>
-                                    </form>
+                            <form action="/admin/api/logs/export" method="POST">
+                                <input
+                                    type="hidden"
+                                    required
+                                    name="AdminPassword"
+                                    value={body.AdminPassword}
+                                />
 
-                                    <form
-                                        action="/admin/api/config.json"
-                                        method="POST"
+                                <button class={"secondary"}>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Export Symbol"}
                                     >
-                                        <input
-                                            type="hidden"
-                                            required
-                                            name="AdminPassword"
-                                            value={body.AdminPassword}
-                                        />
+                                        <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                        <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                                    </svg>{" "}
+                                    Export Logs
+                                </button>
+                            </form>
 
-                                        <button class={"secondary"}>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Export Symbol"}
-                                            >
-                                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                                <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
-                                            </svg>{" "}
-                                            Export Config
-                                        </button>
-                                    </form>
-                                </div>
+                            <form action="/admin/api/config.json" method="POST">
+                                <input
+                                    type="hidden"
+                                    required
+                                    name="AdminPassword"
+                                    value={body.AdminPassword}
+                                />
 
-                                <hr style={{ width: "100%" }} />
-
-                                <form
-                                    action="/admin/api/import"
-                                    encType={"multipart/form-data"}
-                                    method="POST"
-                                    style={{
-                                        display: "flex",
-                                        gap: "0.4rem",
-                                        flexWrap: "wrap",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <input
-                                        type="hidden"
-                                        required
-                                        name="AdminPassword"
-                                        value={body.AdminPassword}
-                                    />
-
-                                    <input
-                                        type="file"
-                                        name={"pastes"}
-                                        required
-                                        placeholder={"Exported Pastes JSON"}
-                                        minLength={2}
-                                    />
-
-                                    <button class={"secondary"}>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            aria-label={"Upload Symbol"}
-                                        >
-                                            <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                            <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
-                                        </svg>{" "}
-                                        Import Pastes
-                                    </button>
-                                </form>
-                            </div>
+                                <button class={"secondary"}>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Export Symbol"}
+                                    >
+                                        <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                        <path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path>
+                                    </svg>{" "}
+                                    Export Config
+                                </button>
+                            </form>
                         </div>
 
-                        <Footer />
-                    </main>
+                        <hr style={{ width: "100%" }} />
 
-                    <style
-                        dangerouslySetInnerHTML={{
-                            __html: `input { background: var(--background-surface); }`,
-                        }}
-                    />
-                </>,
+                        <form
+                            action="/admin/api/import"
+                            encType={"multipart/form-data"}
+                            method="POST"
+                            style={{
+                                display: "flex",
+                                gap: "0.4rem",
+                                flexWrap: "wrap",
+                                alignItems: "center",
+                            }}
+                        >
+                            <input
+                                type="hidden"
+                                required
+                                name="AdminPassword"
+                                value={body.AdminPassword}
+                            />
+
+                            <input
+                                type="file"
+                                name={"pastes"}
+                                required
+                                placeholder={"Exported Pastes JSON"}
+                                minLength={2}
+                                class={"secondary"}
+                            />
+
+                            <button class={"secondary"}>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Upload Symbol"}
+                                >
+                                    <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                    <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
+                                </svg>{" "}
+                                Import Pastes
+                            </button>
+                        </form>
+                    </div>
+                </AdminLayout>,
                 <>
                     <title>{config.name} Admin</title>
                 </>
@@ -889,217 +867,205 @@ export class LogsPage implements Endpoint {
         // get logs
         const logs = await EntryDB.Logs.QueryLogs(
             body.filter_type !== undefined
-                ? `Type = "${body.filter_type}" LIMIT 1000`
+                ? `Type = "${body.filter_type}" LIMIT 500`
                 : 'ID IS NOT NULL AND Type IS NOT "view_paste" AND Type IS NOT "session" LIMIT 500'
         );
 
         // return
         return new Response(
             Renderer.Render(
-                <>
-                    <main>
-                        <div
-                            className="tab-container editor-tab"
+                <AdminLayout body={body} page="logs">
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <a
+                            href="/paste/doc/what:sentrytwo.com#logs"
+                            class={"button secondary"}
+                        >
+                            Help
+                        </a>
+
+                        <a
+                            href="https://codeberg.org/hkau/entry/issues/new/choose"
+                            class={"button secondary"}
+                        >
+                            Issues
+                        </a>
+                    </div>
+
+                    <hr />
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "1rem",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <form
+                            action="/admin/logs"
+                            method={"POST"}
                             style={{
-                                height: "min-content",
-                                maxHeight: "85vh",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                                flexWrap: "wrap",
                             }}
                         >
-                            <AdminNav active="logs" pass={body.AdminPassword} />
+                            <input
+                                type="hidden"
+                                required
+                                name="AdminPassword"
+                                value={body.AdminPassword}
+                            />
 
-                            <div>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        marginBottom: "1rem",
-                                        flexWrap: "wrap",
-                                        gap: "0.5rem",
-                                    }}
+                            <select
+                                name="filter_type"
+                                id="filter_type"
+                                class={"secondary"}
+                                required
+                            >
+                                <option value="">Filter by type</option>
+
+                                {config.log &&
+                                    config.log.events.map((event) => (
+                                        <option
+                                            value={event}
+                                            selected={body.filter_type === event}
+                                        >
+                                            {event}
+                                        </option>
+                                    ))}
+                            </select>
+
+                            <button class={"secondary"}>Query</button>
+                        </form>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "1rem",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        >
+                            <form
+                                action="/admin/api/logs/mass-delete"
+                                method={"POST"}
+                            >
+                                <input
+                                    type="hidden"
+                                    required
+                                    name="AdminPassword"
+                                    value={body.AdminPassword}
+                                />
+
+                                <input
+                                    type="hidden"
+                                    required
+                                    name={"logs"}
+                                    value={JSON.stringify(
+                                        logs[2].map((log) => log.ID)
+                                    )}
+                                />
+
+                                <button class={"secondary"}>Delete Results</button>
+                            </form>
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    gap: "0.5rem",
+                                }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Magnifying Glass Symbol"}
                                 >
-                                    <>
-                                        <form
-                                            action="/admin/logs"
-                                            method={"POST"}
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                gap: "0.5rem",
-                                                flexWrap: "wrap",
-                                            }}
-                                        >
-                                            <input
-                                                type="hidden"
-                                                required
-                                                name="AdminPassword"
-                                                value={body.AdminPassword}
-                                            />
+                                    <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
+                                </svg>
 
-                                            <select
-                                                name="filter_type"
-                                                id="filter_type"
-                                                class={"secondary"}
-                                                required
-                                            >
-                                                <option value="">
-                                                    Filter by type
-                                                </option>
-
-                                                {config.log &&
-                                                    config.log.events.map(
-                                                        (event) => (
-                                                            <option
-                                                                value={event}
-                                                                selected={
-                                                                    body.filter_type ===
-                                                                    event
-                                                                }
-                                                            >
-                                                                {event}
-                                                            </option>
-                                                        )
-                                                    )}
-                                            </select>
-
-                                            <button class={"secondary"}>
-                                                Query
-                                            </button>
-                                        </form>
-                                    </>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            gap: "1rem",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <form
-                                            action="/admin/api/logs/mass-delete"
-                                            method={"POST"}
-                                        >
-                                            <input
-                                                type="hidden"
-                                                required
-                                                name="AdminPassword"
-                                                value={body.AdminPassword}
-                                            />
-
-                                            <input
-                                                type="hidden"
-                                                required
-                                                name={"logs"}
-                                                value={JSON.stringify(
-                                                    logs[2].map((log) => log.ID)
-                                                )}
-                                            />
-
-                                            <button class={"secondary"}>
-                                                Delete Results
-                                            </button>
-                                        </form>
-
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "center",
-                                                alignItems: "center",
-                                                gap: "0.5rem",
-                                            }}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={
-                                                    "Magnifying Glass Symbol"
-                                                }
-                                            >
-                                                <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
-                                            </svg>
-
-                                            <span>
-                                                <b>{logs[2].length}</b> result
-                                                {logs[2].length > 1 ||
-                                                logs[2].length === 0
-                                                    ? "s"
-                                                    : ""}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    style={{
-                                        maxWidth: "100vw",
-                                        overflow: "auto",
-                                    }}
-                                >
-                                    <table
-                                        class={"force-full"}
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                    >
-                                        <thead>
-                                            <tr>
-                                                <th>Content</th>
-                                                <th>Timestamp</th>
-                                                <th>Event Type</th>
-                                                <th>ID</th>
-                                            </tr>
-                                        </thead>
-
-                                        <tbody>
-                                            {logs[2].map((log) => {
-                                                return (
-                                                    <tr>
-                                                        <td
-                                                            title={log.Content}
-                                                            style={{
-                                                                maxWidth: "5rem",
-                                                            }}
-                                                        >
-                                                            {log.Content}
-                                                        </td>
-
-                                                        <td
-                                                            class="utc-date-to-localize"
-                                                            title={log.Timestamp}
-                                                        >
-                                                            {log.Timestamp}
-                                                        </td>
-
-                                                        <td>{log.Type}</td>
-                                                        <td
-                                                            title={log.ID}
-                                                            style={{
-                                                                maxWidth: "5rem",
-                                                            }}
-                                                        >
-                                                            {log.ID}
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                <span>
+                                    <b>{logs[2].length}</b> result
+                                    {logs[2].length > 1 || logs[2].length === 0
+                                        ? "s"
+                                        : ""}
+                                </span>
                             </div>
                         </div>
+                    </div>
 
-                        <Footer />
-                    </main>
-
-                    <style
-                        dangerouslySetInnerHTML={{
-                            __html: `input { background: var(--background-surface); }`,
+                    <div
+                        style={{
+                            maxWidth: "100vw",
+                            overflow: "auto",
                         }}
-                    />
-                </>,
+                    >
+                        <table
+                            class={"force-full"}
+                            style={{
+                                width: "100%",
+                            }}
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Content</th>
+                                    <th>Timestamp</th>
+                                    <th>Event Type</th>
+                                    <th>ID</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {logs[2].map((log) => {
+                                    return (
+                                        <tr>
+                                            <td
+                                                title={log.Content}
+                                                style={{
+                                                    maxWidth: "5rem",
+                                                }}
+                                            >
+                                                {log.Content}
+                                            </td>
+
+                                            <td
+                                                class="utc-date-to-localize"
+                                                title={log.Timestamp}
+                                            >
+                                                {log.Timestamp}
+                                            </td>
+
+                                            <td>{log.Type}</td>
+                                            <td
+                                                title={log.ID}
+                                                style={{
+                                                    maxWidth: "5rem",
+                                                }}
+                                            >
+                                                {log.ID}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </AdminLayout>,
                 <>
                     <title>{config.name} Admin</title>
                 </>
