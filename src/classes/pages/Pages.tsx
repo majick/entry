@@ -544,6 +544,7 @@ export class PasteDocView implements Endpoint {
                                         justifyContent: "center",
                                         alignItems: "center",
                                         flexWrap: "wrap",
+                                        padding: "0"
                                     }}
                                 >
                                     <li>

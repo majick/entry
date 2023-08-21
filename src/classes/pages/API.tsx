@@ -105,7 +105,8 @@ export async function Session(request: Request): Promise<string> {
         // if something doesn't match these rules, it is likely a bot and shouldn't be given a session
         if (
             !UA.startsWith("Mozilla/5.0") ||
-            UA.startsWith("Mozilla/5.0 (compatible")
+            UA.startsWith("Mozilla/5.0 (compatible") ||
+            UA.includes("bot")
         )
             return (session = "");
 

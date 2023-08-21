@@ -238,8 +238,24 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public static async InitLogs(): Promise<void> {
+        if (!EntryDB.config.log) return;
+
         // init logs
         EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
+
+        // delete bot sessions
+        if (EntryDB.config.log.events.includes("session")) {
+            const BotSessions = await EntryDB.Logs.QueryLogs(
+                'Content LIKE "%bot%" OR Content LIKE "%compatible%"'
+            );
+
+            for (const session of BotSessions[2])
+                await EntryDB.Logs.DeleteLog(session.ID);
+
+            // log (only if there were multiple bot sessions)
+            if (BotSessions[2].length > 1)
+                console.log(`Deleted ${BotSessions[2].length} bot sessions`);
+        }
 
         // start logs interval
         // runs every day, checks sessions to see if it has been more than a year
