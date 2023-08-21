@@ -110,6 +110,10 @@ export function ParseMarkdownSync(content: string): string {
     if (content.match(TOC_Regex)) {
         let TOC_Content = "";
 
+        // if there is no heading 1, add root heading (so formatting doesn't break)
+        if (!TOC.find((v) => v.Type === 1)) TOC_Content = `1. [(root)](#)\n`;
+
+        // load headings
         for (const heading of TOC)
             TOC_Content += `${"    ".repeat(heading.Type - 1)} 1. [${
                 heading.Text

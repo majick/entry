@@ -18,15 +18,13 @@ export default function Footer() {
             <hr
                 style={{
                     width: "425px",
-                    maxWidth: "100vw",
+                    maxWidth: "100%",
                 }}
             />
 
             <ul
                 class={"__footernav"}
                 style={{
-                    display: "flex",
-                    gap: "0.25rem",
                     padding: "0",
                     margin: "0",
                 }}
@@ -95,7 +93,12 @@ export default function Footer() {
 
             <style
                 dangerouslySetInnerHTML={{
-                    __html: `.__footernav li {
+                    __html: `.__footernav {
+                        display: flex;
+                        gap: 0.25rem;
+                    }
+                    
+                    .__footernav li {
                         list-style-type: "·";
                         padding: 0 0.25rem;
                     }

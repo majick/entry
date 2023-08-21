@@ -164,6 +164,7 @@ const config: HoneybeeConfig = {
         "/search": { Page: Pages.PastesSearch },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
+        "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/": {
             // return paste view, will return homepage if no paste is provided
             // at the end so it tests this last because everything starts with /, which means

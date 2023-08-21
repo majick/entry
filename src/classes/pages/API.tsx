@@ -101,9 +101,6 @@ export async function Session(request: Request): Promise<string> {
     if (!session) {
         const UA = request.headers.get("User-Agent") || "?";
 
-        // if UA includes "Bun/" or is a question mark, return
-        if (UA.includes("Bun/") || UA === "?") return (session = "");
-
         // UA must start with "Mozilla/5.0" and must NOT start with "Mozilla/5.0 (compatible"
         // if something doesn't match these rules, it is likely a bot and shouldn't be given a session
         if (
@@ -528,6 +525,16 @@ export class GetRawPaste implements Endpoint {
  * @implements {Endpoint}
  */
 export class RenderMarkdown implements Endpoint {
+    public static async Render(body: string, toc: boolean = false): Promise<string> {
+        return toc !== true
+            ? // only render markdown
+              await ParseMarkdown(body)
+            : // only render toc
+              (await ParseMarkdown(`[TOC]\n{{@TABLE_OF_CONTENTS}}\n${body}`)).split(
+                  "{{@TABLE_OF_CONTENTS}}"
+              )[0];
+    }
+
     public async request(request: Request): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(request, "text/markdown");
@@ -540,14 +547,10 @@ export class RenderMarkdown implements Endpoint {
         const body = await request.text();
 
         // render
-        const rendered =
-            url.searchParams.get("toc") !== "true"
-                ? // only render markdown
-                  await ParseMarkdown(body)
-                : // only render toc
-                  (
-                      await ParseMarkdown(`[TOC]\n{{@TABLE_OF_CONTENTS}}\n${body}`)
-                  ).split("{{@TABLE_OF_CONTENTS}}")[0];
+        const rendered = await RenderMarkdown.Render(
+            body,
+            url.searchParams.get("toc") === "true"
+        );
 
         // return
         return new Response(rendered, {
