@@ -3,7 +3,8 @@ import { CreateHash } from "../../db/helpers/Hash";
 
 export default function PasteList(props: {
     Pastes: Paste[];
-    Selector?: string;
+    Query?: string;
+    Limit?: number;
     ShowDelete?: boolean;
     AdminPassword?: string;
 }) {
@@ -19,7 +20,7 @@ export default function PasteList(props: {
                     gap: "0.5rem",
                 }}
             >
-                {(props.Selector && (
+                {(props.Query !== undefined && (
                     <>
                         <form
                             action="/admin/manage-pastes"
@@ -40,11 +41,27 @@ export default function PasteList(props: {
 
                             <input
                                 required
-                                name={"sql"}
+                                name={"query"}
                                 placeholder={"Query"}
-                                value={props.Selector}
+                                value={props.Query}
                                 style={{
                                     background: "var(--background-surface)",
+                                    width: "20rem",
+                                }}
+                            />
+
+                            <input
+                                type="number"
+                                value={props.Limit}
+                                placeholder={"Limit"}
+                                minLength={1}
+                                maxLength={10000}
+                                name={"limit"}
+                                id={"limit"}
+                                class={"secondary"}
+                                required
+                                style={{
+                                    width: "10rem",
                                 }}
                             />
 

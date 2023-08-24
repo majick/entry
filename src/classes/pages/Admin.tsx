@@ -270,8 +270,17 @@ export class ManagePastes implements Endpoint {
                 });
         }
 
+        // get limit
+        const LIMIT = parseInt(body.limit || "500");
+
         // fetch all pastes
-        const pastes = await db.GetAllPastes(true, false, body.sql);
+        const pastes = await db.GetAllPastes(
+            true,
+            false,
+            body.query !== undefined
+                ? `CustomURL LIKE "%${body.query}%" LIMIT ${LIMIT}`
+                : `CustomURL IS NOT NULL LIMIT ${LIMIT}`
+        );
 
         // return
         return new Response(
@@ -358,7 +367,8 @@ export class ManagePastes implements Endpoint {
                         Pastes={pastes}
                         ShowDelete={true}
                         AdminPassword={body.AdminPassword}
-                        Selector={body.sql || "CustomURL IS NOT NULL LIMIT 500"}
+                        Query={body.query || ""}
+                        Limit={LIMIT}
                     />
                 </AdminLayout>,
                 <>
@@ -865,7 +875,7 @@ export class LogsPage implements Endpoint {
             return new Login().request(request);
 
         // get limit
-        const LIMIT = parseInt(url.searchParams.get("limit") || "500");
+        const LIMIT = parseInt(body.limit || "500");
 
         // get logs
         const logs = await EntryDB.Logs.QueryLogs(
@@ -936,6 +946,9 @@ export class LogsPage implements Endpoint {
                                 id="filter_type"
                                 class={"secondary"}
                                 required
+                                style={{
+                                    width: "10rem",
+                                }}
                             >
                                 <option value="">Filter by type</option>
 
@@ -949,6 +962,21 @@ export class LogsPage implements Endpoint {
                                         </option>
                                     ))}
                             </select>
+
+                            <input
+                                type="number"
+                                value={LIMIT}
+                                placeholder={"Limit"}
+                                minLength={1}
+                                maxLength={10000}
+                                name={"limit"}
+                                id={"limit"}
+                                class={"secondary"}
+                                required
+                                style={{
+                                    width: "10rem",
+                                }}
+                            />
 
                             <button class={"secondary"}>Query</button>
                         </form>
