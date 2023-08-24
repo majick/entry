@@ -17,8 +17,6 @@ import { Config } from "../..";
 import Checkbox from "./components/form/Checkbox";
 let config: Config;
 
-import pack from "../../../package.json";
-
 /**
  * @function AdminNav
  *
@@ -849,6 +847,8 @@ export class LogsPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
+        const url = new URL(request.url);
+
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -864,11 +864,14 @@ export class LogsPage implements Endpoint {
         if (!body.AdminPassword || body.AdminPassword !== config!.admin)
             return new Login().request(request);
 
+        // get limit
+        const LIMIT = parseInt(url.searchParams.get("limit") || "500");
+
         // get logs
         const logs = await EntryDB.Logs.QueryLogs(
             body.filter_type !== undefined
-                ? `Type = "${body.filter_type}" LIMIT 500`
-                : 'ID IS NOT NULL AND Type IS NOT "view_paste" AND Type IS NOT "session" LIMIT 500'
+                ? `Type = "${body.filter_type}" LIMIT ${LIMIT}`
+                : `ID IS NOT NULL AND Type IS NOT "view_paste" AND Type IS NOT "session" LIMIT ${LIMIT}`
         );
 
         // return

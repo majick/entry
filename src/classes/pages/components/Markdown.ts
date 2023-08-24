@@ -178,6 +178,12 @@ export function ParseMarkdownSync(content: string): string {
             // hsl block
             else if (_class === "hsl")
                 result = `<${attributes[0]}>${attributes[1]}</${attributes[0]}>`;
+            // time block
+            else if (_class === "time")
+                result = `<span class="utc-date-to-localize">${attributes[0].replaceAll(
+                    "_",
+                    " "
+                )}</span>`;
 
             // return
             return result;

@@ -224,13 +224,7 @@ function BasicCompletion(context: CompletionContext): any {
             {
                 label: "timestamp",
                 type: "text",
-                apply: new Date().toLocaleString(),
-                detail: "Extras",
-            },
-            {
-                label: "UTC timestamp",
-                type: "text",
-                apply: new Date().toUTCString(),
+                apply: `<% time ${new Date().toUTCString().replaceAll(" ", "_")} %>`,
                 detail: "Extras",
             },
             {

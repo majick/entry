@@ -183,9 +183,9 @@ export class WellKnown implements Endpoint {
                         total: 0,
                         // we're going to use activeMonth to display number of sessions...
                         // sessions are probably cleared regularly, so this makes sense
-                        activeMonth: (
-                            await EntryDB.Logs.QueryLogs('Type = "session"')
-                        )[2].length,
+                        activeMonth:
+                            (await EntryDB.Logs.QueryLogs('Type = "session"'))[2]
+                                .length - 1,
                         activeHalfyear: 0,
                     },
                     // this, however, we can supply
