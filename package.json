@@ -1,13 +1,13 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.0.19-rev-2",
+  "version": "1.1.0-pre",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
     "@types/highlight.js": "^10.1.0",
     "@types/marked": "^5.0.0",
-    "bun-types": "latest",
+    "bun-types": "0.8.0",
     "prettier": "^3.0.0"
   },
   "peerDependencies": {
@@ -22,7 +22,7 @@
     "@codemirror/view": "^6.14.0",
     "@lezer/highlight": "^1.1.6",
     "highlight.js": "^11.8.0",
-    "honeybee": "1.0.6",
+    "honeybee": "https://git.sentrytwo.com/api/packages/hkau/npm/honeybee/-/1.0.6/honeybee-1.0.6.tgz",
     "marked": "^5.1.0"
   },
   "scripts": {

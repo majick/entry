@@ -155,6 +155,24 @@ An example that doesn't clear logs on restart and has all events enabled looks l
 }
 ```
 
+#### Plugins
+
+Entry servers are able to run plugins that extend the functionality of Entry.
+
+Plugins only need one dependency, Entry. You can add this through `git+https://git.sentrytwo.com/hkau/entry`.
+
+```bash
+bun a git+https://git.sentrytwo.com/hkau/entry
+```
+
+Plugins can access the `EntryDB` class through `global.EntryDB`.
+
+```typescript
+console.log(global.EntryDB.DataDirectory);
+```
+
+An example server plugin can be seen [here](https://codeberg.org/hkau/entry/src/branch/master/docs/plugins/plugin-example)!
+
 ### Customization
 
 Every color is customizable through simple CSS variables. You can customize the background using the `--base-hue`, `--base-sat` and `--base-lit` variables. The background is normally in `hsl` format, while other colors are in hex. Many of these values can be controlled using specific [Special Elements](#special-elements).

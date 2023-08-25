@@ -8,6 +8,8 @@
 import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
 
+(global as any).EntryDB = EntryDB;
+
 // includes
 import "./classes/pages/assets/style.css";
 
@@ -18,7 +20,7 @@ export type Config = {
     admin: string;
     data: string;
     config: string;
-    force_https?: boolean;
+    plugin_file?: string;
     env?: "production" | "development";
     app?: {
         info?: string;
@@ -117,6 +119,20 @@ import Admin from "./classes/pages/Admin";
 import Pages from "./classes/pages/Pages";
 import API from "./classes/pages/API";
 
+// get plugins
+let plugins: HoneybeeConfig["Pages"] = {};
+await EntryDB.GetConfig();
+
+if (EntryDB.config.plugin_file) {
+    const Path = EntryDB.config.plugin_file.replace(":cwd", process.cwd());
+
+    // if file exists, import file and get default return value
+    if (await Bun.file(Path).exists()) {
+        const PluginsList: Array<HoneybeeConfig["Pages"]> = await import(Path);
+        for (const Plugin of PluginsList) plugins = { ...plugins, ...Plugin };
+    }
+}
+
 // ...create config
 const ServerConfig = await EntryDB.GetConfig();
 const config: HoneybeeConfig = {
@@ -178,6 +194,8 @@ const config: HoneybeeConfig = {
             Type: "begins",
             Page: Pages.GetPasteFromURL,
         },
+        // (any) plugins
+        ...plugins,
     },
 };
 

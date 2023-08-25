@@ -40,7 +40,6 @@ export default function PasteList(props: {
                             />
 
                             <input
-                                required
                                 name={"query"}
                                 placeholder={"Query"}
                                 value={props.Query}

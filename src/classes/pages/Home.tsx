@@ -24,19 +24,6 @@ export default class Home implements Endpoint {
         const search = new URLSearchParams(url.search);
         if (!config) config = (await EntryDB.GetConfig()) as Config;
 
-        // force https
-        if (
-            EntryDB.config.force_https === true &&
-            url.hostname !== "localhost" &&
-            url.protocol === "http:"
-        )
-            return new Response("Please use HTTPS", {
-                status: 301,
-                headers: {
-                    Location: url.href.replace("http:", "https:"),
-                },
-            });
-
         // if search.server, add server to paste.CustomURL
         if (search.get("server"))
             search.set("OldURL", `${search.get("OldURL")}:${search.get("server")}`);

@@ -65,19 +65,6 @@ export class GetPasteFromURL implements Endpoint {
         const search = new URLSearchParams(url.search);
         config = (await EntryDB.GetConfig()) as Config;
 
-        // force https
-        if (
-            EntryDB.config.force_https === true &&
-            url.hostname !== "localhost" &&
-            url.protocol === "http:"
-        )
-            return new Response("Please use HTTPS", {
-                status: 301,
-                headers: {
-                    Location: url.href.replace("http:", "https:"),
-                },
-            });
-
         // load doc view is specified
         if (search.get("view") && search.get("view") === "doc")
             return await new PasteDocView().request(request);
@@ -441,19 +428,6 @@ export class PasteDocView implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         config = (await EntryDB.GetConfig()) as Config;
-
-        // force https
-        if (
-            EntryDB.config.force_https === true &&
-            url.hostname !== "localhost" &&
-            url.protocol === "http:"
-        )
-            return new Response("Please use HTTPS", {
-                status: 301,
-                headers: {
-                    Location: url.href.replace("http:", "https:"),
-                },
-            });
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
