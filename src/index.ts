@@ -8,7 +8,11 @@
 import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
 
+// create global
+import Footer from "./classes/pages/components/Footer";
+
 (global as any).EntryDB = EntryDB;
+(global as any).Footer = Footer;
 
 // includes
 import "./classes/pages/assets/style.css";
@@ -120,7 +124,7 @@ import Pages from "./classes/pages/Pages";
 import API from "./classes/pages/API";
 
 // get plugins
-let plugins: HoneybeeConfig["Pages"] = {};
+export let plugins: HoneybeeConfig["Pages"] = {};
 await EntryDB.GetConfig();
 
 if (EntryDB.config.plugin_file) {
@@ -128,15 +132,18 @@ if (EntryDB.config.plugin_file) {
 
     // if file exists, import file and get default return value
     if (await Bun.file(Path).exists()) {
-        const PluginsList: Array<HoneybeeConfig["Pages"]> = await import(Path);
-        for (const Plugin of PluginsList) plugins = { ...plugins, ...Plugin };
+        const PluginsList: { default: Array<HoneybeeConfig["Pages"]> } =
+            await import(Path);
+
+        // load plugin pages
+        for (const Plugin of PluginsList.default)
+            plugins = { ...plugins, ...Plugin };
     }
 }
 
 // ...create config
-const ServerConfig = await EntryDB.GetConfig();
 const config: HoneybeeConfig = {
-    Port: ServerConfig!.port || 8080,
+    Port: EntryDB.config.port || 8080,
     AssetsDir: import.meta.dir,
     NotFoundPage: _404Page(),
     Pages: {
@@ -155,6 +162,7 @@ const config: HoneybeeConfig = {
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
         "/admin/logs": { Method: "POST", Page: Admin.LogsPage },
+        "/admin/plugins": { Method: "POST", Page: Admin.PluginsPage },
         "/admin/api/delete": { Method: "POST", Page: Admin.APIDeletePaste },
         "/admin/api/export": { Method: "POST", Page: Admin.APIExport },
         "/admin/api/import": { Method: "POST", Page: Admin.APIImport },
@@ -178,6 +186,8 @@ const config: HoneybeeConfig = {
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET search
         "/search": { Page: Pages.PastesSearch },
+        // (any) plugins
+        ...plugins,
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
@@ -194,8 +204,6 @@ const config: HoneybeeConfig = {
             Type: "begins",
             Page: Pages.GetPasteFromURL,
         },
-        // (any) plugins
-        ...plugins,
     },
 };
 

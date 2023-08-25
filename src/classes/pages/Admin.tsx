@@ -13,7 +13,7 @@ import EntryDB from "../db/EntryDB";
 import PasteList from "./components/PasteList";
 import Footer from "./components/Footer";
 
-import { Config } from "../..";
+import { Config, plugins } from "../..";
 import Checkbox from "./components/form/Checkbox";
 let config: Config;
 
@@ -127,6 +127,28 @@ function AdminNav(props: { active: string; pass: string }): any {
                             <path d="M13-.005c1.654 0 3 1.328 3 3 0 .982-.338 1.933-.783 2.818-.443.879-1.028 1.758-1.582 2.588l-.011.017c-.568.853-1.104 1.659-1.501 2.446-.398.789-.623 1.494-.623 2.136a1.5 1.5 0 1 0 2.333-1.248.75.75 0 0 1 .834-1.246A3 3 0 0 1 13 16H3a3 3 0 0 1-3-3c0-1.582.891-3.135 1.777-4.506.209-.322.418-.637.623-.946.473-.709.923-1.386 1.287-2.048H2.51c-.576 0-1.381-.133-1.907-.783A2.68 2.68 0 0 1 0 2.995a3 3 0 0 1 3-3Zm0 1.5a1.5 1.5 0 0 0-1.5 1.5c0 .476.223.834.667 1.132A.75.75 0 0 1 11.75 5.5H5.368c-.467 1.003-1.141 2.015-1.773 2.963-.192.289-.381.571-.558.845C2.13 10.711 1.5 11.916 1.5 13A1.5 1.5 0 0 0 3 14.5h7.401A2.989 2.989 0 0 1 10 13c0-.979.338-1.928.784-2.812.441-.874 1.023-1.748 1.575-2.576l.017-.026c.568-.853 1.103-1.658 1.501-2.448.398-.79.623-1.497.623-2.143 0-.838-.669-1.5-1.5-1.5Zm-10 0a1.5 1.5 0 0 0-1.5 1.5c0 .321.1.569.27.778.097.12.325.227.74.227h7.674A2.737 2.737 0 0 1 10 2.995c0-.546.146-1.059.401-1.5Z"></path>
                         </svg>{" "}
                         Logs
+                    </button>
+                </form>
+
+                <form action="/admin/plugins" method="POST">
+                    <input
+                        type="hidden"
+                        required
+                        name="AdminPassword"
+                        value={props.pass}
+                    />
+
+                    <button class={props.active === "plugins" ? " active" : ""}>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            height="16"
+                            aria-label={"Plug Symbol"}
+                        >
+                            <path d="M4 8H2.5a1 1 0 0 0-1 1v5.25a.75.75 0 0 1-1.5 0V9a2.5 2.5 0 0 1 2.5-2.5H4V5.133a1.75 1.75 0 0 1 1.533-1.737l2.831-.353.76-.913c.332-.4.825-.63 1.344-.63h.782c.966 0 1.75.784 1.75 1.75V4h2.25a.75.75 0 0 1 0 1.5H13v4h2.25a.75.75 0 0 1 0 1.5H13v.75a1.75 1.75 0 0 1-1.75 1.75h-.782c-.519 0-1.012-.23-1.344-.63l-.761-.912-2.83-.354A1.75 1.75 0 0 1 4 9.867Zm6.276-4.91-.95 1.14a.753.753 0 0 1-.483.265l-3.124.39a.25.25 0 0 0-.219.248v4.734c0 .126.094.233.219.249l3.124.39a.752.752 0 0 1 .483.264l.95 1.14a.25.25 0 0 0 .192.09h.782a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25h-.782a.25.25 0 0 0-.192.09Z"></path>
+                        </svg>{" "}
+                        Plugins
                     </button>
                 </form>
 
@@ -1219,6 +1241,106 @@ export class APIExportConfig implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class PluginsPage
+ * @implements {Endpoint}
+ */
+export class PluginsPage implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        if (!config) config = (await EntryDB.GetConfig()) as Config;
+
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+            return new Login().request(request);
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <AdminLayout body={body} page="plugins">
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <a
+                            href="/paste/doc/what:sentrytwo.com#plugins"
+                            class={"button secondary"}
+                        >
+                            Help
+                        </a>
+
+                        <a
+                            href="https://codeberg.org/hkau/entry/issues/new/choose"
+                            class={"button secondary"}
+                        >
+                            Issues
+                        </a>
+                    </div>
+
+                    <hr />
+
+                    <h6>Plugin Pages</h6>
+
+                    <div
+                        style={{
+                            maxWidth: "100vw",
+                            overflow: "auto",
+                        }}
+                    >
+                        <table class={"force-full"}>
+                            <thead>
+                                <tr>
+                                    <th>Path</th>
+                                    <th>Type</th>
+                                    <th>Method</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {Object.entries(plugins).map((page) => (
+                                    <tr>
+                                        <td>
+                                            <a href={page[0]}>{page[0]}</a>
+                                        </td>
+
+                                        <td>{page[1].Type || "matches"}</td>
+                                        <td>{page[1].Method || "GET"}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </AdminLayout>,
+                <>
+                    <title>{config.name} Admin</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     Login,
@@ -1233,4 +1355,5 @@ export default {
     APIExportLogs,
     APIMassDeleteLogs,
     APIExportConfig,
+    PluginsPage,
 };

@@ -12,11 +12,17 @@
     "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "preserve",
+    "jsxImportSource": "preact",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "types": [
       "bun-types" // add Bun global
     ]
+  },
+  "paths": {
+    "react": ["./node_modules/preact/"],
+    "react/*": ["./node_modules/preact/*"],
+    "react-dom": ["./node_modules/preact/"]
   }
 }

@@ -157,12 +157,15 @@ An example that doesn't clear logs on restart and has all events enabled looks l
 
 #### Plugins
 
+!!! warn Security
+    Plugins are given **full access** to your server. Please be sure you trust a plugin before adding it!
+
 Entry servers are able to run plugins that extend the functionality of Entry.
 
-Plugins only need one dependency, Entry. You can add this through `git+https://git.sentrytwo.com/hkau/entry`.
+Plugins only need one dependency, Entry. You can add this through `https://codeberg.org/hkau/entry/archive/master.tar.gz` or `https://git.sentrytwo.com/hkau/entry/archive/master.tar.gz`.
 
 ```bash
-bun a git+https://git.sentrytwo.com/hkau/entry
+bun a https://codeberg.org/hkau/entry/archive/master.tar.gz
 ```
 
 Plugins can access the `EntryDB` class through `global.EntryDB`.
@@ -171,7 +174,19 @@ Plugins can access the `EntryDB` class through `global.EntryDB`.
 console.log(global.EntryDB.DataDirectory);
 ```
 
-An example server plugin can be seen [here](https://codeberg.org/hkau/entry/src/branch/master/docs/plugins/plugin-example)!
+An example server plugin can be seen [here](https://codeberg.org/hkau/entry/src/branch/master/docs/plugins/plugin-example)! It is also important to build your server plugin file, as pages are written in JSX. An example build file (using [Bun](#install)) and example plugin load file can be found [here](https://codeberg.org/hkau/entry/src/branch/master/docs/plugins).
+
+Please refer to the example files provided, as they walk you through the steps of creating plugins and adding them to your server through comments. Once you have built your plugin file, it can be added through the `plugin_file` key in your server config.
+
+```json
+{
+    ...
+    "plugin_file": "path_to_built_plugin_file.js",
+    ...
+}
+```
+
+The [admin panel](#admin-panel) plugin tab shows the found and loaded plugin pages.
 
 ### Customization
 
