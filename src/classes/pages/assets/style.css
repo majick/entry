@@ -674,6 +674,7 @@ details * {
 }
 
 details summary {
+    background: var(--background-surface1);
     transition: all 0.15s;
     padding: 0.5rem 0.75rem;
     cursor: pointer;
@@ -712,6 +713,39 @@ details details:nth-child(even) {
 
 details hr {
     border-color: var(--background-surface2);
+}
+
+details.horizontal {
+    position: relative;
+    background: transparent;
+}
+
+details.horizontal .details-content {
+    position: absolute;
+    bottom: -40px; /* -height of summary */
+    left: 0;
+    display: none;
+    z-index: 1;
+    width: 20rem;
+}
+
+details.horizontal summary {
+    width: 87px;
+}
+
+details[open].horizontal summary {
+    margin: 0;
+    box-shadow: none;
+    background: var(--background-surface1);
+}
+
+details[open].horizontal .details-content {
+    display: flex;
+    background: var(--background-surface1);
+}
+
+details[open].horizontal .details-content * {
+    width: max-content;
 }
 
 /* codemirror styles */

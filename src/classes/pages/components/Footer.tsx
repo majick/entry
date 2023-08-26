@@ -5,7 +5,7 @@ import EntryDB from "../../db/EntryDB";
 
 const config: Config = (await EntryDB.GetConfig()) as Config;
 
-export default function Footer() {
+export default function Footer(props: { ShowBottomRow?: boolean }) {
     return (
         <div
             style={{
@@ -75,21 +75,23 @@ export default function Footer() {
                 </>
             )}
 
-            <p
-                style={{
-                    fontSize: "12px",
-                    margin: "0.4rem 0 0 0",
-                }}
-            >
-                <a href="https://codeberg.org/hkau/entry">Entry</a>{" "}
-                <span
+            {props.ShowBottomRow !== false && (
+                <p
                     style={{
-                        color: "var(--text-color-faded)",
+                        fontSize: "12px",
+                        margin: "0.4rem 0 0 0",
                     }}
                 >
-                    - A Markdown Pastebin
-                </span>
-            </p>
+                    <a href="https://codeberg.org/hkau/entry">Entry</a>{" "}
+                    <span
+                        style={{
+                            color: "var(--text-color-faded)",
+                        }}
+                    >
+                        - A Markdown Pastebin
+                    </span>
+                </p>
+            )}
 
             <style
                 dangerouslySetInnerHTML={{

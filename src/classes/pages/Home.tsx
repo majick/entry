@@ -304,12 +304,16 @@ export default class Home implements Endpoint {
                                         // show optional section if config doesn't have
                                         // an "app" entry, or all optional features are enabled
                                         (!EntryDB.config.app ||
-                                            (EntryDB.config.app
-                                                .enable_private_pastes !== false &&
-                                                EntryDB.config.app.enable_groups !==
-                                                    false &&
-                                                EntryDB.config.app.enable_expiry !==
-                                                    false)) && (
+                                            (EntryDB.config.app &&
+                                                !(
+                                                    EntryDB.config.app
+                                                        .enable_private_pastes ===
+                                                        false &&
+                                                    EntryDB.config.app
+                                                        .enable_groups === false &&
+                                                    EntryDB.config.app
+                                                        .enable_expiry === false
+                                                ))) && (
                                             <>
                                                 <div style={{ margin: "0.25rem 0" }}>
                                                     <hr class={"mobile-only"} />

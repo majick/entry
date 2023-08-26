@@ -267,7 +267,12 @@ export class GetPasteFromURL implements Endpoint {
                                             </a>
                                         )}
 
-                                        <details>
+                                        <details
+                                            class={"horizontal"}
+                                            style={{
+                                                width: "calc(65px * 3)",
+                                            }}
+                                        >
                                             <summary
                                                 style={{
                                                     fontWeight: "normal",
@@ -276,39 +281,35 @@ export class GetPasteFromURL implements Endpoint {
                                                 Export
                                             </summary>
 
-                                            <div
-                                                class={
-                                                    "details-flex-content-list-box"
-                                                }
-                                            >
+                                            <div class={"details-content"}>
                                                 <a
-                                                    class={"button secondary"}
+                                                    class={"button"}
                                                     target={"_blank"}
-                                                    style={{
-                                                        width: "100%",
-                                                    }}
                                                     href={`/api/raw/${result.CustomURL}`}
+                                                    style={{
+                                                        width: "65px",
+                                                    }}
                                                 >
                                                     Raw
                                                 </a>
 
                                                 <a
-                                                    class={"button secondary"}
-                                                    style={{
-                                                        width: "100%",
-                                                    }}
+                                                    class={"button"}
                                                     href={`/api/html/${result.CustomURL}`}
                                                     target={"_blank"}
+                                                    style={{
+                                                        width: "65px",
+                                                    }}
                                                 >
                                                     HTML
                                                 </a>
 
                                                 <a
-                                                    class={"button secondary"}
-                                                    style={{
-                                                        width: "100%",
-                                                    }}
+                                                    class={"button"}
                                                     href={`?view=doc`}
+                                                    style={{
+                                                        width: "65px",
+                                                    }}
                                                 >
                                                     Doc
                                                 </a>
@@ -382,7 +383,7 @@ export class GetPasteFromURL implements Endpoint {
                                 </div>
                             </div>
 
-                            <Footer />
+                            <Footer ShowBottomRow={false} />
                         </main>
 
                         <script
