@@ -338,7 +338,6 @@ export class ManagePastes implements Endpoint {
                                 id={"sql"}
                                 placeholder={"SELECT * FROM Pastes LIMIT 100"}
                                 className="secondary"
-                                autoComplete={"off"}
                                 style={{
                                     width: "40rem",
                                 }}

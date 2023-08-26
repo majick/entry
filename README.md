@@ -1,8 +1,10 @@
 # 📝 entry
 
-Certain features of this README only work on Entry! You can view this README [here](https://www.sentrytwo.com/what)
+<comment>
+Certain features of this README only work on Entry! You can view this README at https://www.sentrytwo.com/what
 
 ***
+</comment>
 
 Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs and [many more features](#features).
 
@@ -39,6 +41,8 @@ Entry was originally written as a replacement for [Rentry](https://rentry.co). E
 | Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews |
 
 Entry supports extra features that Rentry does not support. They are detailed below.
+
+An instance with all features enable is hosted at [sentrytwo.com](https://sentrytwo.com), and an (almost) 1:1 compatible version (with most extra features disabled) is hosted at [snty.hkau.org](https://snty.hkau.org)!
 
 ## Features
 

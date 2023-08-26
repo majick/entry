@@ -453,6 +453,35 @@ export class PasteDocView implements Endpoint {
         // manage session
         const SessionCookie = await Session(request);
 
+        // count view
+        let Viewed = false;
+        if (result && !result.HostServer) {
+            const SessionCookieValue = GetCookie(
+                request.headers.get("Cookie") || "",
+                "session-id"
+            );
+
+            if (
+                SessionCookieValue &&
+                config.log &&
+                config.log.events.includes("view_paste") &&
+                // make sure we haven't already added this view
+                // (make sure length of query for log is 0)
+                (
+                    await EntryDB.Logs.QueryLogs(
+                        `Content = "${result.CustomURL};${SessionCookieValue}"`
+                    )
+                )[2].length === 0 &&
+                // make sure session id is valid
+                !SessionCookie.startsWith("session-id=refresh;")
+            )
+                await EntryDB.Logs.CreateLog({
+                    Type: "view_paste",
+                    Content: `${result.CustomURL};${SessionCookieValue}`,
+                });
+            else Viewed = true;
+        }
+
         // return
         if (!result)
             // show 404 because paste does not exist
@@ -477,7 +506,7 @@ export class PasteDocView implements Endpoint {
                                     />
                                 </div>
 
-                                <Footer />
+                                <Footer ShowBottomRow={false} />
                             </div>
 
                             <details className="sidebar-mobile">

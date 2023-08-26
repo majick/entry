@@ -82,7 +82,9 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                         margin: "0.4rem 0 0 0",
                     }}
                 >
-                    <a href="https://codeberg.org/hkau/entry">Entry</a>{" "}
+                    <a href="https://codeberg.org/hkau/entry">
+                        {EntryDB.config.name || "Entry"}
+                    </a>{" "}
                     <span
                         style={{
                             color: "var(--text-color-faded)",
@@ -121,7 +123,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     __html: `setTimeout(() => {
                         for (const element of document.querySelectorAll(".utc-date-to-localize"))
                                 element.innerText = new Date(element.innerText).toLocaleString();
-                    });`,
+                    }, 50);`,
                 }}
             />
         </div>

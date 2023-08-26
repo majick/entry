@@ -204,6 +204,21 @@ export class WellKnown implements Endpoint {
 
 /**
  * @export
+ * @class RobotsTXT
+ * @implements {Endpoint}
+ */
+export class RobotsTXT implements Endpoint {
+    async request(request: Request): Promise<Response> {
+        return new Response("User-agent: *\nAllow: /\nDisallow: /api", {
+            headers: {
+                "Content-Type": "text/plain",
+            },
+        });
+    }
+}
+
+/**
+ * @export
  * @class CreatePaste
  * @implements {Endpoint}
  */
@@ -660,6 +675,7 @@ export default {
     VerifyContentType,
     Session,
     WellKnown,
+    RobotsTXT,
     CreatePaste,
     GetPasteRecord,
     EditPaste,
