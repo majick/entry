@@ -662,6 +662,12 @@ details {
     max-width: 100%;
     user-select: none;
     -webkit-user-select: none;
+    appearance: none;
+}
+
+details summary::marker,
+details summary::-webkit-details-marker {
+    display: none;
 }
 
 details.details-confined {
@@ -680,6 +686,18 @@ details summary {
     cursor: pointer;
     font-weight: 600;
     height: 40px; /* WHY is it normally 40.5px??? WHEN EVERTHING ELSE IS JUST 40!!! */
+    list-style: none;
+    display: flex;
+}
+
+details summary::before {
+    content: "⯈";
+    margin-right: 10px;
+    transition: transform 0.1s;
+}
+
+details[open] summary::before {
+    transform: rotate(90deg);
 }
 
 details[open] summary:not(details details summary) {
@@ -717,7 +735,7 @@ details hr {
 
 details.horizontal {
     position: relative;
-    background: transparent;
+    background: transparent !important;
 }
 
 details.horizontal .details-content {
@@ -731,6 +749,8 @@ details.horizontal .details-content {
 
 details.horizontal summary {
     width: 87px;
+    justify-content: center;
+    align-items: center;
 }
 
 details[open].horizontal summary {

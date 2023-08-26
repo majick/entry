@@ -270,12 +270,13 @@ export class GetPasteFromURL implements Endpoint {
                                         <details
                                             class={"horizontal"}
                                             style={{
-                                                width: "calc(65px * 3)",
+                                                width: "calc(80px * 3)",
                                             }}
                                         >
                                             <summary
                                                 style={{
                                                     fontWeight: "normal",
+                                                    width: "100px",
                                                 }}
                                             >
                                                 Export
@@ -287,7 +288,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     target={"_blank"}
                                                     href={`/api/raw/${result.CustomURL}`}
                                                     style={{
-                                                        width: "65px",
+                                                        width: "80px",
                                                     }}
                                                 >
                                                     Raw
@@ -298,7 +299,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     href={`/api/html/${result.CustomURL}`}
                                                     target={"_blank"}
                                                     style={{
-                                                        width: "65px",
+                                                        width: "80px",
                                                     }}
                                                 >
                                                     HTML
@@ -308,7 +309,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     class={"button"}
                                                     href={`?view=doc`}
                                                     style={{
-                                                        width: "65px",
+                                                        width: "80px",
                                                     }}
                                                 >
                                                     Doc
