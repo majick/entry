@@ -3,7 +3,6 @@ FROM oven/bun
 WORKDIR /app
 
 COPY ["package.json", "./"]
-COPY ["bunfig.toml", "./"]
 RUN bun install
 
 COPY ["dist", "./dist"]

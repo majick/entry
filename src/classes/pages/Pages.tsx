@@ -226,7 +226,7 @@ export class GetPasteFromURL implements Endpoint {
                                             display: "flex",
                                             gap: "0.5rem",
                                             flexWrap: "wrap",
-                                            maxWidth: "50%"
+                                            maxWidth: "50%",
                                         }}
                                     >
                                         {editable[2] === true && (
@@ -275,7 +275,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     href={`/paste/comments/${result.CustomURL}`}
                                                     title={"View Comments"}
                                                     style={{
-                                                        width: "3.5rem"
+                                                        width: "3.5rem",
                                                     }}
                                                 >
                                                     <svg
@@ -868,7 +868,7 @@ export class PasteCommentsPage implements Endpoint {
 
         // get comments
         const comments = await EntryDB.Logs.QueryLogs(
-            `Content LIKE "${result.CustomURL};%" LIMIT 100`
+            `Type = "comment" AND Content LIKE "${result.CustomURL};%" LIMIT 100`
         );
 
         const CommentPastes: Partial<Paste>[] = [];
@@ -876,7 +876,21 @@ export class PasteCommentsPage implements Endpoint {
         for (const comment of comments[2]) {
             // get paste
             const paste = await db.GetPasteFromURL(comment.Content.split(";")[1]);
-            if (!paste) continue;
+
+            // make sure comment paste exists
+            if (!paste) {
+                // deleted comment
+                CommentPastes.push({
+                    CustomURL: "",
+                    PubDate: new Date().toUTCString(),
+                    Content: "[comment deleted]",
+                    Views: -1,
+                });
+
+                continue;
+            }
+
+            // push comment
             CommentPastes.push(paste);
         }
 
@@ -930,7 +944,9 @@ export class PasteCommentsPage implements Endpoint {
                             marginBottom: "0.5rem",
                         }}
                     >
-                        <b class={"mdnote-title"}>At this time, this page only shows 100 comments.</b>
+                        <b class={"mdnote-title"}>
+                            At this time, this page only shows 100 comments.
+                        </b>
                     </div>
                 </>
             );
@@ -1007,8 +1023,11 @@ export class PasteCommentsPage implements Endpoint {
                                         }}
                                     >
                                         <li>
-                                            <b>{comment.PubDate}</b>
+                                            <b class={"utc-date-to-localize"}>
+                                                {comment.PubDate}
+                                            </b>
                                         </li>
+
                                         <li
                                             style={{
                                                 color: "var(--text-color-faded)",
@@ -1021,6 +1040,7 @@ export class PasteCommentsPage implements Endpoint {
                                                 ? ""
                                                 : "s"}
                                         </li>
+
                                         <li>
                                             <a
                                                 href={`/${comment.CustomURL}`}
