@@ -65,9 +65,7 @@
     --red3: #ad0008;
 }
 
-html.dark-theme,
-html.purple-theme,
-html.blue-theme {
+html.dark-theme {
     --base-lit: 11%;
 
     --text-color: hsl(204, 4%, 80%);
@@ -95,6 +93,16 @@ html.purple-theme {
 html.blue-theme {
     --base-hue: 203;
     --base-sat: 12%;
+}
+
+html.pink-theme {
+    --base-hue: 0;
+    --base-sat: 50%;
+}
+
+html.green-theme {
+    --base-hue: 105;
+    --base-sat: 50%;
 }
 
 * {
@@ -400,6 +408,10 @@ h6:focus .htag {
     .mobile-flex {
         display: flex !important;
     }
+
+    .mobile-block {
+        display: block !important;
+    }
 }
 
 ul > li,
@@ -698,6 +710,7 @@ details summary {
     height: 40px; /* WHY is it normally 40.5px??? WHEN EVERTHING ELSE IS JUST 40!!! */
     list-style: none;
     display: flex;
+    align-items: center;
 }
 
 details summary::before {
@@ -766,7 +779,6 @@ details.horizontal .details-content {
 details.horizontal summary {
     width: 87px;
     justify-content: center;
-    align-items: center;
 }
 
 details[open].horizontal summary {

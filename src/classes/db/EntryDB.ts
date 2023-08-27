@@ -18,6 +18,7 @@ import pack from "../../../package.json";
 import type { Config } from "../..";
 
 export type Paste = {
+    // * = value is not stored in database record
     Content: string;
     EditPassword: string;
     CustomURL: string;
@@ -31,11 +32,12 @@ export type Paste = {
     ViewPassword?: string; // we're going to use this to check if the paste is private,
     //                        if it is valid, the paste is private and should have a
     //                        corresponding entry in the Encryption table
-    HostServer?: string; // this is not actually stored in the record
-    IsEditable?: string; // this is not actually stored in the record
-    ExpireOn?: string; //   this is not actually stored in the record
-    UnhashedEditPassword?: string; // this should never be stored in the record! only used on paste creation
-    Views?: number; // this is not actually stored in the record! amount of log records LIKE "%{CustomURL}%"
+    HostServer?: string; // *
+    IsEditable?: string; // *
+    ExpireOn?: string; //   *
+    UnhashedEditPassword?: string; // * only used on paste creation
+    Views?: number; // * amount of log records LIKE "%{CustomURL}%"
+    CommentOn?: string; // * the paste the that this paste is commenting on
 };
 
 let StaticInit = false;
@@ -614,7 +616,15 @@ export default class EntryDB {
             // somebody could make a paste named "login" and the paste would have the URL
             // of "/admin/login" which would make the real admin login page either inaccessible
             // OR make the paste inaccessible!
-            const NotAllowed = ["admin", "api", "search", "new", "paste"];
+            const NotAllowed = [
+                "admin",
+                "api",
+                "search",
+                "new",
+                "paste",
+                "group",
+                "comments",
+            ];
 
             if (NotAllowed.includes(PasteInfo.GroupName))
                 return [
@@ -645,10 +655,6 @@ export default class EntryDB {
                 PasteInfo,
             ];
 
-        // make sure CustomURL isn't the name of a page
-        if (PasteInfo.CustomURL === "group")
-            return [false, 'The custom URL "group" is reserved!', PasteInfo];
-
         // encrypt (if needed)
         if (PasteInfo.ViewPassword) {
             const result = Encrypt(PasteInfo.Content);
@@ -678,6 +684,19 @@ export default class EntryDB {
                 PasteInfo.CustomURL,
                 PasteInfo.ExpireOn
             );
+
+        // if paste is a comment, create the respective log entry and set groupname to "comments"
+        if (PasteInfo.CommentOn) {
+            // set group
+            PasteInfo.GroupName = "comments";
+            PasteInfo.CustomURL = `comments/${PasteInfo.CustomURL}`;
+
+            // create log
+            await EntryDB.Logs.CreateLog({
+                Type: "comment",
+                Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}`,
+            });
+        }
 
         // create paste
         await SQL.QueryOBJ({

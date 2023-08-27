@@ -174,7 +174,7 @@ export function ParseMarkdownSync(content: string): string {
                         : "width: max-content; max-width: 100%;"
                 }">`;
             // ...close block
-            else if (_class === "close") result = "</span>";
+            else if (_class === "close") result = "</span>&nbsp;";
             // hsl block
             else if (_class === "hsl")
                 result = `<${attributes[0]}>${attributes[1]}</${attributes[0]}>`;

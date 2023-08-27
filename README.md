@@ -136,6 +136,7 @@ The following options can be used as events:
 - `session`, fires when a new session is created (`Content` is the session `User-Agent` header)
 - `view_paste`, fires when a paste is viewed (`Content` is the paste CustomURL and the session ID of the viewer)
     - A "Views" counter is added to pastes when this event is enabled
+- `comment`, fires when somebody leaves a comment on the paste (`Content` is the paste the comment was left on, followed by the CustomURL of the comment)
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:
@@ -344,6 +345,14 @@ Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results
     ...
 }
 ```
+
+### Paste Comments
+
+People can anonymously leave comments on pastes through paste comments. For comments to work, you must enable the `comment` [log event](#logs). When a comment is created, a new paste is created in the "comments" group. The content of this paste is the content of the comment.
+
+Can be disabled through the server config. `app.enable_expiry`
+
+Paste comments are disabled by default.
 
 ## Development
 

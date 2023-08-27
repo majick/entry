@@ -1,7 +1,9 @@
 import { build } from "bun";
 import fs from "node:fs";
 
-fs.rmSync("./dist", { recursive: true }); // reset dist directory
+if (process.env.DO_NOT_CLEAR_DIST === undefined)
+    fs.rmSync("./dist", { recursive: true }); // reset dist directory
+    
 const output = await build({
     entrypoints: [
         "./src/index.ts",

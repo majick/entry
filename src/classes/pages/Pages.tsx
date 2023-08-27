@@ -19,7 +19,6 @@ export const db = new EntryDB();
 import pack from "../../../package.json";
 
 import { Config } from "../..";
-let config: Config;
 
 import API, {
     VerifyContentType,
@@ -31,7 +30,7 @@ import API, {
 } from "./API";
 
 // ...
-import { ParseMarkdown } from "./components/Markdown";
+import { ParseMarkdown, ParseMarkdownSync } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 
 // ...
@@ -63,7 +62,6 @@ export class GetPasteFromURL implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
-        config = (await EntryDB.GetConfig()) as Config;
 
         // load doc view is specified
         if (search.get("view") && search.get("view") === "doc")
@@ -119,7 +117,7 @@ export class GetPasteFromURL implements Endpoint {
 
         // count view
         let Viewed = false;
-        if (result && !result.HostServer) {
+        if (result && !result.HostServer && search.get("NoView") !== "true") {
             const SessionCookieValue = GetCookie(
                 request.headers.get("Cookie") || "",
                 "session-id"
@@ -127,8 +125,8 @@ export class GetPasteFromURL implements Endpoint {
 
             if (
                 SessionCookieValue &&
-                config.log &&
-                config.log.events.includes("view_paste") &&
+                EntryDB.config.log &&
+                EntryDB.config.log.events.includes("view_paste") &&
                 // make sure we haven't already added this view
                 // (make sure length of query for log is 0)
                 (
@@ -182,9 +180,10 @@ export class GetPasteFromURL implements Endpoint {
                                 <DecryptionForm paste={result} />
                             )}
 
-                            {config.app &&
-                                config.app.info &&
-                                config.app.info.split("?")[0] === result.CustomURL &&
+                            {EntryDB.config.app &&
+                                EntryDB.config.app.info &&
+                                EntryDB.config.app.info.split("?")[0] ===
+                                    result.CustomURL &&
                                 InformationPageNote()}
 
                             <div
@@ -227,6 +226,7 @@ export class GetPasteFromURL implements Endpoint {
                                             display: "flex",
                                             gap: "0.5rem",
                                             flexWrap: "wrap",
+                                            maxWidth: "50%"
                                         }}
                                     >
                                         {editable[2] === true && (
@@ -266,6 +266,31 @@ export class GetPasteFromURL implements Endpoint {
                                                 View Group
                                             </a>
                                         )}
+
+                                        {EntryDB.config.app &&
+                                            EntryDB.config.app.enable_comments ===
+                                                true && (
+                                                <a
+                                                    class={"button"}
+                                                    href={`/paste/comments/${result.CustomURL}`}
+                                                    title={"View Comments"}
+                                                    style={{
+                                                        width: "3.5rem"
+                                                    }}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={
+                                                            "Comments Symbol"
+                                                        }
+                                                    >
+                                                        <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 12H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"></path>
+                                                    </svg>
+                                                </a>
+                                            )}
 
                                         <details
                                             class={"horizontal"}
@@ -346,8 +371,8 @@ export class GetPasteFromURL implements Endpoint {
                                             </span>
                                         </span>
 
-                                        {config.log &&
-                                            config.log.events.includes(
+                                        {EntryDB.config.log &&
+                                            EntryDB.config.log.events.includes(
                                                 "view_paste"
                                             ) && (
                                                 <span
@@ -429,7 +454,7 @@ export class GetPasteFromURL implements Endpoint {
 export class PasteDocView implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
-        config = (await EntryDB.GetConfig()) as Config;
+        const search = new URLSearchParams(url.search);
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
@@ -455,8 +480,7 @@ export class PasteDocView implements Endpoint {
         const SessionCookie = await Session(request);
 
         // count view
-        let Viewed = false;
-        if (result && !result.HostServer) {
+        if (result && !result.HostServer && search.get("NoView") !== "true") {
             const SessionCookieValue = GetCookie(
                 request.headers.get("Cookie") || "",
                 "session-id"
@@ -464,8 +488,8 @@ export class PasteDocView implements Endpoint {
 
             if (
                 SessionCookieValue &&
-                config.log &&
-                config.log.events.includes("view_paste") &&
+                EntryDB.config.log &&
+                EntryDB.config.log.events.includes("view_paste") &&
                 // make sure we haven't already added this view
                 // (make sure length of query for log is 0)
                 (
@@ -480,7 +504,6 @@ export class PasteDocView implements Endpoint {
                     Type: "view_paste",
                     Content: `${result.CustomURL};${SessionCookieValue}`,
                 });
-            else Viewed = true;
         }
 
         // return
@@ -494,9 +517,9 @@ export class PasteDocView implements Endpoint {
                         <div class={"sidebar-layout-wrapper"}>
                             <div class={"sidebar"}>
                                 <div>
-                                    {config.app &&
-                                        config.app.info &&
-                                        config.app.info.split("?")[0] ===
+                                    {EntryDB.config.app &&
+                                        EntryDB.config.app.info &&
+                                        EntryDB.config.app.info.split("?")[0] ===
                                             result.CustomURL &&
                                         InformationPageNote()}
 
@@ -513,9 +536,9 @@ export class PasteDocView implements Endpoint {
                             <details className="sidebar-mobile">
                                 <summary>Document</summary>
 
-                                {config.app &&
-                                    config.app.info &&
-                                    config.app.info.split("?")[0] ===
+                                {EntryDB.config.app &&
+                                    EntryDB.config.app.info &&
+                                    EntryDB.config.app.info.split("?")[0] ===
                                         result.CustomURL &&
                                     InformationPageNote()}
 
@@ -632,8 +655,6 @@ export class PastesSearch implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.searchParams);
-
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // manage session
         const SessionCookie = await Session(request);
@@ -798,7 +819,7 @@ export class PastesSearch implements Endpoint {
                     <>
                         <meta
                             name="description"
-                            content={`Search Pastes on ${config.name} - A Markdown Pastebin`}
+                            content={`Search Pastes on ${EntryDB.config.name} - A Markdown Pastebin`}
                         ></meta>
 
                         <title>Search Pastes</title>
@@ -816,9 +837,234 @@ export class PastesSearch implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class PasteCommentsPage
+ * @implements {Endpoint}
+ */
+export class PasteCommentsPage implements Endpoint {
+    async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.searchParams);
+
+        // return 404 if comments are disabled
+        if (EntryDB.config.app && EntryDB.config.app.enable_comments !== true)
+            return new _404Page().request(request);
+
+        // get paste name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("paste/comments/"))
+            name = name.split("paste/comments/")[1];
+
+        // return home if name === ""
+        if (name === "") return new Home().request(request);
+
+        // attempt to get paste
+        const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result) return new _404Page().request(request);
+
+        // no cross-server commenting (for now)
+        if (result.HostServer) return new _404Page().request(request);
+
+        // get comments
+        const comments = await EntryDB.Logs.QueryLogs(
+            `Content LIKE "${result.CustomURL};%" LIMIT 100`
+        );
+
+        const CommentPastes: Partial<Paste>[] = [];
+
+        for (const comment of comments[2]) {
+            // get paste
+            const paste = await db.GetPasteFromURL(comment.Content.split(";")[1]);
+            if (!paste) continue;
+            CommentPastes.push(paste);
+        }
+
+        // ...
+        function CommentsNav() {
+            return (
+                <>
+                    <h1
+                        style={{
+                            width: "100%",
+                        }}
+                    >
+                        {result.CustomURL}
+                    </h1>
+
+                    <hr />
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <a href={`/${result.CustomURL}`} class={"button"}>
+                            View Paste
+                        </a>
+                    </div>
+
+                    <hr />
+
+                    <div
+                        class={"mdnote note-warn"}
+                        style={{
+                            marginBottom: "0.5rem",
+                        }}
+                    >
+                        <b class={"mdnote-title"}>This is a beta feature!</b>
+                        <p>
+                            Things might change quickly or comments may be deleted!
+                            If you find any bugs, please report them{" "}
+                            <a href="https://codeberg.org/hkau/entry/issues">here</a>
+                            !
+                        </p>
+                    </div>
+
+                    <div
+                        class={"mdnote note-warn"}
+                        style={{
+                            marginBottom: "0.5rem",
+                        }}
+                    >
+                        <b class={"mdnote-title"}>At this time, this page only shows 100 comments.</b>
+                    </div>
+                </>
+            );
+        }
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <div class="sidebar-layout-wrapper">
+                    <div className="sidebar">
+                        <div>
+                            <CommentsNav />
+                        </div>
+
+                        <Footer />
+                    </div>
+
+                    <details className="sidebar-mobile">
+                        <summary>Menu</summary>
+
+                        <div>
+                            <CommentsNav />
+                        </div>
+                    </details>
+
+                    <div className="tab-container editor-tab page-content">
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                flexWrap: "wrap",
+                                gap: "0.5rem",
+                            }}
+                        >
+                            <span>
+                                <b>{CommentPastes.length}</b> comment
+                                {CommentPastes.length > 1
+                                    ? "s"
+                                    : CommentPastes.length === 1
+                                    ? ""
+                                    : "s"}
+                            </span>
+
+                            <a
+                                href={`/?CommentOn=${result.CustomURL}`}
+                                className="button secondary"
+                            >
+                                Add Comment
+                            </a>
+                        </div>
+
+                        <hr />
+
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: "0.5rem",
+                            }}
+                        >
+                            {CommentPastes.map((comment) => (
+                                <div
+                                    style={{
+                                        background: "var(--background-surface)",
+                                        padding: "1rem",
+                                    }}
+                                >
+                                    <ul
+                                        className="__footernav"
+                                        style={{
+                                            paddingLeft: 0,
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <li>
+                                            <b>{comment.PubDate}</b>
+                                        </li>
+                                        <li
+                                            style={{
+                                                color: "var(--text-color-faded)",
+                                            }}
+                                        >
+                                            {comment.Views} view
+                                            {comment.Views! > 1
+                                                ? "s"
+                                                : comment.Views! === 1
+                                                ? ""
+                                                : "s"}
+                                        </li>
+                                        <li>
+                                            <a
+                                                href={`/${comment.CustomURL}`}
+                                                target={"_blank"}
+                                            >
+                                                open
+                                            </a>
+                                        </li>
+                                    </ul>
+
+                                    <div
+                                        style={{
+                                            maxHeight: "20rem",
+                                            overflow: "auto",
+                                        }}
+                                        dangerouslySetInnerHTML={{
+                                            __html: ParseMarkdownSync(
+                                                comment.Content!
+                                            ),
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>,
+                <>
+                    <title>Paste Comments</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...DefaultHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     GetPasteFromURL,
     PasteDocView,
     PastesSearch,
+    PasteCommentsPage,
 };

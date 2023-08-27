@@ -8,6 +8,7 @@ export default function ToggleTheme() {
             <script
                 dangerouslySetInnerHTML={{
                     __html: `document.getElementById("ThemeButton").addEventListener("click", () => {
+                        if (window.PASTE_USES_CUSTOM_THEME) return;
                         const current = window.localStorage.getItem("theme");
 
                         if (current === "dark") {

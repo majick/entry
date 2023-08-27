@@ -50,7 +50,13 @@ export function HandleCustomElements() {
                 document.documentElement.classList.add("purple-theme", "dark-theme");
             else if (theme.innerText === "blue")
                 document.documentElement.classList.add("blue-theme", "dark-theme");
+            else if (theme.innerText === "pink")
+                document.documentElement.classList.add("pink-theme");
+            else if (theme.innerText === "green")
+                document.documentElement.classList.add("green-theme");
         }
+
+        (window as any).PASTE_USES_CUSTOM_THEME = true; // don't allow user to set their own theme when a custom theme is active!
     }
 }
 

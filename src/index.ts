@@ -32,6 +32,7 @@ export type Config = {
         enable_private_pastes?: boolean;
         enable_groups?: boolean;
         enable_expiry?: boolean;
+        enable_comments?: boolean;
         footer?: {
             rows: Array<{
                 [key: string]: string;
@@ -191,6 +192,7 @@ const config: HoneybeeConfig = {
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
+        "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
         "/robots.txt": { Page: API.RobotsTXT },
         "/": {
             // return paste view, will return homepage if no paste is provided
@@ -211,3 +213,8 @@ const config: HoneybeeConfig = {
 // ...start server
 new Honeybee(config);
 console.log("\x1b[92m[entry] Started server on port:\x1b[0m", config.Port);
+
+// gc interval
+setInterval(() => {
+    Bun.gc(true);
+}, 1000 * 60); // every minute

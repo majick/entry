@@ -153,6 +153,20 @@ function BasicCompletion(context: CompletionContext): any {
                 apply: "<% theme blue %>",
                 detail: "Themes",
             },
+            {
+                label: "pink theme",
+                type: "variable",
+                info: "Sets the user's theme when viewing the paste to pink",
+                apply: "<% theme pink %>",
+                detail: "Themes",
+            },
+            {
+                label: "green theme",
+                type: "variable",
+                info: "Sets the user's theme when viewing the paste to green",
+                apply: "<% theme green %>",
+                detail: "Themes",
+            },
             // markdown
             {
                 label: "h1",

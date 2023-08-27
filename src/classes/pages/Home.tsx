@@ -89,6 +89,22 @@ export default class Home implements Endpoint {
                             />
                         )}
 
+                        {search.get("CommentOn") && (
+                            <div
+                                class={"mdnote note-info"}
+                                style={{
+                                    marginBottom: "0.5rem",
+                                }}
+                            >
+                                <b class={"mdnote-title"}>Just so you know!</b>
+                                <p>
+                                    You're commenting on a paste, write something
+                                    short and simple! Not what you want?{" "}
+                                    <a href="javascript:history.back()">Go Back</a>
+                                </p>
+                            </div>
+                        )}
+
                         <noscript>
                             <div
                                 class={"mdnote note-error"}
@@ -255,6 +271,18 @@ export default class Home implements Endpoint {
                                                     name={"CustomURL"}
                                                     id={"CustomURL"}
                                                     autoComplete={"off"}
+                                                    disabled={
+                                                        // cannot be changed if we're creating a comment
+                                                        search.get("CommentOn") !==
+                                                        null
+                                                    }
+                                                    value={
+                                                        // random value if we're creating a comment
+                                                        search.get("CommentOn") ===
+                                                        null
+                                                            ? ""
+                                                            : `paste is a comment...`
+                                                    }
                                                 />
 
                                                 <div
@@ -313,7 +341,9 @@ export default class Home implements Endpoint {
                                                         .enable_groups === false &&
                                                     EntryDB.config.app
                                                         .enable_expiry === false
-                                                ))) && (
+                                                ) &&
+                                                search.get("CommentOn") ===
+                                                    null)) && (
                                             <>
                                                 <div style={{ margin: "0.25rem 0" }}>
                                                     <hr class={"mobile-only"} />
@@ -522,11 +552,21 @@ export default class Home implements Endpoint {
                                         )
                                     }
 
+                                    {/* hidden */}
+                                    <input
+                                        type="hidden"
+                                        name="CommentOn"
+                                        id={"CommentOn"}
+                                        value={search.get("CommentOn") || ""}
+                                    />
+
+                                    {/* ... */}
+
                                     <script
                                         dangerouslySetInnerHTML={{
                                             __html: `document.getElementById("IsEditable").addEventListener("change", (e) => {
-                                            document.getElementById("EditPassword").toggleAttribute("disabled");
-                                        });`,
+                                                document.getElementById("EditPassword").toggleAttribute("disabled");
+                                            });`,
                                         }}
                                     />
                                 </form>

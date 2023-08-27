@@ -179,13 +179,11 @@ export class WellKnown implements Endpoint {
                 },
                 usage: {
                     users: {
-                        // entry is completely anonymous, user count is forever 0
-                        total: 0,
-                        // we're going to use activeMonth to display number of sessions...
-                        // sessions are probably cleared regularly, so this makes sense
-                        activeMonth:
+                        // we're going to use total to display number of sessions...
+                        total:
                             (await EntryDB.Logs.QueryLogs('Type = "session"'))[2]
                                 .length - 1,
+                        activeMonth: 0,
                         activeHalfyear: 0,
                     },
                     // this, however, we can supply
@@ -209,11 +207,16 @@ export class WellKnown implements Endpoint {
  */
 export class RobotsTXT implements Endpoint {
     async request(request: Request): Promise<Response> {
-        return new Response("User-agent: *\nAllow: /\nDisallow: /api", {
-            headers: {
-                "Content-Type": "text/plain",
-            },
-        });
+        return new Response(
+            `User-agent: *\nAllow: /\nDisallow: /api${["", "/admin", "/paste"].join(
+                "\nDisallow: "
+            )}`,
+            {
+                headers: {
+                    "Content-Type": "text/plain",
+                },
+            }
+        );
     }
 }
 
@@ -235,7 +238,7 @@ export class CreatePaste implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
         body.Content = decodeURIComponent(body.Content);
-        body.CustomURL = body.CustomURL.toLowerCase();
+        if (body.CustomURL) body.CustomURL = body.CustomURL.toLowerCase();
 
         // create paste
         const result = await db.CreatePaste(body);

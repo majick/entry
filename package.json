@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -27,6 +27,7 @@
   },
   "scripts": {
     "build": "bun run build.ts",
+    "build:no-clear": "DO_NOT_CLEAR_DIST=true bun run build",
     "start": "bun run build && bun run start:no-build",
     "start:no-build": "bun run dist/index.js",
     "format": "prettier src/ --write --config ./.prettierrc",

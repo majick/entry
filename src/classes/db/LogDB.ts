@@ -23,7 +23,8 @@ export type LogEvent =
     | "access_admin"
     | "session"
     | "error"
-    | "view_paste";
+    | "view_paste"
+    | "comment";
 
 export type Log = {
     Content: string;
