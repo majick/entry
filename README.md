@@ -273,6 +273,8 @@ When rendered, it would look like <% animation Float 1s 0s infinite inline %> th
 
 #### Custom Footer Links
 
+!!! info This feature is only configurable from the server settings!
+
 You can added custom footer links to your server by editing the `config.json` (`{DATA_DIRECTORY}/config.json`) and adding a `footer` section. All links should have a `label` and `href` value. Links are organized in different rows. Each new entry in the "rows" array creates a new row in the footer.
 
 Example:
@@ -296,6 +298,8 @@ Example:
 ```
 
 #### Info Page
+
+!!! info This feature is only configurable from the server settings!
 
 You can add an info page that is automatically rendered into a third editor tab named *info*. This tab is only shown if the `info` key exists. This page will be opened whenever the *info* tab is selected. This page is intended for server information and announcements, but it can be used for anything.
 

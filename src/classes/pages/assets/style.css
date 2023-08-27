@@ -303,6 +303,15 @@ h6 {
     position: relative;
 }
 
+h1 br,
+h2 br,
+h3 br,
+h4 br,
+h5 br,
+h6 br {
+    display: none !important;
+}
+
 h1.no-margin,
 h2.no-margin,
 h3.no-margin,
@@ -348,6 +357,7 @@ h6 {
         opacity 0.1s,
         transform 0.1s;
     transform: scale(0);
+    top: 0;
 }
 
 .htag:hover {
@@ -691,13 +701,19 @@ details summary {
 }
 
 details summary::before {
-    content: "⯈";
-    margin-right: 10px;
-    transition: transform 0.1s;
+    content: "▸"; /* rip correctly aligned triangle (U+2BC8) */
+    margin-right: 5px;
+    transition: transform 0.15s;
+    /* the styles below are because I had to change the triangle character
+       because iphones don't have the good character that I wanted! */
+    font-size: 20px;
+    margin-bottom: 3px;
 }
 
 details[open] summary::before {
     transform: rotate(90deg);
+    /* this is kind of awful, why does it make me do this?? */
+    margin-bottom: 0; /* ugh */
 }
 
 details[open] summary:not(details details summary) {

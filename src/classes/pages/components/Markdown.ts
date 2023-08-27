@@ -85,7 +85,7 @@ export function ParseMarkdownSync(content: string): string {
 
             // add to toc
             const heading: Heading = {
-                Text: string,
+                Text: string.replaceAll("\n", ""),
                 Type: HeadingType,
                 ID: `${string
                     .toLowerCase()
@@ -151,7 +151,7 @@ export function ParseMarkdownSync(content: string): string {
             if (_class === "theme") result = `<theme>${attributes[0]}</theme>`;
             // ...animation
             else if (_class === "animation")
-                result = `<span style="animation: ${
+                result = `<span class="anim" style="animation: ${
                     // animation name
                     attributes[0]
                 } ${

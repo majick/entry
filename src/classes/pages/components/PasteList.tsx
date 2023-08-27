@@ -1,4 +1,4 @@
-import { Paste } from "../../db/EntryDB";
+import EntryDB, { Paste } from "../../db/EntryDB";
 import { CreateHash } from "../../db/helpers/Hash";
 
 export default function PasteList(props: {
@@ -144,7 +144,11 @@ export default function PasteList(props: {
                             <th>Custom URL</th>
                             <th>Publish Date</th>
                             <th>Edit Date</th>
-                            <th>Private</th>
+
+                            {!EntryDB.config.app ||
+                                (EntryDB.config.app.enable_private_pastes !==
+                                    false && <th>Private</th>)}
+
                             <th>Editable</th>
                             <th>Open</th>
                             {props.ShowDelete && <th>Delete</th>}
@@ -181,9 +185,15 @@ export default function PasteList(props: {
                                         {paste.EditDate}
                                     </td>
 
-                                    <td>
-                                        {paste.ViewPassword !== "" ? "yes" : "no"}
-                                    </td>
+                                    {!EntryDB.config.app ||
+                                        (EntryDB.config.app.enable_private_pastes !==
+                                            false && (
+                                            <td>
+                                                {paste.ViewPassword !== ""
+                                                    ? "yes"
+                                                    : "no"}
+                                            </td>
+                                        ))}
 
                                     <td>
                                         {paste.EditPassword !== CreateHash("") &&
