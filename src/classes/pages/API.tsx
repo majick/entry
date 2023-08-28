@@ -252,7 +252,7 @@ export class CreatePaste implements Endpoint {
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste
-                          body.CommentOn === undefined
+                          body.CommentOn === ""
                             ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
                             : `/paste/comments/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message

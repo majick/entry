@@ -1054,6 +1054,14 @@ export class PasteCommentsPage implements Endpoint {
                                                 open
                                             </a>
                                         </li>
+
+                                        <li>
+                                            <a
+                                                href={`/?CommentOn=${comment.CustomURL}`}
+                                            >
+                                                reply
+                                            </a>
+                                        </li>
                                     </ul>
 
                                     <div
