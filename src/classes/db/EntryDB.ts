@@ -38,6 +38,7 @@ export type Paste = {
     UnhashedEditPassword?: string; // * only used on paste creation
     Views?: number; // * amount of log records LIKE "%{CustomURL}%"
     CommentOn?: string; // * the paste the that this paste is commenting on
+    Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)
 };
 
 let StaticInit = false;
@@ -452,6 +453,13 @@ export default class EntryDB {
                             `Content LIKE "${record.CustomURL};%"`
                         )
                     )[2].length;
+
+                // count comments
+                const comments = await EntryDB.Logs.QueryLogs(
+                    `Type = "comment" AND Content LIKE "${record.CustomURL};%" LIMIT 100`
+                );
+
+                record.Comments = comments[2].length;
 
                 // return
                 return resolve(record);
