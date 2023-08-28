@@ -137,6 +137,9 @@ The following options can be used as events:
 - `view_paste`, fires when a paste is viewed (`Content` is the paste CustomURL and the session ID of the viewer)
     - A "Views" counter is added to pastes when this event is enabled
 - `comment`, fires when somebody leaves a comment on the paste (`Content` is the paste the comment was left on, followed by the CustomURL of the comment)
+- `report`, fires when a paste is reported (`Content` dependent on the report log type, see below)
+    - `create`, followed by the paste that is being reported and the CustomURL of the report
+    - `archive`, followed by the CustomURL of the report that is being archived
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:
@@ -192,6 +195,10 @@ Please refer to the example files provided, as they walk you through the steps o
 ```
 
 The [admin panel](#admin-panel) plugin tab shows the found and loaded plugin pages.
+
+#### Paste Reports
+
+Paste reports can be enabled by adding the `report` [log type](#logs). With paste reports enabled, you can view reported pastes from the [admin panel](#admin-panel). The panel will allow you to view the contents of a report, as well as archive and delete reports.
 
 ### Customization
 
@@ -350,9 +357,9 @@ Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results
 
 People can anonymously leave comments on pastes through paste comments. For comments to work, you must enable the `comment` [log event](#logs). When a comment is created, a new paste is created in the "comments" group. The content of this paste is the content of the comment.
 
-Can be disabled through the server config. `app.enable_expiry`
+Paste comments are disabled by default. They can be enabled by enabling the `comment` log type.
 
-Paste comments are disabled by default.
+Paste comments can be disabled on individual pastes if the paste includes `&!lt% disable comments %&gt;`
 
 ## Development
 

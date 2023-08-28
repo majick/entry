@@ -24,7 +24,8 @@ export type LogEvent =
     | "session"
     | "error"
     | "view_paste"
-    | "comment";
+    | "comment"
+    | "report";
 
 export type Log = {
     Content: string;

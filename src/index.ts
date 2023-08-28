@@ -32,7 +32,6 @@ export type Config = {
         enable_private_pastes?: boolean;
         enable_groups?: boolean;
         enable_expiry?: boolean;
-        enable_comments?: boolean;
         footer?: {
             rows: Array<{
                 [key: string]: string;
@@ -120,9 +119,10 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 
 // ...import endpoints
 import { _404Page } from "./classes/pages/components/404";
+import AdminAPI from "./classes/pages/api/AdminAPI";
 import Admin from "./classes/pages/Admin";
 import Pages from "./classes/pages/Pages";
-import API from "./classes/pages/API";
+import API from "./classes/pages/api/API";
 
 // get plugins
 export let plugins: HoneybeeConfig["Pages"] = {};
@@ -163,20 +163,26 @@ const config: HoneybeeConfig = {
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
         "/admin/logs": { Method: "POST", Page: Admin.LogsPage },
+        "/admin/logs/reports": { Method: "POST", Page: Admin.ManageReports },
+        "/admin/logs/report/": {
+            Type: "begins",
+            Method: "POST",
+            Page: Admin.ViewReport,
+        },
         "/admin/plugins": { Method: "POST", Page: Admin.PluginsPage },
-        "/admin/api/delete": { Method: "POST", Page: Admin.APIDeletePaste },
-        "/admin/api/export": { Method: "POST", Page: Admin.APIExport },
-        "/admin/api/import": { Method: "POST", Page: Admin.APIImport },
-        "/admin/api/mass-delete": { Method: "POST", Page: Admin.APIMassDelete },
-        "/admin/api/sql": { Method: "POST", Page: Admin.APISQL },
-        "/admin/api/logs/export": { Method: "POST", Page: Admin.APIExportLogs },
+        "/admin/api/delete": { Method: "POST", Page: AdminAPI.APIDeletePaste },
+        "/admin/api/export": { Method: "POST", Page: AdminAPI.APIExport },
+        "/admin/api/import": { Method: "POST", Page: AdminAPI.APIImport },
+        "/admin/api/mass-delete": { Method: "POST", Page: AdminAPI.APIMassDelete },
+        "/admin/api/sql": { Method: "POST", Page: AdminAPI.APISQL },
+        "/admin/api/logs/export": { Method: "POST", Page: AdminAPI.APIExportLogs },
         "/admin/api/logs/mass-delete": {
             Method: "POST",
-            Page: Admin.APIMassDeleteLogs,
+            Page: AdminAPI.APIMassDeleteLogs,
         },
         "/admin/api/config.json": {
             Method: "POST",
-            Page: Admin.APIExportConfig,
+            Page: AdminAPI.APIExportConfig,
         },
         // POST api
         "/api/new": { Method: "POST", Page: API.CreatePaste },

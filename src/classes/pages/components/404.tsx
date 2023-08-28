@@ -6,7 +6,7 @@ import EntryDB from "../../db/EntryDB";
 import { Config } from "../../..";
 let config: Config;
 
-import { DefaultHeaders } from "../API";
+import { DefaultHeaders } from "../api/API";
 
 /**
  * @function _404Page

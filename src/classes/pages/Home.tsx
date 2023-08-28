@@ -3,7 +3,7 @@ import { Endpoint, Renderer } from "honeybee";
 import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/Footer";
 
-import { DecryptPaste, db, PageHeaders, Session } from "./API";
+import { DecryptPaste, db, PageHeaders, Session } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import pack from "../../../package.json";
@@ -100,6 +100,23 @@ export default class Home implements Endpoint {
                                 <p>
                                     You're commenting on a paste, write something
                                     short and simple! Not what you want?{" "}
+                                    <a href="javascript:history.back()">Go Back</a>
+                                </p>
+                            </div>
+                        )}
+
+                        {search.get("ReportOn") && (
+                            <div
+                                class={"mdnote note-info"}
+                                style={{
+                                    marginBottom: "0.5rem",
+                                }}
+                            >
+                                <b class={"mdnote-title"}>Just so you know!</b>
+                                <p>
+                                    You're <b>reporting a paste</b>! Please explain
+                                    the reason you are reporting this paste and what
+                                    rules it broke. Not what you want?{" "}
                                     <a href="javascript:history.back()">Go Back</a>
                                 </p>
                             </div>
@@ -274,14 +291,19 @@ export default class Home implements Endpoint {
                                                     disabled={
                                                         // cannot be changed if we're creating a comment
                                                         search.get("CommentOn") !==
-                                                        null
+                                                            null ||
+                                                        // or a report...
+                                                        search.get("ReportOn") !==
+                                                            null
                                                     }
                                                     value={
                                                         // random value if we're creating a comment
                                                         search.get("CommentOn") ===
-                                                        null
+                                                            null &&
+                                                        search.get("ReportOn") ===
+                                                            null
                                                             ? ""
-                                                            : `paste is a comment...`
+                                                            : "url will be randomly assigned"
                                                     }
                                                 />
 
@@ -342,7 +364,9 @@ export default class Home implements Endpoint {
                                                     EntryDB.config.app
                                                         .enable_expiry === false
                                                 ) &&
-                                                search.get("CommentOn") ===
+                                                // don't show on comment or report!
+                                                search.get("CommentOn") === null &&
+                                                search.get("ReportOn") ===
                                                     null)) && (
                                             <>
                                                 <div style={{ margin: "0.25rem 0" }}>
@@ -558,6 +582,13 @@ export default class Home implements Endpoint {
                                         name="CommentOn"
                                         id={"CommentOn"}
                                         value={search.get("CommentOn") || ""}
+                                    />
+
+                                    <input
+                                        type="hidden"
+                                        name="ReportOn"
+                                        id={"ReportOn"}
+                                        value={search.get("ReportOn") || ""}
                                     />
 
                                     {/* ... */}

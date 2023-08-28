@@ -262,6 +262,12 @@ function BasicCompletion(context: CompletionContext): any {
                 apply: "!!right!! ...content here... !!",
                 detail: "extras",
             },
+            {
+                label: "disable comments",
+                type: "variable",
+                apply: `<% disable comments %>`,
+                detail: "Extras",
+            },
             // animations
             {
                 label: "fade in animation",

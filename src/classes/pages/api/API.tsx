@@ -7,18 +7,18 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 
 // import components
-import _404Page from "./components/404";
+import _404Page from "../components/404";
 
 // create database
-import { CreateHash, Decrypt } from "../db/helpers/Hash";
-import EntryDB, { Paste } from "../db/EntryDB";
+import { CreateHash, Decrypt } from "../../db/helpers/Hash";
+import EntryDB, { Paste } from "../../db/EntryDB";
 export const db = new EntryDB();
 
-import pack from "../../../package.json";
-import { Config } from "../..";
+import pack from "../../../../package.json";
+import { Config } from "../../..";
 
 // ...
-import { ParseMarkdown } from "./components/Markdown";
+import { ParseMarkdown } from "../components/Markdown";
 
 // headers
 export const DefaultHeaders = {
@@ -253,7 +253,9 @@ export class CreatePaste implements Endpoint {
                     result[0] === true
                         ? // if successful, redirect to paste
                           body.CommentOn === ""
-                            ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
+                            ? body.ReportOn === ""
+                                ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
+                                : "/?msg=Paste reported!"
                             : `/paste/comments/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}`,

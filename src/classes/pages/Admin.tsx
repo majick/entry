@@ -6,16 +6,16 @@
 
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 
-import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./API";
-import { Decrypt } from "../db/helpers/Hash";
-import EntryDB from "../db/EntryDB";
+import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./api/API";
+import EntryDB, { Paste } from "../db/EntryDB";
 
 import PasteList from "./components/PasteList";
 import Footer from "./components/Footer";
 
-import { Config, plugins } from "../..";
+import { plugins } from "../..";
 import Checkbox from "./components/form/Checkbox";
-let config: Config;
+import { ParseMarkdownSync } from "./components/Markdown";
+import _404Page from "./components/404";
 
 /**
  * @function AdminNav
@@ -47,7 +47,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                     <path d="M3.25 2h17.5c.966 0 1.75.784 1.75 1.75v7c0 .372-.116.716-.314 1 .198.284.314.628.314 1v7a1.75 1.75 0 0 1-1.75 1.75H3.25a1.75 1.75 0 0 1-1.75-1.75v-7c0-.358.109-.707.314-1a1.741 1.741 0 0 1-.314-1v-7C1.5 2.784 2.284 2 3.25 2Zm0 10.5a.25.25 0 0 0-.25.25v7c0 .138.112.25.25.25h17.5a.25.25 0 0 0 .25-.25v-7a.25.25 0 0 0-.25-.25Zm0-1.5h17.5a.25.25 0 0 0 .25-.25v-7a.25.25 0 0 0-.25-.25H3.25a.25.25 0 0 0-.25.25v7c0 .138.112.25.25.25Z"></path>
                 </svg>
 
-                <span>{config.name} Admin</span>
+                <span>{EntryDB.config.name} Admin</span>
             </h1>
 
             <hr />
@@ -152,6 +152,32 @@ function AdminNav(props: { active: string; pass: string }): any {
                     </button>
                 </form>
 
+                {EntryDB.config.log &&
+                    EntryDB.config.log.events.includes("report") && (
+                        <form action="/admin/logs/reports" method="POST">
+                            <input
+                                type="hidden"
+                                required
+                                name="AdminPassword"
+                                value={props.pass}
+                            />
+
+                            <button
+                                class={props.active === "reports" ? " active" : ""}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                >
+                                    <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
+                                </svg>{" "}
+                                Reports
+                            </button>
+                        </form>
+                    )}
+
                 <a href="https://codeberg.org/hkau/entry" class={"button"}>
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -207,8 +233,6 @@ function AdminLayout(props: { children: any; body: any; page: string }) {
  */
 export class Login implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
-
         // we aren't actually using a login system, it's just a form for the configured
         // server admin password
 
@@ -239,7 +263,7 @@ export class Login implements Endpoint {
                     </main>
                 </>,
                 <>
-                    <title>{config.name} Admin</title>
+                    <title>{EntryDB.config.name} Admin</title>
                 </>
             ),
             {
@@ -259,8 +283,6 @@ export class Login implements Endpoint {
  */
 export class ManagePastes implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
-
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -273,7 +295,7 @@ export class ManagePastes implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
             return new Login().request(request);
 
         // log event (only on first access)
@@ -393,7 +415,7 @@ export class ManagePastes implements Endpoint {
                     />
                 </AdminLayout>,
                 <>
-                    <title>{config.name} Admin</title>
+                    <title>{EntryDB.config.name} Admin</title>
                 </>
             ),
             {
@@ -425,7 +447,11 @@ export class QueryPastesPage implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin || !body.sql)
+        if (
+            !body.AdminPassword ||
+            body.AdminPassword !== EntryDB.config.admin ||
+            !body.sql
+        )
             return new Login().request(request);
 
         // get pastes
@@ -462,7 +488,7 @@ export class QueryPastesPage implements Endpoint {
                     />
                 </>,
                 <>
-                    <title>{config.name} Admin</title>
+                    <title>{EntryDB.config.name} Admin</title>
                 </>
             ),
             {
@@ -477,63 +503,11 @@ export class QueryPastesPage implements Endpoint {
 
 /**
  * @export
- * @class APIDeletePaste
- * @implements {Endpoint}
- */
-export class APIDeletePaste implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // this is the same code as API.DeletePaste, but it requires body.AdminPassword
-        // NOTE: API.DeletePaste CAN take the admin password in the normal "password" field,
-        //       and it will still work the same!!!
-        // this endpoint is just use to redirect to /admin/login instead of /
-
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // delete paste
-        const result = await db.DeletePaste(
-            {
-                CustomURL: body.CustomURL,
-            },
-            body.AdminPassword
-        );
-
-        // return
-        return new Response(JSON.stringify(result), {
-            status: 302,
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-                Location:
-                    result[0] === true
-                        ? // if successful, redirect to home
-                          `/admin/login`
-                        : // otherwise, show error message
-                          `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
-                              result[2].CustomURL
-                          }`,
-            },
-        });
-    }
-}
-
-/**
- * @export
  * @class ExportPastesPage
  * @implements {Endpoint}
  */
 export class ExportPastesPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
-
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -546,7 +520,7 @@ export class ExportPastesPage implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
             return new Login().request(request);
 
         // return
@@ -613,7 +587,10 @@ export class ExportPastesPage implements Endpoint {
                                 </button>
                             </form>
 
-                            <form action="/admin/api/config.json" method="POST">
+                            <form
+                                action="/admin/api/EntryDB.config.json"
+                                method="POST"
+                            >
                                 <input
                                     type="hidden"
                                     required
@@ -683,7 +660,7 @@ export class ExportPastesPage implements Endpoint {
                     </div>
                 </AdminLayout>,
                 <>
-                    <title>{config.name} Admin</title>
+                    <title>{EntryDB.config.name} Admin</title>
                 </>
             ),
             {
@@ -698,188 +675,11 @@ export class ExportPastesPage implements Endpoint {
 
 /**
  * @export
- * @class APIExport
- * @implements {Endpoint}
- */
-export class APIExport implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // get pastes
-        const _export = await db.GetAllPastes(true, false, "CustomURL IS NOT NULL");
-
-        // decrypt encrypted pastes
-        // if paste is encrypted, decrypt
-        // ...otherwise the created paste will decrypt to an encrypted value!!!
-        for (let paste of _export)
-            if (paste.ViewPassword) {
-                // get encryption information
-                const enc = await db.GetEncryptionInfo(
-                    paste.ViewPassword,
-                    paste.CustomURL
-                );
-
-                // decrypt
-                paste.Content = Decrypt(
-                    paste.Content,
-                    enc[1].key,
-                    enc[1].iv,
-                    enc[1].auth
-                )!;
-            } else continue;
-
-        // return
-        return new Response(JSON.stringify(_export), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "text/plain",
-                "Content-Disposition": `attachment; filename="entry-${new Date().toISOString()}.json"`,
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class APIImport
- * @implements {Endpoint}
- */
-export class APIImport implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(request, "multipart/form-data");
-
-        if (
-            WrongType &&
-            !(request.headers.get("content-type") || "").includes(
-                "multipart/form-data"
-            )
-        )
-            return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-        body.pastes = await (body.pastes as Blob).text();
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // get pastes
-        const output = await db.ImportPastes(JSON.parse(body.pastes) || []);
-
-        // return
-        return new Response(JSON.stringify(output), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class APIMassDelete
- * @implements {Endpoint}
- */
-export class APIMassDelete implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // get pastes
-        const output = await db.DeletePastes(
-            JSON.parse(body.pastes),
-            body.AdminPassword
-        );
-
-        // return
-        return new Response(JSON.stringify(output), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class APISQL
- * @implements {Endpoint}
- */
-export class APISQL implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // run query
-        const output = await db.DirectSQL(
-            body.sql,
-            body.get !== undefined,
-            body.all !== undefined,
-            body.AdminPassword
-        );
-
-        // return
-        return new Response(JSON.stringify(output), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-            },
-        });
-    }
-}
-
-/**
- * @export
  * @class LogsPage
  * @implements {Endpoint}
  */
 export class LogsPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
-
-        const url = new URL(request.url);
-
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -892,7 +692,7 @@ export class LogsPage implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
             return new Login().request(request);
 
         // get limit
@@ -902,7 +702,13 @@ export class LogsPage implements Endpoint {
         const logs = await EntryDB.Logs.QueryLogs(
             body.filter_type !== undefined
                 ? `Type = "${body.filter_type}" LIMIT ${LIMIT}`
-                : `ID IS NOT NULL AND Type IS NOT "view_paste" AND Type IS NOT "session" AND Type IS NOT "comment" LIMIT ${LIMIT}`
+                : `ID IS NOT NULL AND ${[
+                      // these log types should probably never be cleared
+                      'Type IS NOT "view_paste"',
+                      'Type IS NOT "session"',
+                      'Type IS NOT "comment"',
+                      'Type IS NOT "report"',
+                  ].join(" AND ")} LIMIT ${LIMIT}`
         );
 
         // return
@@ -973,8 +779,8 @@ export class LogsPage implements Endpoint {
                             >
                                 <option value="">Filter by type</option>
 
-                                {config.log &&
-                                    config.log.events.map((event) => (
+                                {EntryDB.config.log &&
+                                    EntryDB.config.log.events.map((event) => (
                                         <option
                                             value={event}
                                             selected={body.filter_type === event}
@@ -1119,7 +925,7 @@ export class LogsPage implements Endpoint {
                     </div>
                 </AdminLayout>,
                 <>
-                    <title>{config.name} Admin</title>
+                    <title>{EntryDB.config.name} Admin</title>
                 </>
             ),
             {
@@ -1134,121 +940,11 @@ export class LogsPage implements Endpoint {
 
 /**
  * @export
- * @class APIExportLogs
- * @implements {Endpoint}
- */
-export class APIExportLogs implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // get logs
-        const _export = await EntryDB.Logs.QueryLogs("ID IS NOT NULL");
-
-        // return
-        return new Response(JSON.stringify(_export[2]), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "text/plain",
-                "Content-Disposition": `attachment; filename="entry-logs-${new Date().toISOString()}.json"`,
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class APIMassDeleteLogs
- * @implements {Endpoint}
- */
-export class APIMassDeleteLogs implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // delete logs
-        const outputs: any[] = [];
-
-        // build outputs
-        for (const id of JSON.parse(body.logs))
-            outputs.push(await EntryDB.Logs.DeleteLog(id));
-
-        // return
-        return new Response(JSON.stringify(outputs), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class APIExportConfig
- * @implements {Endpoint}
- */
-export class APIExportConfig implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
-            return new Login().request(request);
-
-        // return
-        return new Response(JSON.stringify(EntryDB.config), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-                "Content-Disposition": `attachment; filename="entry-config-${new Date().toISOString()}.json"`,
-            },
-        });
-    }
-}
-
-/**
- * @export
  * @class PluginsPage
  * @implements {Endpoint}
  */
 export class PluginsPage implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
-
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -1261,7 +957,7 @@ export class PluginsPage implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== config!.admin)
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
             return new Login().request(request);
 
         // return
@@ -1327,7 +1023,471 @@ export class PluginsPage implements Endpoint {
                     </div>
                 </AdminLayout>,
                 <>
-                    <title>{config.name} Admin</title>
+                    <title>{EntryDB.config.name} Admin</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
+/**
+ * @export
+ * @class ManageReports
+ * @implements {Endpoint}
+ */
+export class ManageReports implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+            return new Login().request(request);
+
+        // get limit
+        const LIMIT = parseInt(body.limit || "500");
+
+        // set query customurl
+        if (body.paste_customurl) body.paste_customurl += ";";
+        else body.paste_customurl = "";
+
+        // fetch all reports
+        const reports = await EntryDB.Logs.QueryLogs(
+            `Type = "report" AND Content LIKE "create;${body.paste_customurl}%" LIMIT ${LIMIT}`
+        );
+
+        // get report logs
+        const ReportPastes: Array<[boolean, Paste, any]> = []; // [archived, report paste, report log]
+        for (const report of reports[2]) {
+            const paste = await db.GetPasteFromURL(report.Content.split(";")[2]);
+            if (!paste) {
+                // delete log if paste doesn't exist
+                await EntryDB.Logs.DeleteLog(report.ID);
+                continue;
+            }
+
+            // check if report is archived
+            const ArchivalLog = await EntryDB.Logs.QueryLogs(
+                `Type = "report" AND Content = "archive;${
+                    report.Content.split(";")[2]
+                }"`
+            );
+
+            // add to reportpastes
+            ReportPastes.push([
+                ArchivalLog[2].length === 1,
+                paste as any as Paste,
+                report,
+            ]);
+        }
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <AdminLayout body={body} page="reports">
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <a
+                            href="/paste/doc/what:sentrytwo.com#logs"
+                            class={"button secondary"}
+                        >
+                            Help
+                        </a>
+
+                        <a
+                            href="https://codeberg.org/hkau/entry/issues/new/choose"
+                            class={"button secondary"}
+                        >
+                            Issues
+                        </a>
+                    </div>
+
+                    <hr />
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            marginBottom: "1rem",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <form
+                            action="/admin/logs/reports"
+                            method={"POST"}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                                flexWrap: "wrap",
+                            }}
+                        >
+                            <input
+                                type="hidden"
+                                required
+                                name="AdminPassword"
+                                value={body.AdminPassword}
+                            />
+
+                            <input
+                                name={"paste_customurl"}
+                                placeholder={"Custom URL"}
+                                value={body.paste_customurl}
+                                style={{
+                                    background: "var(--background-surface)",
+                                    width: "20rem",
+                                }}
+                            />
+
+                            <input
+                                type="number"
+                                value={LIMIT}
+                                placeholder={"Limit"}
+                                minLength={1}
+                                maxLength={10000}
+                                name={"limit"}
+                                id={"limit"}
+                                class={"secondary"}
+                                required
+                                style={{
+                                    width: "10rem",
+                                }}
+                            />
+
+                            <button class={"secondary"}>Query</button>
+                        </form>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: "0.5rem",
+                            }}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                height="16"
+                                aria-label={"Magnifying Glass Symbol"}
+                            >
+                                <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
+                            </svg>
+
+                            <span>
+                                <b>{reports[2].length}</b> result
+                                {reports[2].length > 1 || reports[2].length === 0
+                                    ? "s"
+                                    : ""}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div
+                        style={{
+                            maxWidth: "100vw",
+                            overflow: "auto",
+                        }}
+                    >
+                        <table
+                            class={"force-full"}
+                            style={{
+                                width: "100%",
+                            }}
+                        >
+                            <thead>
+                                <tr>
+                                    <th>Reporting</th>
+                                    <th>Timestamp</th>
+                                    <th>Archived</th>
+                                    <th>View Report</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {ReportPastes.map((report) => (
+                                    <tr
+                                        style={{
+                                            opacity:
+                                                report[0] === true
+                                                    ? "75%"
+                                                    : "inherit",
+                                        }}
+                                    >
+                                        {/* https://sentrytwo.com/paste/doc/what#logs */}
+                                        <td>{report[2].Content.split(";")[1]}</td>
+                                        <td class={"utc-date-to-localize"}>
+                                            {report[2].Timestamp}
+                                        </td>
+
+                                        <td>{report[0] === true ? "yes" : "no"}</td>
+
+                                        <td>
+                                            <form
+                                                action={`/admin/logs/report/${report[2].ID}`}
+                                                method={"POST"}
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <input
+                                                    type="hidden"
+                                                    required
+                                                    name="AdminPassword"
+                                                    value={body.AdminPassword}
+                                                />
+
+                                                <button class={"secondary"}>
+                                                    View Report
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </AdminLayout>,
+                <>
+                    <title>{EntryDB.config.name} Admin</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
+/**
+ * @export
+ * @class ViewReport
+ * @implements {Endpoint}
+ */
+export class ViewReport implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+            return new Login().request(request);
+
+        // get log id
+        let LogID = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (LogID.startsWith("admin/logs/report/"))
+            LogID = LogID.split("admin/logs/report/")[1];
+
+        // return manage reports if LogID === ""
+        if (LogID === "") return new _404Page().request(request);
+
+        // get log
+        const ReportLog = await EntryDB.Logs.GetLog(LogID);
+        if (!ReportLog[0] || !ReportLog[2]) return new _404Page().request(request);
+
+        // archive log if body.archive = "true"
+        if (body.archive === "true")
+            await EntryDB.Logs.CreateLog({
+                Content: `archive;${ReportLog[2].Content.split(";")[2]}`,
+                Type: "report",
+            });
+
+        // check if report is archived!
+        const ArchivalLog = await EntryDB.Logs.QueryLogs(
+            `Type = "report" AND Content = "archive;${
+                ReportLog[2].Content.split(";")[2]
+            }"`
+        );
+
+        // attempt to get report
+        const report = (await db.GetPasteFromURL(
+            ReportLog[2].Content.split(";")[2]
+        )) as Paste;
+
+        if (!report) return new _404Page().request(request);
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <AdminLayout body={body} page="reports">
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <a
+                            href="/paste/doc/what:sentrytwo.com#logs"
+                            class={"button secondary"}
+                        >
+                            Help
+                        </a>
+
+                        <a
+                            href="https://codeberg.org/hkau/entry/issues/new/choose"
+                            class={"button secondary"}
+                        >
+                            Issues
+                        </a>
+                    </div>
+
+                    <hr />
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            flexWrap: "wrap",
+                        }}
+                    >
+                        <a
+                            href="javascript:history.back()"
+                            className="button secondary"
+                        >
+                            Back
+                        </a>
+
+                        <div
+                            style={{
+                                display: "flex",
+                                gap: "0.5rem",
+                                flexWrap: "wrap",
+                            }}
+                        >
+                            {ArchivalLog[2].length !== 1 && (
+                                <form action={url.pathname} method={"POST"}>
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name="AdminPassword"
+                                        value={body.AdminPassword}
+                                    />
+
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name={"archive"}
+                                        value={"true"}
+                                    />
+
+                                    <button
+                                        class={"secondary"}
+                                        style={{
+                                            margin: "auto",
+                                        }}
+                                    >
+                                        Archive
+                                    </button>
+                                </form>
+                            )}
+
+                            <form action="/admin/api/delete" method={"POST"}>
+                                <input
+                                    type="hidden"
+                                    required
+                                    name="AdminPassword"
+                                    value={body.AdminPassword}
+                                />
+
+                                <input
+                                    type="hidden"
+                                    required
+                                    name={"CustomURL"}
+                                    value={report.CustomURL}
+                                />
+
+                                <button
+                                    class={"secondary"}
+                                    style={{
+                                        margin: "auto",
+                                    }}
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <p>
+                        Report ID: <b>{ReportLog[2].ID}</b>, Archived:{" "}
+                        <b>{ArchivalLog[2].length === 1 ? "yes" : "no"}</b>
+                    </p>
+
+                    <p>
+                        Pub: <b class={"utc-date-to-localize"}>{report.PubDate}</b>,
+                        Edit: <b class={"utc-date-to-localize"}>{report.EditDate}</b>
+                        , Comments: <b>{report.Comments}</b>
+                    </p>
+
+                    <p>
+                        Reporting paste:{" "}
+                        <a
+                            href={`/${ReportLog[2].Content.split(";")[1]}`}
+                            target={"_blank"}
+                        >
+                            <b>{ReportLog[2].Content.split(";")[1]}</b>
+                        </a>
+                    </p>
+
+                    <hr />
+
+                    <div
+                        style={{
+                            maxHeight: "20rem",
+                            overflow: "auto",
+                            background: "var(--background-surface)",
+                            padding: "1rem",
+                        }}
+                        dangerouslySetInnerHTML={{
+                            __html: ParseMarkdownSync(report.Content!),
+                        }}
+                    />
+                </AdminLayout>,
+                <>
+                    <title>{EntryDB.config.name} Admin</title>
                 </>
             ),
             {
@@ -1344,15 +1504,9 @@ export class PluginsPage implements Endpoint {
 export default {
     Login,
     ManagePastes,
-    APIDeletePaste,
     ExportPastesPage,
-    APIExport,
-    APIImport,
-    APIMassDelete,
-    APISQL,
     LogsPage,
-    APIExportLogs,
-    APIMassDeleteLogs,
-    APIExportConfig,
     PluginsPage,
+    ManageReports,
+    ViewReport,
 };

@@ -184,6 +184,8 @@ export function ParseMarkdownSync(content: string): string {
                     "_",
                     " "
                 )}">${attributes[0].replaceAll("_", " ")}</span>`;
+            // disable block
+            else if (_class === "disable") result = "";
 
             // return
             return result;

@@ -39,6 +39,7 @@ export type Paste = {
     Views?: number; // * amount of log records LIKE "%{CustomURL}%"
     CommentOn?: string; // * the paste the that this paste is commenting on
     Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)
+    ReportOn?: string; // * the paste that this paste is reporting
 };
 
 let StaticInit = false;
@@ -632,6 +633,7 @@ export default class EntryDB {
                 "paste",
                 "group",
                 "comments",
+                "reports",
             ];
 
             if (NotAllowed.includes(PasteInfo.GroupName))
@@ -703,6 +705,19 @@ export default class EntryDB {
             await EntryDB.Logs.CreateLog({
                 Type: "comment",
                 Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}`,
+            });
+        }
+
+        // if paste is a report, create the respective log entry and set groupname to "reports"
+        if (PasteInfo.ReportOn) {
+            // set group
+            PasteInfo.GroupName = "reports";
+            PasteInfo.CustomURL = `reports/${PasteInfo.CustomURL}`;
+
+            // create log
+            await EntryDB.Logs.CreateLog({
+                Type: "report",
+                Content: `create;${PasteInfo.ReportOn};${PasteInfo.CustomURL}`,
             });
         }
 
