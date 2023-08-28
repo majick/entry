@@ -76,6 +76,7 @@ export class GetPasteFromURL implements Endpoint {
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result) return new _404Page().request(request);
 
         // check if paste is editable
         const editable = await db.CheckPasteEditable(name);
@@ -144,305 +145,307 @@ export class GetPasteFromURL implements Endpoint {
             else Viewed = true;
         }
 
-        // return
-        if (!result || !editable[0])
-            // show 404 because paste does not exist
-            return new _404Page().request(request);
-        else
-            return new Response(
-                Renderer.Render(
-                    <>
-                        <main>
-                            {search.get("UnhashedEditPassword") &&
-                                search.get("UnhashedEditPassword") !==
-                                    "paste is not editable!" && (
-                                    <div
-                                        class="mdnote"
-                                        style={{
-                                            marginBottom: "0.5rem",
-                                        }}
-                                    >
-                                        <b className="mdnote-title">
-                                            Don't forget your edit password!
-                                        </b>
-                                        <p>
-                                            You cannot edit or delete your paste if
-                                            you don't have your edit password. Please
-                                            save it somewhere safe:{" "}
-                                            <code>
-                                                {search.get("UnhashedEditPassword")}
-                                            </code>
-                                        </p>
-                                    </div>
-                                )}
+        // get paste comments
+        let comments: any;
 
-                            {result.ViewPassword && (
-                                <DecryptionForm paste={result} />
+        if (
+            result !== undefined &&
+            EntryDB.config.app &&
+            EntryDB.config.app.enable_comments === true
+        )
+            comments = await EntryDB.Logs.QueryLogs(
+                `Type = "comment" AND Content LIKE "${result.CustomURL};%" LIMIT 100`
+            );
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <main>
+                        {search.get("UnhashedEditPassword") &&
+                            search.get("UnhashedEditPassword") !==
+                                "paste is not editable!" && (
+                                <div
+                                    class="mdnote"
+                                    style={{
+                                        marginBottom: "0.5rem",
+                                    }}
+                                >
+                                    <b className="mdnote-title">
+                                        Don't forget your edit password!
+                                    </b>
+                                    <p>
+                                        You cannot edit or delete your paste if you
+                                        don't have your edit password. Please save it
+                                        somewhere safe:{" "}
+                                        <code>
+                                            {search.get("UnhashedEditPassword")}
+                                        </code>
+                                    </p>
+                                </div>
                             )}
 
-                            {EntryDB.config.app &&
-                                EntryDB.config.app.info &&
-                                EntryDB.config.app.info.split("?")[0] ===
-                                    result.CustomURL &&
-                                InformationPageNote()}
+                        {result.ViewPassword && <DecryptionForm paste={result} />}
 
+                        {EntryDB.config.app &&
+                            EntryDB.config.app.info &&
+                            EntryDB.config.app.info.split("?")[0] ===
+                                result.CustomURL &&
+                            InformationPageNote()}
+
+                        <div
+                            class={"tab-container"}
+                            style={{
+                                height: "max-content",
+                                maxHeight: "initial",
+                            }}
+                        >
                             <div
-                                class={"tab-container"}
+                                id="editor-tab-preview"
+                                class="editor-tab"
                                 style={{
                                     height: "max-content",
-                                    maxHeight: "initial",
                                 }}
-                            >
-                                <div
-                                    id="editor-tab-preview"
-                                    class="editor-tab"
-                                    style={{
-                                        height: "max-content",
-                                    }}
-                                    dangerouslySetInnerHTML={{
-                                        __html: await ParseMarkdown(result.Content),
-                                    }}
-                                />
-                            </div>
+                                dangerouslySetInnerHTML={{
+                                    __html: await ParseMarkdown(result.Content),
+                                }}
+                            />
+                        </div>
 
+                        <div
+                            style={{
+                                marginTop: "0.5rem",
+                                display: "flex",
+                                justifyContent: "space-between",
+                            }}
+                        >
                             <div
                                 style={{
-                                    marginTop: "0.5rem",
                                     display: "flex",
                                     justifyContent: "space-between",
+                                    alignItems: "flex-start",
+                                    gap: "0.5rem",
+                                    width: "100%",
                                 }}
                             >
                                 <div
                                     style={{
                                         display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "flex-start",
                                         gap: "0.5rem",
-                                        width: "100%",
+                                        flexWrap: "wrap",
+                                        maxWidth: "50%",
                                     }}
                                 >
-                                    <div
+                                    {editable[2] === true && (
+                                        <a
+                                            class={"button"}
+                                            href={`/?mode=edit&OldURL=${
+                                                result.CustomURL.split(":")[0]
+                                            }${
+                                                // add host server (if it exists)
+                                                result.HostServer
+                                                    ? `&server=${result.HostServer}`
+                                                    : ""
+                                            }${
+                                                // add view password (if it exists)
+                                                // this is so content is automatically decrypted!
+                                                ViewPassword !== ""
+                                                    ? `&ViewPassword=${ViewPassword}`
+                                                    : ""
+                                            }`}
+                                        >
+                                            Edit
+                                        </a>
+                                    )}
+
+                                    {result.GroupName && (
+                                        <a
+                                            class={"button"}
+                                            href={`/search?q=${
+                                                result.GroupName
+                                            }%2F&group=${result.GroupName}${
+                                                // add host server (if it exists)
+                                                result.HostServer
+                                                    ? `:${result.HostServer}`
+                                                    : ""
+                                            }`}
+                                        >
+                                            View Group
+                                        </a>
+                                    )}
+
+                                    {EntryDB.config.app &&
+                                        EntryDB.config.app.enable_comments ===
+                                            true &&
+                                        comments !== undefined && (
+                                            <a
+                                                class={"button"}
+                                                href={`/paste/comments/${result.CustomURL}`}
+                                                title={"View Comments"}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Comments Symbol"}
+                                                >
+                                                    <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 12H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"></path>
+                                                </svg>
+
+                                                {comments[2].length}
+                                            </a>
+                                        )}
+
+                                    <details
+                                        class={"horizontal"}
                                         style={{
-                                            display: "flex",
-                                            gap: "0.5rem",
-                                            flexWrap: "wrap",
-                                            maxWidth: "50%",
+                                            width: "calc(80px * 3)",
                                         }}
                                     >
-                                        {editable[2] === true && (
+                                        <summary
+                                            style={{
+                                                fontWeight: "normal",
+                                                width: "100px",
+                                            }}
+                                        >
+                                            Export
+                                        </summary>
+
+                                        <div class={"details-content"}>
                                             <a
                                                 class={"button"}
-                                                href={`/?mode=edit&OldURL=${
-                                                    result.CustomURL.split(":")[0]
-                                                }${
-                                                    // add host server (if it exists)
-                                                    result.HostServer
-                                                        ? `&server=${result.HostServer}`
-                                                        : ""
-                                                }${
-                                                    // add view password (if it exists)
-                                                    // this is so content is automatically decrypted!
-                                                    ViewPassword !== ""
-                                                        ? `&ViewPassword=${ViewPassword}`
-                                                        : ""
-                                                }`}
+                                                target={"_blank"}
+                                                href={`/api/raw/${result.CustomURL}`}
+                                                style={{
+                                                    width: "80px",
+                                                }}
                                             >
-                                                Edit
+                                                Raw
                                             </a>
-                                        )}
 
-                                        {result.GroupName && (
                                             <a
                                                 class={"button"}
-                                                href={`/search?q=${
-                                                    result.GroupName
-                                                }%2F&group=${result.GroupName}${
-                                                    // add host server (if it exists)
-                                                    result.HostServer
-                                                        ? `:${result.HostServer}`
-                                                        : ""
-                                                }`}
+                                                href={`/api/html/${result.CustomURL}`}
+                                                target={"_blank"}
+                                                style={{
+                                                    width: "80px",
+                                                }}
                                             >
-                                                View Group
+                                                HTML
                                             </a>
-                                        )}
 
-                                        {EntryDB.config.app &&
-                                            EntryDB.config.app.enable_comments ===
-                                                true && (
-                                                <a
-                                                    class={"button"}
-                                                    href={`/paste/comments/${result.CustomURL}`}
-                                                    title={"View Comments"}
-                                                    style={{
-                                                        width: "3.5rem",
-                                                    }}
-                                                >
+                                            <a
+                                                class={"button"}
+                                                href={`?view=doc`}
+                                                style={{
+                                                    width: "80px",
+                                                }}
+                                            >
+                                                Doc
+                                            </a>
+                                        </div>
+                                    </details>
+                                </div>
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        alignItems: "flex-end",
+                                        color: "var(--text-color-faded)",
+                                        textAlign: "right",
+                                    }}
+                                >
+                                    {result.ExpireOn !== undefined && (
+                                        <span>Expires: {result.ExpireOn}</span>
+                                    )}
+
+                                    <span title={result.PubDate}>
+                                        Pub:{" "}
+                                        <span className="utc-date-to-localize">
+                                            {result.PubDate}
+                                        </span>
+                                    </span>
+
+                                    <span title={result.EditDate}>
+                                        Edit:{" "}
+                                        <span className="utc-date-to-localize">
+                                            {result.EditDate}
+                                        </span>
+                                    </span>
+
+                                    {EntryDB.config.log &&
+                                        EntryDB.config.log.events.includes(
+                                            "view_paste"
+                                        ) && (
+                                            <span
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "right",
+                                                    alignItems: "center",
+                                                    gap: "0.25rem",
+                                                    width: "max-content",
+                                                }}
+                                                title={
+                                                    Viewed === true
+                                                        ? "Paste Viewed Before"
+                                                        : "Pasted Viewed Just Now"
+                                                }
+                                            >
+                                                {Viewed === true && (
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
                                                         viewBox="0 0 16 16"
                                                         width="16"
                                                         height="16"
-                                                        aria-label={
-                                                            "Comments Symbol"
-                                                        }
+                                                        aria-label={"Sparkle Symbol"}
                                                     >
-                                                        <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 12H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"></path>
+                                                        <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
                                                     </svg>
-                                                </a>
-                                            )}
-
-                                        <details
-                                            class={"horizontal"}
-                                            style={{
-                                                width: "calc(80px * 3)",
-                                            }}
-                                        >
-                                            <summary
-                                                style={{
-                                                    fontWeight: "normal",
-                                                    width: "100px",
-                                                }}
-                                            >
-                                                Export
-                                            </summary>
-
-                                            <div class={"details-content"}>
-                                                <a
-                                                    class={"button"}
-                                                    target={"_blank"}
-                                                    href={`/api/raw/${result.CustomURL}`}
-                                                    style={{
-                                                        width: "80px",
-                                                    }}
-                                                >
-                                                    Raw
-                                                </a>
-
-                                                <a
-                                                    class={"button"}
-                                                    href={`/api/html/${result.CustomURL}`}
-                                                    target={"_blank"}
-                                                    style={{
-                                                        width: "80px",
-                                                    }}
-                                                >
-                                                    HTML
-                                                </a>
-
-                                                <a
-                                                    class={"button"}
-                                                    href={`?view=doc`}
-                                                    style={{
-                                                        width: "80px",
-                                                    }}
-                                                >
-                                                    Doc
-                                                </a>
-                                            </div>
-                                        </details>
-                                    </div>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            justifyContent: "center",
-                                            alignItems: "flex-end",
-                                            color: "var(--text-color-faded)",
-                                            textAlign: "right",
-                                        }}
-                                    >
-                                        {result.ExpireOn !== undefined && (
-                                            <span>Expires: {result.ExpireOn}</span>
+                                                )}
+                                                Views: {result.Views}
+                                            </span>
                                         )}
-
-                                        <span title={result.PubDate}>
-                                            Pub:{" "}
-                                            <span className="utc-date-to-localize">
-                                                {result.PubDate}
-                                            </span>
-                                        </span>
-
-                                        <span title={result.EditDate}>
-                                            Edit:{" "}
-                                            <span className="utc-date-to-localize">
-                                                {result.EditDate}
-                                            </span>
-                                        </span>
-
-                                        {EntryDB.config.log &&
-                                            EntryDB.config.log.events.includes(
-                                                "view_paste"
-                                            ) && (
-                                                <span
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "right",
-                                                        alignItems: "center",
-                                                        gap: "0.25rem",
-                                                        width: "max-content",
-                                                    }}
-                                                    title={
-                                                        Viewed === true
-                                                            ? "Paste Viewed Before"
-                                                            : "Pasted Viewed Just Now"
-                                                    }
-                                                >
-                                                    {Viewed === true && (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                            aria-label={
-                                                                "Sparkle Symbol"
-                                                            }
-                                                        >
-                                                            <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
-                                                        </svg>
-                                                    )}
-                                                    Views: {result.Views}
-                                                </span>
-                                            )}
-                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <Footer ShowBottomRow={false} />
-                        </main>
+                        <Footer ShowBottomRow={false} />
+                    </main>
 
-                        <script
-                            // P.S. I hate this
-                            type="module"
-                            dangerouslySetInnerHTML={{
-                                __html: `import fix from "/ClientFixMarkdown.js?v=${pack.version}"; fix();`,
-                            }}
-                        />
-                    </>,
-                    <>
-                        <meta
-                            name="description"
-                            content={
-                                // if length of content is greater than 150, cut it at 150 characters and add "..."
-                                // otherwise, we can just show the full content
-                                result.Content.length > 150
-                                    ? `${result.Content.substring(0, 150)}...`
-                                    : result.Content
-                            }
-                        />
+                    <script
+                        // P.S. I hate this
+                        type="module"
+                        dangerouslySetInnerHTML={{
+                            __html: `import fix from "/ClientFixMarkdown.js?v=${pack.version}"; fix();`,
+                        }}
+                    />
+                </>,
+                <>
+                    <meta
+                        name="description"
+                        content={
+                            // if length of content is greater than 150, cut it at 150 characters and add "..."
+                            // otherwise, we can just show the full content
+                            result.Content.length > 150
+                                ? `${result.Content.substring(0, 150)}...`
+                                : result.Content
+                        }
+                    />
 
-                        <title>{result.CustomURL}</title>
-                    </>
-                ),
-                {
-                    headers: {
-                        ...PageHeaders,
-                        "Content-Type": "text/html",
-                        "Set-Cookie": SessionCookie,
-                    },
-                }
-            );
+                    <title>{result.CustomURL}</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                    "Set-Cookie": SessionCookie,
+                },
+            }
+        );
     }
 }
 
@@ -827,7 +830,7 @@ export class PastesSearch implements Endpoint {
                 ),
                 {
                     headers: {
-                        ...DefaultHeaders,
+                        ...PageHeaders,
                         "Content-Type": "text/html",
                         "Set-Cookie": SessionCookie,
                     },
@@ -1073,7 +1076,8 @@ export class PasteCommentsPage implements Endpoint {
             ),
             {
                 headers: {
-                    ...DefaultHeaders,
+                    ...PageHeaders,
+                    "Cache-Control": "max-age=0, must-revalidate", // page might change too much for it to be cached!
                     "Content-Type": "text/html",
                 },
             }
