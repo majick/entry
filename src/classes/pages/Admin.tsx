@@ -902,7 +902,7 @@ export class LogsPage implements Endpoint {
         const logs = await EntryDB.Logs.QueryLogs(
             body.filter_type !== undefined
                 ? `Type = "${body.filter_type}" LIMIT ${LIMIT}`
-                : `ID IS NOT NULL AND Type IS NOT "view_paste" AND Type IS NOT "session" LIMIT ${LIMIT}`
+                : `ID IS NOT NULL AND Type IS NOT "view_paste" AND Type IS NOT "session" AND Type IS NOT "comment" LIMIT ${LIMIT}`
         );
 
         // return

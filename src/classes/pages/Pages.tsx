@@ -1011,6 +1011,18 @@ export class PasteCommentsPage implements Endpoint {
                                 gap: "0.5rem",
                             }}
                         >
+                            {search.get("msg") && (
+                                <div
+                                    class={"mdnote note-note"}
+                                    style={{
+                                        marginBottom: "0.5rem",
+                                    }}
+                                >
+                                    <b class={"mdnote-title"}>Application Message</b>
+                                    <p>{decodeURIComponent(search.get("msg")!)}</p>
+                                </div>
+                            )}
+
                             {CommentPastes.map((comment) => (
                                 <div
                                     style={{
