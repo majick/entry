@@ -772,7 +772,6 @@ export class LogsPage implements Endpoint {
                                 name="filter_type"
                                 id="filter_type"
                                 class={"secondary"}
-                                required
                                 style={{
                                     width: "10rem",
                                 }}
@@ -1485,6 +1484,19 @@ export class ViewReport implements Endpoint {
                             __html: ParseMarkdownSync(report.Content!),
                         }}
                     />
+
+                    <hr />
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <a href={`/paste/comments/${report.CustomURL}`}>
+                            View Report Comments
+                        </a>
+                    </div>
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>

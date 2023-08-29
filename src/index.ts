@@ -32,6 +32,7 @@ export type Config = {
         enable_private_pastes?: boolean;
         enable_groups?: boolean;
         enable_expiry?: boolean;
+        enable_not_editable_pastes?: boolean;
         footer?: {
             rows: Array<{
                 [key: string]: string;

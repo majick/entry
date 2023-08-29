@@ -171,6 +171,8 @@ export function ParseMarkdownSync(content: string): string {
                     // set width to max-content if display is not inline
                     attributes[4] === "inline"
                         ? ""
+                        : attributes[4] === "full"
+                        ? "width: 100%;"
                         : "width: max-content; max-width: 100%;"
                 }">`;
             // ...close block

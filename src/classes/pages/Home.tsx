@@ -53,6 +53,12 @@ export default class Home implements Endpoint {
         // manage session
         const SessionCookie = await Session(request);
 
+        // if commenton or reporton is blank, remove it (we can't comment on nothing!!)
+        if (search.get("CommentOn") === "" || search.get("ReportOn") === "") {
+            search.delete("CommentOn");
+            search.delete("ReportOn");
+        }
+
         // return
         return new Response(
             Renderer.Render(
@@ -315,15 +321,16 @@ export default class Home implements Endpoint {
                                                         alignItems: "center",
                                                     }}
                                                 >
-                                                    <Checkbox
-                                                        name="IsEditable"
-                                                        title="Toggle Editable"
-                                                        checked={
-                                                            process.env
-                                                                .EDITABLE_BY_DEFAULT ===
-                                                            "true"
-                                                        }
-                                                    />
+                                                    {!EntryDB.config.app ||
+                                                        (EntryDB.config.app
+                                                            .enable_not_editable_pastes !==
+                                                            false && (
+                                                            <Checkbox
+                                                                name="IsEditable"
+                                                                title="Toggle Editable"
+                                                                checked={true}
+                                                            />
+                                                        ))}
 
                                                     <input
                                                         type="text"
@@ -339,11 +346,6 @@ export default class Home implements Endpoint {
                                                         name={"EditPassword"}
                                                         id={"EditPassword"}
                                                         autoComplete={"off"}
-                                                        disabled={
-                                                            process.env
-                                                                .EDITABLE_BY_DEFAULT !==
-                                                            "true"
-                                                        }
                                                     />
                                                 </div>
                                             </div>
@@ -684,6 +686,14 @@ export default class Home implements Endpoint {
                                                     }
                                                     minLength={
                                                         EntryDB.MinCustomURLLength
+                                                    }
+                                                    disabled={
+                                                        // cannot be changed if we're editing a comment
+                                                        search.get("CommentOn") !==
+                                                            null ||
+                                                        // or a report...
+                                                        search.get("ReportOn") !==
+                                                            null
                                                     }
                                                     name={"NewURL"}
                                                     autoComplete={"off"}

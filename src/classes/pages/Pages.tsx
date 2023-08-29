@@ -885,9 +885,12 @@ export class PasteCommentsPage implements Endpoint {
         if (result.Content.includes("<% disable comments %>"))
             return new _404Page().request(request);
 
+        // get offset
+        const OFFSET = parseInt(search.get("offset") || "0");
+
         // get comments
         const comments = await EntryDB.Logs.QueryLogs(
-            `Type = "comment" AND Content LIKE "${result.CustomURL};%" LIMIT 100`
+            `Type = "comment" AND Content LIKE "${result.CustomURL};%" ORDER BY substr(Timestamp, 5, 1000) DESC LIMIT 100 OFFSET ${OFFSET}`
         );
 
         const CommentPastes: Partial<Paste>[] = [];
@@ -948,14 +951,34 @@ export class PasteCommentsPage implements Endpoint {
                     <hr />
 
                     <div
-                        class={"mdnote note-warn"}
                         style={{
-                            marginBottom: "0.5rem",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "0.5rem",
                         }}
                     >
-                        <b class={"mdnote-title"}>
-                            At this time, this page only shows 100 comments.
-                        </b>
+                        {OFFSET !== 0 && (
+                            <>
+                                {/* only shown if we're not at the first page */}
+                                <a href={`?offset=${OFFSET - 100}`} class={"button"}>
+                                    Previous Page
+                                </a>
+                            </>
+                        )}
+
+                        {OFFSET / 100 < (result.Comments || 0) / 100 &&
+                            (result.Comments || 0) > 100 && (
+                                <>
+                                    {/* only shown if we're not at the last page (100 per page) */}
+                                    <a
+                                        href={`?offset=${OFFSET + 100}`}
+                                        class={"button"}
+                                    >
+                                        Next Page
+                                    </a>
+                                </>
+                            )}
                     </div>
                 </>
             );
@@ -997,7 +1020,8 @@ export class PasteCommentsPage implements Endpoint {
                                     ? "s"
                                     : CommentPastes.length === 1
                                     ? ""
-                                    : "s"}
+                                    : "s"}{" "}
+                                , newest <i>to</i> oldest
                             </span>
 
                             <a
@@ -1026,6 +1050,22 @@ export class PasteCommentsPage implements Endpoint {
                                 >
                                     <b class={"mdnote-title"}>Application Message</b>
                                     <p>{decodeURIComponent(search.get("msg")!)}</p>
+                                </div>
+                            )}
+
+                            {result.Comments === 0 && (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <span>
+                                        No comments yet!{" "}
+                                        <a href={`/?CommentOn=${result.CustomURL}`}>
+                                            Add Comment
+                                        </a>
+                                    </span>
                                 </div>
                             )}
 
