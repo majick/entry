@@ -588,7 +588,7 @@ export class ExportPastesPage implements Endpoint {
                             </form>
 
                             <form
-                                action="/admin/api/EntryDB.config.json"
+                                action="/admin/api/config.json"
                                 method="POST"
                             >
                                 <input

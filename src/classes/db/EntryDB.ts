@@ -536,7 +536,11 @@ export default class EntryDB {
                 PasteInfo.EditPassword = `${PasteInfo.UnhashedEditPassword}`;
 
                 // check for PasteInfo.IsEditable, if it does not exist set UnhashedEditPassword to "paste is not editable!"
-                if (!PasteInfo.IsEditable)
+                if (
+                    !PasteInfo.IsEditable &&
+                    (!EntryDB.config.app ||
+                        EntryDB.config.app.enable_not_editable_pastes !== false)
+                )
                     PasteInfo.UnhashedEditPassword = "paste is not editable!";
             } else PasteInfo.UnhashedEditPassword = `${PasteInfo.EditPassword}`;
         // if we don't need to hash the editpassword, just set unhashed to hashed
@@ -560,7 +564,13 @@ export default class EntryDB {
 
         // check for IsEditable, if it does not exist set EditPassword to "" so the paste
         // cannot be changed
-        if (!PasteInfo.IsEditable && !SkipHash) PasteInfo.EditPassword = "";
+        if (
+            !PasteInfo.IsEditable &&
+            !SkipHash &&
+            (!EntryDB.config.app ||
+                EntryDB.config.app.enable_not_editable_pastes !== false)
+        )
+            PasteInfo.EditPassword = "";
 
         // hash passwords
         if (!SkipHash) {

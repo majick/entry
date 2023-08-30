@@ -266,8 +266,8 @@ The animation element also supports more attributes to allow you to customize yo
 - Animation Name
 - Duration
 - Delay
-- Repeat (`infinite` makes the animation repeat forever)
-- Inline (Set to `inline` to make the animation block fit with text)
+- Repeat (`infinite` makes the animation repeat forever, set to 1 for an animation to play once)
+- Inline (Set to `inline` to make the animation block fit with text, set to `full` to make the animation full width **makes centered animation works**)
 
 An example using all of these would look like:
 
