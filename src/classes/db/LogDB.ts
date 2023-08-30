@@ -166,14 +166,15 @@ export default class LogDB {
      * @method QueryLogs
      *
      * @param {string} sql
+     * @param [select="*"] 
      * @return {Promise<[boolean, string, Log[]]>}
      * @memberof LogDB
      */
-    public async QueryLogs(sql: string): Promise<[boolean, string, Log[]]> {
+    public async QueryLogs(sql: string, select: string = "*"): Promise<[boolean, string, Log[]]> {
         // query logs
         const logs = await SQL.QueryOBJ({
             db: this.db,
-            query: `SELECT * FROM Logs WHERE ${sql}`,
+            query: `SELECT ${select} FROM Logs WHERE ${sql}`,
             use: "Prepare",
             all: true,
         });

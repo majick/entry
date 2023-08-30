@@ -772,6 +772,7 @@ export class LogsPage implements Endpoint {
                                 name="filter_type"
                                 id="filter_type"
                                 class={"secondary"}
+                                required
                                 style={{
                                     width: "10rem",
                                 }}

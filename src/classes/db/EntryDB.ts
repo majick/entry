@@ -457,7 +457,8 @@ export default class EntryDB {
 
                 // count comments
                 const comments = await EntryDB.Logs.QueryLogs(
-                    `Type = "comment" AND Content LIKE "${record.CustomURL};%" LIMIT 100`
+                    `Type = "comment" AND Content LIKE "${record.CustomURL};%"`,
+                    "ROWID"
                 );
 
                 record.Comments = comments[2].length;

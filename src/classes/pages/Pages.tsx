@@ -1020,7 +1020,7 @@ export class PasteCommentsPage implements Endpoint {
                                     ? "s"
                                     : CommentPastes.length === 1
                                     ? ""
-                                    : "s"}{" "}
+                                    : "s"}
                                 , newest <i>to</i> oldest
                             </span>
 
