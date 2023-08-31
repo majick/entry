@@ -290,7 +290,8 @@ export class GetPasteFromURL implements Endpoint {
                                     {EntryDB.config.log &&
                                         EntryDB.config.log.events.includes(
                                             "report"
-                                        ) && (
+                                        ) &&
+                                        !result.HostServer && (
                                             <a
                                                 class={"button"}
                                                 href={`/?ReportOn=${result.CustomURL}`}
@@ -1015,10 +1016,10 @@ export class PasteCommentsPage implements Endpoint {
                             }}
                         >
                             <span>
-                                <b>{CommentPastes.length}</b> comment
-                                {CommentPastes.length > 1
+                                <b>{result.Comments}</b> comment
+                                {(result.Comments || 0) > 1
                                     ? "s"
-                                    : CommentPastes.length === 1
+                                    : (result.Comments || 0) === 1
                                     ? ""
                                     : "s"}
                                 , newest <i>to</i> oldest

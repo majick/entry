@@ -1,10 +1,17 @@
 import ToggleTheme from "./ToggleTheme";
 
-import type { Config } from "../../..";
-import EntryDB from "../../db/EntryDB";
+import EntryDB, { Paste } from "../../db/EntryDB";
+import { db } from "../api/API";
 
-const config: Config = (await EntryDB.GetConfig()) as Config;
+// get version
+let version: Partial<Paste> | undefined;
 
+if (!EntryDB.config) {
+    await EntryDB.GetConfig();
+    version = await db.GetPasteFromURL("v");
+}
+
+// ...
 export default function Footer(props: { ShowBottomRow?: boolean }) {
     return (
         <div
@@ -37,43 +44,42 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     <a href="https://codeberg.org/hkau/entry/issues">issues</a>
                 </li>
 
-                <li>
-                    <a href="/v">version</a>
-                </li>
-
-                {config.app && config.app.enable_search !== false && (
-                    <li>
-                        <a href="/search">search</a>
-                    </li>
-                )}
+                {EntryDB.config.app &&
+                    EntryDB.config.app.enable_search !== false && (
+                        <li>
+                            <a href="/search">search</a>
+                        </li>
+                    )}
 
                 <li>
                     <ToggleTheme />
                 </li>
             </ul>
 
-            {config.app && config.app.footer && config.app.footer.rows && (
-                <>
-                    {/* custom footer rows */}
-                    {config.app.footer.rows.map((row) => (
-                        <ul
-                            class={"__footernav"}
-                            style={{
-                                display: "flex",
-                                gap: "0.25rem",
-                                padding: "0",
-                                margin: "0",
-                            }}
-                        >
-                            {Object.entries(row).map((link) => (
-                                <li>
-                                    <a href={link[1]}>{link[0]}</a>
-                                </li>
-                            ))}
-                        </ul>
-                    ))}
-                </>
-            )}
+            {EntryDB.config.app &&
+                EntryDB.config.app.footer &&
+                EntryDB.config.app.footer.rows && (
+                    <>
+                        {/* custom footer rows */}
+                        {EntryDB.config.app.footer.rows.map((row) => (
+                            <ul
+                                class={"__footernav"}
+                                style={{
+                                    display: "flex",
+                                    gap: "0.25rem",
+                                    padding: "0",
+                                    margin: "0",
+                                }}
+                            >
+                                {Object.entries(row).map((link) => (
+                                    <li>
+                                        <a href={link[1]}>{link[0]}</a>
+                                    </li>
+                                ))}
+                            </ul>
+                        ))}
+                    </>
+                )}
 
             {props.ShowBottomRow !== false && (
                 <p
@@ -82,7 +88,12 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                         margin: "0.4rem 0 0 0",
                     }}
                 >
-                    <a href="https://codeberg.org/hkau/entry">
+                    <a
+                        href="https://codeberg.org/hkau/entry"
+                        title={`Running Entry${
+                            version ? ` v${version!.Content}` : ""
+                        }`}
+                    >
                         {EntryDB.config.name || "Entry"}
                     </a>{" "}
                     <span

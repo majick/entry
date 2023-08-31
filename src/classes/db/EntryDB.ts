@@ -133,7 +133,10 @@ export default class EntryDB {
             });
 
             // ...
-            if (isNew) {
+            // check version
+            let storedVersion = await this.GetPasteFromURL("v");
+
+            if (!storedVersion) {
                 // create version paste
                 // this is used to check if the server is outdated
                 await SQL.QueryOBJ({
@@ -155,28 +158,26 @@ export default class EntryDB {
                     transaction: true,
                     use: "Prepare",
                 });
-            } else {
-                // check version
-                const storedVersion = await this.GetPasteFromURL("v");
-                if (!storedVersion) return;
 
-                if (storedVersion.Content !== pack.version) {
-                    // update version, this means that we are running a different version
-                    // than the version file contains
-                    storedVersion.Content = pack.version;
+                storedVersion = await this.GetPasteFromURL("v");
+            }
 
-                    await SQL.QueryOBJ({
-                        db: db,
-                        query: "UPDATE Pastes SET (Content, EditDate) = (?, ?) WHERE CustomURL = ?",
-                        params: [
-                            storedVersion.Content,
-                            new Date().toUTCString(), // new edit date
-                            storedVersion.CustomURL,
-                        ],
-                        transaction: true,
-                        use: "Prepare",
-                    });
-                }
+            if (storedVersion!.Content !== pack.version) {
+                // update version, this means that we are running a different version
+                // than the version file contains
+                storedVersion!.Content = pack.version;
+
+                await SQL.QueryOBJ({
+                    db: db,
+                    query: "UPDATE Pastes SET (Content, EditDate) = (?, ?) WHERE CustomURL = ?",
+                    params: [
+                        storedVersion!.Content,
+                        new Date().toUTCString(), // new edit date
+                        storedVersion!.CustomURL,
+                    ],
+                    transaction: true,
+                    use: "Prepare",
+                });
             }
         })();
     }
@@ -242,7 +243,7 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public static async InitLogs(): Promise<void> {
-        if (!EntryDB.config.log) return;
+        if (!EntryDB.config.log || EntryDB.Logs) return;
 
         // init logs
         EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
@@ -456,12 +457,14 @@ export default class EntryDB {
                     )[2].length;
 
                 // count comments
-                const comments = await EntryDB.Logs.QueryLogs(
-                    `Type = "comment" AND Content LIKE "${record.CustomURL};%"`,
-                    "ROWID"
-                );
+                if (EntryDB.Logs) {
+                    const comments = await EntryDB.Logs.QueryLogs(
+                        `Type = "comment" AND Content LIKE "${record.CustomURL};%"`,
+                        "ROWID"
+                    );
 
-                record.Comments = comments[2].length;
+                    record.Comments = comments[2].length;
+                } else record.Comments = 0;
 
                 // return
                 return resolve(record);
