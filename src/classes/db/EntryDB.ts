@@ -1248,6 +1248,11 @@ export default class EntryDB {
             if (paste.GroupName)
                 paste.CustomURL = paste.CustomURL.replace(`${paste.GroupName}/`, "");
 
+            // delete existing paste if it exists
+            const _paste = await this.GetPasteFromURL(paste.CustomURL);
+            if (_paste) await this.DeletePaste(_paste, EntryDB.config.admin);
+
+            // create paste
             outputs.push(await this.CreatePaste(paste, true));
         }
 

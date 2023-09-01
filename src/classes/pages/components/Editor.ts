@@ -410,6 +410,18 @@ export default function CreateEditor(ElementID: string, content: string) {
         parent: element,
     });
 
+    // prerender
+    (async () => {
+        window.sessionStorage.setItem(
+            "gen",
+            await ParseMarkdown(
+                window.sessionStorage.getItem("doc")! ||
+                    decodeURIComponent(content) ||
+                    ""
+            )
+        );
+    })();
+
     // add attributes
     const contentField = document.querySelector(
         "#editor-tab-text .cm-editor .cm-scroller .cm-content"

@@ -31,6 +31,8 @@ export function HandleCustomElements() {
     if (sat) style += `--base-sat: ${sat.innerText};`;
     if (lit) style += `--base-lit: ${lit.innerText};`;
 
+    if (hue || sat || lit) (window as any).PASTE_USES_CUSTOM_THEME = true;
+
     // ...set style attribute
     document.documentElement.setAttribute("style", style);
 

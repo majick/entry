@@ -596,13 +596,18 @@ export default class Home implements Endpoint {
 
                                     {/* ... */}
 
-                                    <script
-                                        dangerouslySetInnerHTML={{
-                                            __html: `document.getElementById("IsEditable").addEventListener("change", (e) => {
-                                                document.getElementById("EditPassword").toggleAttribute("disabled");
-                                            });`,
-                                        }}
-                                    />
+                                    {(!EntryDB.config.app ||
+                                        EntryDB.config.app
+                                            .enable_not_editable_pastes !==
+                                            false) && (
+                                        <script
+                                            dangerouslySetInnerHTML={{
+                                                __html: `document.getElementById("IsEditable").addEventListener("change", (e) => {
+                                                    document.getElementById("EditPassword").toggleAttribute("disabled");
+                                                });`,
+                                            }}
+                                        />
+                                    )}
                                 </form>
                             )) ||
                                 (paste && search.get("mode") === "edit" && (

@@ -240,7 +240,7 @@ export function ParseMarkdownSync(content: string): string {
     // these are actually so fragile, and the ordering of all of these operations matters
     content = content.replaceAll(
         /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)/g,
-        '<img alt="$<TEXT>" src="$<URL>" />'
+        '<img alt="$<TEXT>" title="$<TEXT>" src="$<URL>" />'
     );
 
     // ...broken images
