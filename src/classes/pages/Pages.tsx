@@ -28,7 +28,7 @@ import API, {
 } from "./api/API";
 
 // ...
-import { ParseMarkdown, ParseMarkdownSync } from "./components/Markdown";
+import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 
 // ...
@@ -859,7 +859,7 @@ export class PastesSearch implements Endpoint {
  * @implements {Endpoint}
  */
 export class PasteCommentsPage implements Endpoint {
-    async request(request: Request): Promise<Response> {
+    public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.searchParams);
 
@@ -913,6 +913,9 @@ export class PasteCommentsPage implements Endpoint {
 
                 continue;
             }
+
+            // render comment
+            paste.Content = await ParseMarkdown(paste.Content!);
 
             // push comment
             CommentPastes.push(paste);
@@ -1127,9 +1130,7 @@ export class PasteCommentsPage implements Endpoint {
                                             overflow: "auto",
                                         }}
                                         dangerouslySetInnerHTML={{
-                                            __html: ParseMarkdownSync(
-                                                comment.Content!
-                                            ),
+                                            __html: comment.Content!,
                                         }}
                                     />
 

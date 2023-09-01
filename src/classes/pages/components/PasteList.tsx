@@ -1,6 +1,8 @@
 import EntryDB, { Paste } from "../../db/EntryDB";
 import { CreateHash } from "../../db/helpers/Hash";
 
+import Modal from "./Modal";
+
 export default function PasteList(props: {
     Pastes: Paste[];
     Query?: string;
@@ -78,25 +80,86 @@ export default function PasteList(props: {
                     }}
                 >
                     {props.ShowDelete && props.AdminPassword && (
-                        <form action="/admin/api/mass-delete" method={"POST"}>
-                            <input
-                                type="hidden"
-                                required
-                                name="AdminPassword"
-                                value={props.AdminPassword}
-                            />
+                        <>
+                            <button
+                                className="secondary"
+                                id={"PLDeleteResultsButton"}
+                            >
+                                Delete Results
+                            </button>
 
-                            <input
-                                type="hidden"
-                                required
-                                name={"pastes"}
-                                value={JSON.stringify(
-                                    props.Pastes.map((p) => p.CustomURL)
-                                )}
-                            />
+                            <Modal
+                                buttonid="PLDeleteResultsButton"
+                                modalid="PLDeleteResultsModal"
+                            >
+                                <h4 style={{ textAlign: "center", width: "100%" }}>
+                                    Confirm Deletion
+                                </h4>
 
-                            <button class={"secondary"}>Delete Results</button>
-                        </form>
+                                <hr />
+
+                                <p>
+                                    This will delete{" "}
+                                    <b>all pastes shown on the page</b>! Please be
+                                    sure you want to do this.
+                                </p>
+
+                                <hr />
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                        gap: "1rem",
+                                    }}
+                                >
+                                    <form method="dialog" class={"mobile-max"}>
+                                        <button class={"green mobile-max"}>
+                                            Cancel
+                                        </button>
+
+                                        <div style={{ margin: "0.25rem 0" }}>
+                                            <hr class={"mobile-only"} />
+                                        </div>
+                                    </form>
+
+                                    <form
+                                        method="POST"
+                                        action={"/admin/api/mass-delete"}
+                                        class={"mobile-max"}
+                                        style={{
+                                            display: "flex",
+                                            flexWrap: "wrap",
+                                            justifyContent: "right",
+                                            maxWidth: "100%",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <input
+                                            type="hidden"
+                                            required
+                                            name="AdminPassword"
+                                            value={props.AdminPassword}
+                                        />
+
+                                        <input
+                                            type="hidden"
+                                            required
+                                            name={"pastes"}
+                                            value={JSON.stringify(
+                                                props.Pastes.map((p) => p.CustomURL)
+                                            )}
+                                        />
+
+                                        <button class={"red mobile-max"}>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </Modal>
+                        </>
                     )}
 
                     <div

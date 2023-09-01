@@ -2,6 +2,7 @@ import { Endpoint, Renderer } from "honeybee";
 
 import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/Footer";
+import Modal from "./components/Modal";
 
 import { DecryptPaste, db, PageHeaders, Session } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
@@ -745,7 +746,10 @@ export default class Home implements Endpoint {
                     </main>
 
                     {paste && (
-                        <dialog id="editor-modal-delete">
+                        <Modal
+                            buttonid="editor-open-delete-modal"
+                            modalid="editor-modal-delete"
+                        >
                             <h4 style={{ textAlign: "center", width: "100%" }}>
                                 Confirm Deletion
                             </h4>
@@ -826,7 +830,7 @@ export default class Home implements Endpoint {
                                     <button class={"red mobile-max"}>Delete</button>
                                 </form>
                             </div>
-                        </dialog>
+                        </Modal>
                     )}
 
                     <script

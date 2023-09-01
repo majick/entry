@@ -490,16 +490,6 @@ for (let element of document.querySelectorAll(
     });
 }
 
-// handle paste delete modal
-if (document.getElementById("editor-open-delete-modal"))
-    document
-        .getElementById("editor-open-delete-modal")!
-        .addEventListener("click", () => {
-            (
-                document.getElementById("editor-modal-delete") as HTMLDialogElement
-            ).showModal();
-        });
-
 // clear stored content only if ref isn't the homepage (meaning the paste was created properly)
 if (
     !document.referrer.endsWith(`${window.location.host}/`) && // homepage
