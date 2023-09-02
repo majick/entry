@@ -22,8 +22,8 @@ export type Paste = {
     Content: string;
     EditPassword: string;
     CustomURL: string;
-    PubDate: string;
-    EditDate: string;
+    PubDate: number;
+    EditDate: number;
     GroupName?: string;
     GroupSubmitPassword?: string;
     ENC_IV?: string;
@@ -499,12 +499,14 @@ export default class EntryDB {
                     return resolve({
                         CustomURL: PasteURL,
                         Content: text,
-                        PubDate:
+                        PubDate: parseFloat(
                             (await request).headers.get("X-Paste-PubDate") ||
-                            new Date().toUTCString(),
-                        EditDate:
+                                new Date().getTime().toString()
+                        ),
+                        EditDate: parseFloat(
                             (await request).headers.get("X-Paste-EditDate") ||
-                            new Date().toUTCString(),
+                                new Date().getTime().toString()
+                        ),
                         GroupName:
                             (await request).headers.get("X-Paste-GroupName") || "",
                         HostServer: server,
@@ -744,8 +746,8 @@ export default class EntryDB {
                 PasteInfo.EditPassword,
                 PasteInfo.CustomURL,
                 PasteInfo.ViewPassword,
-                new Date().toUTCString(), // PubDate
-                new Date().toUTCString(), // EditDate
+                new Date().getTime(), // PubDate
+                new Date().getTime(), // EditDate
                 PasteInfo.GroupName || "",
                 PasteInfo.GroupSubmitPassword || "",
             ],

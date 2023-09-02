@@ -375,17 +375,25 @@ export class GetPasteFromURL implements Endpoint {
                                         <span>Expires: {result.ExpireOn}</span>
                                     )}
 
-                                    <span title={result.PubDate}>
+                                    <span
+                                        title={new Date(
+                                            result.PubDate
+                                        ).toUTCString()}
+                                    >
                                         Pub:{" "}
                                         <span className="utc-date-to-localize">
-                                            {result.PubDate}
+                                            {new Date(result.PubDate).toUTCString()}
                                         </span>
                                     </span>
 
-                                    <span title={result.EditDate}>
+                                    <span
+                                        title={new Date(
+                                            result.EditDate
+                                        ).toUTCString()}
+                                    >
                                         Edit:{" "}
                                         <span className="utc-date-to-localize">
-                                            {result.EditDate}
+                                            {new Date(result.EditDate).toUTCString()}
                                         </span>
                                     </span>
 
@@ -763,9 +771,13 @@ export class PastesSearch implements Endpoint {
                                             Created:{" "}
                                             <span
                                                 class={"utc-date-to-localize"}
-                                                title={paste.PubDate}
+                                                title={new Date(
+                                                    paste.PubDate
+                                                ).toUTCString()}
                                             >
-                                                {paste.PubDate}
+                                                {new Date(
+                                                    paste.PubDate
+                                                ).toUTCString()}
                                             </span>{" "}
                                             · Content length: {paste.Content.length}{" "}
                                             Characters
@@ -891,7 +903,7 @@ export class PasteCommentsPage implements Endpoint {
 
         // get comments
         const comments = await EntryDB.Logs.QueryLogs(
-            `Type = "comment" AND Content LIKE "${result.CustomURL};%" ORDER BY substr(Timestamp, 5, 1000) DESC LIMIT 100 OFFSET ${OFFSET}`
+            `Type = "comment" AND Content LIKE "${result.CustomURL};%" ORDER BY cast(Timestamp as float) DESC LIMIT 100 OFFSET ${OFFSET}`
         );
 
         const CommentPastes: Partial<Paste>[] = [];
@@ -905,7 +917,7 @@ export class PasteCommentsPage implements Endpoint {
                 // deleted comment
                 CommentPastes.push({
                     CustomURL: "",
-                    PubDate: new Date().toUTCString(),
+                    PubDate: new Date().getTime(),
                     Content: "[comment deleted]",
                     Views: -1,
                     Comments: 0,
@@ -1089,7 +1101,9 @@ export class PasteCommentsPage implements Endpoint {
                                     >
                                         <li>
                                             <b class={"utc-date-to-localize"}>
-                                                {comment.PubDate}
+                                                {new Date(
+                                                    comment.PubDate || 0
+                                                ).toUTCString()}
                                             </b>
                                         </li>
 

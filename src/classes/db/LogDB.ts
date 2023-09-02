@@ -29,7 +29,7 @@ export type LogEvent =
 
 export type Log = {
     Content: string;
-    Timestamp: string;
+    Timestamp: number;
     Type: LogEvent;
     ID: string;
 };
@@ -81,7 +81,7 @@ export default class LogDB {
         // fill log
         const _log: Log = {
             Content: log.Content || "No content",
-            Timestamp: log.Timestamp || new Date().toUTCString(),
+            Timestamp: log.Timestamp || new Date().getTime(),
             Type: log.Type || "generic",
             ID: log.ID || ComputeRandomObjectHash(),
         };
@@ -166,11 +166,14 @@ export default class LogDB {
      * @method QueryLogs
      *
      * @param {string} sql
-     * @param [select="*"] 
+     * @param [select="*"]
      * @return {Promise<[boolean, string, Log[]]>}
      * @memberof LogDB
      */
-    public async QueryLogs(sql: string, select: string = "*"): Promise<[boolean, string, Log[]]> {
+    public async QueryLogs(
+        sql: string,
+        select: string = "*"
+    ): Promise<[boolean, string, Log[]]> {
         // query logs
         const logs = await SQL.QueryOBJ({
             db: this.db,

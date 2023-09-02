@@ -453,6 +453,10 @@ pre code {
     padding: 0;
 }
 
+pre code p {
+    display: none;
+}
+
 pre,
 code,
 pre code span {

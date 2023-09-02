@@ -705,7 +705,9 @@ export class LogsPage implements Endpoint {
                       'Type IS NOT "session"',
                       'Type IS NOT "comment"',
                       'Type IS NOT "report"',
-                  ].join(" AND ")} LIMIT ${LIMIT}`
+                  ].join(
+                      " AND "
+                  )} ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
         );
 
         // return
@@ -901,9 +903,13 @@ export class LogsPage implements Endpoint {
 
                                             <td
                                                 class="utc-date-to-localize"
-                                                title={log.Timestamp}
+                                                title={new Date(
+                                                    log.Timestamp || 0
+                                                ).toUTCString()}
                                             >
-                                                {log.Timestamp}
+                                                {new Date(
+                                                    log.Timestamp || 0
+                                                ).toUTCString()}
                                             </td>
 
                                             <td>{log.Type}</td>
@@ -1108,7 +1114,7 @@ export class ManageReports implements Endpoint {
 
         // fetch all reports
         const reports = await EntryDB.Logs.QueryLogs(
-            `Type = "report" AND Content LIKE "create;${body.paste_customurl}%" LIMIT ${LIMIT}`
+            `Type = "report" AND Content LIKE "create;${body.paste_customurl}%" ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
         );
 
         // get report logs
@@ -1282,7 +1288,9 @@ export class ManageReports implements Endpoint {
                                         {/* https://sentrytwo.com/paste/doc/what#logs */}
                                         <td>{report[2].Content.split(";")[1]}</td>
                                         <td class={"utc-date-to-localize"}>
-                                            {report[2].Timestamp}
+                                            {new Date(
+                                                report[2].Timestamp || 0
+                                            ).toUTCString()}
                                         </td>
 
                                         <td>{report[0] === true ? "yes" : "no"}</td>
@@ -1498,8 +1506,14 @@ export class ViewReport implements Endpoint {
                     </p>
 
                     <p>
-                        Pub: <b class={"utc-date-to-localize"}>{report.PubDate}</b>,
-                        Edit: <b class={"utc-date-to-localize"}>{report.EditDate}</b>
+                        Pub:{" "}
+                        <b class={"utc-date-to-localize"}>
+                            {new Date(report.PubDate || 0).toUTCString()}
+                        </b>
+                        , Edit:{" "}
+                        <b class={"utc-date-to-localize"}>
+                            {new Date(report.PubDate || 0).toUTCString()}
+                        </b>
                         , Comments: <b>{report.Comments}</b>
                     </p>
 

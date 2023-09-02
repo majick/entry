@@ -337,7 +337,7 @@ export class EditPaste implements Endpoint {
                 EditPassword: body.NewEditPassword || body.OldEditPassword,
                 CustomURL: body.NewURL || body.OldURL,
                 PubDate: (paste || { PubDate: "" }).PubDate!,
-                EditDate: new Date().toUTCString(),
+                EditDate: new Date().getTime(),
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             }
         );
