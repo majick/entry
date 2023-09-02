@@ -40,7 +40,7 @@ export const DefaultHeaders = {
 
 export const PageHeaders = {
     ...DefaultHeaders,
-    "Cache-Control": "private",
+    "Cache-Control": "private, max-age=432000, must-revalidate",
 };
 
 /**
@@ -328,15 +328,15 @@ export class EditPaste implements Endpoint {
                 Content: body.OldContent,
                 EditPassword: body.OldEditPassword,
                 CustomURL: body.OldURL,
-                PubDate: "",
-                EditDate: "",
+                PubDate: 0,
+                EditDate: 0,
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             },
             {
                 Content: body.NewContent,
                 EditPassword: body.NewEditPassword || body.OldEditPassword,
                 CustomURL: body.NewURL || body.OldURL,
-                PubDate: (paste || { PubDate: "" }).PubDate!,
+                PubDate: (paste || { PubDate: 0 }).PubDate!,
                 EditDate: new Date().getTime(),
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             }
@@ -533,8 +533,8 @@ export class GetRawPaste implements Endpoint {
             status: 200,
             headers: {
                 "Content-Type": "text/plain; charset=utf-8",
-                "X-Paste-PubDate": result.PubDate,
-                "X-Paste-EditDate": result.EditDate,
+                "X-Paste-PubDate": result.PubDate.toString(),
+                "X-Paste-EditDate": result.EditDate.toString(),
                 "X-Paste-GroupName": result.GroupName || "",
                 "X-Frame-Options": "",
             },

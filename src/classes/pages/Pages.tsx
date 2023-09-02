@@ -933,6 +933,11 @@ export class PasteCommentsPage implements Endpoint {
             CommentPastes.push(paste);
         }
 
+        // check if paste is a comment on another paste
+        const PreviousInThread = (
+            await EntryDB.Logs.QueryLogs(`Content LIKE "%;${result.CustomURL}"`)
+        )[2][0];
+
         // ...
         function CommentsNav() {
             return (
@@ -959,9 +964,16 @@ export class PasteCommentsPage implements Endpoint {
                             View Paste
                         </a>
 
-                        <a href={"javascript:history.back()"} class={"button"}>
-                            Back
-                        </a>
+                        {PreviousInThread && (
+                            <a
+                                class={"button"}
+                                href={`/paste/comments/${
+                                    PreviousInThread.Content.split(";")[0]
+                                }`}
+                            >
+                                Back
+                            </a>
+                        )}
                     </div>
 
                     <hr />
@@ -983,7 +995,7 @@ export class PasteCommentsPage implements Endpoint {
                             </>
                         )}
 
-                        {OFFSET / 100 < (result.Comments || 0) / 100 &&
+                        {OFFSET / 100 < (result.Comments || 0) / 100 - 1 &&
                             (result.Comments || 0) > 100 && (
                                 <>
                                     {/* only shown if we're not at the last page (100 per page) */}
@@ -1038,6 +1050,20 @@ export class PasteCommentsPage implements Endpoint {
                                     ? ""
                                     : "s"}
                                 , newest <i>to</i> oldest
+                                {PreviousInThread && (
+                                    <>
+                                        {", "}
+                                        <a
+                                            href={`/paste/comments/${
+                                                PreviousInThread.Content.split(
+                                                    ";"
+                                                )[0]
+                                            }`}
+                                        >
+                                            see full thread
+                                        </a>
+                                    </>
+                                )}
                             </span>
 
                             <a

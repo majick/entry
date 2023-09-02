@@ -53,6 +53,7 @@ export function ParseMarkdownSync(content: string): string {
             // run replacements
             code = code.replaceAll("*", "&!temp-ast;");
             code = code.replaceAll("`", "&!temp-back;");
+            code = code.replaceAll("\n", "&nbsp;1;\n");
 
             // return
             return `<pre><code class="language-${lang}">${code}</code></pre>\n`;
@@ -229,6 +230,7 @@ export function ParseMarkdownSync(content: string): string {
     //                   (we need this to stop italics matching when the asterisk is in a code block)
     //      (essentially just replaces it and then runs the italics match and then replaces it again)
     content = content.replaceAll("&!temp-back;", "`");
+    content = content.replaceAll("&nbsp;1;\n", "&nbsp;\n");
 
     // strikethrough
     content = content.replaceAll(/(\~{2})(.*?)(\~{2})/gs, "<del>$2</del>");

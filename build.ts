@@ -3,7 +3,7 @@ import fs from "node:fs";
 
 if (process.env.DO_NOT_CLEAR_DIST === undefined)
     fs.rmSync("./dist", { recursive: true }); // reset dist directory
-    
+
 const output = await build({
     entrypoints: [
         "./src/index.ts",

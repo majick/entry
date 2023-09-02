@@ -2,8 +2,9 @@
     /* default colors (light) */
     --base-hue: 0;
     --base-sat: 0%;
-    --base-lit: 93%;
+    --base-lit: 96%;
     --mod: -;
+    --diff: 9%;
 
     --background-surface-1: hsl(
         var(--base-hue),
@@ -20,32 +21,32 @@
     --background-surface1: hsl(
         var(--base-hue),
         var(--base-sat),
-        calc(var(--base-lit) + 4%)
+        calc(var(--base-lit) var(--mod) 4% + var(--diff))
     );
 
     --background-surface1a: hsla(
         var(--base-hue),
         var(--base-sat),
-        calc(var(--base-lit) + 8%),
+        calc(var(--base-lit) var(--mod) 8% + var(--diff)),
         0.4
     );
 
     --background-surface1-5: hsl(
         var(--base-hue),
         var(--base-sat),
-        calc(var(--base-lit) + 6%)
+        calc(var(--base-lit) var(--mod) 6% + var(--diff))
     );
 
     --background-surface2: hsl(
         var(--base-hue),
         var(--base-sat),
-        calc(var(--base-lit) + 21%)
+        calc(var(--base-lit) var(--mod) 21% + var(--diff))
     );
 
     --background-surface3: hsl(
         var(--base-hue),
         var(--base-sat),
-        calc(var(--base-lit) + 23%)
+        calc(var(--base-lit) var(--mod) 23% + var(--diff))
     );
 
     --text-color: hsl(208, 7%, `%);
@@ -67,6 +68,8 @@
 
 html.dark-theme {
     --base-lit: 11%;
+    --mod: +;
+    --diff: 0%;
 
     --text-color: hsl(204, 4%, 80%);
     --text-color-faded: hsl(207, 5%, 54%);

@@ -698,7 +698,7 @@ export class LogsPage implements Endpoint {
         // get logs
         const logs = await EntryDB.Logs.QueryLogs(
             body.filter_type !== undefined
-                ? `Type = "${body.filter_type}" LIMIT ${LIMIT}`
+                ? `Type = "${body.filter_type}" ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
                 : `ID IS NOT NULL AND ${[
                       // these log types should probably never be cleared
                       'Type IS NOT "view_paste"',
