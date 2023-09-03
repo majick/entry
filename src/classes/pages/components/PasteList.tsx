@@ -45,8 +45,8 @@ export default function PasteList(props: {
                                 name={"query"}
                                 placeholder={"Query"}
                                 value={props.Query}
+                                class={"secondary"}
                                 style={{
-                                    background: "var(--background-surface)",
                                     width: "20rem",
                                 }}
                             />

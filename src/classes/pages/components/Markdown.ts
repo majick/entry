@@ -189,6 +189,8 @@ export function ParseMarkdownSync(content: string): string {
                 )}">${attributes[0].replaceAll("_", " ")}</span>`;
             // disable block
             else if (_class === "disable") result = "";
+            // class block
+            else if (_class === "class") result = `<span class="${attributes[0]}">`;
 
             // return
             return result;

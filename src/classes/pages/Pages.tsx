@@ -338,7 +338,7 @@ export class GetPasteFromURL implements Endpoint {
                                         <summary
                                             style={{
                                                 fontWeight: "normal",
-                                                width: "100px",
+                                                width: "90px",
                                             }}
                                         >
                                             Export
@@ -361,7 +361,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 href={`/api/html/${result.CustomURL}`}
                                                 target={"_blank"}
                                                 style={{
-                                                    width: "90px",
+                                                    width: "100px",
                                                 }}
                                             >
                                                 HTML
@@ -452,7 +452,19 @@ export class GetPasteFromURL implements Endpoint {
                             </div>
                         </div>
 
-                        <Footer ShowBottomRow={false} />
+                        <Footer
+                            ShowBottomRow={
+                                (
+                                    (
+                                        EntryDB.config.app || {
+                                            footer: {
+                                                show_name_on_all_pages: false,
+                                            },
+                                        }
+                                    ).footer || { show_name_on_all_pages: false }
+                                ).show_name_on_all_pages === true
+                            }
+                        />
                     </main>
 
                     <script
@@ -573,7 +585,22 @@ export class PasteDocView implements Endpoint {
                                     />
                                 </div>
 
-                                <Footer ShowBottomRow={false} />
+                                <Footer
+                                    ShowBottomRow={
+                                        (
+                                            (
+                                                EntryDB.config.app || {
+                                                    footer: {
+                                                        show_name_on_all_pages:
+                                                            false,
+                                                    },
+                                                }
+                                            ).footer || {
+                                                show_name_on_all_pages: false,
+                                            }
+                                        ).show_name_on_all_pages === true
+                                    }
+                                />
                             </div>
 
                             <details className="sidebar-mobile">
@@ -764,13 +791,7 @@ export class PastesSearch implements Endpoint {
                                 }}
                             >
                                 {pastes.map((paste) => (
-                                    <div
-                                        class={"search-result"}
-                                        style={{
-                                            background: "var(--background-surface)",
-                                            padding: "1rem",
-                                        }}
-                                    >
+                                    <div class={"search-result card"}>
                                         <a
                                             href={`/${
                                                 paste.CustomURL.startsWith("/")
@@ -1210,12 +1231,7 @@ export class PasteCommentsPage implements Endpoint {
                             )}
 
                             {CommentPastes.map((comment) => (
-                                <div
-                                    style={{
-                                        background: "var(--background-surface)",
-                                        padding: "1rem",
-                                    }}
-                                >
+                                <div class={"card"}>
                                     <ul
                                         className="__footernav"
                                         style={{

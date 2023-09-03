@@ -9,7 +9,7 @@ import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
 
 // create global
-import Footer from "./classes/pages/components/Footer";
+import Footer, { InitFooterExtras } from "./classes/pages/components/Footer";
 
 (global as any).EntryDB = EntryDB;
 (global as any).Footer = Footer;
@@ -34,6 +34,7 @@ export type Config = {
         enable_expiry?: boolean;
         enable_not_editable_pastes?: boolean;
         footer?: {
+            show_name_on_all_pages?: boolean;
             rows: Array<{
                 [key: string]: string;
             }>;
@@ -142,6 +143,8 @@ if (EntryDB.config.plugin_file) {
             plugins = { ...plugins, ...Plugin };
     }
 }
+
+await InitFooterExtras(plugins); // load footer pages to the footer
 
 // ...create config
 const config: HoneybeeConfig = {

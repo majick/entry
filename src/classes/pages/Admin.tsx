@@ -1203,8 +1203,8 @@ export class ManageReports implements Endpoint {
                                 name={"paste_customurl"}
                                 placeholder={"Custom URL"}
                                 value={body.paste_customurl}
+                                class={"secondary"}
                                 style={{
-                                    background: "var(--background-surface)",
                                     width: "20rem",
                                 }}
                             />
@@ -1530,11 +1530,10 @@ export class ViewReport implements Endpoint {
                     <hr />
 
                     <div
+                        class={"card"}
                         style={{
                             maxHeight: "20rem",
                             overflow: "auto",
-                            background: "var(--background-surface)",
-                            padding: "1rem",
                         }}
                         dangerouslySetInnerHTML={{
                             __html: ParseMarkdownSync(report.Content!),

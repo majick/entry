@@ -1,6 +1,8 @@
 import ToggleTheme from "./ToggleTheme";
 
 import EntryDB, { Paste } from "../../db/EntryDB";
+import { HoneybeeConfig } from "honeybee";
+
 import { db } from "../api/API";
 
 // get version
@@ -9,6 +11,23 @@ let version: Partial<Paste> | undefined;
 if (!EntryDB.config) {
     await EntryDB.GetConfig();
     version = await db.GetPasteFromURL("v");
+}
+
+// plugin footer load
+const FooterExtras: string[] = [];
+
+export async function InitFooterExtras(plugins: HoneybeeConfig["Pages"]) {
+    // if a plugin page exists that begins with ._footer, save it to FooterExtras
+    for (const plugin of Object.entries(plugins)) {
+        if (!plugin[0].startsWith("._footer")) continue;
+
+        FooterExtras.push(
+            // load plugin using fake request and then push the text output
+            `<!-- ${plugin[0]} -->${await (
+                await new plugin[1].Page().request(new Request("entry:footer-load"))
+            ).text()}`
+        );
+    }
 }
 
 // ...
@@ -137,6 +156,11 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     }, 50);`,
                 }}
             />
+
+            {/* footer extras */}
+            {FooterExtras.map((html) => (
+                <div dangerouslySetInnerHTML={{ __html: html }}></div>
+            ))}
         </div>
     );
 }

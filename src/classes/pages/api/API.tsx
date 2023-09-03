@@ -700,7 +700,10 @@ export class DeleteComment implements Endpoint {
         if (paste.HostServer) return new _404Page().request(request);
 
         // check edit password
-        if (paste.EditPassword !== CreateHash(body.EditPassword))
+        if (
+            paste.EditPassword !== CreateHash(body.EditPassword) &&
+            paste.EditPassword !== CreateHash(EntryDB.config.admin)
+        )
             return new _404Page().request(request);
 
         // get comment log

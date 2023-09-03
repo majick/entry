@@ -686,6 +686,13 @@ dialog::backdrop {
     height: max-content;
 }
 
+.card {
+    background: var(--background-surface);
+    padding: 1rem;
+    display: block;
+    width: 100%;
+}
+
 details {
     background: var(--background-surface1);
     color: currentColor;
