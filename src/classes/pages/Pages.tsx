@@ -30,6 +30,7 @@ import API, {
 // ...
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
+import Modal from "./components/Modal";
 
 // ...
 
@@ -151,24 +152,42 @@ export class GetPasteFromURL implements Endpoint {
                         {search.get("UnhashedEditPassword") &&
                             search.get("UnhashedEditPassword") !==
                                 "paste is not editable!" && (
-                                <div
-                                    class="mdnote"
-                                    style={{
-                                        marginBottom: "0.5rem",
-                                    }}
-                                >
-                                    <b className="mdnote-title">
-                                        Don't forget your edit password!
-                                    </b>
-                                    <p>
-                                        You cannot edit or delete your paste if you
-                                        don't have your edit password. Please save it
-                                        somewhere safe:{" "}
-                                        <code>
-                                            {search.get("UnhashedEditPassword")}
-                                        </code>
-                                    </p>
-                                </div>
+                                <>
+                                    <div
+                                        class="mdnote"
+                                        style={{
+                                            marginBottom: "0.5rem",
+                                        }}
+                                    >
+                                        <b className="mdnote-title">
+                                            Don't forget your edit password!
+                                        </b>
+                                        <p>
+                                            You cannot edit or delete your paste if
+                                            you don't have your edit password. Please
+                                            save it somewhere safe:{" "}
+                                            <code>
+                                                {search.get("UnhashedEditPassword")}
+                                            </code>
+                                        </p>
+                                    </div>
+
+                                    <div
+                                        class="mdnote note-warn"
+                                        style={{
+                                            marginBottom: "0.5rem",
+                                        }}
+                                    >
+                                        <b className="mdnote-title">
+                                            The URL you are currently on contains the
+                                            edit password for your paste!
+                                        </b>
+                                        <p>
+                                            You can click <a href="?">here</a> to
+                                            remove it.
+                                        </p>
+                                    </div>
+                                </>
                             )}
 
                         {result.ViewPassword && <DecryptionForm paste={result} />}
@@ -1060,18 +1079,97 @@ export class PasteCommentsPage implements Endpoint {
                                                 )[0]
                                             }`}
                                         >
-                                            see thread
+                                            up thread
                                         </a>
                                     </>
                                 )}
                             </span>
 
-                            <a
-                                href={`/?CommentOn=${result.CustomURL}`}
-                                className="button secondary"
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "0.5rem",
+                                    flexWrap: "wrap",
+                                }}
                             >
-                                Add Comment
-                            </a>
+                                <a
+                                    href={`/?CommentOn=${result.CustomURL}`}
+                                    className="button secondary"
+                                >
+                                    Add Comment
+                                </a>
+
+                                {(search.get("edit") !== "true" && (
+                                    <>
+                                        <button id={"managebutton"}>Manage</button>
+
+                                        <Modal
+                                            buttonid="managebutton"
+                                            modalid="managemodal"
+                                        >
+                                            <h1>Manage Comments</h1>
+
+                                            <hr />
+
+                                            <form
+                                                method="dialog"
+                                                class={"mobile-max"}
+                                            >
+                                                <button
+                                                    class={"green"}
+                                                    style={{
+                                                        width: "100%",
+                                                    }}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </form>
+
+                                            <hr />
+
+                                            <form
+                                                style={{
+                                                    display: "flex",
+                                                    gap: "0.5rem",
+                                                    flexWrap: "wrap",
+                                                }}
+                                            >
+                                                <input
+                                                    type="hidden"
+                                                    name="edit"
+                                                    value={"true"}
+                                                    required
+                                                />
+
+                                                <input
+                                                    type="text"
+                                                    name="UnhashedEditPassword"
+                                                    placeholder={"Edit Password"}
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
+                                                    autoComplete={"off"}
+                                                    required
+                                                />
+
+                                                <button class={"mobile-max"}>
+                                                    Enter Manage Mode
+                                                </button>
+                                            </form>
+                                        </Modal>
+                                    </>
+                                )) || (
+                                    <a
+                                        href={"?edit=false"}
+                                        className="button secondary"
+                                    >
+                                        Stop Editing
+                                    </a>
+                                )}
+                            </div>
                         </div>
 
                         <hr />
@@ -1189,6 +1287,44 @@ export class PasteCommentsPage implements Endpoint {
                                                     ? ""
                                                     : "s"}
                                             </a>
+                                        </div>
+                                    )}
+
+                                    {search.get("edit") === "true" && (
+                                        <div>
+                                            <hr />
+
+                                            <form
+                                                action="/api/comments/delete"
+                                                method={"POST"}
+                                            >
+                                                <input
+                                                    type="hidden"
+                                                    name="CustomURL"
+                                                    value={result.CustomURL}
+                                                    required
+                                                />
+
+                                                <input
+                                                    type="hidden"
+                                                    name="CommentURL"
+                                                    value={comment.CustomURL}
+                                                    required
+                                                />
+
+                                                <input
+                                                    type="hidden"
+                                                    name="EditPassword"
+                                                    value={
+                                                        search.get(
+                                                            "UnhashedEditPassword"
+                                                        ) || ""
+                                                    }
+                                                    required
+                                                />
+
+                                                <button>Delete</button>
+                                            </form>
                                         </div>
                                     )}
                                 </div>

@@ -191,6 +191,11 @@ const config: HoneybeeConfig = {
         "/api/delete": { Method: "POST", Page: API.DeletePaste },
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
         "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
+        "/api/comments/delete": {
+            Type: "begins",
+            Method: "POST",
+            Page: API.DeleteComment,
+        },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET search
         "/search": { Page: Pages.PastesSearch },

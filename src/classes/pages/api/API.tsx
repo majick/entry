@@ -676,6 +676,67 @@ export class JSONAPI implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class DeleteComment
+ * @implements {Endpoint}
+ */
+export class DeleteComment implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+        if (paste.HostServer) return new _404Page().request(request);
+
+        // check edit password
+        if (paste.EditPassword !== CreateHash(body.EditPassword))
+            return new _404Page().request(request);
+
+        // get comment log
+        const CommentLog = (
+            await EntryDB.Logs.QueryLogs(
+                `Content = "${paste.CustomURL};${body.CommentURL}"`
+            )
+        )[2][0];
+
+        if (!CommentLog) return new _404Page().request(request);
+
+        // delete log and paste (this unlinks the comment)
+        const result = [];
+
+        result.push(await EntryDB.Logs.DeleteLog(CommentLog.ID));
+        result.push(
+            await db.DeletePaste(
+                {
+                    CustomURL: CommentLog.Content.split(";")[1],
+                },
+                EntryDB.config.admin // delete using admin password
+            )
+        );
+
+        // return
+        return new Response(JSON.stringify(result), {
+            status: 302,
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json; charset=utf-8",
+                Location: `/paste/comments/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -694,4 +755,5 @@ export default {
     RenderMarkdown,
     GetPasteHTML,
     JSONAPI,
+    DeleteComment,
 };
