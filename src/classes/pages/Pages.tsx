@@ -1060,7 +1060,7 @@ export class PasteCommentsPage implements Endpoint {
                                                 )[0]
                                             }`}
                                         >
-                                            see full thread
+                                            see thread
                                         </a>
                                     </>
                                 )}

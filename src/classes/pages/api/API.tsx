@@ -40,7 +40,7 @@ export const DefaultHeaders = {
 
 export const PageHeaders = {
     ...DefaultHeaders,
-    "Cache-Control": "private, max-age=432000, must-revalidate",
+    "Cache-Control": "no-cache",
 };
 
 /**
