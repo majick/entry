@@ -87,7 +87,10 @@ export default class Home implements Endpoint {
                                 }}
                             >
                                 <b class={"mdnote-title"}>Application Error</b>
-                                <p>{decodeURIComponent(search.get("err")!)}</p>
+                                <p>
+                                    {decodeURIComponent(search.get("err")!)},{" "}
+                                    <a href="javascript:history.back()">go back</a>
+                                </p>
                             </div>
                         )) ||
                             (search.get("msg") && (
@@ -98,7 +101,12 @@ export default class Home implements Endpoint {
                                     }}
                                 >
                                     <b class={"mdnote-title"}>Application Message</b>
-                                    <p>{decodeURIComponent(search.get("msg")!)}</p>
+                                    <p>
+                                        {decodeURIComponent(search.get("msg")!)},{" "}
+                                        <a href="javascript:history.back()">
+                                            go back
+                                        </a>
+                                    </p>
                                 </div>
                             ))}
 

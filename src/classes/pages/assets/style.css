@@ -37,6 +37,13 @@
         calc(var(--base-lit) var(--mod) 6% + var(--diff))
     );
 
+    --background-surface1-5a: hsla(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) var(--mod) 10% + var(--diff)),
+        0.4
+    );
+
     --background-surface2: hsl(
         var(--base-hue),
         var(--base-sat),
@@ -215,6 +222,16 @@ button:hover,
 button.secondary:hover,
 .button.secondary:hover {
     background: var(--background-surface-1);
+}
+
+button.tertiary,
+.button.tertiary {
+    background: var(--background-surface1a);
+}
+
+button.tertiary:hover,
+.button.tertiary:hover {
+    background: var(--background-surface1-5a);
 }
 
 button.green,

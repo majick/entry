@@ -58,6 +58,9 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))
 - `POST /api/comments/delete`, Delete a comment from a paste, expects FormData with the fields: `CustomURL, EditPassword, CommentURL`
+- `POST /api/associate`, Associate (Login) as a paste, expects FormData with the fields: `CustomURL, EditPassword`
+    - Links posted comments with this paste
+- `POST /api/disassociate`, Disassociate (Logout) from a paste
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
 - `GET  /api/exists/{paste}`, Check if a paste exists

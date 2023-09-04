@@ -200,6 +200,8 @@ const config: HoneybeeConfig = {
             Method: "POST",
             Page: API.DeleteComment,
         },
+        "/api/associate": { Method: "POST", Page: API.PasteLogin },
+        "/api/disassociate": { Method: "POST", Page: API.PasteLogout },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET search
         "/search": { Page: Pages.PastesSearch },

@@ -240,6 +240,9 @@ export class CreatePaste implements Endpoint {
         body.Content = decodeURIComponent(body.Content);
         if (body.CustomURL) body.CustomURL = body.CustomURL.toLowerCase();
 
+        // load associated
+        body.Associated = GetCookie(request.headers.get("Cookie")!, "associated");
+
         // create paste
         const result = await db.CreatePaste(body);
 
@@ -762,9 +765,92 @@ export class DeleteComment implements Endpoint {
         return new Response(JSON.stringify(result), {
             status: 302,
             headers: {
-                ...DefaultHeaders,
                 "Content-Type": "application/json; charset=utf-8",
                 Location: `/paste/comments/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class PasteLogin
+ * @implements {Endpoint}
+ */
+export class PasteLogin implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+        if (paste.HostServer) return new _404Page().request(request); // can't post comments as a paste from another server... right now!
+
+        // check edit password
+        if (
+            paste.EditPassword !== CreateHash(body.EditPassword) &&
+            paste.EditPassword !== CreateHash(EntryDB.config.admin)
+        )
+            return new Response("Incorrect password", {
+                status: 302,
+                headers: {
+                    Location: "/?err=Incorrect password",
+                },
+            });
+
+        // return
+        return new Response(paste.CustomURL, {
+            status: 302,
+            headers: {
+                Location: `/?msg=Associated as ${encodeURIComponent(
+                    paste.CustomURL || ""
+                )}`,
+                "Set-Cookie": `associated=${
+                    paste.CustomURL
+                }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                    60 * 60 * 24 * 365
+                }`,
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class PasteLogout
+ * @implements {Endpoint}
+ */
+export class PasteLogout implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // get customurl
+        const CustomURL = GetCookie(request.headers.get("Cookie")!, "associated");
+        if (!CustomURL)
+            return new Response("You must be associated with a paste to do this", {
+                status: 401,
+            });
+
+        // get paste
+        const paste = await db.GetPasteFromURL(CustomURL);
+        if (!paste) return new _404Page().request(request);
+        if (paste.HostServer) return new _404Page().request(request); // can't post comments as a paste from another server... right now!
+
+        // return
+        return new Response(paste.CustomURL, {
+            status: 302,
+            headers: {
+                Location: `/?msg=Removed association with ${encodeURIComponent(
+                    paste.CustomURL || ""
+                )}`,
+                "Set-Cookie": `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
             },
         });
     }
@@ -790,4 +876,6 @@ export default {
     GetPasteHTML,
     JSONAPI,
     DeleteComment,
+    PasteLogin,
+    PasteLogout,
 };

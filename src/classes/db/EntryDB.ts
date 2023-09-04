@@ -40,6 +40,7 @@ export type Paste = {
     CommentOn?: string; // * the paste the that this paste is commenting on
     Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)
     ReportOn?: string; // * the paste that this paste is reporting
+    Associated?: string | undefined; // * the paste that is associated with this new paste
 };
 
 let StaticInit = false;
@@ -717,10 +718,15 @@ export default class EntryDB {
             PasteInfo.GroupName = "comments";
             PasteInfo.CustomURL = `comments/${PasteInfo.CustomURL}`;
 
+            if (PasteInfo.Associated)
+                PasteInfo.Associated = `;${PasteInfo.Associated}`;
+
             // create log
             await EntryDB.Logs.CreateLog({
                 Type: "comment",
-                Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}`,
+                Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}${
+                    PasteInfo.Associated || ""
+                }`,
             });
         }
 

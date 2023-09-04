@@ -985,6 +985,10 @@ export class PasteCommentsPage implements Endpoint {
                 continue;
             }
 
+            // add associated info
+            const Associated = comment.Content.split(";")[2];
+            if (Associated) paste.Associated = Associated;
+
             // render comment
             paste.Content = await ParseMarkdown(paste.Content!);
 
@@ -996,6 +1000,9 @@ export class PasteCommentsPage implements Endpoint {
         const PreviousInThread = (
             await EntryDB.Logs.QueryLogs(`Content LIKE "%;${result.CustomURL}"`)
         )[2][0];
+
+        // get associated paste
+        const PostingAs = GetCookie(request.headers.get("Cookie")!, "associated");
 
         // ...
         function CommentsNav() {
@@ -1108,7 +1115,30 @@ export class PasteCommentsPage implements Endpoint {
                                     : (result.Comments || 0) === 1
                                     ? ""
                                     : "s"}
-                                , newest <i>to</i> oldest
+                                , posting as{" "}
+                                {(PostingAs && (
+                                    <>
+                                        <b>{PostingAs}</b> (
+                                        <a
+                                            href="#entry:logout"
+                                            id={"entry:button.logout"}
+                                        >
+                                            logout
+                                        </a>
+                                        )
+                                    </>
+                                )) || (
+                                    <>
+                                        <b>anonymous</b> (
+                                        <a
+                                            href="#entry:login"
+                                            id={"entry:button.login"}
+                                        >
+                                            login
+                                        </a>
+                                        )
+                                    </>
+                                )}
                                 {PreviousInThread && (
                                     <>
                                         {", "}
@@ -1141,7 +1171,12 @@ export class PasteCommentsPage implements Endpoint {
 
                                 {(search.get("edit") !== "true" && (
                                     <>
-                                        <button id={"managebutton"}>Manage</button>
+                                        <button
+                                            id={"managebutton"}
+                                            class={"tertiary"}
+                                        >
+                                            Manage
+                                        </button>
 
                                         <Modal
                                             buttonid="managebutton"
@@ -1266,6 +1301,19 @@ export class PasteCommentsPage implements Endpoint {
                                             </b>
                                         </li>
 
+                                        {comment.Associated && (
+                                            <li
+                                                style={{
+                                                    color: "var(--text-color-faded)",
+                                                }}
+                                            >
+                                                posted by{" "}
+                                                <a href={`/${comment.Associated}`}>
+                                                    {comment.Associated}
+                                                </a>
+                                            </li>
+                                        )}
+
                                         <li
                                             style={{
                                                 color: "var(--text-color-faded)",
@@ -1366,15 +1414,148 @@ export class PasteCommentsPage implements Endpoint {
                             ))}
                         </div>
                     </div>
+
+                    {/* extra modals */}
+
+                    {(PostingAs === undefined && (
+                        <Modal
+                            buttonid="entry:button.login"
+                            modalid="entry:modal.login"
+                        >
+                            <h1
+                                style={{
+                                    width: "25rem",
+                                    maxWidth: "100%",
+                                }}
+                            >
+                                Associate Paste
+                            </h1>
+
+                            <hr />
+
+                            <form method="dialog" class={"mobile-max"}>
+                                <button
+                                    class={"green"}
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </form>
+
+                            <hr />
+
+                            <form
+                                action="/api/associate"
+                                method={"POST"}
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "0.5rem",
+                                }}
+                            >
+                                <input
+                                    type="text"
+                                    placeholder={"Paste URL"}
+                                    maxLength={EntryDB.MaxCustomURLLength}
+                                    minLength={EntryDB.MinCustomURLLength}
+                                    name={"CustomURL"}
+                                    id={"CustomURL"}
+                                    autoComplete={"off"}
+                                />
+
+                                <input
+                                    type="text"
+                                    placeholder={"Paste Edit Password"}
+                                    maxLength={EntryDB.MaxPasswordLength}
+                                    minLength={EntryDB.MinPasswordLength}
+                                    name={"EditPassword"}
+                                    id={"EditPassword"}
+                                    autoComplete={"off"}
+                                />
+
+                                <button
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    Login
+                                </button>
+                            </form>
+                        </Modal>
+                    )) || (
+                        <Modal
+                            buttonid="entry:button.logout"
+                            modalid="entry:modal.logout"
+                        >
+                            <h1
+                                style={{
+                                    width: "25rem",
+                                    maxWidth: "100%",
+                                }}
+                            >
+                                Logout
+                            </h1>
+
+                            <hr />
+
+                            <div
+                                style={{
+                                    width: "100%",
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: "0.5rem",
+                                }}
+                            >
+                                <form
+                                    method="dialog"
+                                    style={{
+                                        width: "calc(50% - 0.25rem)",
+                                    }}
+                                >
+                                    <button
+                                        class={"green"}
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </form>
+
+                                <form
+                                    action="/api/disassociate"
+                                    method={"POST"}
+                                    style={{
+                                        width: "calc(50% - 0.25rem)",
+                                    }}
+                                >
+                                    <button
+                                        class={"red"}
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                    >
+                                        Confirm
+                                    </button>
+                                </form>
+                            </div>
+                        </Modal>
+                    )}
                 </div>,
                 <>
-                    <title>Paste Comments</title>
+                    <title>Comments on {result.CustomURL}</title>
+
+                    <meta
+                        name="description"
+                        content={`View comments on ${result.CustomURL}, on ${EntryDB.config.name}`}
+                    />
                 </>
             ),
             {
                 headers: {
                     ...PageHeaders,
-                    "Cache-Control": "max-age=0, must-revalidate", // page might change too much for it to be cached!
                     "Content-Type": "text/html",
                 },
             }
