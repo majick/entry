@@ -360,6 +360,7 @@ export class ManagePastes implements Endpoint {
                                 id={"sql"}
                                 placeholder={"SELECT * FROM Pastes LIMIT 100"}
                                 className="secondary"
+                                required
                                 style={{
                                     width: "40rem",
                                 }}
@@ -399,6 +400,59 @@ export class ManagePastes implements Endpoint {
                             </div>
                         </form>
                     </div>
+
+                    <hr />
+
+                    <iframe
+                        name={"association_frame"}
+                        style={{
+                            display: "none",
+                        }}
+                        // @ts-ignore
+                        onload={`(${((event: any) => {
+                            // check path
+                            if (event.target.contentWindow.location.pathname !== "/")
+                                return;
+
+                            // alert
+                            alert("Paste association changed!");
+                        }).toString()})(event);`}
+                    ></iframe>
+
+                    <p>
+                        <b>Set Association</b>
+                    </p>
+
+                    <form
+                        action="/api/associate"
+                        method={"POST"}
+                        target={"association_frame"}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            flexWrap: "wrap",
+                        }}
+                    >
+                        <input
+                            type="hidden"
+                            required
+                            name="EditPassword"
+                            value={body.AdminPassword}
+                        />
+
+                        <input
+                            name={"CustomURL"}
+                            placeholder={"Custom URL"}
+                            class={"secondary"}
+                            required
+                            style={{
+                                width: "20rem",
+                            }}
+                        />
+
+                        <button class={"secondary"}>Login</button>
+                    </form>
 
                     <hr />
 
@@ -1286,7 +1340,13 @@ export class ManageReports implements Endpoint {
                                         }}
                                     >
                                         {/* https://sentrytwo.com/paste/doc/what#logs */}
-                                        <td>{report[2].Content.split(";")[1]}</td>
+                                        <td
+                                            style={{ maxWidth: "10rem" }}
+                                            title={report[2].Content.split(";")[1]}
+                                        >
+                                            {report[2].Content.split(";")[1]}
+                                        </td>
+
                                         <td class={"utc-date-to-localize"}>
                                             {new Date(
                                                 report[2].Timestamp || 0

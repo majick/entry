@@ -1230,17 +1230,32 @@ export class PasteCommentsPage implements Endpoint {
                                 gap: "0.5rem",
                             }}
                         >
-                            {search.get("msg") && (
+                            {(search.get("err") && (
                                 <div
-                                    class={"mdnote note-note"}
+                                    class={"mdnote note-error"}
                                     style={{
                                         marginBottom: "0.5rem",
                                     }}
                                 >
-                                    <b class={"mdnote-title"}>Application Message</b>
-                                    <p>{decodeURIComponent(search.get("msg")!)}</p>
+                                    <b class={"mdnote-title"}>Application Error</b>
+                                    <p>{decodeURIComponent(search.get("err")!)}</p>
                                 </div>
-                            )}
+                            )) ||
+                                (search.get("msg") && (
+                                    <div
+                                        class={"mdnote note-note"}
+                                        style={{
+                                            marginBottom: "0.5rem",
+                                        }}
+                                    >
+                                        <b class={"mdnote-title"}>
+                                            Application Message
+                                        </b>
+                                        <p>
+                                            {decodeURIComponent(search.get("msg")!)}
+                                        </p>
+                                    </div>
+                                ))}
 
                             {result.Comments === 0 && (
                                 <div
@@ -1391,6 +1406,32 @@ export class PasteCommentsPage implements Endpoint {
 
                     {/* extra modals */}
 
+                    <iframe
+                        name={"association_frame"}
+                        style={{
+                            display: "none",
+                        }}
+                        // @ts-ignore
+                        onload={`(${((event: any) => {
+                            // check path
+                            if (event.target.contentWindow.location.pathname !== "/")
+                                return;
+
+                            // redirect (show error on this page instead)
+                            const SearchParams = new URLSearchParams(
+                                event.target.contentWindow.location.search
+                            );
+
+                            // get message or error
+                            const msg = SearchParams.get("msg");
+                            const err = SearchParams.get("err");
+
+                            // redirect
+                            if (msg) window.location.href = `?msg=${msg}`;
+                            else if (err) window.location.href = `?err=${err}`;
+                        }).toString()})(event);`}
+                    ></iframe>
+
                     {(PostingAs === undefined && (
                         <Modal
                             buttonid="entry:button.login"
@@ -1410,6 +1451,7 @@ export class PasteCommentsPage implements Endpoint {
                             <form
                                 action="/api/associate"
                                 method={"POST"}
+                                target={"association_frame"}
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
@@ -1503,6 +1545,7 @@ export class PasteCommentsPage implements Endpoint {
                                 <form
                                     action="/api/disassociate"
                                     method={"POST"}
+                                    target={"association_frame"}
                                     style={{
                                         width: "calc(50% - 0.25rem)",
                                     }}

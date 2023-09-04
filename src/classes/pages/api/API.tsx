@@ -798,7 +798,7 @@ export class PasteLogin implements Endpoint {
         // check edit password
         if (
             paste.EditPassword !== CreateHash(body.EditPassword) &&
-            paste.EditPassword !== CreateHash(EntryDB.config.admin)
+            body.EditPassword !== EntryDB.config.admin
         )
             return new Response("Incorrect password", {
                 status: 302,
