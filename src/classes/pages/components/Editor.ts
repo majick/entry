@@ -252,14 +252,14 @@ function BasicCompletion(context: CompletionContext): any {
                 label: "center",
                 type: "function",
                 info: "Center paste content",
-                apply: "!!center!! ...content here... !!",
+                apply: "-> ...content here... <-",
                 detail: "extras",
             },
             {
                 label: "right",
                 type: "function",
                 info: "Align paste content to the right",
-                apply: "!!right!! ...content here... !!",
+                apply: "-> ...content here... ->",
                 detail: "extras",
             },
             {
@@ -487,6 +487,50 @@ document.querySelector(".tab-container")!.addEventListener("click", () => {
 
     (document.querySelector(".cm-content")! as HTMLElement).focus();
 });
+
+// check CustomURL
+const CustomURLInput: HTMLInputElement | null = document.getElementById(
+    "CustomURL"
+) as any;
+
+const GroupNameInput: HTMLInputElement | null = document.getElementById(
+    "GroupName"
+) as any;
+
+let URLInputTimeout: any = undefined;
+
+if (CustomURLInput)
+    CustomURLInput.addEventListener("keyup", (event: any) => {
+        let value = event.target.value.trim();
+
+        // make sure value isn't too short
+        if (value.length < 2) {
+            CustomURLInput.classList.remove("invalid");
+            return;
+        }
+
+        // add group name
+        console.log(GroupNameInput)
+        if (GroupNameInput && GroupNameInput.value.trim().length > 1)
+            value = `${GroupNameInput.value.trim()}/${value}`;
+
+        // create timeout
+        if (URLInputTimeout) clearTimeout(URLInputTimeout);
+        URLInputTimeout = setTimeout(async () => {
+            // fetch url
+            const exists =
+                (await (await fetch(`/api/exists/${value}`)).text()) === "true";
+
+            if (!exists) {
+                // paste does not exist
+                CustomURLInput.classList.remove("invalid");
+                return;
+            }
+
+            // set input to invalid
+            CustomURLInput.classList.add("invalid");
+        }, 500);
+    });
 
 // details auto focus
 for (let element of document.querySelectorAll(

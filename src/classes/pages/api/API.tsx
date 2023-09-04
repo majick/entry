@@ -527,6 +527,7 @@ export class GetRawPaste implements Endpoint {
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result) return new _404Page().request(request);
 
         // return
         return new Response(result!.Content, {
@@ -538,6 +539,35 @@ export class GetRawPaste implements Endpoint {
                 "X-Paste-GroupName": result.GroupName || "",
                 "X-Frame-Options": "",
             },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class PasteExists
+ * @implements {Endpoint}
+ */
+export class PasteExists implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get paste name
+        const name = url.pathname.slice("/api/exists/".length, url.pathname.length);
+
+        // return home if name === ""
+        if (name === "") return new _404Page().request(request);
+
+        // attempt to get paste
+        const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result)
+            return new Response("false", {
+                status: 200,
+            });
+
+        // return
+        return new Response("true", {
+            status: 200,
         });
     }
 }
@@ -755,6 +785,7 @@ export default {
     GetAllPastes,
     GetAllPastesInGroup,
     GetRawPaste,
+    PasteExists,
     RenderMarkdown,
     GetPasteHTML,
     JSONAPI,

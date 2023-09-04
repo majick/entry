@@ -48,7 +48,7 @@ export default class Home implements Endpoint {
                         ""
                     );
         }
-        
+
         // decrypt (if we can)
         if (search.get("ViewPassword") && paste) {
             const decrypted = await new DecryptPaste().GetDecrypted({
@@ -511,6 +511,9 @@ export default class Home implements Endpoint {
                                                                         }
                                                                         maxLength={
                                                                             EntryDB.MaxCustomURLLength
+                                                                        }
+                                                                        id={
+                                                                            "GroupName"
                                                                         }
                                                                         name={
                                                                             "GroupName"

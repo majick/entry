@@ -175,7 +175,7 @@ svg {
 
 @media screen and (max-height: 900px) {
     .tab-container {
-        max-height: 70vh;
+        max-height: 65vh;
     }
 }
 
@@ -515,7 +515,8 @@ select:invalid:required {
 
 input:invalid,
 textarea:invalid,
-select:invalid {
+select:invalid,
+input.invalid {
     /* so, the idea behind this is because the input is technically wrong... but it isn't required,
        we're only going to show a yellow "border" thing! */
     box-shadow: inset 0 0 0 2px var(--yellow);

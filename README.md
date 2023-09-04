@@ -60,6 +60,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /api/comments/delete`, Delete a comment from a paste, expects FormData with the fields: `CustomURL, EditPassword, CommentURL`
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
+- `GET  /api/exists/{paste}`, Check if a paste exists
 - `GET  /api/html/{paste}`, Get rendered paste content
 - `GET  /api/group/{group}`, Get all pastes in specified group
 
