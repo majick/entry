@@ -502,7 +502,7 @@ select {
     max-width: 100%;
     border-radius: 0 !important;
     transition:
-        box-shadow 0.15s,
+        box-shadow 0.25s,
         opacity 0.15s,
         filter 0.15s;
 }
@@ -510,7 +510,7 @@ select {
 input:invalid:required,
 textarea:invalid:required,
 select:invalid:required {
-    box-shadow: inset 0 0 0 2px var(--red);
+    box-shadow: inset 4px 0 var(--red);
 }
 
 input:invalid,
@@ -519,7 +519,8 @@ select:invalid,
 input.invalid {
     /* so, the idea behind this is because the input is technically wrong... but it isn't required,
        we're only going to show a yellow "border" thing! */
-    box-shadow: inset 0 0 0 2px var(--yellow);
+    background-clip: padding-box;
+    box-shadow: inset 4px 0 var(--yellow) !important;
 }
 
 input:disabled,

@@ -504,13 +504,12 @@ if (CustomURLInput)
         let value = event.target.value.trim();
 
         // make sure value isn't too short
-        if (value.length < 2) {
+        if (value.length < 1) {
             CustomURLInput.classList.remove("invalid");
             return;
         }
 
         // add group name
-        console.log(GroupNameInput)
         if (GroupNameInput && GroupNameInput.value.trim().length > 1)
             value = `${GroupNameInput.value.trim()}/${value}`;
 
