@@ -998,11 +998,20 @@ export class PasteCommentsPage implements Endpoint {
 
         // check if paste is a comment on another paste
         const PreviousInThread = (
-            await EntryDB.Logs.QueryLogs(`Content LIKE "%;${result.CustomURL}"`)
+            await EntryDB.Logs.QueryLogs(
+                `Content LIKE "%;${result.CustomURL}" AND Content NOT LIKE "%;%;${result.CustomURL}"`
+            )
         )[2][0];
 
         // get associated paste
-        const PostingAs = GetCookie(request.headers.get("Cookie")!, "associated");
+        const PostingAs = GetCookie(
+            request.headers.get("Cookie")! || "",
+            "associated"
+        );
+
+        // if edit mode is enabled, but we aren't associated with this paste... return 404
+        if (search.get("edit") === "true" && PostingAs !== result.CustomURL)
+            return new _404Page().request(request);
 
         // ...
         function CommentsNav() {
@@ -1171,70 +1180,35 @@ export class PasteCommentsPage implements Endpoint {
 
                                 {(search.get("edit") !== "true" && (
                                     <>
-                                        <button
-                                            id={"managebutton"}
-                                            class={"tertiary"}
-                                        >
-                                            Manage
-                                        </button>
-
-                                        <Modal
-                                            buttonid="managebutton"
-                                            modalid="managemodal"
-                                        >
-                                            <h1>Manage Comments</h1>
-
-                                            <hr />
-
-                                            <form
-                                                method="dialog"
-                                                class={"mobile-max"}
-                                            >
+                                        {PostingAs !== undefined ? (
+                                            (PostingAs !== result.CustomURL && (
                                                 <button
-                                                    class={"green"}
-                                                    style={{
-                                                        width: "100%",
-                                                    }}
+                                                    // show logout button if we're already associated with a paste
+                                                    class={
+                                                        "tertiary modal:entry:button.logout"
+                                                    }
                                                 >
-                                                    Cancel
+                                                    Manage
                                                 </button>
-                                            </form>
-
-                                            <hr />
-
-                                            <form
-                                                style={{
-                                                    display: "flex",
-                                                    gap: "0.5rem",
-                                                    flexWrap: "wrap",
-                                                }}
+                                            )) || (
+                                                <a
+                                                    // show edit button if we're associated with this paste
+                                                    class={"button tertiary"}
+                                                    href={"?edit=true"}
+                                                >
+                                                    Manage
+                                                </a>
+                                            )
+                                        ) : (
+                                            <button
+                                                // show login button if we're not already associated with a paste
+                                                class={
+                                                    "tertiary modal:entry:button.login"
+                                                }
                                             >
-                                                <input
-                                                    type="hidden"
-                                                    name="edit"
-                                                    value={"true"}
-                                                    required
-                                                />
-
-                                                <input
-                                                    type="text"
-                                                    name="UnhashedEditPassword"
-                                                    placeholder={"Edit Password"}
-                                                    minLength={
-                                                        EntryDB.MinPasswordLength
-                                                    }
-                                                    maxLength={
-                                                        EntryDB.MaxPasswordLength
-                                                    }
-                                                    autoComplete={"off"}
-                                                    required
-                                                />
-
-                                                <button class={"mobile-max"}>
-                                                    Enter Manage Mode
-                                                </button>
-                                            </form>
-                                        </Modal>
+                                                Manage
+                                            </button>
+                                        )}
                                     </>
                                 )) || (
                                     <a
@@ -1433,19 +1407,6 @@ export class PasteCommentsPage implements Endpoint {
 
                             <hr />
 
-                            <form method="dialog" class={"mobile-max"}>
-                                <button
-                                    class={"green"}
-                                    style={{
-                                        width: "100%",
-                                    }}
-                                >
-                                    Cancel
-                                </button>
-                            </form>
-
-                            <hr />
-
                             <form
                                 action="/api/associate"
                                 method={"POST"}
@@ -1463,6 +1424,7 @@ export class PasteCommentsPage implements Endpoint {
                                     name={"CustomURL"}
                                     id={"CustomURL"}
                                     autoComplete={"off"}
+                                    required
                                 />
 
                                 <input
@@ -1473,6 +1435,7 @@ export class PasteCommentsPage implements Endpoint {
                                     name={"EditPassword"}
                                     id={"EditPassword"}
                                     autoComplete={"off"}
+                                    required
                                 />
 
                                 <button
@@ -1481,6 +1444,19 @@ export class PasteCommentsPage implements Endpoint {
                                     }}
                                 >
                                     Login
+                                </button>
+                            </form>
+
+                            <hr />
+
+                            <form method="dialog" class={"mobile-max"}>
+                                <button
+                                    class={"green"}
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    Cancel
                                 </button>
                             </form>
                         </Modal>

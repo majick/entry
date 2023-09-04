@@ -524,12 +524,6 @@ select {
         filter 0.15s;
 }
 
-input:invalid:required,
-textarea:invalid:required,
-select:invalid:required {
-    box-shadow: inset 4px 0 var(--red);
-}
-
 input:invalid,
 textarea:invalid,
 select:invalid,
@@ -538,6 +532,12 @@ input.invalid {
        we're only going to show a yellow "border" thing! */
     background-clip: padding-box;
     box-shadow: inset 4px 0 var(--yellow) !important;
+}
+
+input:invalid:required,
+textarea:invalid:required,
+select:invalid:required {
+    box-shadow: inset 4px 0 var(--red) !important;
 }
 
 input:disabled,
@@ -695,6 +695,10 @@ dialog h4 {
 dialog::backdrop {
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(5px);
+}
+
+dialog[open] {
+    animation: Grow 0.15s 0s running;
 }
 
 .editor-tab h1,
@@ -1055,9 +1059,19 @@ br:not(.cm-line br) {
     }
 }
 
+@keyframes Grow {
+    from {
+        transform: scale(0.95);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
 @keyframes GrowShrink {
     from {
-        transform: scaleY(1);
+        transform: scale(1);
     }
 
     50% {
@@ -1065,7 +1079,7 @@ br:not(.cm-line br) {
     }
 
     to {
-        transform: scaleY(1);
+        transform: scale(1);
     }
 }
 

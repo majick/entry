@@ -832,7 +832,10 @@ export class PasteLogin implements Endpoint {
 export class PasteLogout implements Endpoint {
     public async request(request: Request): Promise<Response> {
         // get customurl
-        const CustomURL = GetCookie(request.headers.get("Cookie")!, "associated");
+        const CustomURL = GetCookie(
+            request.headers.get("Cookie")! || "",
+            "associated"
+        );
         if (!CustomURL)
             return new Response("You must be associated with a paste to do this", {
                 status: 401,
