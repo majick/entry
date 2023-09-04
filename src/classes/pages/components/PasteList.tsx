@@ -246,10 +246,10 @@ export default function PasteList(props: {
                                     <td
                                         class="utc-date-to-localize"
                                         title={new Date(
-                                            paste.PubDate || 0
+                                            paste.EditDate || 0
                                         ).toUTCString()}
                                     >
-                                        {new Date(paste.PubDate || 0).toUTCString()}
+                                        {new Date(paste.EditDate || 0).toUTCString()}
                                     </td>
 
                                     {!EntryDB.config.app ||

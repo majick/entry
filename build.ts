@@ -21,7 +21,7 @@ const output = await build({
     splitting: true,
     naming: {
         asset: "[name].[ext]",
-        chunk: "[name].[ext]",
+        chunk: "[name]-[hash].[ext]",
         entry: "[name].[ext]", // do not include [dir]!!! files will NOT be findable if you include [dir]!!!
     },
     external: [

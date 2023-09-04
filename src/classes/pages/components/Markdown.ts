@@ -19,9 +19,15 @@ export type TableOfContents = Heading[];
  * @function ParseMarkdownSync
  *
  * @param {string} content
+ * @param [onserver=true]
  * @return {string}
  */
-export function ParseMarkdownSync(content: string): string {
+export function ParseMarkdownSync(
+    content: string,
+    onserver: boolean = true
+): string {
+    let CurrentPaste = "";
+
     // table of contents base
     const TOC: TableOfContents = [];
 
@@ -148,9 +154,15 @@ export function ParseMarkdownSync(content: string): string {
                 `<b>&gt;&gt; ${_class} &lt;&lt;</b>`
             )}`;
 
-            // ...theme
-            if (_class === "theme") result = `<theme>${attributes[0]}</theme>`;
-            // ...animation
+            // tag block
+            if (_class === "tag") {
+                // this is used to tell us information about the content that we will need to know for rendering
+                if (attributes[0] === "current_paste") CurrentPaste = attributes[1];
+                result = "";
+            }
+            // theme block
+            else if (_class === "theme") result = `<theme>${attributes[0]}</theme>`;
+            // animation block
             else if (_class === "animation")
                 result = `<span class="anim" style="animation: ${
                     // animation name
@@ -176,7 +188,7 @@ export function ParseMarkdownSync(content: string): string {
                         ? "width: 100%;"
                         : "width: max-content; max-width: 100%;"
                 }">`;
-            // ...close block
+            // close block
             else if (_class === "close") result = "</span>&nbsp;";
             // hsl block
             else if (_class === "hsl")
@@ -187,10 +199,15 @@ export function ParseMarkdownSync(content: string): string {
                     "_",
                     " "
                 )}">${attributes[0].replaceAll("_", " ")}</span>`;
-            // disable block
-            else if (_class === "disable") result = "";
+            // enable/disable block
+            else if (_class === "enable" || _class === "disable" || _class === "tag")
+                result = "";
             // class block
             else if (_class === "class") result = `<span class="${attributes[0]}">`;
+            // include block
+            else if (_class === "include" && attributes[0] !== CurrentPaste)
+                // set temp result
+                result = `<% tag temp_include ${attributes[0]} %>`;
 
             // return
             return result;
@@ -323,11 +340,15 @@ export function ParseMarkdownSync(content: string): string {
  * @function ParseMarkdown
  *
  * @export
- * @param {string} content
+ * @param {string}
+ * @param [onserver=true]
  * @return {Promise<string>}
  */
-export async function ParseMarkdown(content: string): Promise<string> {
-    content = ParseMarkdownSync(content);
+export async function ParseMarkdown(
+    content: string,
+    onserver: boolean = true
+): Promise<string> {
+    content = ParseMarkdownSync(content, onserver);
 
     // parse content with marked and return
     content = await marked.parse(content, {
@@ -346,6 +367,9 @@ export async function ParseMarkdown(content: string): Promise<string> {
             return `<p>\n${match}\n</p>`;
         }
     );
+
+    // fill includes
+    // TODO
 
     // fix mistakes (again)
     content = content.replaceAll("<p></p>", "");

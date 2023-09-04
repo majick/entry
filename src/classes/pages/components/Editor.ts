@@ -264,8 +264,14 @@ function BasicCompletion(context: CompletionContext): any {
             },
             {
                 label: "disable comments",
-                type: "variable",
+                type: "function",
                 apply: `<% disable comments %>`,
+                detail: "Extras",
+            },
+            {
+                label: "enable template",
+                type: "function",
+                apply: `<% enable template %>`,
                 detail: "Extras",
             },
             // animations
@@ -358,7 +364,7 @@ export default function CreateEditor(ElementID: string, content: string) {
                     const content = update.state.doc.toString();
                     window.sessionStorage.setItem("doc", content);
 
-                    const html = await ParseMarkdown(content);
+                    const html = await ParseMarkdown(content, false);
                     window.sessionStorage.setItem("gen", html);
 
                     // update the hidden contentInput element so we can save the paste
@@ -417,7 +423,8 @@ export default function CreateEditor(ElementID: string, content: string) {
             await ParseMarkdown(
                 window.sessionStorage.getItem("doc")! ||
                     decodeURIComponent(content) ||
-                    ""
+                    "",
+                false
             )
         );
     })();

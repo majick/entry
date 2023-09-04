@@ -173,7 +173,7 @@ svg {
     min-height: 15rem;
 }
 
-@media screen and (max-height: 950px) {
+@media screen and (max-height: 900px) {
     .tab-container {
         max-height: 70vh;
     }
@@ -419,6 +419,11 @@ h6:focus .htag {
 
     .mobile-block {
         display: block !important;
+    }
+
+    .mobile-flex-center {
+        justify-content: center !important;
+        align-items: center !important;
     }
 }
 

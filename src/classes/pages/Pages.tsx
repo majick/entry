@@ -144,6 +144,9 @@ export class GetPasteFromURL implements Endpoint {
             else Viewed = true;
         }
 
+        // tag paste
+        result.Content = `<% tag current_paste ${result.CustomURL} %>\n${result.Content}`;
+
         // return
         return new Response(
             Renderer.Render(
@@ -225,6 +228,7 @@ export class GetPasteFromURL implements Endpoint {
                             }}
                         >
                             <div
+                                class={"mobile-block"}
                                 style={{
                                     display: "flex",
                                     justifyContent: "space-between",
@@ -238,7 +242,6 @@ export class GetPasteFromURL implements Endpoint {
                                         display: "flex",
                                         gap: "0.5rem",
                                         flexWrap: "wrap",
-                                        maxWidth: "50%",
                                     }}
                                 >
                                     {editable[2] === true && (
@@ -329,6 +332,17 @@ export class GetPasteFromURL implements Endpoint {
                                             </a>
                                         )}
 
+                                    {result.Content.includes(
+                                        "<% enable template %>"
+                                    ) && (
+                                        <a
+                                            href={`/?Template=${result.CustomURL}`}
+                                            class={"button"}
+                                        >
+                                            Use Template
+                                        </a>
+                                    )}
+
                                     <details
                                         class={"horizontal"}
                                         style={{
@@ -338,7 +352,7 @@ export class GetPasteFromURL implements Endpoint {
                                         <summary
                                             style={{
                                                 fontWeight: "normal",
-                                                width: "90px",
+                                                width: "100px",
                                             }}
                                         >
                                             Export
@@ -380,7 +394,12 @@ export class GetPasteFromURL implements Endpoint {
                                     </details>
                                 </div>
 
+                                <div className="mobile-only">
+                                    <hr />
+                                </div>
+
                                 <div
+                                    class={"mobile-flex-center"}
                                     style={{
                                         display: "flex",
                                         flexDirection: "column",

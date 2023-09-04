@@ -34,7 +34,21 @@ export default class Home implements Endpoint {
 
         if (search.get("mode") === "edit" && search.get("OldURL"))
             paste = await db.GetPasteFromURL(search.get("OldURL")!);
+        else if (search.get("Template")) {
+            paste = await db.GetPasteFromURL(search.get("Template")!);
 
+            if (paste)
+                if (!paste!.Content!.includes("<% enable template %>"))
+                    // make sure paste is a template
+                    paste = undefined;
+                // remove template string from content if it is
+                else
+                    paste!.Content = paste!.Content!.replaceAll(
+                        "<% enable template %>",
+                        ""
+                    );
+        }
+        
         // decrypt (if we can)
         if (search.get("ViewPassword") && paste) {
             const decrypted = await new DecryptPaste().GetDecrypted({
@@ -580,6 +594,7 @@ export default class Home implements Endpoint {
                                     }
 
                                     {/* hidden */}
+
                                     <input
                                         type="hidden"
                                         name="CommentOn"
