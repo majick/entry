@@ -25,6 +25,7 @@ import API, {
     DefaultHeaders,
     GetCookie,
     PageHeaders,
+    GetAssociation,
 } from "./api/API";
 
 // ...
@@ -182,8 +183,10 @@ export class GetPasteFromURL implements Endpoint {
                                         }}
                                     >
                                         <b className="mdnote-title">
-                                            The URL you are currently on contains the
-                                            edit password for your paste!
+                                            The web address you are currently on
+                                            contains the edit password for your
+                                            paste! Please remove it before sharing
+                                            this current web address with anyone.
                                         </b>
                                         <p>
                                             You can click <a href="?">here</a> to
@@ -1004,10 +1007,11 @@ export class PasteCommentsPage implements Endpoint {
         )[2][0];
 
         // get associated paste
-        const PostingAs = GetCookie(
-            request.headers.get("Cookie")! || "",
-            "associated"
-        );
+        let PostingAs = undefined;
+
+        const _Association = await GetAssociation(request);
+        if (_Association[1] && !_Association[1].startsWith("associated"))
+            PostingAs = _Association[1];
 
         // if edit mode is enabled, but we aren't associated with this paste... return 404
         if (search.get("edit") === "true" && PostingAs !== result.CustomURL)
@@ -1384,17 +1388,6 @@ export class PasteCommentsPage implements Endpoint {
                                                     required
                                                 />
 
-                                                <input
-                                                    type="hidden"
-                                                    name="EditPassword"
-                                                    value={
-                                                        search.get(
-                                                            "UnhashedEditPassword"
-                                                        ) || ""
-                                                    }
-                                                    required
-                                                />
-
                                                 <button>Delete</button>
                                             </form>
                                         </div>
@@ -1576,6 +1569,9 @@ export class PasteCommentsPage implements Endpoint {
                 headers: {
                     ...PageHeaders,
                     "Content-Type": "text/html",
+                    "Set-Cookie": _Association[1].startsWith("associated")
+                        ? _Association[1]
+                        : "",
                 },
             }
         );

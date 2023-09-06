@@ -185,4 +185,29 @@ export default class LogDB {
         // return
         return [true, sql, logs];
     }
+
+    /**
+     * @method UpdateLog
+     *
+     * @param {string} id
+     * @param {string} content
+     * @return {Promise<[boolean, string]>}
+     * @memberof LogDB
+     */
+    public async UpdateLog(id: string, content: string): Promise<[boolean, string]> {
+        // make sure log exists
+        const log = await this.GetLog(id);
+        if (!log[2]) return [false, "Log does not exist"];
+
+        // delete log
+        await SQL.QueryOBJ({
+            db: this.db,
+            query: "UPDATE Logs SET Content = ? WHERE ID = ?",
+            params: [content, id],
+            use: "Prepare",
+        });
+
+        // return
+        return [true, "Log updated"];
+    }
 }

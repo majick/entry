@@ -143,6 +143,7 @@ html {
     line-height: 1.5;
     font-weight: 400;
     overflow-x: hidden;
+    transition: background 0.15s;
 }
 
 main {
@@ -171,6 +172,7 @@ svg {
 
 .tab-container {
     background: var(--background-surface1);
+    transition: background 0.15s;
     padding: 1.5rem;
     height: 45rem;
     overflow-y: auto;
@@ -226,12 +228,12 @@ button.secondary:hover,
 
 button.tertiary,
 .button.tertiary {
-    background: var(--background-surface1a);
+    background: var(--background-surface1-5a);
 }
 
 button.tertiary:hover,
 .button.tertiary:hover {
-    background: var(--background-surface1-5a);
+    background: var(--background-surface1a);
 }
 
 button.green,
@@ -519,6 +521,7 @@ select {
     max-width: 100%;
     border-radius: 0 !important;
     transition:
+        background 0.15s,
         box-shadow 0.25s,
         opacity 0.15s,
         filter 0.15s;

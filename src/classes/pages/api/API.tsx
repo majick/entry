@@ -139,6 +139,77 @@ export async function Session(request: Request): Promise<string> {
 }
 
 /**
+ * @function GetAssociation
+ *
+ * @export
+ * @param {Request} request
+ * @return {Promise<[boolean, string]>}
+ */
+export async function GetAssociation(
+    request: Request,
+    UpdateOnly: boolean = false,
+    SetAssociation?: string,
+    Delete: boolean = false
+): Promise<[boolean, string]> {
+    const config = (await EntryDB.GetConfig()) as Config;
+    if (!config.log || !config.log.events.includes("session"))
+        return [false, "Sessions are disabled"];
+
+    // get session
+    const session = GetCookie(request.headers.get("Cookie") || "", "session-id");
+    const association = GetCookie(request.headers.get("Cookie") || "", "associated");
+
+    // make sure session exists
+    if (!session) return [false, "Session does not exist"];
+    else {
+        // try to get session log
+        const log = await EntryDB.Logs.GetLog(session);
+        if (!log[0] || !log[2]) return [false, "Failed to get session log"];
+
+        // check if session has an association
+        const split = log[2].Content.split(";_with;");
+
+        // update only...
+        if (UpdateOnly) {
+            // update log
+            await EntryDB.Logs.UpdateLog(
+                log[2].ID,
+                `${split[0]};_with;${SetAssociation}`
+            );
+
+            return [true, ""];
+        } else if (Delete) {
+            // update log to remove association
+            await EntryDB.Logs.UpdateLog(log[2].ID, split[0]);
+            return [true, ""];
+        }
+
+        // ...
+        if (split[1])
+            if (association !== split[1])
+                // if association exists, but does not match what is in the log... reset!!
+                return [
+                    true,
+                    `associated=${
+                        split[1]
+                    }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                        60 * 60 * 24 * 365
+                    }`,
+                ];
+            // otherwise, return associated paste
+            else return [true, split[1]];
+        else if (association)
+            return [
+                true,
+                `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
+            ];
+    }
+
+    // default return
+    return [false, ""];
+}
+
+/**
  * @export
  * @class WellKnown
  * @implements {Endpoint}
@@ -240,8 +311,12 @@ export class CreatePaste implements Endpoint {
         body.Content = decodeURIComponent(body.Content);
         if (body.CustomURL) body.CustomURL = body.CustomURL.toLowerCase();
 
+        // make sure association is correct
+        const Association = await GetAssociation(request);
+
         // load associated
-        body.Associated = GetCookie(request.headers.get("Cookie")!, "associated");
+        if (!Association[1].startsWith("associated"))
+            body.Associated = Association[1];
 
         // create paste
         const result = await db.CreatePaste(body);
@@ -263,6 +338,7 @@ export class CreatePaste implements Endpoint {
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}`,
                 "X-Entry-Error": result[1],
+                "Set-Cookie": Association[1],
             },
         });
     }
@@ -732,17 +808,23 @@ export class DeleteComment implements Endpoint {
         if (!paste) return new _404Page().request(request);
         if (paste.HostServer) return new _404Page().request(request);
 
-        // check edit password
-        if (
-            paste.EditPassword !== CreateHash(body.EditPassword) &&
-            paste.EditPassword !== CreateHash(EntryDB.config.admin)
-        )
-            return new _404Page().request(request);
+        // check association
+        const association = await GetAssociation(request);
+
+        if (!association[0])
+            return new Response("You must be associated with a paste to do this", {
+                status: 401,
+            });
+
+        if (association[1].startsWith("associated"))
+            return new Response(
+                "Cannot delete comments on a paste you're not associated with! Please change your paste association."
+            );
 
         // get comment log
         const CommentLog = (
             await EntryDB.Logs.QueryLogs(
-                `Content = "${paste.CustomURL};${body.CommentURL}"`
+                `Content = "${paste.CustomURL};${body.CommentURL}" OR Content LIKE "${paste.CustomURL};${body.CommentURL};%"`
             )
         )[2][0];
 
@@ -767,6 +849,9 @@ export class DeleteComment implements Endpoint {
             headers: {
                 "Content-Type": "application/json; charset=utf-8",
                 Location: `/paste/comments/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
+                "Set-Cookie": association[1].startsWith("associated")
+                    ? association[1]
+                    : "",
             },
         });
     }
@@ -807,6 +892,9 @@ export class PasteLogin implements Endpoint {
                 },
             });
 
+        // generate association
+        const Association = await GetAssociation(request, true, paste.CustomURL);
+
         // return
         return new Response(paste.CustomURL, {
             status: 302,
@@ -836,6 +924,7 @@ export class PasteLogout implements Endpoint {
             request.headers.get("Cookie")! || "",
             "associated"
         );
+
         if (!CustomURL)
             return new Response("You must be associated with a paste to do this", {
                 status: 401,
@@ -845,6 +934,9 @@ export class PasteLogout implements Endpoint {
         const paste = await db.GetPasteFromURL(CustomURL);
         if (!paste) return new _404Page().request(request);
         if (paste.HostServer) return new _404Page().request(request); // can't post comments as a paste from another server... right now!
+
+        // remove association from session
+        await GetAssociation(request, false, "", true);
 
         // return
         return new Response(paste.CustomURL, {
