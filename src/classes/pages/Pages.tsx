@@ -146,7 +146,7 @@ export class GetPasteFromURL implements Endpoint {
         }
 
         // tag paste
-        result.Content = `<% tag current_paste ${result.CustomURL} %>\n${result.Content}`;
+        result.Content = `${result.Content}\n<% tag current_paste ${result.CustomURL} %>`;
 
         // return
         return new Response(
@@ -1002,7 +1002,8 @@ export class PasteCommentsPage implements Endpoint {
         // check if paste is a comment on another paste
         const PreviousInThread = (
             await EntryDB.Logs.QueryLogs(
-                `Content LIKE "%;${result.CustomURL}" AND Content NOT LIKE "%;%;${result.CustomURL}"`
+                `(Content LIKE "%;${result.CustomURL}" OR Content LIKE "%;${result.CustomURL};%")
+                AND Content NOT LIKE "%;%;${result.CustomURL}"`
             )
         )[2][0];
 
