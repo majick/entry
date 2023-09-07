@@ -378,7 +378,7 @@ export async function ParseMarkdown(
     content = content.replaceAll("</p><p>", "");
 
     // return
-    return decodeURIComponent(content);
+    return content;
 }
 
 // default export
