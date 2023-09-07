@@ -121,6 +121,7 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 
 // ...import endpoints
 import { _404Page } from "./classes/pages/components/404";
+import Builder from "./classes/pages/components/builder";
 import AdminAPI from "./classes/pages/api/AdminAPI";
 import Admin from "./classes/pages/Admin";
 import Pages from "./classes/pages/Pages";
@@ -211,6 +212,7 @@ const config: HoneybeeConfig = {
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
+        "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/": {
             // return paste view, will return homepage if no paste is provided

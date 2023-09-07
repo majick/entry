@@ -451,7 +451,7 @@ ol > li {
     margin-top: 0.25rem;
 }
 
-p:not(.mdnote p),
+p:not(.mdnote p):not(.builder\:page p),
 pre,
 table,
 ul,
@@ -1097,5 +1097,123 @@ br:not(.cm-line br) {
 
     100% {
         opacity: 100%;
+    }
+}
+
+@keyframes SlideInFromLeft {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* stuff for builder */
+.builder\:page {
+    --AlignX: center;
+    --AlignY: center;
+    --Spacing: 10px;
+
+    width: 100vw;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--Spacing);
+
+    align-items: var(--AlignX);
+    justify-content: var(--AlignY);
+}
+
+.builder\:text {
+    --Size: 16px;
+    --Weight: 400;
+    --LineSpacing: 1.5;
+    --LetterSpacing: 1;
+    --Margins: 0.5rem;
+    --Alignment: center;
+
+    font-size: var(--Size);
+    font-weight: var(--Weight);
+    line-height: var(--LineSpacing);
+    letter-spacing: var(--LetterSpacing);
+    margin: var(--Margins);
+    text-align: var(--Alignment);
+    font-size-adjust: none;
+}
+
+.builder\:card {
+    --Padding: 1rem;
+
+    background: var(--background-surface1);
+    padding: var(--Padding);
+    display: block;
+    width: max-content;
+}
+
+.builder\:toolbar {
+    position: fixed;
+    top: 0.5rem;
+    right: 0.5rem;
+    border-radius: 0.25rem;
+    background: var(--background-surface1);
+    display: flex;
+    gap: 4;
+    padding: 0.5rem;
+}
+
+.builder\:toolbar button {
+    border-radius: 0.25rem;
+    background: var(--background-surface1);
+}
+
+.builder\:toolbar button:hover {
+    background: var(--background-surface1-5a);
+}
+
+.builder\:sidebar {
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 25rem;
+    border-right: solid 1px var(--background-surface2);
+    background: var(--background-surface1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    animation: SlideInFromLeft 0.15s 0s running;
+}
+
+.builder\:sidebar button,
+.option {
+    width: 100%;
+    padding: 0.5rem;
+    border-bottom: solid 1px var(--background-surface2);
+}
+
+.component {
+    cursor: pointer;
+}
+
+.component.hover {
+    outline: solid 4px var(--blue2);
+}
+
+.component.active {
+    outline: solid 4px var(--blue);
+}
+
+@media screen and (max-width: 900px) {
+    .builder\:toolbar {
+        width: 100vw;
+        top: 0;
+        left: 0;
+    }
+
+    .builder\:sidebar {
+        width: 100vw;
     }
 }

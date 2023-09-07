@@ -10,6 +10,7 @@ const output = await build({
         "./src/classes/pages/components/Editor.ts",
         "./src/classes/pages/assets/ClientFixMarkdown.ts",
         "./src/classes/pages/components/Markdown.ts",
+        "./src/classes/pages/components/builder/Builder.tsx",
     ],
     minify: {
         identifiers: true,

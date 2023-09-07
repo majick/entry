@@ -60,6 +60,8 @@ export function ParseMarkdownSync(
             code = code.replaceAll("*", "&!temp-ast;");
             code = code.replaceAll("`", "&!temp-back;");
             code = code.replaceAll("\n", "&nbsp;1;\n");
+            code = code.replaceAll("#", "&#35;");
+            code = code.replaceAll("(", "&lpar;");
 
             // return
             return `<pre><code class="language-${lang}">${code}</code></pre>\n`;
@@ -376,7 +378,7 @@ export async function ParseMarkdown(
     content = content.replaceAll("</p><p>", "");
 
     // return
-    return content;
+    return decodeURIComponent(content);
 }
 
 // default export
