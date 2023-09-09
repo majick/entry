@@ -965,7 +965,10 @@ export class PasteCommentsPage implements Endpoint {
 
         // get comments
         const comments = await EntryDB.Logs.QueryLogs(
-            `Type = "comment" AND Content LIKE "${result.CustomURL};%" ORDER BY cast(Timestamp as float) DESC LIMIT 100 OFFSET ${OFFSET}`
+            `Type = "comment" AND Content LIKE "${result.CustomURL.replaceAll(
+                "_",
+                "\\_"
+            )};%" ESCAPE "\\" ORDER BY cast(Timestamp as float) DESC LIMIT 100 OFFSET ${OFFSET}`
         );
 
         const CommentPastes: Partial<Paste>[] = [];

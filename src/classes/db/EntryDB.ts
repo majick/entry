@@ -453,14 +453,20 @@ export default class EntryDB {
                 )
                     record.Views = (
                         await EntryDB.Logs.QueryLogs(
-                            `Content LIKE "${record.CustomURL};%"`
+                            `Content LIKE "${record.CustomURL.replaceAll(
+                                "_",
+                                "\\_"
+                            )};%" ESCAPE "\\"`
                         )
                     )[2].length;
 
                 // count comments
                 if (EntryDB.Logs) {
                     const comments = await EntryDB.Logs.QueryLogs(
-                        `Type = "comment" AND Content LIKE "${record.CustomURL};%"`,
+                        `Type = "comment" AND Content LIKE "${record.CustomURL.replaceAll(
+                            "_",
+                            "\\_"
+                        )};%" ESCAPE "\\"`,
                         "ROWID"
                     );
 

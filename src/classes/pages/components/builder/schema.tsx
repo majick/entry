@@ -110,7 +110,7 @@ function DragZones(props: {
         ) as HTMLElement;
 
         if (!PreviousDropElement || !NextDropElement) return;
-        
+
         if (
             !PreviousDropElement.classList.contains("builder:drag-zone") ||
             !NextDropElement.classList.contains("builder:drag-zone")
