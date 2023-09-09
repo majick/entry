@@ -73,7 +73,7 @@
     --red3: #ad0008;
 }
 
-html.dark-theme {
+.dark-theme {
     --base-lit: 11%;
     --mod: +;
     --diff: 0%;
@@ -95,22 +95,22 @@ html.dark-theme {
     --red3: #e0aeb4;
 }
 
-html.purple-theme {
+.purple-theme {
     --base-hue: 255;
     --base-sat: 50%;
 }
 
-html.blue-theme {
+.blue-theme {
     --base-hue: 203;
     --base-sat: 12%;
 }
 
-html.pink-theme {
+.pink-theme {
     --base-hue: 0;
     --base-sat: 50%;
 }
 
-html.green-theme {
+.green-theme {
     --base-hue: 105;
     --base-sat: 50%;
 }
@@ -234,6 +234,18 @@ button.tertiary,
 button.tertiary:hover,
 .button.tertiary:hover {
     background: var(--background-surface1a);
+}
+
+button.border,
+.button.border {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--background-surface2);
+}
+
+button.border:hover,
+.button.border:hover {
+    box-shadow: none;
+    background: var(--background-surface2);
 }
 
 button.green,
@@ -416,7 +428,7 @@ h6:focus .htag {
 }
 
 .mobile-only {
-    display: none;
+    display: none !important;
 }
 
 @media screen and (max-width: 800px) {
@@ -429,7 +441,7 @@ h6:focus .htag {
     }
 
     .mobile-only {
-        display: block;
+        display: block !important;
     }
 
     .mobile-flex {
@@ -557,6 +569,10 @@ input.secondary,
 textarea.secondary,
 select.secondary {
     background: var(--background-surface);
+}
+
+textarea {
+    resize: vertical;
 }
 
 .checkbox-container.secondary {
@@ -1160,8 +1176,11 @@ br:not(.cm-line br) {
     border-radius: 0.25rem;
     background: var(--background-surface1);
     display: flex;
-    gap: 4;
+    gap: 0.4rem;
     padding: 0.5rem;
+    box-shadow: 0 0 4px var(--background-surface3);
+    justify-content: center;
+    align-items: center;
 }
 
 .builder\:toolbar button {
@@ -1185,6 +1204,7 @@ br:not(.cm-line br) {
     flex-direction: column;
     gap: 0.4rem;
     animation: SlideInFromLeft 0.15s 0s running;
+    overflow: auto;
 }
 
 .builder\:sidebar button,
@@ -1192,6 +1212,42 @@ br:not(.cm-line br) {
     width: 100%;
     padding: 0.5rem;
     border-bottom: solid 1px var(--background-surface2);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.builder\:drag-element {
+    position: relative;
+}
+
+.builder\:drag-zone {
+    user-select: none;
+    -webkit-user-select: none;
+    width: 100%;
+    position: absolute;
+    padding: 0.5rem;
+    display: none;
+    height: 5px;
+}
+
+.builder\:drag-zone.top {
+    border-top: dashed 2px var(--background-surface2);
+    top: -10px
+}
+
+.builder\:drag-zone.bottom {
+    border-bottom: dashed 2px var(--background-surface2);
+    bottom: -10px;
+}
+
+.builder\:drag-zone.active {
+    border-color: var(--blue2);
+    display: block;
+}
+
+.builder\:drag-element:-moz-drag-over .builder\:drag-zone {
+    display: block;
 }
 
 .component {
@@ -1199,11 +1255,11 @@ br:not(.cm-line br) {
 }
 
 .component.hover {
-    outline: solid 4px var(--blue2);
+    outline: solid 2px var(--blue2);
 }
 
 .component.active {
-    outline: solid 4px var(--blue);
+    outline: solid 2px var(--blue);
 }
 
 @media screen and (max-width: 900px) {
@@ -1211,6 +1267,7 @@ br:not(.cm-line br) {
         width: 100vw;
         top: 0;
         left: 0;
+        border-radius: 0;
     }
 
     .builder\:sidebar {

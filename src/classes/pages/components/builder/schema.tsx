@@ -5,6 +5,7 @@
  */
 
 import { ParseMarkdownSync } from "../Markdown";
+import { Select, Update } from "./Builder";
 
 // types
 export type BaseNode = {
@@ -12,6 +13,7 @@ export type BaseNode = {
     ID?: string;
     Children?: Node[];
     NotRemovable?: boolean;
+    EditMode?: boolean;
 };
 
 export interface PageNode extends BaseNode {
@@ -22,6 +24,7 @@ export interface PageNode extends BaseNode {
     Spacing?: number; // gap, px
     NotRemovable: true;
     Children: Node[];
+    Theme?: "dark" | "light" | "purple" | "blue" | "green" | "pink";
 }
 
 export interface CardNode extends BaseNode {
@@ -54,10 +57,113 @@ export interface ImageNode extends BaseNode {
 export type Node = PageNode | CardNode | TextNode | ImageNode;
 
 export type BuilderDocument = {
-    Nodes: Node[];
+    Pages: PageNode[];
 };
 
+// state
+let dragging: Node;
+let draggingDocument: Node[];
+
 // components
+
+/**
+ * @function DragZones
+ * @description Place drop zones around text
+ *
+ * @param {{ visible?: boolean; fornode: Node; fordocument: Node[]; children: any }} props
+ * @return {*}
+ */
+function DragZones(props: {
+    visible?: boolean;
+    fornode: Node;
+    fordocument: Node[];
+    children: any;
+}): any {
+    function Drag(direction: number) {
+        if (dragging === props.fornode) return (props.visible = false);
+
+        // get index of props.fornode, move dragging to that index
+        const index = props.fordocument.indexOf(props.fornode) || 1;
+
+        // move dragging
+        draggingDocument.splice(draggingDocument.indexOf(dragging), 1);
+        props.fordocument.splice(index + direction, 0, dragging);
+
+        // update
+        return Update();
+    }
+
+    function ShowDropZones(event: any, remove: boolean = false) {
+        const target = event.target as HTMLElement;
+
+        // try to get previous and next siblings (drop elements)
+        let PreviousDropElement = (
+            target.previousElementSibling !== null
+                ? target.previousElementSibling
+                : target.parentElement!.previousElementSibling
+        ) as HTMLElement;
+
+        let NextDropElement = (
+            target.nextElementSibling !== null
+                ? target.nextElementSibling
+                : target.parentElement!.nextElementSibling
+        ) as HTMLElement;
+
+        if (!PreviousDropElement || !NextDropElement) return;
+        
+        if (
+            !PreviousDropElement.classList.contains("builder:drag-zone") ||
+            !NextDropElement.classList.contains("builder:drag-zone")
+        )
+            return;
+
+        // show drag elements
+        if (!remove) {
+            PreviousDropElement.classList.add("active");
+            NextDropElement.classList.add("active");
+        } else {
+            setTimeout(() => {
+                PreviousDropElement.classList.remove("active");
+                NextDropElement.classList.remove("active");
+            }, 1000);
+        }
+    }
+
+    // return
+    return props.visible ? (
+        <div
+            class="builder:drag-element"
+            onDragOver={(event) => ShowDropZones(event, false)}
+            onDragLeave={(event) => ShowDropZones(event, true)}
+        >
+            <div
+                className="builder:drag-zone top"
+                onDragEnter={(event) => {
+                    event.preventDefault();
+                }}
+                onDragOver={(event) => {
+                    event.preventDefault();
+                }}
+                onDrop={() => Drag(-1)}
+            />
+
+            {props.children}
+
+            <div
+                className="builder:drag-zone bottom"
+                onDragEnter={(event) => {
+                    event.preventDefault();
+                }}
+                onDragOver={(event) => {
+                    event.preventDefault();
+                }}
+                onDrop={() => Drag(1)}
+            />
+        </div>
+    ) : (
+        props.children
+    );
+}
 
 /**
  * @function PageNode
@@ -67,6 +173,18 @@ export type BuilderDocument = {
  * @return {*}
  */
 export function PageNode(props: { node: PageNode; children: any }): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
+    // apply theme
+    if (props.node.Theme)
+        if (props.node.Theme === "blue" || props.node.Theme === "purple")
+            document.documentElement.classList.add(
+                `${props.node.Theme}-theme`,
+                "dark-theme"
+            );
+        else document.documentElement.classList.add(`${props.node.Theme}-theme`);
+
+    // return page
     return (
         <div
             id={props.node.ID || crypto.randomUUID()}
@@ -87,22 +205,34 @@ export function PageNode(props: { node: PageNode; children: any }): any {
  * @function CardNode
  *
  * @export
- * @param {{ node: CardNode; children: any }} props
+ * @param {{ node: CardNode; document: Node[]; children: any }} props
  * @return {*}
  */
-export function CardNode(props: { node: CardNode; children: any }): any {
+export function CardNode(props: {
+    node: CardNode;
+    document: Node[];
+    children: any;
+}): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
     return (
-        <div
-            className="component builder:card"
-            style={{
-                "--Padding": props.node.Padding
-                    ? `${props.node.Padding}rem`
-                    : undefined,
-            }}
-            data-component={props.node.Type}
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
         >
-            {props.children}
-        </div>
+            <div
+                className="component builder:card"
+                style={{
+                    "--Padding": props.node.Padding
+                        ? `${props.node.Padding}rem`
+                        : undefined,
+                }}
+                data-component={props.node.Type}
+            >
+                {props.children}
+            </div>
+        </DragZones>
     );
 }
 
@@ -110,30 +240,59 @@ export function CardNode(props: { node: CardNode; children: any }): any {
  * @function TextNode
  *
  * @export
- * @param {{ node: TextNode; children: any }} props
+ * @param {{ node: TextNode; document: Node[]; children: any }} props
  * @return {*}
  */
-export function TextNode(props: { node: TextNode; children: any }): any {
+export function TextNode(props: {
+    node: TextNode;
+    document: Node[];
+    children: any;
+}): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
     return (
-        <p
-            id={props.node.ID || crypto.randomUUID()}
-            class={"component builder:text"}
-            style={{
-                "--Size": props.node.Size ? `${props.node.Size}px` : undefined,
-                "--Weight": props.node.Weight || undefined,
-                "--LineSpacing": props.node.LineSpacing || undefined,
-                "--LetterSpacing": props.node.LetterSpacng || undefined,
-                "--Margins": props.node.Margins
-                    ? `${props.node.Margins}rem`
-                    : undefined,
-                "--Alignment": props.node.Alignment || undefined,
-            }}
-            dangerouslySetInnerHTML={{
-                // set content, supports markdown!
-                __html: ParseMarkdownSync(props.node.Content),
-            }}
-            data-component={props.node.Type}
-        />
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
+        >
+            <p
+                id={props.node.ID}
+                class={"component builder:text"}
+                style={{
+                    "--Size": props.node.Size ? `${props.node.Size}px` : undefined,
+                    "--Weight": props.node.Weight || undefined,
+                    "--LineSpacing": props.node.LineSpacing || undefined,
+                    "--LetterSpacing": props.node.LetterSpacng || undefined,
+                    "--Margins": props.node.Margins
+                        ? `${props.node.Margins}rem`
+                        : undefined,
+                    "--Alignment": props.node.Alignment || undefined,
+                }}
+                dangerouslySetInnerHTML={{
+                    // set content, supports markdown!
+                    __html: ParseMarkdownSync(props.node.Content),
+                }}
+                data-component={props.node.Type}
+                onClick={
+                    props.node.EditMode
+                        ? () => {
+                              Select(props.node);
+                          }
+                        : undefined
+                }
+                // drag
+                draggable={props.node.EditMode}
+                onDragStart={
+                    props.node.EditMode
+                        ? () => {
+                              dragging = props.node;
+                              draggingDocument = props.document;
+                          }
+                        : undefined
+                }
+            />
+        </DragZones>
     );
 }
 
@@ -141,18 +300,47 @@ export function TextNode(props: { node: TextNode; children: any }): any {
  * @function ImageNode
  *
  * @export
- * @param {{ node: ImageNode; children: any }} props
+ * @param {{ node: ImageNode; document: Node[]; children: any }} props
  * @return {*}
  */
-export function ImageNode(props: { node: ImageNode; children: any }): any {
+export function ImageNode(props: {
+    node: ImageNode;
+    document: Node[];
+    children: any;
+}): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
     return (
-        <img
-            id={props.node.ID || crypto.randomUUID()}
-            class={"builder:image"}
-            src={props.node.Source}
-            alt={props.node.Alt}
-            title={props.node.Alt}
-        />
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
+        >
+            <img
+                id={props.node.ID || crypto.randomUUID()}
+                class={"builder:image"}
+                src={props.node.Source}
+                alt={props.node.Alt}
+                title={props.node.Alt}
+                onClick={
+                    props.node.EditMode
+                        ? () => {
+                              Select(props.node);
+                          }
+                        : undefined
+                }
+                // drag
+                draggable={props.node.EditMode}
+                onDragStart={
+                    props.node.EditMode
+                        ? () => {
+                              dragging = props.node;
+                              draggingDocument = props.document;
+                          }
+                        : undefined
+                }
+            />
+        </DragZones>
     );
 }
 
