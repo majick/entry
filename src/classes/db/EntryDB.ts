@@ -450,7 +450,8 @@ export default class EntryDB {
                     EntryDB.config.log &&
                     EntryDB.config.log.events.includes("view_paste") &&
                     EntryDB.Logs
-                )
+                ) {
+                    // this is only here for compatability!!
                     record.Views = (
                         await EntryDB.Logs.QueryLogs(
                             `Content LIKE "${record.CustomURL.replaceAll(
@@ -459,6 +460,7 @@ export default class EntryDB {
                             )};%" ESCAPE "\\"`
                         )
                     )[2].length;
+                }
 
                 // count comments
                 if (EntryDB.Logs) {

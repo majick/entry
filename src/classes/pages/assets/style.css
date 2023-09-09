@@ -1149,7 +1149,7 @@ br:not(.cm-line br) {
     --LineSpacing: 1.5;
     --LetterSpacing: 1;
     --Margins: 0.5rem;
-    --Alignment: center;
+    --Alignment: initial;
 
     font-size: var(--Size);
     font-weight: var(--Weight);
@@ -1161,12 +1161,16 @@ br:not(.cm-line br) {
 }
 
 .builder\:card {
+    --Background: var(--background-surface1);
+    --Width: max-content;
     --Padding: 1rem;
 
-    background: var(--background-surface1);
+    background: var(--Background);
     padding: var(--Padding);
     display: block;
-    width: max-content;
+    width: var(--Width);
+    max-width: 100%;
+    min-width: fit-content;
 }
 
 .builder\:toolbar {
@@ -1202,7 +1206,6 @@ br:not(.cm-line br) {
     background: var(--background-surface1);
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
     animation: SlideInFromLeft 0.15s 0s running;
     overflow: auto;
 }
@@ -1233,7 +1236,7 @@ br:not(.cm-line br) {
 
 .builder\:drag-zone.top {
     border-top: dashed 2px var(--background-surface2);
-    top: -10px
+    top: -10px;
 }
 
 .builder\:drag-zone.bottom {
@@ -1246,20 +1249,30 @@ br:not(.cm-line br) {
     display: block;
 }
 
-.builder\:drag-element:-moz-drag-over .builder\:drag-zone {
-    display: block;
-}
-
 .component {
     cursor: pointer;
 }
 
-.component.hover {
+.component.hover,
+.component.active {
     outline: solid 2px var(--blue2);
 }
 
-.component.active {
-    outline: solid 2px var(--blue);
+.component h1 {
+    width: 100%;
+}
+
+.component h1,
+.component h2,
+.component h3,
+.component h4,
+.component h5,
+.component h6 {
+    text-align: var(--Alignment);
+}
+
+.component * .htag {
+    display: none;
 }
 
 @media screen and (max-width: 900px) {

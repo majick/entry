@@ -31,6 +31,8 @@ export interface CardNode extends BaseNode {
     Type: "Card";
     Children: Node[];
     Padding?: string; // rem
+    Width?: string; // px
+    Background?: string;
 }
 
 export interface TextNode extends BaseNode {
@@ -41,7 +43,7 @@ export interface TextNode extends BaseNode {
     Size?: number; // px
     Weight?: number;
     LineSpacing?: number; // px
-    LetterSpacng?: number; // px
+    LetterSpacing?: number; // px
     Margins?: number; // rem
     Alignment?: "left" | "right" | "center";
 }
@@ -157,12 +159,33 @@ function DragZones(props: {
                 onDragOver={(event) => {
                     event.preventDefault();
                 }}
-                onDrop={() => Drag(1)}
+                onDrop={() => Drag(0)}
             />
         </div>
     ) : (
         props.children
     );
+}
+
+/**
+ * @function NodeSelect
+ *
+ * @param {*} event
+ * @param {Node} node
+ * @return {*}
+ */
+function NodeSelect(event: any, node: Node): any {
+    // remove active class from all elements
+    for (const element of document.querySelectorAll(
+        ".component.active"
+    ) as any as HTMLElement[])
+        element.classList.remove("active");
+
+    // add active class to selected element
+    (event.target as HTMLElement).classList.add("active");
+
+    // select
+    return Select(node);
 }
 
 /**
@@ -224,6 +247,10 @@ export function CardNode(props: {
             <div
                 className="component builder:card"
                 style={{
+                    "--Background": props.node.Background,
+                    "--Width": props.node.Width
+                        ? `${props.node.Width}px`
+                        : undefined,
                     "--Padding": props.node.Padding
                         ? `${props.node.Padding}rem`
                         : undefined,
@@ -263,7 +290,7 @@ export function TextNode(props: {
                     "--Size": props.node.Size ? `${props.node.Size}px` : undefined,
                     "--Weight": props.node.Weight || undefined,
                     "--LineSpacing": props.node.LineSpacing || undefined,
-                    "--LetterSpacing": props.node.LetterSpacng || undefined,
+                    "--LetterSpacing": props.node.LetterSpacing || undefined,
                     "--Margins": props.node.Margins
                         ? `${props.node.Margins}rem`
                         : undefined,
@@ -276,9 +303,7 @@ export function TextNode(props: {
                 data-component={props.node.Type}
                 onClick={
                     props.node.EditMode
-                        ? () => {
-                              Select(props.node);
-                          }
+                        ? (event) => NodeSelect(event, props.node)
                         : undefined
                 }
                 // drag
@@ -324,9 +349,7 @@ export function ImageNode(props: {
                 title={props.node.Alt}
                 onClick={
                     props.node.EditMode
-                        ? () => {
-                              Select(props.node);
-                          }
+                        ? (event) => NodeSelect(event, props.node)
                         : undefined
                 }
                 // drag
