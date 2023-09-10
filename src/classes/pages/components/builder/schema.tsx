@@ -5,7 +5,7 @@
  */
 
 import { ParseMarkdownSync } from "../Markdown";
-import { Select, Update } from "./Builder";
+import { Update } from "./Builder";
 
 // types
 export type BaseNode = {
@@ -69,6 +69,43 @@ let draggingDocument: Node[];
 // components
 
 /**
+ * @function GetDropZoneFromElement
+ *
+ * @export
+ * @param {HTMLElement} target
+ * @return {(HTMLElement[] | undefined)}
+ */
+export function GetDropZoneFromElement(
+    target: HTMLElement
+): HTMLElement[] | undefined {
+    if (!target.parentElement) return;
+
+    // try to get previous and next siblings (drop elements)
+    let PreviousDropElement = (
+        target.previousElementSibling !== null
+            ? target.previousElementSibling
+            : target.parentElement!.previousElementSibling
+    ) as HTMLElement;
+
+    let NextDropElement = (
+        target.nextElementSibling !== null
+            ? target.nextElementSibling
+            : target.parentElement!.nextElementSibling
+    ) as HTMLElement;
+
+    if (!PreviousDropElement || !NextDropElement) return;
+
+    if (
+        !PreviousDropElement.classList.contains("builder:drag-zone") ||
+        !NextDropElement.classList.contains("builder:drag-zone")
+    )
+        return;
+
+    // return
+    return [PreviousDropElement, NextDropElement];
+}
+
+/**
  * @function DragZones
  * @description Place drop zones around text
  *
@@ -98,26 +135,11 @@ function DragZones(props: {
     function ShowDropZones(event: any, remove: boolean = false) {
         const target = event.target as HTMLElement;
 
-        // try to get previous and next siblings (drop elements)
-        let PreviousDropElement = (
-            target.previousElementSibling !== null
-                ? target.previousElementSibling
-                : target.parentElement!.previousElementSibling
-        ) as HTMLElement;
+        // get drop zones
+        const _zones = GetDropZoneFromElement(target);
+        if (!_zones) return;
 
-        let NextDropElement = (
-            target.nextElementSibling !== null
-                ? target.nextElementSibling
-                : target.parentElement!.nextElementSibling
-        ) as HTMLElement;
-
-        if (!PreviousDropElement || !NextDropElement) return;
-
-        if (
-            !PreviousDropElement.classList.contains("builder:drag-zone") ||
-            !NextDropElement.classList.contains("builder:drag-zone")
-        )
-            return;
+        const [PreviousDropElement, NextDropElement] = _zones;
 
         // show drag elements
         if (!remove) {
@@ -165,27 +187,6 @@ function DragZones(props: {
     ) : (
         props.children
     );
-}
-
-/**
- * @function NodeSelect
- *
- * @param {*} event
- * @param {Node} node
- * @return {*}
- */
-function NodeSelect(event: any, node: Node): any {
-    // remove active class from all elements
-    for (const element of document.querySelectorAll(
-        ".component.active"
-    ) as any as HTMLElement[])
-        element.classList.remove("active");
-
-    // add active class to selected element
-    (event.target as HTMLElement).classList.add("active");
-
-    // select
-    return Select(node);
 }
 
 /**
@@ -239,27 +240,20 @@ export function CardNode(props: {
     if (!props.node.ID) props.node.ID = crypto.randomUUID();
 
     return (
-        <DragZones
-            visible={props.node.EditMode}
-            fornode={props.node}
-            fordocument={props.document}
+        <div
+            id={props.node.ID}
+            className="component builder:card"
+            style={{
+                "--Background": props.node.Background,
+                "--Width": props.node.Width ? `${props.node.Width}px` : undefined,
+                "--Padding": props.node.Padding
+                    ? `${props.node.Padding}rem`
+                    : undefined,
+            }}
+            data-component={props.node.Type}
         >
-            <div
-                className="component builder:card"
-                style={{
-                    "--Background": props.node.Background,
-                    "--Width": props.node.Width
-                        ? `${props.node.Width}px`
-                        : undefined,
-                    "--Padding": props.node.Padding
-                        ? `${props.node.Padding}rem`
-                        : undefined,
-                }}
-                data-component={props.node.Type}
-            >
-                {props.children}
-            </div>
-        </DragZones>
+            {props.children}
+        </div>
     );
 }
 
@@ -301,11 +295,6 @@ export function TextNode(props: {
                     __html: ParseMarkdownSync(props.node.Content),
                 }}
                 data-component={props.node.Type}
-                onClick={
-                    props.node.EditMode
-                        ? (event) => NodeSelect(event, props.node)
-                        : undefined
-                }
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
@@ -322,7 +311,7 @@ export function TextNode(props: {
 }
 
 /**
- * @function ImageNode
+ * @function ImageNodeonDragStart
  *
  * @export
  * @param {{ node: ImageNode; document: Node[]; children: any }} props
@@ -347,11 +336,6 @@ export function ImageNode(props: {
                 src={props.node.Source}
                 alt={props.node.Alt}
                 title={props.node.Alt}
-                onClick={
-                    props.node.EditMode
-                        ? (event) => NodeSelect(event, props.node)
-                        : undefined
-                }
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
@@ -369,6 +353,7 @@ export function ImageNode(props: {
 
 // default export
 export default {
+    GetDropZoneFromElement,
     PageNode,
     CardNode,
     TextNode,

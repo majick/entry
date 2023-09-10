@@ -7,6 +7,9 @@
 import schema, { Node, PageNode } from "./schema";
 import { VNode } from "preact";
 
+// ...
+let AllNodes: Node[] = [];
+
 /**
  * @function ParseNodes
  *
@@ -27,6 +30,9 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
 
                 if (node.Children && node.Children.length > 0)
                     children = ParseNodes(node.Children, edit);
+
+                // add to allnodes
+                AllNodes.push(node);
 
                 // render main
                 // cannot parse pages! they have to be root level in a document!!
@@ -78,6 +84,7 @@ export function ParsePage(page: PageNode, edit: boolean = false): VNode {
 
 // default export
 export default {
+    AllNodes,
     ParseNodes,
     ParsePage,
 };
