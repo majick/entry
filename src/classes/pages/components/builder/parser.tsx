@@ -25,6 +25,12 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                 if (edit) node.EditMode = true;
                 else delete node.EditMode;
 
+                // delete node if it was removed
+                if (node.ID === "node:removed") {
+                    nodes.splice(nodes.indexOf(node), 0);
+                    return <></>;
+                }
+
                 // render children
                 let children: VNode = <></>;
 
@@ -54,6 +60,12 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                             {children}
                         </schema.ImageNode>
                     );
+                else if (node.Type === "Columns")
+                    return (
+                        <schema.ColumnNode node={node} document={nodes}>
+                            {children}
+                        </schema.ColumnNode>
+                    );
             })}
         </>
     );
@@ -67,16 +79,20 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
  * @param {boolean} [edit=false]
  * @return {VNode}
  */
-export function ParsePage(page: PageNode, edit: boolean = false): VNode {
+export function ParsePage(
+    page: PageNode,
+    edit: boolean = false,
+    server: boolean = false
+): VNode {
     // reset theme
-    document.documentElement.className = "";
+    if (!server) document.documentElement.className = "";
 
     // set edit mode
     page.EditMode = edit;
 
     // render
     return (
-        <schema.PageNode node={page}>
+        <schema.PageNode node={page} server={server}>
             {ParseNodes(page.Children, edit)}
         </schema.PageNode>
     );

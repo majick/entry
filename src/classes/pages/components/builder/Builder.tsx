@@ -9,6 +9,7 @@ import parser from "./parser";
 
 import { render } from "preact";
 
+import type { Paste } from "../../../db/EntryDB";
 import Sidebar from "./components/Sidebar";
 import Modal from "../Modal";
 
@@ -16,6 +17,9 @@ import Modal from "../Modal";
 export let Document: BuilderDocument;
 
 export function AddComponent(Type: string) {
+    // make sure we're in edit mode
+    if (!EditMode) return;
+
     // add component
     if (Type === "Page") {
         Document.Pages.push({
@@ -45,6 +49,36 @@ export function AddComponent(Type: string) {
             Type: "Image",
             Alt: "New Image",
             Source: "about:blank",
+        });
+    else if (Type === "Column")
+        Document.Pages[CurrentPage].Children.push({
+            Type: "Columns",
+            Children: [
+                {
+                    Type: "Card",
+                    Background: "transparent",
+                    NotRemovable: true,
+                    Children: [
+                        {
+                            Type: "Text",
+                            Content: "left",
+                            Alignment: "center",
+                        },
+                    ],
+                },
+                {
+                    Type: "Card",
+                    Background: "transparent",
+                    NotRemovable: true,
+                    Children: [
+                        {
+                            Type: "Text",
+                            Content: "right",
+                            Alignment: "center",
+                        },
+                    ],
+                },
+            ],
         });
 
     // update
@@ -90,8 +124,21 @@ export function Move(state: boolean = false) {
     return RenderSidebar();
 }
 
+export function Delete(node: Node) {
+    node.ID = "node:removed";
+
+    SidebarOpen = false;
+    RenderSidebar();
+
+    return Update();
+}
+
 // sidebar
 export function RenderSidebar(props?: { Page: "PagesView" }) {
+    // make sure we're in edit mode
+    if (!EditMode) return;
+
+    // render
     return render(
         <>
             <Sidebar Page={props !== undefined ? props.Page : undefined} />
@@ -102,6 +149,14 @@ export function RenderSidebar(props?: { Page: "PagesView" }) {
 
 // render
 function RenderPage() {
+    // make sure we're in edit mode
+    if (!EditMode) return;
+
+    // check if we're editing an existing paste
+    const search = new URLSearchParams(window.location.search);
+    const EditingPaste = search.get("edit");
+
+    // render
     return render(
         <>
             <div
@@ -314,6 +369,17 @@ function RenderPage() {
                         <button
                             className="border"
                             onClick={() => {
+                                AddComponent("Column");
+                            }}
+                        >
+                            Columns
+                        </button>
+
+                        <button
+                            className="border"
+                            disabled // wip
+                            title={"Work in progress!"}
+                            onClick={() => {
                                 AddComponent("Embed");
                             }}
                         >
@@ -353,7 +419,149 @@ function RenderPage() {
 
                     <hr />
 
-                    <p>wip</p>
+                    {(EditingPaste === null && (
+                        <form
+                            style={{
+                                display: "flex",
+                                gap: "0.5rem",
+                                flexDirection: "column",
+                                width: "100%",
+                            }}
+                            onSubmit={async (event) => {
+                                event.preventDefault();
+
+                                // get target
+                                const target = event.target as HTMLFormElement;
+
+                                // disable EditMode
+                                for (const node of parser.AllNodes)
+                                    node.EditMode = undefined;
+
+                                // build paste
+                                const Paste: Paste = {
+                                    CustomURL: target.CustomURL.value || "",
+                                    Content: encodeURIComponent(
+                                        `_builder:${btoa(JSON.stringify(Document))}`
+                                    ),
+                                    EditPassword: target.EditPassword.value || "",
+                                    PubDate: new Date().getTime(),
+                                    EditDate: new Date().getTime(),
+                                    GroupName: "",
+                                    GroupSubmitPassword: "",
+                                };
+
+                                // send request
+                                const res = await fetch("/api/json/new", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify(Paste),
+                                });
+
+                                // check if there was an error
+                                if (res.headers.get("X-Entry-Error"))
+                                    return alert(res.headers.get("X-Entry-Error"));
+
+                                // redirect to view
+                                return (window.location.href = `/${Paste.CustomURL}`);
+                            }}
+                        >
+                            <input
+                                type="text"
+                                placeholder={"Custom URL"}
+                                maxLength={100}
+                                minLength={2}
+                                name={"CustomURL"}
+                                id={"CustomURL"}
+                                autoComplete={"off"}
+                                required
+                            />
+
+                            <input
+                                type="text"
+                                placeholder={"Custom edit code"}
+                                maxLength={256}
+                                minLength={5}
+                                name={"EditPassword"}
+                                id={"EditPassword"}
+                                autoComplete={"off"}
+                                required
+                            />
+
+                            <button
+                                style={{
+                                    width: "100%",
+                                }}
+                            >
+                                Publish
+                            </button>
+                        </form>
+                    )) || (
+                        <form
+                            style={{
+                                display: "flex",
+                                gap: "0.5rem",
+                                flexDirection: "column",
+                                width: "100%",
+                            }}
+                            onSubmit={async (event) => {
+                                event.preventDefault();
+
+                                // get target
+                                const target = event.target as HTMLFormElement;
+
+                                // disable EditMode
+                                for (const node of parser.AllNodes)
+                                    node.EditMode = undefined;
+
+                                // build paste
+                                const Paste = {
+                                    OldURL: EditingPaste || "",
+                                    OldEditPassword:
+                                        target.OldEditPassword.value || "",
+                                    NewContent: encodeURIComponent(
+                                        `_builder:${btoa(JSON.stringify(Document))}`
+                                    ),
+                                };
+
+                                // send request
+                                const res = await fetch("/api/json/edit", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify(Paste),
+                                });
+
+                                // check if there was an error
+                                if (res.headers.get("X-Entry-Error"))
+                                    return alert(res.headers.get("X-Entry-Error"));
+
+                                // redirect to view
+                                return (window.location.href = `/${Paste.OldURL}`);
+                            }}
+                        >
+                            <input
+                                type="text"
+                                placeholder={"Edit code"}
+                                maxLength={256}
+                                minLength={5}
+                                name={"OldEditPassword"}
+                                id={"OldEditPassword"}
+                                autoComplete={"off"}
+                                required
+                            />
+
+                            <button
+                                style={{
+                                    width: "100%",
+                                }}
+                            >
+                                Publish Changes
+                            </button>
+                        </form>
+                    )}
 
                     <hr />
 
@@ -381,65 +589,70 @@ function RenderPage() {
 }
 
 // ...
-function RenderDocument(doc: BuilderDocument) {
+export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) {
     // update document
     Document = doc;
     CurrentPage = 0;
+    EditMode = _EditMode;
 
-    // render
-    RenderPage();
-
-    render(
-        parser.ParsePage(doc.Pages[CurrentPage], EditMode),
-        document.getElementById("_doc")!
-    );
-
-    SidebarOpen = false;
-    RenderSidebar();
-
-    // render every second
-    setInterval(() => {
-        // check if we need to render
-        if (NeedsUpdate !== true) return;
-        NeedsUpdate = false;
-
-        // render
-        render(
-            parser.ParsePage(doc.Pages[CurrentPage], EditMode),
+    // ...
+    function RenderCurrentPage() {
+        return render(
+            parser.ParsePage(doc.Pages[CurrentPage], _EditMode),
             document.getElementById("_doc")!
         );
-    }, 1000);
+    }
+
+    // ...edit mode stuff
+    if (!_EditMode) {
+        // handle pages
+        function CheckHash() {
+            if (window.location.hash && window.location.hash.startsWith("#/")) {
+                const PageID = window.location.hash.split("#/")[1];
+
+                // get page
+                const Page = doc.Pages.find((page) => page.ID === PageID);
+
+                // set CurrentPage
+                if (Page) {
+                    CurrentPage = doc.Pages.indexOf(Page);
+                    RenderCurrentPage(); // render
+                }
+            }
+        }
+
+        window.addEventListener("hashchange", CheckHash); // every change
+        CheckHash(); // initial run
+
+        // initial page render
+        RenderCurrentPage();
+    }
+
+    // edit mode stuff
+    if (_EditMode) {
+        RenderPage(); // render full editor
+
+        // initial page render
+        RenderCurrentPage();
+
+        // render sidebar
+        SidebarOpen = false;
+        RenderSidebar();
+
+        // render every second
+        setInterval(() => {
+            // check if we need to render
+            if (NeedsUpdate !== true) return;
+            NeedsUpdate = false;
+
+            // render
+            render(
+                parser.ParsePage(doc.Pages[CurrentPage], EditMode),
+                document.getElementById("_doc")!
+            );
+        }, 1000);
+    }
 }
 
-// DEMO ONLY!!
-RenderDocument({
-    Pages: [
-        {
-            Type: "Page",
-            NotRemovable: true,
-            Theme: "dark",
-            Children: [
-                {
-                    Type: "Card",
-                    Children: [
-                        {
-                            Type: "Text",
-                            Content: "# paste builder",
-                            Alignment: "center",
-                        },
-                        {
-                            Type: "Text",
-                            Content: "nothing here yet! :)",
-                            Alignment: "center",
-                        },
-                        {
-                            Type: "Text",
-                            Content: "supports [markdown](/)!!",
-                            Alignment: "center",
-                        },
-                    ],
-                },
-            ],
-        },
-    ],
-});
+// default export
+export default RenderDocument;

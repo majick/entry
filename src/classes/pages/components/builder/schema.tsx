@@ -55,8 +55,13 @@ export interface ImageNode extends BaseNode {
     Alt: string;
 }
 
+export interface ColumnNode extends BaseNode {
+    Type: "Columns";
+    Children: CardNode[]; // children property must contain two cards!
+}
+
 // ...base type
-export type Node = PageNode | CardNode | TextNode | ImageNode;
+export type Node = PageNode | CardNode | TextNode | ImageNode | ColumnNode;
 
 export type BuilderDocument = {
     Pages: PageNode[];
@@ -196,17 +201,25 @@ function DragZones(props: {
  * @param {{ node: PageNode; children: any }} props
  * @return {*}
  */
-export function PageNode(props: { node: PageNode; children: any }): any {
+export function PageNode(props: {
+    node: PageNode;
+    children: any;
+    server?: boolean;
+}): any {
     if (!props.node.ID) props.node.ID = crypto.randomUUID();
 
     // apply theme
-    if (props.node.Theme)
+    if (props.node.Theme && props.server !== true) {
         if (props.node.Theme === "blue" || props.node.Theme === "purple")
             document.documentElement.classList.add(
                 `${props.node.Theme}-theme`,
                 "dark-theme"
             );
         else document.documentElement.classList.add(`${props.node.Theme}-theme`);
+
+        // set global theme so user can't overwrite theme
+        (window as any).PASTE_USES_CUSTOM_THEME = true;
+    }
 
     // return page
     return (
@@ -219,6 +232,7 @@ export function PageNode(props: { node: PageNode; children: any }): any {
                 "--Spacing": props.node.Spacing ? `${props.node.Spacing}px` : "",
             }}
             data-component={props.node.Type}
+            data-edit={props.node.EditMode}
         >
             {props.children}
         </div>
@@ -251,6 +265,7 @@ export function CardNode(props: {
                     : undefined,
             }}
             data-component={props.node.Type}
+            data-edit={props.node.EditMode}
         >
             {props.children}
         </div>
@@ -295,6 +310,7 @@ export function TextNode(props: {
                     __html: ParseMarkdownSync(props.node.Content),
                 }}
                 data-component={props.node.Type}
+                data-edit={props.node.EditMode}
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
@@ -336,6 +352,7 @@ export function ImageNode(props: {
                 src={props.node.Source}
                 alt={props.node.Alt}
                 title={props.node.Alt}
+                data-edit={props.node.EditMode}
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
@@ -351,6 +368,46 @@ export function ImageNode(props: {
     );
 }
 
+/**
+ * @function ImageNodeonDragStart
+ *
+ * @export
+ * @param {{ node: ColumnNode; document: Node[]; children: any }} props
+ * @return {*}
+ */
+export function ColumnNode(props: {
+    node: ColumnNode;
+    document: Node[];
+    children: any;
+}): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
+    return (
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
+        >
+            <div
+                class={"builder:columns"}
+                data-edit={props.node.EditMode}
+                // drag
+                draggable={props.node.EditMode}
+                onDragStart={
+                    props.node.EditMode
+                        ? () => {
+                              dragging = props.node;
+                              draggingDocument = props.document;
+                          }
+                        : undefined
+                }
+            >
+                {props.children}
+            </div>
+        </DragZones>
+    );
+}
+
 // default export
 export default {
     GetDropZoneFromElement,
@@ -358,4 +415,5 @@ export default {
     CardNode,
     TextNode,
     ImageNode,
+    ColumnNode,
 };

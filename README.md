@@ -53,7 +53,7 @@ Many features are able to be disabled or enabled through the server configuratio
 All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
 
 - `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
-- `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldCustomURL, OldEditPassword, NewContent, NewCustomURL, NewEditPassword`
+- `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldURL, OldEditPassword, NewContent, OldURL, NewEditPassword`
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))
@@ -364,11 +364,23 @@ Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results
 
 ### Paste Comments
 
-People can anonymously leave comments on pastes through paste comments. For comments to work, you must enable the `comment` [log event](#logs). When a comment is created, a new paste is created in the "comments" group. The content of this paste is the content of the comment.
+Users can anonymously leave comments on pastes through paste comments. For comments to work, you must enable the `comment` [log event](#logs). When a comment is created, a new paste is created in the "comments" group. The content of this paste is the content of the comment. Users can associate an existing paste that they own to "login" to comments.
 
 Paste comments are disabled by default. They can be enabled by enabling the `comment` log type.
 
 Paste comments can be disabled on individual pastes if the paste includes `&!lt% disable comments %&gt;`
+
+### Paste Builder
+
+Users can build multi-page "pastes" using the paste builder. These pages are built using drag-and-drop (desktop only, automatic move on mobile) components, allowing them to build with text, images, buttons and more. These pages are highly customizable, from the width of the containing box to the overall theme of the page.
+
+These pages can be published as normal pastes, and will open rendered when viewed.
+
+#### Technical
+
+Pastes built in this way follow a basic "schema" that is detailed in the types used for each node. This schema can be viewed [here](https://codeberg.org/hkau/entry/src/branch/master/src/classes/pages/components/builder/schema.tsx).
+
+The paste builder can be disabled using config `app.enable_builder`. It is enabled by default.
 
 ## Development
 

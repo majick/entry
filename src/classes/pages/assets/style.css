@@ -258,6 +258,10 @@ button.red,
     color: var(--red3);
 }
 
+button:disabled, .button:disabled {
+    opacity: 50%;
+}
+
 .tabbar {
     display: flex;
 }
@@ -1174,6 +1178,13 @@ br:not(.cm-line br) {
     overflow: auto;
 }
 
+.builder\:columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
 .builder\:toolbar {
     position: fixed;
     top: 0.5rem;
@@ -1250,7 +1261,7 @@ br:not(.cm-line br) {
     display: block;
 }
 
-.component {
+.component[data-edit="true"] {
     cursor: pointer;
 }
 
@@ -1277,7 +1288,7 @@ br:not(.cm-line br) {
 }
 
 @media screen and (max-width: 900px) {
-    .builder\:toolbar {
+    .builder\:toolbar:not(.always-absolute) {
         width: 100vw;
         top: 0;
         left: 0;

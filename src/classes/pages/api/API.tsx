@@ -311,6 +311,7 @@ export class CreatePaste implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
         body.Content = decodeURIComponent(body.Content);
+
         if (body.CustomURL) body.CustomURL = body.CustomURL.toLowerCase();
 
         // make sure association is correct
@@ -323,6 +324,10 @@ export class CreatePaste implements Endpoint {
         // create paste
         const result = await db.CreatePaste(body);
 
+        // return without redirect if content starts with _builder:
+        if (result[0] === true && result[2].Content.startsWith("_builder:"))
+            return new Response(JSON.stringify(result), { status: 200 });
+
         // return
         return new Response(JSON.stringify(result), {
             status: 302,
@@ -334,7 +339,7 @@ export class CreatePaste implements Endpoint {
                         ? // if successful, redirect to paste
                           body.CommentOn === ""
                             ? body.ReportOn === ""
-                                ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
+                                ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}&nobuilder=true`
                                 : "/?msg=Paste reported!"
                             : `/paste/comments/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message

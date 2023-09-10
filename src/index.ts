@@ -33,6 +33,7 @@ export type Config = {
         enable_groups?: boolean;
         enable_expiry?: boolean;
         enable_not_editable_pastes?: boolean;
+        enable_builder?: boolean;
         footer?: {
             show_name_on_all_pages?: boolean;
             rows: Array<{

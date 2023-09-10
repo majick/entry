@@ -8,6 +8,7 @@ import Honeybee, { Endpoint, Renderer } from "honeybee";
 
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
+import BuilderParser from "./components/builder/parser";
 import _404Page from "./components/404";
 import Footer from "./components/Footer";
 import Home from "./Home";
@@ -144,6 +145,155 @@ export class GetPasteFromURL implements Endpoint {
                 });
             else Viewed = true;
         }
+
+        // check if paste was created in the builder (starts with _builder:)
+        if (
+            result.Content.startsWith("_builder:") &&
+            search.get("nobuilder") === null
+        ) {
+            const TrueContent = JSON.parse(
+                atob(result.Content.split("_builder:")[1])
+            );
+
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <div id="_doc">
+                            {/* initial render */}
+                            {BuilderParser.ParsePage(
+                                TrueContent.Pages[0],
+                                false,
+                                true
+                            )}
+                        </div>
+
+                        {/* fix mistakes on client */}
+                        <script
+                            type={"module"}
+                            dangerouslySetInnerHTML={{
+                                __html: `import Builder from "/Builder.js";
+                                Builder(${JSON.stringify(TrueContent)}, false);`,
+                            }}
+                        />
+
+                        {/* toolbar */}
+                        <div
+                            className="builder\:toolbar always-absolute"
+                            style={{
+                                padding: "0",
+                                top: "initial",
+                                bottom: "0.5rem",
+                            }}
+                        >
+                            <button
+                                id={"entry:button.PasteOptions"}
+                                title={"Paste Options"}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Sparkle Symbol"}
+                                >
+                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <Modal
+                            buttonid="entry:button.PasteOptions"
+                            modalid="entry:modal.PasteOptions"
+                        >
+                            <div
+                                style={{
+                                    width: "25rem",
+                                    maxWidth: "100%",
+                                }}
+                            >
+                                <h4 style={{ textAlign: "center", width: "100%" }}>
+                                    {result.CustomURL}
+                                </h4>
+
+                                <hr />
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: "0.5rem",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
+                                >
+                                    <a
+                                        href={`/paste/builder?edit=${result.CustomURL}`}
+                                        className="button"
+                                    >
+                                        Edit
+                                    </a>
+
+                                    <a
+                                        href={`/paste/comments/${result.CustomURL}`}
+                                        className="button"
+                                    >
+                                        Comments ({result.Comments})
+                                    </a>
+                                </div>
+
+                                <hr />
+
+                                <p>Views: {result.Views}</p>
+
+                                <p>
+                                    Publish:{" "}
+                                    <span class={"utc-date-to-localize"}>
+                                        {new Date(result.PubDate).toUTCString()}
+                                    </span>
+                                </p>
+
+                                <p>
+                                    Edit:{" "}
+                                    <span class={"utc-date-to-localize"}>
+                                        {new Date(result.EditDate).toUTCString()}
+                                    </span>
+                                </p>
+
+                                <hr />
+
+                                <form
+                                    method={"dialog"}
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    <button
+                                        className="green"
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                    >
+                                        Close
+                                    </button>
+                                </form>
+
+                                <Footer />
+                            </div>
+                        </Modal>
+                    </>,
+                    <>
+                        <title>{result.CustomURL}</title>
+                    </>
+                ),
+                {
+                    headers: {
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        }
+
+        // ...otherwise
 
         // tag paste
         result.Content = `${result.Content}\n<% tag current_paste ${result.CustomURL} %>`;

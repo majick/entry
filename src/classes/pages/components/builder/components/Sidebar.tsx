@@ -8,6 +8,7 @@ import {
     SetPage,
     Selected,
     Move,
+    Delete,
 } from "../Builder";
 
 export default function Sidebar(props: { Page?: string }) {
@@ -22,6 +23,10 @@ export default function Sidebar(props: { Page?: string }) {
                 Back
             </button>
 
+            {Selected && Selected.NotRemovable !== true && (
+                <button onClick={() => Delete(Selected)}>Delete</button>
+            )}
+
             {(props && props.Page === "PagesView" && (
                 <>
                     {/* pages list */}
@@ -31,7 +36,7 @@ export default function Sidebar(props: { Page?: string }) {
                         const index = Document.Pages.indexOf(page);
 
                         return (
-                            <button onClick={() => SetPage(index)}>
+                            <button onClick={() => SetPage(index)} title={page.ID}>
                                 Page {index + 1}
                             </button>
                         );
@@ -43,6 +48,32 @@ export default function Sidebar(props: { Page?: string }) {
                         {(Selected.Type === "Page" && (
                             <>
                                 {/* page element controls */}
+                                <div className="option">
+                                    <label htmlFor="ID">
+                                        <b>ID</b>
+                                    </label>
+
+                                    <input
+                                        class={"secondary"}
+                                        type="text"
+                                        name={"ID"}
+                                        id={"ID"}
+                                        value={Selected.ID}
+                                        onKeyUp={(event) => {
+                                            if (Selected.Type !== "Page") return;
+
+                                            Selected.ID = (
+                                                event.target as HTMLInputElement
+                                            ).value;
+
+                                            Update();
+                                        }}
+                                        style={{
+                                            minWidth: "100%",
+                                        }}
+                                    />
+                                </div>
+
                                 <div className="option">
                                     <label htmlFor="Theme">
                                         <b>Theme</b>
@@ -130,12 +161,115 @@ export default function Sidebar(props: { Page?: string }) {
                                 </div>
 
                                 <div className="option">
-                                    <b>WORK IN PROGRESS!!! document object</b>
-                                    <pre>
-                                        <code>
-                                            {JSON.stringify(Document, undefined, 2)}
-                                        </code>
-                                    </pre>
+                                    <label htmlFor="AlignX">
+                                        <b>Align X</b>
+                                    </label>
+
+                                    <select
+                                        name="AlignX"
+                                        id="AlignX"
+                                        class={"secondary"}
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                        onChange={(event) => {
+                                            if (Selected.Type !== "Page") return;
+
+                                            const target =
+                                                event.target as HTMLSelectElement;
+
+                                            Selected.AlignX = target
+                                                .selectedOptions[0].value as any;
+
+                                            Update();
+                                        }}
+                                    >
+                                        <option
+                                            value="flex-start"
+                                            selected={
+                                                Document.Pages[CurrentPage]
+                                                    .AlignX === "left"
+                                            }
+                                        >
+                                            Left
+                                        </option>
+
+                                        <option
+                                            value="center"
+                                            selected={
+                                                Document.Pages[CurrentPage]
+                                                    .AlignX === "center"
+                                            }
+                                        >
+                                            Center
+                                        </option>
+
+                                        <option
+                                            value="flex-end"
+                                            selected={
+                                                Document.Pages[CurrentPage]
+                                                    .AlignX === "right"
+                                            }
+                                        >
+                                            Right
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div className="option">
+                                    <label htmlFor="AlignY">
+                                        <b>Align Y</b>
+                                    </label>
+
+                                    <select
+                                        name="AlignY"
+                                        id="AlignY"
+                                        class={"secondary"}
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                        onChange={(event) => {
+                                            if (Selected.Type !== "Page") return;
+
+                                            const target =
+                                                event.target as HTMLSelectElement;
+
+                                            Selected.AlignY = target
+                                                .selectedOptions[0].value as any;
+
+                                            Update();
+                                        }}
+                                    >
+                                        <option
+                                            value="flex-start"
+                                            selected={
+                                                Document.Pages[CurrentPage]
+                                                    .AlignY === "top"
+                                            }
+                                        >
+                                            Top
+                                        </option>
+
+                                        <option
+                                            value="center"
+                                            selected={
+                                                Document.Pages[CurrentPage]
+                                                    .AlignY === "center"
+                                            }
+                                        >
+                                            Center
+                                        </option>
+
+                                        <option
+                                            value="flex-end"
+                                            selected={
+                                                Document.Pages[CurrentPage]
+                                                    .AlignY === "bottom"
+                                            }
+                                        >
+                                            Bottom
+                                        </option>
+                                    </select>
                                 </div>
                             </>
                         )) ||
@@ -218,11 +352,7 @@ export default function Sidebar(props: { Page?: string }) {
                             (Selected.Type === "Text" && (
                                 <>
                                     {/* text element controls */}
-                                    <button
-                                        onClick={() => Move(true)}
-                                    >
-                                        Move
-                                    </button>
+                                    <button onClick={() => Move(true)}>Move</button>
 
                                     <div className="option">
                                         <label htmlFor="Content">
@@ -421,11 +551,7 @@ export default function Sidebar(props: { Page?: string }) {
                             (Selected.Type === "Image" && (
                                 <>
                                     {/* image element controls */}
-                                    <button
-                                        onClick={() => Move(true)}
-                                    >
-                                        Move
-                                    </button>
+                                    <button onClick={() => Move(true)}>Move</button>
 
                                     <div className="option">
                                         <label htmlFor="Source">
