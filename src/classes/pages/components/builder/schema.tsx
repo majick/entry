@@ -16,6 +16,7 @@ export type BaseNode = {
     NotRemovable?: boolean;
     EditMode?: boolean;
     StyleString?: string; // injected directly into the element style attribute
+    ClassString?: string; // injected directly into the element class
 };
 
 export interface PageNode extends BaseNode {
@@ -47,6 +48,9 @@ export interface TextNode extends BaseNode {
     LineSpacing?: number; // px
     LetterSpacing?: number; // px
     Margins?: number; // rem
+    Padding?: number; // rem
+    BorderRadius?: number; // px
+    Background?: string;
     Alignment?: "left" | "right" | "center";
 }
 
@@ -62,8 +66,21 @@ export interface ColumnNode extends BaseNode {
     Children: CardNode[]; // children property must contain two cards!
 }
 
+export interface EmbedNode extends BaseNode {
+    // does not support children property
+    Type: "Embed";
+    Source: string;
+    Alt: string;
+}
+
 // ...base type
-export type Node = PageNode | CardNode | TextNode | ImageNode | ColumnNode;
+export type Node =
+    | PageNode
+    | CardNode
+    | TextNode
+    | ImageNode
+    | ColumnNode
+    | EmbedNode;
 
 export type BuilderDocument = {
     Pages: PageNode[];
@@ -227,7 +244,7 @@ export function PageNode(props: {
     return (
         <div
             id={props.node.ID || crypto.randomUUID()}
-            class={"component builder:page"}
+            class={`component builder:page ${props.node.ClassString || ""}`}
             style={{
                 "--AlignX": props.node.AlignX || "center",
                 "--AlignY": props.node.AlignY || "center",
@@ -264,7 +281,7 @@ export function CardNode(props: {
     return (
         <div
             id={props.node.ID}
-            className="component builder:card"
+            className={`component builder:card ${props.node.ClassString || ""}`}
             style={{
                 "--Background": props.node.Background,
                 "--Width": props.node.Width ? `${props.node.Width}px` : undefined,
@@ -305,7 +322,7 @@ export function TextNode(props: {
         >
             <p
                 id={props.node.ID}
-                class={"component builder:text"}
+                class={`component builder:text ${props.node.ClassString || ""}`}
                 style={{
                     "--Size": props.node.Size ? `${props.node.Size}px` : undefined,
                     "--Weight": props.node.Weight || undefined,
@@ -316,7 +333,14 @@ export function TextNode(props: {
                     "--Margins": props.node.Margins
                         ? `${props.node.Margins}rem`
                         : undefined,
+                    "--Padding": props.node.Padding
+                        ? `${props.node.Padding}rem`
+                        : undefined,
+                    "--BorderRadius": props.node.BorderRadius
+                        ? `${props.node.BorderRadius}px`
+                        : undefined,
                     "--Alignment": props.node.Alignment || undefined,
+                    "--Background": props.node.Background || undefined,
                     ...(props.node.StyleString
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),
@@ -343,7 +367,7 @@ export function TextNode(props: {
 }
 
 /**
- * @function ImageNodeonDragStart
+ * @function ImageNode
  *
  * @export
  * @param {{ node: ImageNode; document: Node[]; children: any }} props
@@ -364,10 +388,11 @@ export function ImageNode(props: {
         >
             <img
                 id={props.node.ID || crypto.randomUUID()}
-                class={"builder:image"}
+                class={`component builder:image ${props.node.ClassString || ""}`}
                 src={props.node.Source}
                 alt={props.node.Alt}
                 title={props.node.Alt}
+                data-component={props.node.Type}
                 data-edit={props.node.EditMode}
                 style={{
                     ...(props.node.StyleString
@@ -390,7 +415,7 @@ export function ImageNode(props: {
 }
 
 /**
- * @function ImageNodeonDragStart
+ * @function ColumnNode
  *
  * @export
  * @param {{ node: ColumnNode; document: Node[]; children: any }} props
@@ -410,13 +435,14 @@ export function ColumnNode(props: {
             fordocument={props.document}
         >
             <div
-                class={"builder:columns"}
-                data-edit={props.node.EditMode}
+                class={`component builder:columns ${props.node.ClassString || ""}`}
                 style={{
                     ...(props.node.StyleString
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),
                 }}
+                data-component={props.node.Type}
+                data-edit={props.node.EditMode}
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
@@ -434,6 +460,52 @@ export function ColumnNode(props: {
     );
 }
 
+/**
+ * @function EmbedNode
+ *
+ * @export
+ * @param {{ node: EmbedNode; document: Node[]; children: any }} props
+ * @return {*}
+ */
+export function EmbedNode(props: {
+    node: EmbedNode;
+    document: Node[];
+    children: any;
+}): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
+    return (
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
+        >
+            <iframe
+                id={props.node.ID}
+                class={`component builder:embed ${props.node.ClassString || ""}`}
+                src={props.node.Source}
+                alt={props.node.Alt}
+                title={props.node.Alt}
+                style={props.node.StyleString}
+                loading={"lazy"}
+                data-component={props.node.Type}
+                data-edit={props.node.EditMode}
+                frameBorder={0}
+                // drag
+                draggable={props.node.EditMode}
+                onDragStart={
+                    props.node.EditMode
+                        ? () => {
+                              dragging = props.node;
+                              draggingDocument = props.document;
+                          }
+                        : undefined
+                }
+            />
+        </DragZones>
+    );
+}
+
 // default export
 export default {
     GetDropZoneFromElement,
@@ -442,4 +514,5 @@ export default {
     TextNode,
     ImageNode,
     ColumnNode,
+    EmbedNode,
 };

@@ -66,6 +66,12 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                             {children}
                         </schema.ColumnNode>
                     );
+                else if (node.Type === "Embed")
+                    return (
+                        <schema.EmbedNode node={node} document={nodes}>
+                            {children}
+                        </schema.EmbedNode>
+                    );
             })}
         </>
     );
@@ -128,5 +134,5 @@ export default {
     AllNodes,
     ParseNodes,
     ParsePage,
-    ParseStyleString
+    ParseStyleString,
 };

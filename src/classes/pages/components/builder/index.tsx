@@ -7,9 +7,8 @@
 import { Endpoint, Renderer } from "honeybee";
 
 import EntryDB, { Paste } from "../../../db/EntryDB";
-import { db } from "../../api/API";
+import { PageHeaders, db } from "../../api/API";
 import _404Page from "../404";
-import Modal from "../Modal";
 
 /**
  * @export
@@ -102,7 +101,11 @@ export default class Builder implements Endpoint {
             ),
             {
                 headers: {
+                    ...PageHeaders,
                     "Content-Type": "text/html",
+                    "Content-Security-Policy": PageHeaders[
+                        "Content-Security-Policy"
+                    ].replace("default-src 'self'", "default-src *"),
                 },
             }
         );

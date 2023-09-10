@@ -372,7 +372,7 @@ Paste comments can be disabled on individual pastes if the paste includes `&!lt%
 
 ### Paste Builder
 
-Users can build multi-page "pastes" using the paste builder. These pages are built using drag-and-drop (desktop only, automatic move on mobile) components, allowing them to build with text, images, buttons and more. These pages are highly customizable, from the width of the containing box to the overall theme of the page.
+Users can build multi-page "pastes" using the paste builder. These pages are built using drag-and-drop (desktop only, automatic move on mobile) components, allowing users to build with text, images, buttons and more. These pages are highly customizable, from the width of the containing box to the overall theme of the page. Users can also directly add CSS styles to components.
 
 These pages can be published as normal pastes, and will open rendered when viewed.
 

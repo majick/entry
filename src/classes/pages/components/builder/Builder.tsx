@@ -24,6 +24,7 @@ export function AddComponent(Type: string) {
     if (Type === "Page") {
         Document.Pages.push({
             Type: "Page",
+            ID: `page-${Document.Pages.length + 1}`,
             NotRemovable: true,
             Children: [
                 {
@@ -80,6 +81,13 @@ export function AddComponent(Type: string) {
                 },
             ],
         });
+    else if (Type === "Embed")
+        Document.Pages[CurrentPage].Children.push({
+            Type: "Embed",
+            Source: "about:blank",
+            Alt: "blank embed",
+            StyleString: "width: 100%; height: 100%;",
+        });
 
     // update
     return (NeedsUpdate = true);
@@ -120,8 +128,9 @@ export function SetPage(page: number = 0) {
 
 export function Move(state: boolean = false) {
     MoveMode = state;
-    SidebarOpen = false;
-    return RenderSidebar();
+
+    if (state) return RenderSidebar({ Page: "Move" });
+    else return RenderSidebar();
 }
 
 export function Delete(node: Node) {
@@ -134,7 +143,7 @@ export function Delete(node: Node) {
 }
 
 // sidebar
-export function RenderSidebar(props?: { Page: "PagesView" }) {
+export function RenderSidebar(props?: { Page: string }) {
     // make sure we're in edit mode
     if (!EditMode) return;
 
@@ -377,8 +386,6 @@ function RenderPage() {
 
                         <button
                             className="border"
-                            disabled // wip
-                            title={"Work in progress!"}
                             onClick={() => {
                                 AddComponent("Embed");
                             }}

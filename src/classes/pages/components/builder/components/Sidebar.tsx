@@ -17,6 +17,7 @@ export function QuickInput(props: {
     type: "input" | "textarea";
     inputType?: string;
     default?: any;
+    step?: number;
 }) {
     return (
         <div className="option">
@@ -35,7 +36,7 @@ export function QuickInput(props: {
                         props.default ||
                         ""
                     }
-                    onKeyUp={(event) => {
+                    onBlur={(event) => {
                         (Selected as { [key: string]: any })[props.property] = (
                             event.target as HTMLInputElement
                         ).value;
@@ -45,7 +46,7 @@ export function QuickInput(props: {
                     style={{
                         minWidth: "100%",
                     }}
-                    step={0.5}
+                    step={props.step || 0.5}
                 />
             )) ||
                 (props.type === "textarea" && (
@@ -54,7 +55,7 @@ export function QuickInput(props: {
                         name={props.name}
                         id={props.name.replaceAll(" ", "_")}
                         value={(Selected as { [key: string]: any })[props.property]}
-                        onKeyUp={(event) => {
+                        onBlur={(event) => {
                             (Selected as { [key: string]: any })[props.property] = (
                                 event.target as HTMLInputElement
                             ).value;
@@ -77,7 +78,7 @@ export function QuickInput(props: {
  * @param {{ Page?: string }} props
  * @return {*}
  */
-export default function Sidebar(props: { Page?: string }) {
+export default function Sidebar(props: { Page?: string }): any {
     return (
         <div
             className="builder:sidebar"
@@ -85,30 +86,72 @@ export default function Sidebar(props: { Page?: string }) {
                 display: SidebarOpen ? "flex" : "none",
             }}
         >
-            <button class={"mobile-only"} onClick={() => SetSidebar(false)}>
+            <button
+                class={"mobile-only"}
+                style={{
+                    position: "sticky",
+                    top: 0,
+                }}
+                onClick={() => SetSidebar(false)}
+            >
                 Back
             </button>
 
-            {Selected && Selected.NotRemovable !== true && (
-                <button onClick={() => Delete(Selected)}>Delete</button>
+            {Selected && Selected.NotRemovable !== true && !props.Page && (
+                <button onClick={() => Delete(Selected)} class={"red"}>
+                    Delete
+                </button>
             )}
 
-            {(props && props.Page === "PagesView" && (
-                <>
-                    {/* pages list */}
-                    <button onClick={() => AddComponent("Page")}>Add Page</button>
+            {(props &&
+                ((props.Page === "PagesView" && (
+                    <>
+                        {/* pages list */}
+                        <button onClick={() => AddComponent("Page")}>
+                            Add Page
+                        </button>
 
-                    {Document.Pages.map((page) => {
-                        const index = Document.Pages.indexOf(page);
+                        {Document.Pages.map((page) => {
+                            const index = Document.Pages.indexOf(page);
 
-                        return (
-                            <button onClick={() => SetPage(index)} title={page.ID}>
-                                Page {index + 1}
+                            return (
+                                <button
+                                    onClick={() => SetPage(index)}
+                                    title={page.ID}
+                                >
+                                    Page {index + 1}
+                                </button>
+                            );
+                        })}
+                    </>
+                )) ||
+                    (props.Page === "Move" && (
+                        <>
+                            {/* move instructions */}
+                            <div className="option">
+                                <b>Moving Component</b>
+                            </div>
+
+                            <div className="option">
+                                <p>
+                                    Select the element you want to move this element
+                                    before/after. A dialog will ask you if you want
+                                    to move it before or after the selected element.
+                                </p>
+                            </div>
+
+                            <button
+                                className="green mobile-only"
+                                onClick={() => SetSidebar(false)}
+                            >
+                                Show Page
                             </button>
-                        );
-                    })}
-                </>
-            )) ||
+
+                            <button class={"red"} onClick={() => Move(false)}>
+                                Cancel
+                            </button>
+                        </>
+                    )))) ||
                 (Selected && (
                     <>
                         {(Selected.Type === "Page" && (
@@ -240,7 +283,8 @@ export default function Sidebar(props: { Page?: string }) {
                                             value="center"
                                             selected={
                                                 Document.Pages[CurrentPage]
-                                                    .AlignX === "center"
+                                                    .AlignX === "center" ||
+                                                !Document.Pages[CurrentPage].AlignX
                                             }
                                         >
                                             Center
@@ -296,7 +340,8 @@ export default function Sidebar(props: { Page?: string }) {
                                             value="center"
                                             selected={
                                                 Document.Pages[CurrentPage]
-                                                    .AlignY === "center"
+                                                    .AlignY === "center" ||
+                                                !Document.Pages[CurrentPage].AlignY
                                             }
                                         >
                                             Center
@@ -414,6 +459,41 @@ export default function Sidebar(props: { Page?: string }) {
                                         type="input"
                                         inputType="number"
                                         default={0}
+                                        step={0.1}
+                                    />
+
+                                    <QuickInput
+                                        name="Padding"
+                                        property="Padding"
+                                        type="input"
+                                        inputType="number"
+                                        default={0}
+                                        step={0.1}
+                                    />
+
+                                    <QuickInput
+                                        name="Border Radius"
+                                        property="BorderRadius"
+                                        type="input"
+                                        inputType="number"
+                                        default={0}
+                                        step={1}
+                                    />
+
+                                    <QuickInput
+                                        name="Font Weight"
+                                        property="Weight"
+                                        type="input"
+                                        inputType="number"
+                                        default={400}
+                                        step={100}
+                                    />
+
+                                    <QuickInput
+                                        name="Background"
+                                        property="Background"
+                                        type="input"
+                                        default={"transparent"}
                                     />
 
                                     <div className="option">
@@ -487,9 +567,34 @@ export default function Sidebar(props: { Page?: string }) {
                                         type="input"
                                     />
                                 </>
+                            )) ||
+                            (Selected.Type === "Embed" && (
+                                <>
+                                    {/* embed element controls */}
+                                    <button onClick={() => Move(true)}>Move</button>
+
+                                    <QuickInput
+                                        name="Source"
+                                        property="Source"
+                                        type="input"
+                                    />
+
+                                    <QuickInput
+                                        name="Alt Text"
+                                        property="Alt"
+                                        type="input"
+                                    />
+                                </>
                             ))}
 
                         {/* inputs everything supports!! */}
+
+                        {/* class string */}
+                        <QuickInput
+                            name="CSS Class"
+                            property="ClassString"
+                            type="input"
+                        />
 
                         {/* style string */}
                         <div className="option">
@@ -503,7 +608,7 @@ export default function Sidebar(props: { Page?: string }) {
                                 name={"StyleString"}
                                 id={"StyleString"}
                                 value={(Selected.StyleString || "").replaceAll(
-                                    /\;(?!\n)/g,
+                                    /\;\s*(?!\n)/g,
                                     ";\n"
                                 )}
                                 onKeyUp={(event) => {

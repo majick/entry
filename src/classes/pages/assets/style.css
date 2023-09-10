@@ -258,7 +258,8 @@ button.red,
     color: var(--red3);
 }
 
-button:disabled, .button:disabled {
+button:disabled,
+.button:disabled {
     opacity: 50%;
 }
 
@@ -1145,6 +1146,8 @@ br:not(.cm-line br) {
 
     align-items: var(--AlignX);
     justify-content: var(--AlignY);
+
+    animation: FadeIn 0.5s 0s running;
 }
 
 .builder\:text {
@@ -1153,14 +1156,20 @@ br:not(.cm-line br) {
     --LineSpacing: 1.5;
     --LetterSpacing: 1;
     --Margins: 0.5rem;
+    --Padding: 0;
     --Alignment: initial;
+    --BorderRadius: 0;
+    --Background: transparent;
 
     font-size: var(--Size);
     font-weight: var(--Weight);
     line-height: var(--LineSpacing);
     letter-spacing: var(--LetterSpacing);
     margin: var(--Margins);
+    padding: var(--Padding);
     text-align: var(--Alignment);
+    border-radius: var(--BorderRadius);
+    background: var(--Background);
     font-size-adjust: none;
 }
 
@@ -1185,6 +1194,15 @@ br:not(.cm-line br) {
     justify-content: center;
 }
 
+.builder\:embed {
+    padding: 0.5rem;
+}
+
+.builder\:embed[src="about:blank"] {
+    background: var(--background-surface-1);
+    cursor: move !important;
+}
+
 .builder\:toolbar {
     position: fixed;
     top: 0.5rem;
@@ -1197,6 +1215,8 @@ br:not(.cm-line br) {
     box-shadow: 0 0 4px var(--background-surface3);
     justify-content: center;
     align-items: center;
+
+    animation: FadeIn 0.75s 0s running;
 }
 
 .builder\:toolbar button {

@@ -151,20 +151,21 @@ export class GetPasteFromURL implements Endpoint {
             result.Content.startsWith("_builder:") &&
             search.get("nobuilder") === null
         ) {
+            // get parsed content
             const TrueContent = JSON.parse(
                 atob(result.Content.split("_builder:")[1])
             );
 
+            // get current page
+            let Page = TrueContent.Pages[0];
+
+            // return
             return new Response(
                 Renderer.Render(
                     <>
                         <div id="_doc">
                             {/* initial render */}
-                            {BuilderParser.ParsePage(
-                                TrueContent.Pages[0],
-                                false,
-                                true
-                            )}
+                            {BuilderParser.ParsePage(Page, false, true)}
                         </div>
 
                         {/* fix mistakes on client */}
@@ -282,11 +283,13 @@ export class GetPasteFromURL implements Endpoint {
                         </Modal>
                     </>,
                     <>
+                        <meta name="description" content={result.CustomURL} />
                         <title>{result.CustomURL}</title>
                     </>
                 ),
                 {
                     headers: {
+                        ...PageHeaders,
                         "Content-Type": "text/html",
                     },
                 }
