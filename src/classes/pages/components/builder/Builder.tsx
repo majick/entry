@@ -450,13 +450,21 @@ function RenderPage() {
                                     GroupSubmitPassword: "",
                                 };
 
+                                // create formdata body
+                                let body: string[] = [];
+
+                                // ...fill formdata body
+                                for (const [key, value] of Object.entries(Paste))
+                                    body.push(`${key}=${value}`);
+
                                 // send request
-                                const res = await fetch("/api/json/new", {
+                                const res = await fetch("/api/new", {
                                     method: "POST",
                                     headers: {
-                                        "Content-Type": "application/json",
+                                        "Content-Type":
+                                            "application/x-www-form-urlencoded",
                                     },
-                                    body: JSON.stringify(Paste),
+                                    body: body.join("&"),
                                 });
 
                                 // check if there was an error
@@ -525,13 +533,21 @@ function RenderPage() {
                                     ),
                                 };
 
+                                // create formdata body
+                                let body: string[] = [];
+
+                                // ...fill formdata body
+                                for (const [key, value] of Object.entries(Paste))
+                                    body.push(`${key}=${value}`);
+
                                 // send request
-                                const res = await fetch("/api/json/edit", {
+                                const res = await fetch("/api/edit", {
                                     method: "POST",
                                     headers: {
-                                        "Content-Type": "application/json",
+                                        "Content-Type":
+                                            "application/x-www-form-urlencoded",
                                     },
-                                    body: JSON.stringify(Paste),
+                                    body: body.join("&"),
                                 });
 
                                 // check if there was an error
