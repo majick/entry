@@ -11,6 +11,72 @@ import {
     Delete,
 } from "../Builder";
 
+export function QuickInput(props: {
+    name: string;
+    property: string;
+    type: "input" | "textarea";
+    inputType?: string;
+    default?: any;
+}) {
+    return (
+        <div className="option">
+            <label htmlFor={props.name.replaceAll(" ", "_")}>
+                <b>{props.name}</b>
+            </label>
+
+            {(props.type === "input" && (
+                <input
+                    class={"secondary"}
+                    type={props.inputType || "text"}
+                    name={props.name}
+                    id={props.name.replaceAll(" ", "_")}
+                    value={
+                        (Selected as { [key: string]: any })[props.property] ||
+                        props.default ||
+                        ""
+                    }
+                    onKeyUp={(event) => {
+                        (Selected as { [key: string]: any })[props.property] = (
+                            event.target as HTMLInputElement
+                        ).value;
+
+                        Update();
+                    }}
+                    style={{
+                        minWidth: "100%",
+                    }}
+                    step={0.5}
+                />
+            )) ||
+                (props.type === "textarea" && (
+                    <textarea
+                        class={"secondary"}
+                        name={props.name}
+                        id={props.name.replaceAll(" ", "_")}
+                        value={(Selected as { [key: string]: any })[props.property]}
+                        onKeyUp={(event) => {
+                            (Selected as { [key: string]: any })[props.property] = (
+                                event.target as HTMLInputElement
+                            ).value;
+
+                            Update();
+                        }}
+                        style={{
+                            minWidth: "100%",
+                        }}
+                    ></textarea>
+                ))}
+        </div>
+    );
+}
+
+/**
+ * @function Sidebar
+ *
+ * @export
+ * @param {{ Page?: string }} props
+ * @return {*}
+ */
 export default function Sidebar(props: { Page?: string }) {
     return (
         <div
@@ -48,31 +114,7 @@ export default function Sidebar(props: { Page?: string }) {
                         {(Selected.Type === "Page" && (
                             <>
                                 {/* page element controls */}
-                                <div className="option">
-                                    <label htmlFor="ID">
-                                        <b>ID</b>
-                                    </label>
-
-                                    <input
-                                        class={"secondary"}
-                                        type="text"
-                                        name={"ID"}
-                                        id={"ID"}
-                                        value={Selected.ID}
-                                        onKeyUp={(event) => {
-                                            if (Selected.Type !== "Page") return;
-
-                                            Selected.ID = (
-                                                event.target as HTMLInputElement
-                                            ).value;
-
-                                            Update();
-                                        }}
-                                        style={{
-                                            minWidth: "100%",
-                                        }}
-                                    />
-                                </div>
+                                <QuickInput name="ID" property="ID" type="input" />
 
                                 <div className="option">
                                     <label htmlFor="Theme">
@@ -276,31 +318,13 @@ export default function Sidebar(props: { Page?: string }) {
                             (Selected.Type === "Card" && (
                                 <>
                                     {/* card element controls */}
-                                    <div className="option">
-                                        <label htmlFor="Width">
-                                            <b>Width</b>
-                                        </label>
-
-                                        <input
-                                            class={"secondary"}
-                                            type="number"
-                                            name={"Width"}
-                                            id={"Width"}
-                                            value={Selected.Width || -1}
-                                            onInput={(event) => {
-                                                if (Selected.Type !== "Card") return;
-
-                                                Selected.Width = (
-                                                    event.target as HTMLInputElement
-                                                ).value;
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
+                                    <QuickInput
+                                        name="Width"
+                                        property="Width"
+                                        type="input"
+                                        inputType="number"
+                                        default={-1}
+                                    />
 
                                     <div className="option">
                                         <label htmlFor="Background">
@@ -354,145 +378,43 @@ export default function Sidebar(props: { Page?: string }) {
                                     {/* text element controls */}
                                     <button onClick={() => Move(true)}>Move</button>
 
-                                    <div className="option">
-                                        <label htmlFor="Content">
-                                            <b>Content</b>
-                                        </label>
+                                    <QuickInput
+                                        name="Content"
+                                        property="Content"
+                                        type="textarea"
+                                    />
 
-                                        <textarea
-                                            class={"secondary"}
-                                            type="text"
-                                            name={"Content"}
-                                            id={"Content"}
-                                            value={Selected.Content}
-                                            onKeyUp={(event) => {
-                                                if (Selected.Type !== "Text") return;
+                                    <QuickInput
+                                        name="Text Size"
+                                        property="Size"
+                                        type="input"
+                                        inputType="number"
+                                        default={16}
+                                    />
 
-                                                Selected.Content = (
-                                                    event.target as HTMLInputElement
-                                                ).value;
+                                    <QuickInput
+                                        name="Line Spacing"
+                                        property="LineSpacing"
+                                        type="input"
+                                        inputType="number"
+                                        default={1.5}
+                                    />
 
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        ></textarea>
-                                    </div>
+                                    <QuickInput
+                                        name="Letter Spacing"
+                                        property="LetterSpacing"
+                                        type="input"
+                                        inputType="number"
+                                        default={1}
+                                    />
 
-                                    <div className="option">
-                                        <label htmlFor="Size">
-                                            <b>Text Size</b>
-                                        </label>
-
-                                        <input
-                                            class={"secondary"}
-                                            type="number"
-                                            name={"Size"}
-                                            id={"Size"}
-                                            value={Selected.Size || 16}
-                                            onInput={(event) => {
-                                                if (Selected.Type !== "Text") return;
-
-                                                Selected.Size = parseInt(
-                                                    (
-                                                        event.target as HTMLInputElement
-                                                    ).value
-                                                );
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="option">
-                                        <label htmlFor="LineSpacing">
-                                            <b>Line Spacing</b>
-                                        </label>
-
-                                        <input
-                                            class={"secondary"}
-                                            type="number"
-                                            name={"LineSpacing"}
-                                            id={"LineSpacing"}
-                                            value={Selected.LineSpacing || 1.5}
-                                            step={"any"}
-                                            onInput={(event) => {
-                                                if (Selected.Type !== "Text") return;
-
-                                                Selected.LineSpacing = parseInt(
-                                                    (
-                                                        event.target as HTMLInputElement
-                                                    ).value
-                                                );
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="option">
-                                        <label htmlFor="LetterSpacing">
-                                            <b>Letter Spacing</b>
-                                        </label>
-
-                                        <input
-                                            class={"secondary"}
-                                            type="number"
-                                            name={"LetterSpacing"}
-                                            id={"LetterSpacing"}
-                                            value={Selected.LineSpacing || 1}
-                                            step={"any"}
-                                            onInput={(event) => {
-                                                if (Selected.Type !== "Text") return;
-
-                                                Selected.LetterSpacing = parseInt(
-                                                    (
-                                                        event.target as HTMLInputElement
-                                                    ).value
-                                                );
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="option">
-                                        <label htmlFor="Margin">
-                                            <b>Margin</b>
-                                        </label>
-
-                                        <input
-                                            class={"secondary"}
-                                            type="number"
-                                            name={"Margin"}
-                                            id={"Margin"}
-                                            value={Selected.Margins || 0}
-                                            onInput={(event) => {
-                                                if (Selected.Type !== "Text") return;
-
-                                                Selected.Margins = parseInt(
-                                                    (
-                                                        event.target as HTMLInputElement
-                                                    ).value
-                                                );
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
+                                    <QuickInput
+                                        name="Margin"
+                                        property="Margins"
+                                        type="input"
+                                        inputType="number"
+                                        default={0}
+                                    />
 
                                     <div className="option">
                                         <label htmlFor="Alignment">
@@ -553,61 +475,49 @@ export default function Sidebar(props: { Page?: string }) {
                                     {/* image element controls */}
                                     <button onClick={() => Move(true)}>Move</button>
 
-                                    <div className="option">
-                                        <label htmlFor="Source">
-                                            <b>Source</b>
-                                        </label>
+                                    <QuickInput
+                                        name="Source"
+                                        property="Source"
+                                        type="input"
+                                    />
 
-                                        <input
-                                            class={"secondary"}
-                                            type="url"
-                                            name={"Source"}
-                                            id={"Source"}
-                                            value={Selected.Source}
-                                            onKeyUp={(event) => {
-                                                if (Selected.Type !== "Image")
-                                                    return;
-
-                                                Selected.Source = (
-                                                    event.target as HTMLInputElement
-                                                ).value;
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
-
-                                    <div className="option">
-                                        <label htmlFor="Alt">
-                                            <b>Alt Text</b>
-                                        </label>
-
-                                        <input
-                                            class={"secondary"}
-                                            type="text"
-                                            name={"Alt"}
-                                            id={"Alt"}
-                                            value={Selected.Alt}
-                                            onKeyUp={(event) => {
-                                                if (Selected.Type !== "Image")
-                                                    return;
-
-                                                Selected.Alt = (
-                                                    event.target as HTMLInputElement
-                                                ).value;
-
-                                                Update();
-                                            }}
-                                            style={{
-                                                minWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
+                                    <QuickInput
+                                        name="Alt Text"
+                                        property="Alt"
+                                        type="input"
+                                    />
                                 </>
                             ))}
+
+                        {/* inputs everything supports!! */}
+
+                        {/* style string */}
+                        <div className="option">
+                            <label htmlFor="StyleString">
+                                <b>CSS Style String</b>
+                            </label>
+
+                            <textarea
+                                class={"secondary"}
+                                type="text"
+                                name={"StyleString"}
+                                id={"StyleString"}
+                                value={(Selected.StyleString || "").replaceAll(
+                                    /\;(?!\n)/g,
+                                    ";\n"
+                                )}
+                                onKeyUp={(event) => {
+                                    Selected.StyleString = (
+                                        event.target as HTMLInputElement
+                                    ).value;
+
+                                    Update();
+                                }}
+                                style={{
+                                    minWidth: "100%",
+                                }}
+                            ></textarea>
+                        </div>
                     </>
                 ))}
         </div>

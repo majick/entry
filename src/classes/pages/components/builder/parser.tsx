@@ -98,9 +98,35 @@ export function ParsePage(
     );
 }
 
+/**
+ * @function ParseStyleString
+ *
+ * @export
+ * @param {string} style
+ * @return {{ [key: string]: string }}
+ */
+export function ParseStyleString(style: string): { [key: string]: string } {
+    let result: any = {};
+
+    // split by lines (;)
+    const lines = style.split(";");
+
+    // get key and value from rule
+    for (const rule of lines) {
+        const [key, value] = rule.split(":");
+        if (!key || !value) continue;
+
+        result[key.trim()] = value.trim();
+    }
+
+    // return
+    return result;
+}
+
 // default export
 export default {
     AllNodes,
     ParseNodes,
     ParsePage,
+    ParseStyleString
 };

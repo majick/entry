@@ -6,6 +6,7 @@
 
 import { ParseMarkdownSync } from "../Markdown";
 import { Update } from "./Builder";
+import parser from "./parser";
 
 // types
 export type BaseNode = {
@@ -14,6 +15,7 @@ export type BaseNode = {
     Children?: Node[];
     NotRemovable?: boolean;
     EditMode?: boolean;
+    StyleString?: string; // injected directly into the element style attribute
 };
 
 export interface PageNode extends BaseNode {
@@ -235,6 +237,12 @@ export function PageNode(props: {
             data-edit={props.node.EditMode}
         >
             {props.children}
+
+            <style
+                // the StyleString on pages can change more than just the page element,
+                // so it's within its own style element... instead of just the attribute!
+                dangerouslySetInnerHTML={{ __html: props.node.StyleString || "" }}
+            />
         </div>
     );
 }
@@ -263,6 +271,9 @@ export function CardNode(props: {
                 "--Padding": props.node.Padding
                     ? `${props.node.Padding}rem`
                     : undefined,
+                ...(props.node.StyleString
+                    ? parser.ParseStyleString(props.node.StyleString)
+                    : {}),
             }}
             data-component={props.node.Type}
             data-edit={props.node.EditMode}
@@ -299,11 +310,16 @@ export function TextNode(props: {
                     "--Size": props.node.Size ? `${props.node.Size}px` : undefined,
                     "--Weight": props.node.Weight || undefined,
                     "--LineSpacing": props.node.LineSpacing || undefined,
-                    "--LetterSpacing": props.node.LetterSpacing || undefined,
+                    "--LetterSpacing": props.node.LetterSpacing
+                        ? `${props.node.LetterSpacing}px`
+                        : undefined,
                     "--Margins": props.node.Margins
                         ? `${props.node.Margins}rem`
                         : undefined,
                     "--Alignment": props.node.Alignment || undefined,
+                    ...(props.node.StyleString
+                        ? parser.ParseStyleString(props.node.StyleString)
+                        : {}),
                 }}
                 dangerouslySetInnerHTML={{
                     // set content, supports markdown!
@@ -353,6 +369,11 @@ export function ImageNode(props: {
                 alt={props.node.Alt}
                 title={props.node.Alt}
                 data-edit={props.node.EditMode}
+                style={{
+                    ...(props.node.StyleString
+                        ? parser.ParseStyleString(props.node.StyleString)
+                        : {}),
+                }}
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
@@ -391,6 +412,11 @@ export function ColumnNode(props: {
             <div
                 class={"builder:columns"}
                 data-edit={props.node.EditMode}
+                style={{
+                    ...(props.node.StyleString
+                        ? parser.ParseStyleString(props.node.StyleString)
+                        : {}),
+                }}
                 // drag
                 draggable={props.node.EditMode}
                 onDragStart={
