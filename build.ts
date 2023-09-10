@@ -15,7 +15,7 @@ const output = await build({
     minify: {
         identifiers: true,
         syntax: true,
-        whitespace: true,
+        whitespace: false,
     },
     target: "bun", // technically Editor.ts should have the "browser" target, but this hasn't caused any issues yet so it's fine!
     outdir: "dist",

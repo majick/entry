@@ -26,13 +26,15 @@ export const DefaultHeaders = {
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     Vary: "Accept-Encoding",
-    "Content-Security-Policy": [
-        "default-src 'self'",
-        "img-src *",
-        "style-src 'unsafe-inline' 'self'",
-        "script-src 'self' 'unsafe-inline'",
-        "upgrade-insecure-requests",
-    ].join("; "),
+    "Content-Security-Policy":
+        process.env.CONTENT_SECURITY_POLICY ||
+        [
+            "default-src 'self'",
+            "img-src *",
+            "style-src 'unsafe-inline' 'self'",
+            "script-src 'self' 'unsafe-inline'",
+            "upgrade-insecure-requests",
+        ].join("; "),
     "X-Entry-Version": pack.version,
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "same-origin",
