@@ -10,6 +10,10 @@ import { VNode } from "preact";
 // ...
 let AllNodes: Node[] = [];
 
+export function ResetNodes() {
+    return (AllNodes = []);
+}
+
 /**
  * @function ParseNodes
  *
@@ -132,6 +136,7 @@ export function ParseStyleString(style: string): { [key: string]: string } {
 // default export
 export default {
     AllNodes,
+    ResetNodes,
     ParseNodes,
     ParsePage,
     ParseStyleString,

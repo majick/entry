@@ -467,7 +467,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                         property="Padding"
                                         type="input"
                                         inputType="number"
-                                        default={0}
+                                        default={0.2}
                                         step={0.1}
                                     />
 
@@ -494,6 +494,13 @@ export default function Sidebar(props: { Page?: string }): any {
                                         property="Background"
                                         type="input"
                                         default={"transparent"}
+                                    />
+
+                                    <QuickInput
+                                        name="Color"
+                                        property="Color"
+                                        type="input"
+                                        default={"var(--text-color)"}
                                     />
 
                                     <div className="option">

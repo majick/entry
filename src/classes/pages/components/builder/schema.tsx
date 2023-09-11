@@ -51,6 +51,7 @@ export interface TextNode extends BaseNode {
     Padding?: number; // rem
     BorderRadius?: number; // px
     Background?: string;
+    Color?: string;
     Alignment?: "left" | "right" | "center";
 }
 
@@ -63,7 +64,7 @@ export interface ImageNode extends BaseNode {
 
 export interface ColumnNode extends BaseNode {
     Type: "Columns";
-    Children: CardNode[]; // children property must contain two cards!
+    Children: Node[]; // children property must contain two cards!
 }
 
 export interface EmbedNode extends BaseNode {
@@ -89,6 +90,12 @@ export type BuilderDocument = {
 // state
 let dragging: Node;
 let draggingDocument: Node[];
+
+export function SetDrag(_dragging: Node, _doc: Node[]) {
+    dragging = _dragging;
+    draggingDocument = _doc;
+    return true;
+}
 
 // components
 
@@ -143,14 +150,23 @@ function DragZones(props: {
     children: any;
 }): any {
     function Drag(direction: number) {
-        if (dragging === props.fornode) return (props.visible = false);
+        if (
+            dragging === props.fornode ||
+            // make sure we're not dragging a parent component into itself
+            (dragging.Children && dragging.Children === props.fordocument)
+        )
+            return (props.visible = false);
 
         // get index of props.fornode, move dragging to that index
+        const previousIndex = draggingDocument.indexOf(dragging);
         const index = props.fordocument.indexOf(props.fornode) || 1;
 
         // move dragging
-        draggingDocument.splice(draggingDocument.indexOf(dragging), 1);
+        draggingDocument.splice(previousIndex, 1);
         props.fordocument.splice(index + direction, 0, dragging);
+
+        // reset all nodes
+        parser.ResetNodes();
 
         // update
         return Update();
@@ -279,24 +295,33 @@ export function CardNode(props: {
     if (!props.node.ID) props.node.ID = crypto.randomUUID();
 
     return (
-        <div
-            id={props.node.ID}
-            className={`component builder:card ${props.node.ClassString || ""}`}
-            style={{
-                "--Background": props.node.Background,
-                "--Width": props.node.Width ? `${props.node.Width}px` : undefined,
-                "--Padding": props.node.Padding
-                    ? `${props.node.Padding}rem`
-                    : undefined,
-                ...(props.node.StyleString
-                    ? parser.ParseStyleString(props.node.StyleString)
-                    : {}),
-            }}
-            data-component={props.node.Type}
-            data-edit={props.node.EditMode}
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
         >
-            {props.children}
-        </div>
+            <div
+                id={props.node.ID}
+                className={`component builder:card ${props.node.ClassString || ""}`}
+                style={{
+                    "--Background": props.node.Background,
+                    "--Width": props.node.Width
+                        ? `${props.node.Width}px`
+                        : undefined,
+                    "--Padding": props.node.Padding
+                        ? `${props.node.Padding}rem`
+                        : undefined,
+                    ...(props.node.StyleString
+                        ? parser.ParseStyleString(props.node.StyleString)
+                        : {}),
+                }}
+                data-component={props.node.Type}
+                data-edit={props.node.EditMode}
+                draggable={props.node.EditMode}
+            >
+                {props.children}
+            </div>
+        </DragZones>
     );
 }
 
@@ -341,6 +366,7 @@ export function TextNode(props: {
                         : undefined,
                     "--Alignment": props.node.Alignment || undefined,
                     "--Background": props.node.Background || undefined,
+                    "--Color": props.node.Color || undefined,
                     ...(props.node.StyleString
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),
@@ -351,16 +377,7 @@ export function TextNode(props: {
                 }}
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}
-                // drag
                 draggable={props.node.EditMode}
-                onDragStart={
-                    props.node.EditMode
-                        ? () => {
-                              dragging = props.node;
-                              draggingDocument = props.document;
-                          }
-                        : undefined
-                }
             />
         </DragZones>
     );
@@ -399,16 +416,7 @@ export function ImageNode(props: {
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),
                 }}
-                // drag
                 draggable={props.node.EditMode}
-                onDragStart={
-                    props.node.EditMode
-                        ? () => {
-                              dragging = props.node;
-                              draggingDocument = props.document;
-                          }
-                        : undefined
-                }
             />
         </DragZones>
     );
@@ -443,16 +451,7 @@ export function ColumnNode(props: {
                 }}
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}
-                // drag
                 draggable={props.node.EditMode}
-                onDragStart={
-                    props.node.EditMode
-                        ? () => {
-                              dragging = props.node;
-                              draggingDocument = props.document;
-                          }
-                        : undefined
-                }
             >
                 {props.children}
             </div>
@@ -491,16 +490,7 @@ export function EmbedNode(props: {
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}
                 frameBorder={0}
-                // drag
                 draggable={props.node.EditMode}
-                onDragStart={
-                    props.node.EditMode
-                        ? () => {
-                              dragging = props.node;
-                              draggingDocument = props.document;
-                          }
-                        : undefined
-                }
             />
         </DragZones>
     );
@@ -508,6 +498,7 @@ export function EmbedNode(props: {
 
 // default export
 export default {
+    SetDrag,
     GetDropZoneFromElement,
     PageNode,
     CardNode,

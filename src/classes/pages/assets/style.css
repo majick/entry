@@ -1170,10 +1170,11 @@ br:not(.cm-line br) {
     --LineSpacing: 1.5;
     --LetterSpacing: 1;
     --Margins: 0.5rem;
-    --Padding: 0;
+    --Padding: 0.2rem;
     --Alignment: initial;
     --BorderRadius: 0;
     --Background: transparent;
+    --Color: var(--text-color);
 
     font-size: var(--Size);
     font-weight: var(--Weight);
@@ -1184,6 +1185,7 @@ br:not(.cm-line br) {
     text-align: var(--Alignment);
     border-radius: var(--BorderRadius);
     background: var(--Background);
+    color: var(--Color);
     font-size-adjust: none;
 }
 

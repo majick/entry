@@ -382,6 +382,41 @@ Pastes built in this way follow a basic "schema" that is detailed in the types u
 
 The paste builder can be disabled using config `app.enable_builder`. It is enabled by default.
 
+Fields for a specific node type are handled in four steps:
+
+- The entry in the `{Type}Node` interface (`schema.tsx`)
+    - Example: `Size: number;` in the `TextNode` interface
+- The handler for the `--{Type}` entry in the schema parse function (`schema.tsx`)
+    - Example: `--Size` for the `TextNode` parse function
+- The style handler in the stylesheet, `.builder\:{type}` (`style.css`)
+    - Example:
+
+```css
+.builder\:text {
+    --Size: 16px;
+    font-size: var(--Size);
+}
+```
+
+- Adding an input in the sidebar (`Sidebar.tsx`)
+    - Example:
+
+```tsx
+<QuickInput
+    name="Text Size"
+    property="Size"
+    type="input"
+    inputType="number"
+    default={16}
+/>
+```
+
+Adding a new node is handled similarly:
+
+- Creating a new interface and parse function in the schema (`schema.tsx`)
+- Creating the handler in the parser (`parser.tsx`)
+- Adding style attributes
+
 ## Development
 
 1. Make sure you have [Bun](https://bun.sh) installed

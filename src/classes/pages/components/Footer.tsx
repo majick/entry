@@ -63,13 +63,6 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 </li>
 
                 {EntryDB.config.app &&
-                    EntryDB.config.app.enable_builder !== false && (
-                        <li>
-                            <a href="/paste/builder">builder</a>
-                        </li>
-                    )}
-
-                {EntryDB.config.app &&
                     EntryDB.config.app.enable_search !== false && (
                         <li>
                             <a href="/search">search</a>
@@ -199,6 +192,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                             viewBox="0 0 24 24"
                             width="24"
                             height="24"
+                            aria-label={"File Symbol"}
                         >
                             <path d="M3 3a2 2 0 0 1 2-2h9.982a2 2 0 0 1 1.414.586l4.018 4.018A2 2 0 0 1 21 7.018V21a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v18a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5V8.5h-4a2 2 0 0 1-2-2v-4Zm10 0v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0-.146-.336l-4.018-4.018A.5.5 0 0 0 15 2.5Z"></path>
                         </svg>
@@ -216,6 +210,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                                     viewBox="0 0 16 16"
                                     width="24"
                                     height="24"
+                                    aria-label={"Sparkle Symbol"}
                                 >
                                     <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
                                 </svg>

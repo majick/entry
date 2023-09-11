@@ -40,7 +40,18 @@ export function AddComponent(Type: string) {
         });
 
         RenderSidebar({ Page: "PagesView" }); // rerender sidebar with updated pages!
-    } else if (Type === "Text")
+    } else if (Type === "Card")
+        Document.Pages[CurrentPage].Children.push({
+            Type: "Card",
+            Children: [
+                {
+                    Type: "Text",
+                    Content: "New Card",
+                    Alignment: "center",
+                },
+            ],
+        });
+    else if (Type === "Text")
         Document.Pages[CurrentPage].Children.push({
             Type: "Text",
             Content: "Text",
@@ -250,6 +261,43 @@ function RenderPage() {
                           }
                         : undefined
                 }
+                onDragStart={
+                    EditMode
+                        ? (event) => {
+                              // get target
+                              let target = event.target as HTMLElement;
+
+                              if (!target.getAttribute("data-component"))
+                                  target = target.parentElement!;
+
+                              // get node
+                              const node = parser.AllNodes.find(
+                                  (node) => node.ID === target.id
+                              );
+
+                              if (!node) return;
+
+                              // get parent
+                              let parent = parser.AllNodes.find((ParentNode) =>
+                                  (ParentNode.Children || []).includes(node)
+                              );
+
+                              if (!parent) {
+                                  // try to get parent from page root
+                                  parent = Document.Pages[
+                                      CurrentPage
+                                  ].Children.includes(node)
+                                      ? Document.Pages[CurrentPage]
+                                      : undefined;
+
+                                  if (!parent) return;
+                              }
+
+                              // set dragging
+                              return schema.SetDrag(node, parent.Children as Node[]);
+                          }
+                        : undefined
+                }
                 id={"_doc"}
             />
 
@@ -373,6 +421,15 @@ function RenderPage() {
                             }}
                         >
                             Image
+                        </button>
+
+                        <button
+                            className="border"
+                            onClick={() => {
+                                AddComponent("Card");
+                            }}
+                        >
+                            Card
                         </button>
 
                         <button

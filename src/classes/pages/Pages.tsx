@@ -240,6 +240,13 @@ export class GetPasteFromURL implements Endpoint {
                                     >
                                         Comments ({result.Comments})
                                     </a>
+
+                                    <a
+                                        href={`/?ReportOn=${result.CustomURL}`}
+                                        className="button"
+                                    >
+                                        Report
+                                    </a>
                                 </div>
 
                                 <hr />
