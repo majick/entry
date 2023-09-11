@@ -248,6 +248,19 @@ button.border:hover,
     background: var(--background-surface2);
 }
 
+button.border.dashed,
+.button.border.dashed {
+    box-shadow: none;
+    border: dashed 1px var(--background-surface2);
+}
+
+button.border.dashed:hover,
+.button.border.dashed:hover {
+    box-shadow: none;
+    border: dashed 1px var(--text-color-faded);
+    background: transparent;
+}
+
 button.green,
 .button.green {
     color: var(--green3);
@@ -870,6 +883,7 @@ details[open].horizontal .details-content * {
 /* codemirror styles */
 .cm-cursor {
     border-color: currentColor !important;
+    border-left: 1.2px solid currentColor !important;
 }
 
 .cm-selectionBackground {

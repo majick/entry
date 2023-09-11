@@ -86,7 +86,7 @@ export function AddComponent(Type: string) {
             Type: "Embed",
             Source: "about:blank",
             Alt: "blank embed",
-            StyleString: "width: 100%; height: 100%;",
+            StyleString: "width: 100%; height: initial;",
         });
 
     // update

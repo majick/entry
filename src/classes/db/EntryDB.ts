@@ -72,7 +72,7 @@ export default class EntryDB {
 
     public static config: Config;
 
-    private static readonly URLRegex = /^[\w\_\-]+$/gm; // custom urls must match this to be accepted
+    private static readonly URLRegex = /^[\w\_\-\.\!\@]+$/gm; // custom urls must match this to be accepted
 
     public static isNew: boolean = true;
 
