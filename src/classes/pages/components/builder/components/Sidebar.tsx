@@ -9,6 +9,7 @@ import {
     Selected,
     Move,
     Delete,
+    SelectedParent,
 } from "../Builder";
 
 export function QuickInput(props: {
@@ -100,6 +101,12 @@ export default function Sidebar(props: { Page?: string }): any {
             {Selected && Selected.NotRemovable !== true && !props.Page && (
                 <button onClick={() => Delete(Selected)} class={"red"}>
                     Delete
+                </button>
+            )}
+
+            {Selected && Selected.NotRemovable !== true && !props.Page && (
+                <button onClick={() => Move(true, Selected, SelectedParent)}>
+                    Move
                 </button>
             )}
 
@@ -363,6 +370,7 @@ export default function Sidebar(props: { Page?: string }): any {
                             (Selected.Type === "Card" && (
                                 <>
                                     {/* card element controls */}
+
                                     <QuickInput
                                         name="Width"
                                         property="Width"
@@ -421,7 +429,6 @@ export default function Sidebar(props: { Page?: string }): any {
                             (Selected.Type === "Text" && (
                                 <>
                                     {/* text element controls */}
-                                    <button onClick={() => Move(true)}>Move</button>
 
                                     <QuickInput
                                         name="Content"
@@ -560,7 +567,6 @@ export default function Sidebar(props: { Page?: string }): any {
                             (Selected.Type === "Image" && (
                                 <>
                                     {/* image element controls */}
-                                    <button onClick={() => Move(true)}>Move</button>
 
                                     <QuickInput
                                         name="Source"
@@ -578,7 +584,6 @@ export default function Sidebar(props: { Page?: string }): any {
                             (Selected.Type === "Embed" && (
                                 <>
                                     {/* embed element controls */}
-                                    <button onClick={() => Move(true)}>Move</button>
 
                                     <QuickInput
                                         name="Source"

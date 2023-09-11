@@ -109,15 +109,18 @@ export let SidebarOpen = false;
 export let MoveMode: boolean = false;
 
 export let Hovered: HTMLElement;
-export let Selected: Node;
 export let CurrentPage: number = 0;
+
+export let Selected: Node;
+export let SelectedParent: Node[];
 
 let NeedsUpdate: boolean = false;
 export let EditMode: boolean = true;
 
 // state functions
-export function Select(node: Node) {
+export function Select(node: Node, parent: Node[]) {
     Selected = node;
+    SelectedParent = parent;
 
     SidebarOpen = true; // so the sidebar opens automatically
     RenderSidebar(); // rerender sidebar
@@ -137,8 +140,9 @@ export function SetPage(page: number = 0) {
     return Update();
 }
 
-export function Move(state: boolean = false) {
+export function Move(state: boolean = false, dragging?: Node, doc?: Node[]) {
     MoveMode = state;
+    if (dragging && doc) schema.SetDrag(dragging, doc);
 
     if (state) return RenderSidebar({ Page: "Move" });
     else return RenderSidebar();
@@ -256,8 +260,17 @@ function RenderPage() {
 
                               if (!node) return;
 
+                              // get parent
+                              const parent =
+                                  (
+                                      parser.AllNodes.find(
+                                          (n) =>
+                                              n.Children && n.Children.includes(node)
+                                      ) || Document.Pages[CurrentPage]
+                                  ).Children || [];
+
                               // select
-                              Select(node);
+                              Select(node, parent);
                           }
                         : undefined
                 }
@@ -321,7 +334,7 @@ function RenderPage() {
                     aria-label={"Current Page"}
                     title={"Current Page"}
                     onClick={() => {
-                        Select(Document.Pages[CurrentPage]);
+                        Select(Document.Pages[CurrentPage], Document.Pages);
                     }}
                 >
                     <svg
