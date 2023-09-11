@@ -234,19 +234,29 @@ export class GetPasteFromURL implements Endpoint {
                                         Edit
                                     </a>
 
-                                    <a
-                                        href={`/paste/comments/${result.CustomURL}`}
-                                        className="button"
-                                    >
-                                        Comments ({result.Comments})
-                                    </a>
+                                    {EntryDB.config.log &&
+                                        EntryDB.config.log.events.includes(
+                                            "comment"
+                                        ) && (
+                                            <a
+                                                href={`/paste/comments/${result.CustomURL}`}
+                                                className="button"
+                                            >
+                                                Comments ({result.Comments})
+                                            </a>
+                                        )}
 
-                                    <a
-                                        href={`/?ReportOn=${result.CustomURL}`}
-                                        className="button"
-                                    >
-                                        Report
-                                    </a>
+                                    {EntryDB.config.log &&
+                                        EntryDB.config.log.events.includes(
+                                            "report"
+                                        ) && (
+                                            <a
+                                                href={`/?ReportOn=${result.CustomURL}`}
+                                                className="button"
+                                            >
+                                                Report
+                                            </a>
+                                        )}
                                 </div>
 
                                 <hr />
