@@ -14,6 +14,10 @@ export function ResetNodes() {
     return (AllNodes = []);
 }
 
+export function GetNodes() {
+    return AllNodes;
+}
+
 /**
  * @function ParseNodes
  *
@@ -137,6 +141,7 @@ export function ParseStyleString(style: string): { [key: string]: string } {
 export default {
     AllNodes,
     ResetNodes,
+    GetNodes,
     ParseNodes,
     ParsePage,
     ParseStyleString,

@@ -35,6 +35,8 @@ export default class Builder implements Endpoint {
                     Type: "Page",
                     ID: "home",
                     NotRemovable: true,
+                    AlignX: "center",
+                    AlignY: "center",
                     Children: [
                         {
                             Type: "Card",

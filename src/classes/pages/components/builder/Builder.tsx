@@ -25,14 +25,17 @@ export function AddComponent(Type: string) {
         Document.Pages.push({
             Type: "Page",
             ID: `page-${Document.Pages.length + 1}`,
-            NotRemovable: true,
+            NotRemovable: false, // new pages can be removed
+            StyleString: Document.Pages[0].StyleString || "",
+            AlignX: "center",
+            AlignY: "center",
             Children: [
                 {
                     Type: "Card",
                     Children: [
                         {
                             Type: "Text",
-                            Content: "nothing here yet :)",
+                            Content: "nothing here yet! :)",
                         },
                     ],
                 },
@@ -137,6 +140,7 @@ export function SetSidebar(state: boolean = false) {
 
 export function SetPage(page: number = 0) {
     CurrentPage = page;
+    parser.ResetNodes(); // reset all nodes so we don't have cross-page id conflicts
     return Update();
 }
 
@@ -254,7 +258,8 @@ function RenderPage() {
                                   target = target.parentElement!;
 
                               // get node
-                              const node = parser.AllNodes.find(
+                              const AllNodes = parser.GetNodes();
+                              const node = AllNodes.find(
                                   (n) => n.ID === target.id
                               ) as Node;
 
@@ -263,7 +268,7 @@ function RenderPage() {
                               // get parent
                               const parent =
                                   (
-                                      parser.AllNodes.find(
+                                      AllNodes.find(
                                           (n) =>
                                               n.Children && n.Children.includes(node)
                                       ) || Document.Pages[CurrentPage]
@@ -280,18 +285,20 @@ function RenderPage() {
                               // get target
                               let target = event.target as HTMLElement;
 
+                              if (!target) return;
                               if (!target.getAttribute("data-component"))
                                   target = target.parentElement!;
 
                               // get node
-                              const node = parser.AllNodes.find(
+                              const AllNodes = parser.GetNodes();
+                              const node = AllNodes.find(
                                   (node) => node.ID === target.id
                               );
 
                               if (!node) return;
 
                               // get parent
-                              let parent = parser.AllNodes.find((ParentNode) =>
+                              let parent = AllNodes.find((ParentNode) =>
                                   (ParentNode.Children || []).includes(node)
                               );
 
@@ -658,6 +665,21 @@ function RenderPage() {
 
                     <hr />
 
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <button className="red" id={"entry:button.DeletePaste"}>
+                            Delete Paste
+                        </button>
+                    </div>
+
+                    <hr />
+
                     <form
                         method="dialog"
                         style={{
@@ -676,6 +698,91 @@ function RenderPage() {
                     </form>
                 </div>
             </Modal>
+
+            {EditingPaste && (
+                <Modal
+                    buttonid="entry:button.DeletePaste"
+                    modalid="entry:modal.DeletePaste"
+                >
+                    <h4 style={{ textAlign: "center", width: "100%" }}>
+                        Confirm Deletion
+                    </h4>
+
+                    <hr />
+
+                    <ul>
+                        <li>If you delete your paste, it will be gone forever</li>
+                        <li>
+                            You cannot restore your paste and it will be removed from
+                            the server
+                        </li>
+                        <li>
+                            Your custom URL (
+                            <b>
+                                {
+                                    // everything before @ so (if there is a server),
+                                    // it isn't included here
+                                    EditingPaste!.split(":")[0]
+                                }
+                            </b>
+                            ) will be available
+                        </li>
+                    </ul>
+
+                    <hr />
+
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: "1rem",
+                        }}
+                    >
+                        <form method="dialog" class={"mobile-max"}>
+                            <button class={"green mobile-max"}>Cancel</button>
+
+                            <div style={{ margin: "0.25rem 0" }}>
+                                <hr class={"mobile-only"} />
+                            </div>
+                        </form>
+
+                        <form
+                            method="POST"
+                            action={"/api/delete"}
+                            class={"mobile-max"}
+                            style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                justifyContent: "right",
+                                maxWidth: "100%",
+                                gap: "0.5rem",
+                            }}
+                        >
+                            <input
+                                type="text"
+                                required
+                                minLength={5}
+                                maxLength={256}
+                                placeholder={"Edit code"}
+                                name={"EditPassword"}
+                                autoComplete={"off"}
+                                class={"mobile-max"}
+                            />
+
+                            <input
+                                type="hidden"
+                                required
+                                name={"CustomURL"}
+                                value={EditingPaste!}
+                            />
+
+                            <button class={"red mobile-max"}>Delete</button>
+                        </form>
+                    </div>
+                </Modal>
+            )}
         </>,
         document.getElementById("builder") as HTMLElement
     );

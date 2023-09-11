@@ -650,7 +650,8 @@ html:not(.dark-theme) hr {
     border-color: hsl(var(--base-hue), var(--base-sat), calc(var(--base-lit) - 14%));
 }
 
-.editor-tab hr {
+.editor-tab hr,
+.builder\:card hr {
     /* editor-tab really just means markdown preview, it has a lighter background that matches
        the normal color of hr, so we need to make hr brighter when it is inside of that */
     border-color: rgba(120, 125, 125, 0.25);
@@ -1175,6 +1176,7 @@ br:not(.cm-line br) {
     --BorderRadius: 0;
     --Background: transparent;
     --Color: var(--text-color);
+    --Width: max-content;
 
     font-size: var(--Size);
     font-weight: var(--Weight);
@@ -1187,20 +1189,37 @@ br:not(.cm-line br) {
     background: var(--Background);
     color: var(--Color);
     font-size-adjust: none;
+    width: var(--Width);
+    max-width: 100%;
 }
 
 .builder\:card {
     --Background: var(--background-surface1);
     --Width: max-content;
     --Padding: 1rem;
+    --Display: block;
+    --Direction: row;
+    --JustifyContent: initial;
+    --AlignItems: initial;
+    --Gap: 0;
 
     background: var(--Background);
     padding: var(--Padding);
-    display: block;
     width: var(--Width);
     max-width: 100vw;
     min-width: 5rem;
     overflow: auto;
+
+    display: var(--Display);
+    flex-wrap: wrap;
+    justify-content: var(--JustifyContent);
+    align-items: var(--AlignItems);
+    flex-direction: var(--Direction);
+    gap: var(--Gap);
+}
+
+.builder\:card .builder\:card {
+    max-width: 100%;
 }
 
 .builder\:columns {

@@ -869,28 +869,32 @@ export class LogsPage implements Endpoint {
                                 alignItems: "center",
                             }}
                         >
-                            <form
-                                action="/admin/api/logs/mass-delete"
-                                method={"POST"}
-                            >
-                                <input
-                                    type="hidden"
-                                    required
-                                    name="AdminPassword"
-                                    value={body.AdminPassword}
-                                />
+                            {body.filter_type !== "comment" && (
+                                <form
+                                    action="/admin/api/logs/mass-delete"
+                                    method={"POST"}
+                                >
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name="AdminPassword"
+                                        value={body.AdminPassword}
+                                    />
 
-                                <input
-                                    type="hidden"
-                                    required
-                                    name={"logs"}
-                                    value={JSON.stringify(
-                                        logs[2].map((log) => log.ID)
-                                    )}
-                                />
+                                    <input
+                                        type="hidden"
+                                        required
+                                        name={"logs"}
+                                        value={JSON.stringify(
+                                            logs[2].map((log) => log.ID)
+                                        )}
+                                    />
 
-                                <button class={"secondary"}>Delete Results</button>
-                            </form>
+                                    <button class={"secondary"}>
+                                        Delete Results
+                                    </button>
+                                </form>
+                            )}
 
                             <div
                                 style={{

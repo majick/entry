@@ -25,7 +25,7 @@ export interface PageNode extends BaseNode {
     AlignX?: string; // align-items (column layout)
     AlignY?: string; // justiy-content (column layout)
     Spacing?: number; // gap, px
-    NotRemovable: true;
+    NotRemovable: boolean;
     Children: Node[];
     Theme?: "dark" | "light" | "purple" | "blue" | "green" | "pink";
 }
@@ -36,6 +36,11 @@ export interface CardNode extends BaseNode {
     Padding?: string; // rem
     Width?: string; // px
     Background?: string;
+    Display?: "flex" | "block";
+    JustifyContent?: "start" | "center" | "end" | "space-between";
+    AlignItems?: "flex-start" | "center" | "flex-end";
+    Direction?: "row" | "column";
+    Gap?: number; // px
 }
 
 export interface TextNode extends BaseNode {
@@ -53,6 +58,7 @@ export interface TextNode extends BaseNode {
     Background?: string;
     Color?: string;
     Alignment?: "left" | "right" | "center";
+    Width?: "max-content" | "100%";
 }
 
 export interface ImageNode extends BaseNode {
@@ -150,6 +156,8 @@ function DragZones(props: {
     children: any;
 }): any {
     function Drag(direction: number) {
+        if (!dragging) return;
+
         if (
             dragging === props.fornode ||
             // make sure we're not dragging a parent component into itself
@@ -311,6 +319,10 @@ export function CardNode(props: {
                     "--Padding": props.node.Padding
                         ? `${props.node.Padding}rem`
                         : undefined,
+                    "--Display": props.node.Display || undefined,
+                    "--JustifyContent": props.node.JustifyContent || undefined,
+                    "--AlignItems": props.node.AlignItems || undefined,
+                    "--Direction": props.node.Direction || undefined,
                     ...(props.node.StyleString
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),
@@ -367,6 +379,7 @@ export function TextNode(props: {
                     "--Alignment": props.node.Alignment || undefined,
                     "--Background": props.node.Background || undefined,
                     "--Color": props.node.Color || undefined,
+                    "--Width": props.node.Width || undefined,
                     ...(props.node.StyleString
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),

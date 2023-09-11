@@ -4,7 +4,6 @@ import {
     SidebarOpen,
     AddComponent,
     Document,
-    CurrentPage,
     SetPage,
     Selected,
     Move,
@@ -12,13 +11,18 @@ import {
     SelectedParent,
 } from "../Builder";
 
+import { Node } from "../schema";
+import parser from "../parser";
+
 export function QuickInput(props: {
     name: string;
     property: string;
-    type: "input" | "textarea";
-    inputType?: string;
-    default?: any;
-    step?: number;
+    type: "input" | "textarea" | "select";
+    inputType?: string; // input only
+    default?: any; // input/textarea only
+    step?: number; // inputType number only
+    value?: string; // input/textarea only
+    options?: { label: string; value: string }[]; // select only
 }) {
     return (
         <div className="option">
@@ -33,6 +37,7 @@ export function QuickInput(props: {
                     name={props.name}
                     id={props.name.replaceAll(" ", "_")}
                     value={
+                        props.value ||
                         (Selected as { [key: string]: any })[props.property] ||
                         props.default ||
                         ""
@@ -55,7 +60,10 @@ export function QuickInput(props: {
                         class={"secondary"}
                         name={props.name}
                         id={props.name.replaceAll(" ", "_")}
-                        value={(Selected as { [key: string]: any })[props.property]}
+                        value={
+                            props.value ||
+                            (Selected as { [key: string]: any })[props.property]
+                        }
                         onBlur={(event) => {
                             (Selected as { [key: string]: any })[props.property] = (
                                 event.target as HTMLInputElement
@@ -63,10 +71,54 @@ export function QuickInput(props: {
 
                             Update();
                         }}
+                        onInput={(event) => {
+                            // get target
+                            const target = event.target as HTMLTextAreaElement;
+
+                            // reset height
+                            target.style.height = "";
+
+                            // expand
+                            target.style.height = `${Math.min(
+                                target.scrollHeight,
+                                500
+                            )}px`;
+                        }}
                         style={{
                             minWidth: "100%",
                         }}
                     ></textarea>
+                )) ||
+                (props.type === "select" && (
+                    <select
+                        name={props.name.replaceAll(" ", "_")}
+                        id={props.name.replaceAll(" ", "_")}
+                        class={"secondary"}
+                        style={{
+                            width: "100%",
+                        }}
+                        onChange={(event) => {
+                            const target = event.target as HTMLSelectElement;
+
+                            (Selected as { [key: string]: any })[props.property] =
+                                target.selectedOptions[0].value as any;
+
+                            Update();
+                        }}
+                    >
+                        {props.options!.map((option) => (
+                            <option
+                                value={option.value}
+                                selected={
+                                    (Selected as { [key: string]: any })[
+                                        props.property
+                                    ] === option.value
+                                }
+                            >
+                                {option.label}
+                            </option>
+                        ))}
+                    </select>
                 ))}
         </div>
     );
@@ -104,7 +156,7 @@ export default function Sidebar(props: { Page?: string }): any {
                 </button>
             )}
 
-            {Selected && Selected.NotRemovable !== true && !props.Page && (
+            {Selected && Selected.Type !== "Page" && !props.Page && (
                 <button onClick={() => Move(true, Selected, SelectedParent)}>
                     Move
                 </button>
@@ -121,6 +173,17 @@ export default function Sidebar(props: { Page?: string }): any {
                         {Document.Pages.map((page) => {
                             const index = Document.Pages.indexOf(page);
 
+                            // check if page was remove
+                            if (page.ID === "node:removed") {
+                                Document.Pages.splice(
+                                    Document.Pages.indexOf(page),
+                                    1
+                                );
+
+                                return <></>;
+                            }
+
+                            // return
                             return (
                                 <button
                                     onClick={() => SetPage(index)}
@@ -166,205 +229,77 @@ export default function Sidebar(props: { Page?: string }): any {
                                 {/* page element controls */}
                                 <QuickInput name="ID" property="ID" type="input" />
 
-                                <div className="option">
-                                    <label htmlFor="Theme">
-                                        <b>Theme</b>
-                                    </label>
+                                <QuickInput
+                                    name="Theme"
+                                    property="Theme"
+                                    type="select"
+                                    options={[
+                                        {
+                                            label: "Light",
+                                            value: "light",
+                                        },
+                                        {
+                                            label: "Dark",
+                                            value: "dark",
+                                        },
+                                        {
+                                            label: "Purple",
+                                            value: "purple",
+                                        },
+                                        {
+                                            label: "Pink",
+                                            value: "pink",
+                                        },
+                                        {
+                                            label: "Green",
+                                            value: "green",
+                                        },
+                                        {
+                                            label: "Blue",
+                                            value: "blue",
+                                        },
+                                    ]}
+                                />
 
-                                    <select
-                                        name="Theme"
-                                        id="Theme"
-                                        class={"secondary"}
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        onChange={(event) => {
-                                            if (Selected.Type !== "Page") return;
+                                <QuickInput
+                                    name="Align X"
+                                    property="AlignX"
+                                    type="select"
+                                    options={[
+                                        {
+                                            label: "Left",
+                                            value: "flex-start",
+                                        },
+                                        {
+                                            label: "Center",
+                                            value: "center",
+                                        },
+                                        {
+                                            label: "Right",
+                                            value: "flex-end",
+                                        },
+                                    ]}
+                                />
 
-                                            const target =
-                                                event.target as HTMLSelectElement;
-
-                                            Selected.Theme = target
-                                                .selectedOptions[0].value as any;
-
-                                            Update();
-                                        }}
-                                    >
-                                        <option
-                                            value="light"
-                                            selected={
-                                                Document.Pages[CurrentPage].Theme ===
-                                                "light"
-                                            }
-                                        >
-                                            Light
-                                        </option>
-
-                                        <option
-                                            value="dark"
-                                            selected={
-                                                Document.Pages[CurrentPage].Theme ===
-                                                "dark"
-                                            }
-                                        >
-                                            Dark
-                                        </option>
-
-                                        <option
-                                            value="purple"
-                                            selected={
-                                                Document.Pages[CurrentPage].Theme ===
-                                                "purple"
-                                            }
-                                        >
-                                            Purple
-                                        </option>
-
-                                        <option
-                                            value="pink"
-                                            selected={
-                                                Document.Pages[CurrentPage].Theme ===
-                                                "pink"
-                                            }
-                                        >
-                                            Pink
-                                        </option>
-
-                                        <option
-                                            value="green"
-                                            selected={
-                                                Document.Pages[CurrentPage].Theme ===
-                                                "green"
-                                            }
-                                        >
-                                            Green
-                                        </option>
-
-                                        <option
-                                            value="blue"
-                                            selected={
-                                                Document.Pages[CurrentPage].Theme ===
-                                                "blue"
-                                            }
-                                        >
-                                            Blue
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <div className="option">
-                                    <label htmlFor="AlignX">
-                                        <b>Align X</b>
-                                    </label>
-
-                                    <select
-                                        name="AlignX"
-                                        id="AlignX"
-                                        class={"secondary"}
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        onChange={(event) => {
-                                            if (Selected.Type !== "Page") return;
-
-                                            const target =
-                                                event.target as HTMLSelectElement;
-
-                                            Selected.AlignX = target
-                                                .selectedOptions[0].value as any;
-
-                                            Update();
-                                        }}
-                                    >
-                                        <option
-                                            value="flex-start"
-                                            selected={
-                                                Document.Pages[CurrentPage]
-                                                    .AlignX === "left"
-                                            }
-                                        >
-                                            Left
-                                        </option>
-
-                                        <option
-                                            value="center"
-                                            selected={
-                                                Document.Pages[CurrentPage]
-                                                    .AlignX === "center" ||
-                                                !Document.Pages[CurrentPage].AlignX
-                                            }
-                                        >
-                                            Center
-                                        </option>
-
-                                        <option
-                                            value="flex-end"
-                                            selected={
-                                                Document.Pages[CurrentPage]
-                                                    .AlignX === "right"
-                                            }
-                                        >
-                                            Right
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <div className="option">
-                                    <label htmlFor="AlignY">
-                                        <b>Align Y</b>
-                                    </label>
-
-                                    <select
-                                        name="AlignY"
-                                        id="AlignY"
-                                        class={"secondary"}
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                        onChange={(event) => {
-                                            if (Selected.Type !== "Page") return;
-
-                                            const target =
-                                                event.target as HTMLSelectElement;
-
-                                            Selected.AlignY = target
-                                                .selectedOptions[0].value as any;
-
-                                            Update();
-                                        }}
-                                    >
-                                        <option
-                                            value="flex-start"
-                                            selected={
-                                                Document.Pages[CurrentPage]
-                                                    .AlignY === "top"
-                                            }
-                                        >
-                                            Top
-                                        </option>
-
-                                        <option
-                                            value="center"
-                                            selected={
-                                                Document.Pages[CurrentPage]
-                                                    .AlignY === "center" ||
-                                                !Document.Pages[CurrentPage].AlignY
-                                            }
-                                        >
-                                            Center
-                                        </option>
-
-                                        <option
-                                            value="flex-end"
-                                            selected={
-                                                Document.Pages[CurrentPage]
-                                                    .AlignY === "bottom"
-                                            }
-                                        >
-                                            Bottom
-                                        </option>
-                                    </select>
-                                </div>
+                                <QuickInput
+                                    name="Align Y"
+                                    property="AlignY"
+                                    type="select"
+                                    options={[
+                                        {
+                                            label: "Top",
+                                            value: "flex-start",
+                                        },
+                                        {
+                                            label: "Center",
+                                            value: "center",
+                                        },
+                                        {
+                                            label: "Bottom",
+                                            value: "flex-end",
+                                        },
+                                    ]}
+                                />
                             </>
                         )) ||
                             (Selected.Type === "Card" && (
@@ -379,51 +314,112 @@ export default function Sidebar(props: { Page?: string }): any {
                                         default={-1}
                                     />
 
-                                    <div className="option">
-                                        <label htmlFor="Background">
-                                            <b>Background</b>
-                                        </label>
+                                    <QuickInput
+                                        name="Background"
+                                        property="Background"
+                                        type="select"
+                                        options={[
+                                            {
+                                                label: "Shown",
+                                                value: "var(--background-surface1)",
+                                            },
+                                            {
+                                                label: "Hidden",
+                                                value: "var(--transparent)",
+                                            },
+                                        ]}
+                                    />
 
-                                        <select
-                                            name="Background"
-                                            id="Background"
-                                            class={"secondary"}
-                                            style={{
-                                                width: "100%",
-                                            }}
-                                            onChange={(event) => {
-                                                if (Selected.Type !== "Card") return;
+                                    <QuickInput
+                                        name="Display"
+                                        property="Display"
+                                        type="select"
+                                        options={[
+                                            {
+                                                label: "Block",
+                                                value: "block",
+                                            },
+                                            {
+                                                label: "Container",
+                                                value: "flex",
+                                            },
+                                        ]}
+                                    />
 
-                                                const target =
-                                                    event.target as HTMLSelectElement;
+                                    <details class={"option"}>
+                                        <summary>Container Display Options</summary>
 
-                                                Selected.Background = target
-                                                    .selectedOptions[0].value as any;
+                                        <div class={"details-flex-content-list-box"}>
+                                            <QuickInput
+                                                name="Gap"
+                                                property="Gap"
+                                                type="input"
+                                                inputType="number"
+                                                step={1}
+                                                default={0}
+                                            />
 
-                                                Update();
-                                            }}
-                                        >
-                                            <option
-                                                value="var(--background-surface1)"
-                                                selected={
-                                                    Selected.Background !==
-                                                    "transparent"
-                                                }
-                                            >
-                                                Shown
-                                            </option>
+                                            <QuickInput
+                                                name="Justify Content"
+                                                property="JustifyContent"
+                                                type="select"
+                                                options={[
+                                                    {
+                                                        label: "Start",
+                                                        value: "flex-start",
+                                                    },
+                                                    {
+                                                        label: "Center",
+                                                        value: "center",
+                                                    },
+                                                    {
+                                                        label: "End",
+                                                        value: "flex-end",
+                                                    },
+                                                    {
+                                                        label: "Space Between",
+                                                        value: "space-between",
+                                                    },
+                                                ]}
+                                            />
 
-                                            <option
-                                                value="transparent"
-                                                selected={
-                                                    Selected.Background ===
-                                                    "transparent"
-                                                }
-                                            >
-                                                Hidden
-                                            </option>
-                                        </select>
-                                    </div>
+                                            <QuickInput
+                                                name="Align Items"
+                                                property="AlignItems"
+                                                type="select"
+                                                options={[
+                                                    {
+                                                        label: "Start",
+                                                        value: "flex-start",
+                                                    },
+                                                    {
+                                                        label: "Center",
+                                                        value: "center",
+                                                    },
+                                                    {
+                                                        label: "End",
+                                                        value: "flex-end",
+                                                    },
+                                                ]}
+                                            />
+
+                                            <QuickInput
+                                                name="Direction"
+                                                property="Direction"
+                                                type="select"
+                                                options={[
+                                                    {
+                                                        label: "Row",
+                                                        value: "row",
+                                                    },
+                                                    {
+                                                        label: "Column",
+                                                        value: "column",
+                                                    },
+                                                ]}
+                                            />
+                                        </div>
+                                    </details>
                                 </>
                             )) ||
                             (Selected.Type === "Text" && (
@@ -510,58 +506,41 @@ export default function Sidebar(props: { Page?: string }): any {
                                         default={"var(--text-color)"}
                                     />
 
-                                    <div className="option">
-                                        <label htmlFor="Alignment">
-                                            <b>Align</b>
-                                        </label>
+                                    <QuickInput
+                                        name="Alignment"
+                                        property="Alignment"
+                                        type="select"
+                                        options={[
+                                            {
+                                                label: "Left",
+                                                value: "left",
+                                            },
+                                            {
+                                                label: "Center",
+                                                value: "center",
+                                            },
+                                            {
+                                                label: "Right",
+                                                value: "right",
+                                            },
+                                        ]}
+                                    />
 
-                                        <select
-                                            name="Alignment"
-                                            id="Alignment"
-                                            class={"secondary"}
-                                            style={{
-                                                width: "100%",
-                                            }}
-                                            onChange={(event) => {
-                                                if (Selected.Type !== "Text") return;
-
-                                                const target =
-                                                    event.target as HTMLSelectElement;
-
-                                                Selected.Alignment = target
-                                                    .selectedOptions[0].value as any;
-
-                                                Update();
-                                            }}
-                                        >
-                                            <option
-                                                value="left"
-                                                selected={
-                                                    Selected.Alignment === "left"
-                                                }
-                                            >
-                                                Left
-                                            </option>
-
-                                            <option
-                                                value="right"
-                                                selected={
-                                                    Selected.Alignment === "right"
-                                                }
-                                            >
-                                                Right
-                                            </option>
-
-                                            <option
-                                                value="center"
-                                                selected={
-                                                    Selected.Alignment === "center"
-                                                }
-                                            >
-                                                Center
-                                            </option>
-                                        </select>
-                                    </div>
+                                    <QuickInput
+                                        name="Width"
+                                        property="Width"
+                                        type="select"
+                                        options={[
+                                            {
+                                                label: "Content",
+                                                value: "max-content",
+                                            },
+                                            {
+                                                label: "Full",
+                                                value: "100%",
+                                            },
+                                        ]}
+                                    />
                                 </>
                             )) ||
                             (Selected.Type === "Image" && (
@@ -609,32 +588,64 @@ export default function Sidebar(props: { Page?: string }): any {
                         />
 
                         {/* style string */}
-                        <div className="option">
-                            <label htmlFor="StyleString">
-                                <b>CSS Style String</b>
-                            </label>
+                        <QuickInput
+                            name="CSS Style String"
+                            property="StyleString"
+                            type="textarea"
+                            value={(Selected.StyleString || "").replaceAll(
+                                Selected.Type !== "Page"
+                                    ? // don't preserve whitespace on components that aren't pages
+                                      /\;\s*(?!\n)/g
+                                    : /\;(?!\n)/g,
+                                ";\n"
+                            )}
+                        />
 
-                            <textarea
-                                class={"secondary"}
-                                type="text"
-                                name={"StyleString"}
-                                id={"StyleString"}
-                                value={(Selected.StyleString || "").replaceAll(
-                                    /\;\s*(?!\n)/g,
-                                    ";\n"
-                                )}
-                                onKeyUp={(event) => {
-                                    Selected.StyleString = (
-                                        event.target as HTMLInputElement
-                                    ).value;
+                        {/* import/export */}
+                        <button
+                            onClick={() => {
+                                // remove EditMode
+                                Selected.EditMode = undefined;
 
-                                    Update();
-                                }}
-                                style={{
-                                    minWidth: "100%",
-                                }}
-                            ></textarea>
-                        </div>
+                                // create blob
+                                const blob = new Blob([JSON.stringify(Selected)], {
+                                    type: "application/json",
+                                });
+
+                                // get url and open
+                                window.open(URL.createObjectURL(blob), "_blank");
+                            }}
+                        >
+                            Export
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                // ask for element json
+                                const element = prompt(
+                                    "Enter exported component JSON below:"
+                                );
+                                if (!element) return;
+
+                                // parse
+                                const parsed = JSON.parse(element) as Node;
+
+                                // randomize ID (so we don't have any ID conflicts)
+                                parsed.ID = crypto.randomUUID();
+
+                                // set node
+                                SelectedParent[SelectedParent.indexOf(Selected)] =
+                                    parsed;
+
+                                // refresh all nodes
+                                parser.ResetNodes();
+
+                                // return and update
+                                return Update();
+                            }}
+                        >
+                            Import
+                        </button>
                     </>
                 ))}
         </div>
