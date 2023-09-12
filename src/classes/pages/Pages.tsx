@@ -153,7 +153,7 @@ export class GetPasteFromURL implements Endpoint {
         ) {
             // get parsed content
             const TrueContent = JSON.parse(
-                atob(result.Content.split("_builder:")[1])
+                decodeURIComponent(atob(result.Content.split("_builder:")[1]))
             );
 
             // get current page

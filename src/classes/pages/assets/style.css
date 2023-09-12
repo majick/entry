@@ -174,7 +174,7 @@ svg {
     background: var(--background-surface1);
     transition: background 0.15s;
     padding: 1.5rem;
-    height: 45rem;
+    height: 78vh;
     overflow-y: auto;
     max-height: 90vh;
     margin-bottom: 0.5rem;
@@ -1174,7 +1174,7 @@ br:not(.cm-line br) {
     --Weight: 400;
     --LineSpacing: 1.5;
     --LetterSpacing: 1;
-    --Margins: 0.5rem;
+    --Margins: 0;
     --Padding: 0.2rem;
     --Alignment: initial;
     --BorderRadius: 0;

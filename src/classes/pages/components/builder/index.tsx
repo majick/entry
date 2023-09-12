@@ -44,6 +44,7 @@ export default class Builder implements Endpoint {
                                 {
                                     Type: "Text",
                                     Content: "nothing here yet! :)",
+                                    ID: "first-element",
                                     Alignment: "center",
                                 },
                             ],
@@ -64,7 +65,7 @@ export default class Builder implements Endpoint {
 
             // parse content
             const TrueContent = JSON.parse(
-                atob(result.Content.split("_builder:")[1])
+                decodeURIComponent(atob(result.Content.split("_builder:")[1]))
             );
 
             // set document

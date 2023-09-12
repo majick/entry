@@ -57,9 +57,12 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 }}
             >
                 <li>
-                    <a href="javascript:" id={"entry:button.NewPaste"}>
-                        new
-                    </a>
+                    {!EntryDB.config.app ||
+                        (EntryDB.config.app.enable_builder !== false && (
+                            <a href="javascript:" id={"entry:button.NewPaste"}>
+                                new
+                            </a>
+                        )) || <a href="/">new</a>}
                 </li>
 
                 {EntryDB.config.app &&

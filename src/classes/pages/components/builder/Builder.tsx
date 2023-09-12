@@ -486,7 +486,11 @@ function RenderPage() {
                                 const Paste: Paste = {
                                     CustomURL: target.CustomURL.value || "",
                                     Content: encodeURIComponent(
-                                        `_builder:${btoa(JSON.stringify(Document))}`
+                                        `_builder:${btoa(
+                                            encodeURIComponent(
+                                                JSON.stringify(Document)
+                                            )
+                                        )}`
                                     ),
                                     EditPassword: target.EditPassword.value || "",
                                     PubDate: new Date().getTime(),
@@ -624,20 +628,27 @@ function RenderPage() {
                         </form>
                     )}
 
-                    <hr />
+                    {search.get("edit") !== null && (
+                        <>
+                            <hr />
 
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                        }}
-                    >
-                        <button className="red" id={"entry:button.DeletePaste"}>
-                            Delete Paste
-                        </button>
-                    </div>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    gap: "0.5rem",
+                                }}
+                            >
+                                <button
+                                    className="red"
+                                    id={"entry:button.DeletePaste"}
+                                >
+                                    Delete Paste
+                                </button>
+                            </div>
+                        </>
+                    )}
 
                     <hr />
 
