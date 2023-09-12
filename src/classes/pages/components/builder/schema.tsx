@@ -68,11 +68,6 @@ export interface ImageNode extends BaseNode {
     Alt: string;
 }
 
-export interface ColumnNode extends BaseNode {
-    Type: "Columns";
-    Children: Node[]; // children property must contain two cards!
-}
-
 export interface EmbedNode extends BaseNode {
     // does not support children property
     Type: "Embed";
@@ -81,13 +76,7 @@ export interface EmbedNode extends BaseNode {
 }
 
 // ...base type
-export type Node =
-    | PageNode
-    | CardNode
-    | TextNode
-    | ImageNode
-    | ColumnNode
-    | EmbedNode;
+export type Node = PageNode | CardNode | TextNode | ImageNode | EmbedNode;
 
 export type BuilderDocument = {
     Pages: PageNode[];
@@ -323,6 +312,7 @@ export function CardNode(props: {
                     "--JustifyContent": props.node.JustifyContent || undefined,
                     "--AlignItems": props.node.AlignItems || undefined,
                     "--Direction": props.node.Direction || undefined,
+                    "--Gap": props.node.Gap ? `${props.node.Gap}px` : undefined,
                     ...(props.node.StyleString
                         ? parser.ParseStyleString(props.node.StyleString)
                         : {}),
@@ -436,43 +426,6 @@ export function ImageNode(props: {
 }
 
 /**
- * @function ColumnNode
- *
- * @export
- * @param {{ node: ColumnNode; document: Node[]; children: any }} props
- * @return {*}
- */
-export function ColumnNode(props: {
-    node: ColumnNode;
-    document: Node[];
-    children: any;
-}): any {
-    if (!props.node.ID) props.node.ID = crypto.randomUUID();
-
-    return (
-        <DragZones
-            visible={props.node.EditMode}
-            fornode={props.node}
-            fordocument={props.document}
-        >
-            <div
-                class={`component builder:columns ${props.node.ClassString || ""}`}
-                style={{
-                    ...(props.node.StyleString
-                        ? parser.ParseStyleString(props.node.StyleString)
-                        : {}),
-                }}
-                data-component={props.node.Type}
-                data-edit={props.node.EditMode}
-                draggable={props.node.EditMode}
-            >
-                {props.children}
-            </div>
-        </DragZones>
-    );
-}
-
-/**
  * @function EmbedNode
  *
  * @export
@@ -517,6 +470,5 @@ export default {
     CardNode,
     TextNode,
     ImageNode,
-    ColumnNode,
     EmbedNode,
 };

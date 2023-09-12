@@ -1227,13 +1227,6 @@ br:not(.cm-line br) {
     max-width: 100%;
 }
 
-.builder\:columns {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-}
-
 .builder\:embed {
     padding: 0.5rem;
 }

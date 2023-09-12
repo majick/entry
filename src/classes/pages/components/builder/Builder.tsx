@@ -65,36 +65,6 @@ export function AddComponent(Type: string) {
             Alt: "New Image",
             Source: "about:blank",
         });
-    else if (Type === "Column")
-        Document.Pages[CurrentPage].Children.push({
-            Type: "Columns",
-            Children: [
-                {
-                    Type: "Card",
-                    Background: "transparent",
-                    NotRemovable: true,
-                    Children: [
-                        {
-                            Type: "Text",
-                            Content: "left",
-                            Alignment: "center",
-                        },
-                    ],
-                },
-                {
-                    Type: "Card",
-                    Background: "transparent",
-                    NotRemovable: true,
-                    Children: [
-                        {
-                            Type: "Text",
-                            Content: "right",
-                            Alignment: "center",
-                        },
-                    ],
-                },
-            ],
-        });
     else if (Type === "Embed")
         Document.Pages[CurrentPage].Children.push({
             Type: "Embed",
@@ -450,15 +420,6 @@ function RenderPage() {
                             }}
                         >
                             Card
-                        </button>
-
-                        <button
-                            className="border"
-                            onClick={() => {
-                                AddComponent("Column");
-                            }}
-                        >
-                            Columns
                         </button>
 
                         <button

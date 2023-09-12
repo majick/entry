@@ -325,7 +325,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                             },
                                             {
                                                 label: "Hidden",
-                                                value: "var(--transparent)",
+                                                value: "transparent",
                                             },
                                         ]}
                                     />

@@ -68,12 +68,6 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                             {children}
                         </schema.ImageNode>
                     );
-                else if (node.Type === "Columns")
-                    return (
-                        <schema.ColumnNode node={node} document={nodes}>
-                            {children}
-                        </schema.ColumnNode>
-                    );
                 else if (node.Type === "Embed")
                     return (
                         <schema.EmbedNode node={node} document={nodes}>
