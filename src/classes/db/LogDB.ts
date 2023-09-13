@@ -4,15 +4,12 @@
  * @license MIT
  */
 
-import path from "node:path";
-import fs from "node:fs";
-
 import { ComputeRandomObjectHash } from "./helpers/Hash";
 import { Database } from "bun:sqlite";
 import SQL from "./helpers/SQL";
 
 import EntryDB from "./EntryDB";
-import { Config } from "../..";
+import type { Config } from "../..";
 
 // types
 export type LogEvent =
@@ -47,10 +44,6 @@ export default class LogDB {
      * @memberof EntryDB
      */
     constructor(config: Config) {
-        // delete database is option is set in config
-        if (config.log && config.log.clear_on_start)
-            fs.rmSync(path.resolve(EntryDB.DataDirectory, "log.sqlite"));
-
         // create db link
         const [db, isNew] = SQL.CreateDB("log", EntryDB.DataDirectory);
 
@@ -67,6 +60,28 @@ export default class LogDB {
                     ID varchar(256)
                 )`,
             });
+
+            // clear logs is option is set in config
+            if (EntryDB.config.log && EntryDB.config.log.clear_on_start === true)
+                for (const event of EntryDB.config.log.events) {
+                    // make sure the event isn't something that we shouldn't clear
+                    if (
+                        event === "comment" ||
+                        event === "report" ||
+                        event === "session" ||
+                        event === "view_paste"
+                    )
+                        continue;
+
+                    // delete
+                    await SQL.QueryOBJ({
+                        db,
+                        query: "DELETE FROM Logs WHERE Type = ?",
+                        params: [event],
+                        use: "Prepare",
+                        all: true,
+                    });
+                }
         })();
     }
 

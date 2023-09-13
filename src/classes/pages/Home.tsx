@@ -78,7 +78,11 @@ export default class Home implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <main>
+                    <main
+                        style={{
+                            height: "calc(100% - 1rem)",
+                        }}
+                    >
                         {(search.get("err") && (
                             <div
                                 class={"mdnote note-error"}
@@ -255,12 +259,357 @@ export default class Home implements Endpoint {
                                     >
                                         {/* top row */}
 
-                                        <button
-                                            style={{ minWidth: "5rem" }}
-                                            class={"mobile-center"}
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: "0.5rem",
+                                                justifyContent: "flex-start",
+                                            }}
+                                            class={"mobile-flex-center mobile-max"}
                                         >
-                                            Go
-                                        </button>
+                                            <button style={{ minWidth: "5rem" }}>
+                                                Go
+                                            </button>
+
+                                            {
+                                                // show optional section if config doesn't have
+                                                // an "app" entry, or all optional features are enabled
+                                                (!EntryDB.config.app ||
+                                                    (EntryDB.config.app &&
+                                                        !(
+                                                            EntryDB.config.app
+                                                                .enable_private_pastes ===
+                                                                false &&
+                                                            EntryDB.config.app
+                                                                .enable_groups ===
+                                                                false &&
+                                                            EntryDB.config.app
+                                                                .enable_expiry ===
+                                                                false
+                                                        ) &&
+                                                        // don't show on comment or report!
+                                                        search.get("CommentOn") ===
+                                                            null &&
+                                                        search.get("ReportOn") ===
+                                                            null)) && (
+                                                    <>
+                                                        <a
+                                                            href={"javascript:"}
+                                                            id={
+                                                                "entry:button.PasteExtras"
+                                                            }
+                                                            title={"More Options"}
+                                                            class={"button"}
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 16 16"
+                                                                width="16"
+                                                                height="16"
+                                                                aria-label={
+                                                                    "Ellipsis Symbol"
+                                                                }
+                                                            >
+                                                                <path d="M0 5.75C0 4.784.784 4 1.75 4h12.5c.966 0 1.75.784 1.75 1.75v4.5A1.75 1.75 0 0 1 14.25 12H1.75A1.75 1.75 0 0 1 0 10.25ZM12 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0ZM4 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
+                                                            </svg>
+                                                            More
+                                                        </a>
+
+                                                        <Modal
+                                                            buttonid="entry:button.PasteExtras"
+                                                            modalid="entry:modal.PasteExtras"
+                                                        >
+                                                            <div
+                                                                style={{
+                                                                    maxWidth:
+                                                                        "50rem",
+                                                                }}
+                                                            >
+                                                                <h4
+                                                                    style={{
+                                                                        textAlign:
+                                                                            "center",
+                                                                        width: "100%",
+                                                                    }}
+                                                                >
+                                                                    Extra Paste
+                                                                    Options
+                                                                </h4>
+
+                                                                <hr />
+
+                                                                <div
+                                                                    style={{
+                                                                        display:
+                                                                            "flex",
+                                                                        justifyContent:
+                                                                            "flex-end",
+                                                                        flexWrap:
+                                                                            "wrap",
+                                                                    }}
+                                                                >
+                                                                    <div
+                                                                        style={{
+                                                                            display:
+                                                                                "flex",
+                                                                            gap: "0.5rem",
+                                                                            flexWrap:
+                                                                                "wrap",
+                                                                            justifyContent:
+                                                                                "center",
+                                                                        }}
+                                                                    >
+                                                                        {(!EntryDB
+                                                                            .config
+                                                                            .app ||
+                                                                            EntryDB
+                                                                                .config
+                                                                                .app
+                                                                                .enable_private_pastes !==
+                                                                                false) && (
+                                                                            <details
+                                                                                class={
+                                                                                    "details-confined"
+                                                                                }
+                                                                            >
+                                                                                <summary>
+                                                                                    Private
+                                                                                    Pastes
+                                                                                </summary>
+
+                                                                                <div className="details-flex-content-list-box ">
+                                                                                    <h4
+                                                                                        style={{
+                                                                                            margin: "0",
+                                                                                        }}
+                                                                                    >
+                                                                                        Private
+                                                                                        Pastes
+                                                                                    </h4>
+
+                                                                                    <p>
+                                                                                        Providing
+                                                                                        a
+                                                                                        view
+                                                                                        code
+                                                                                        makes
+                                                                                        your
+                                                                                        paste
+                                                                                        private.
+                                                                                        The
+                                                                                        view
+                                                                                        code
+                                                                                        is
+                                                                                        used
+                                                                                        to
+                                                                                        decrypt
+                                                                                        your
+                                                                                        paste
+                                                                                        for
+                                                                                        viewing.
+                                                                                    </p>
+
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        placeholder={
+                                                                                            "View code - optional"
+                                                                                        }
+                                                                                        minLength={
+                                                                                            EntryDB.MinPasswordLength
+                                                                                        }
+                                                                                        maxLength={
+                                                                                            EntryDB.MaxPasswordLength
+                                                                                        }
+                                                                                        name={
+                                                                                            "ViewPassword"
+                                                                                        }
+                                                                                        autoComplete={
+                                                                                            "off"
+                                                                                        }
+                                                                                    />
+                                                                                </div>
+                                                                            </details>
+                                                                        )}
+
+                                                                        {(!EntryDB
+                                                                            .config
+                                                                            .app ||
+                                                                            EntryDB
+                                                                                .config
+                                                                                .app
+                                                                                .enable_groups !==
+                                                                                false) && (
+                                                                            <details
+                                                                                class={
+                                                                                    "details-confined"
+                                                                                }
+                                                                            >
+                                                                                <summary>
+                                                                                    Group
+                                                                                    Pastes
+                                                                                </summary>
+
+                                                                                <div className="details-flex-content-list-box ">
+                                                                                    <h4
+                                                                                        style={{
+                                                                                            margin: "0",
+                                                                                        }}
+                                                                                    >
+                                                                                        Group
+                                                                                        Pastes
+                                                                                    </h4>
+
+                                                                                    <p>
+                                                                                        Groups
+                                                                                        cannot
+                                                                                        be
+                                                                                        made
+                                                                                        private.
+                                                                                        The
+                                                                                        group
+                                                                                        post
+                                                                                        code
+                                                                                        is
+                                                                                        only
+                                                                                        required
+                                                                                        when
+                                                                                        submitting
+                                                                                        to
+                                                                                        an
+                                                                                        existing
+                                                                                        group
+                                                                                        or
+                                                                                        creating
+                                                                                        a
+                                                                                        new
+                                                                                        group.
+                                                                                    </p>
+
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        placeholder={
+                                                                                            "Group name - optional"
+                                                                                        }
+                                                                                        minLength={
+                                                                                            EntryDB.MinCustomURLLength
+                                                                                        }
+                                                                                        maxLength={
+                                                                                            EntryDB.MaxCustomURLLength
+                                                                                        }
+                                                                                        id={
+                                                                                            "GroupName"
+                                                                                        }
+                                                                                        name={
+                                                                                            "GroupName"
+                                                                                        }
+                                                                                    />
+
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        placeholder={
+                                                                                            "Group post code - optional"
+                                                                                        }
+                                                                                        minLength={
+                                                                                            EntryDB.MinPasswordLength
+                                                                                        }
+                                                                                        maxLength={
+                                                                                            EntryDB.MaxPasswordLength
+                                                                                        }
+                                                                                        name={
+                                                                                            "GroupSubmitPassword"
+                                                                                        }
+                                                                                        autoComplete={
+                                                                                            "off"
+                                                                                        }
+                                                                                    />
+                                                                                </div>
+                                                                            </details>
+                                                                        )}
+
+                                                                        {(!EntryDB
+                                                                            .config
+                                                                            .app ||
+                                                                            EntryDB
+                                                                                .config
+                                                                                .app
+                                                                                .enable_expiry !==
+                                                                                false) && (
+                                                                            <details
+                                                                                class={
+                                                                                    "details-confined"
+                                                                                }
+                                                                            >
+                                                                                <summary>
+                                                                                    Paste
+                                                                                    Expiry
+                                                                                </summary>
+
+                                                                                <div
+                                                                                    class={
+                                                                                        "details-flex-content-list-box"
+                                                                                    }
+                                                                                >
+                                                                                    <h4
+                                                                                        style={{
+                                                                                            margin: "0",
+                                                                                        }}
+                                                                                    >
+                                                                                        Paste
+                                                                                        Expiry
+                                                                                    </h4>
+
+                                                                                    <label htmlFor="ExpireOn">
+                                                                                        Delete
+                                                                                        Paste
+                                                                                        On
+                                                                                    </label>
+
+                                                                                    <input
+                                                                                        type={
+                                                                                            "datetime-local"
+                                                                                        }
+                                                                                        name={
+                                                                                            "ExpireOn"
+                                                                                        }
+                                                                                        id={
+                                                                                            "ExpireOn"
+                                                                                        }
+                                                                                    />
+
+                                                                                    <hr />
+                                                                                    <DateOptions />
+                                                                                </div>
+                                                                            </details>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <hr />
+
+                                                            <div
+                                                                style={{
+                                                                    display: "flex",
+                                                                    justifyContent:
+                                                                        "center",
+                                                                    alignItems:
+                                                                        "center",
+                                                                }}
+                                                            >
+                                                                <a
+                                                                    className="button green"
+                                                                    href={
+                                                                        "javascript:modals['entry:modal.PasteExtras']();"
+                                                                    }
+                                                                >
+                                                                    Close
+                                                                </a>
+                                                            </div>
+                                                        </Modal>
+                                                    </>
+                                                )
+                                            }
+                                        </div>
 
                                         <div
                                             style={{
@@ -366,235 +715,6 @@ export default class Home implements Endpoint {
                                             </div>
                                         </div>
                                     </div>
-
-                                    {
-                                        // show optional section if config doesn't have
-                                        // an "app" entry, or all optional features are enabled
-                                        (!EntryDB.config.app ||
-                                            (EntryDB.config.app &&
-                                                !(
-                                                    EntryDB.config.app
-                                                        .enable_private_pastes ===
-                                                        false &&
-                                                    EntryDB.config.app
-                                                        .enable_groups === false &&
-                                                    EntryDB.config.app
-                                                        .enable_expiry === false
-                                                ) &&
-                                                // don't show on comment or report!
-                                                search.get("CommentOn") === null &&
-                                                search.get("ReportOn") ===
-                                                    null)) && (
-                                            <>
-                                                <div style={{ margin: "0.25rem 0" }}>
-                                                    <hr class={"mobile-only"} />
-                                                </div>
-
-                                                <div
-                                                    style={{
-                                                        display: "flex",
-                                                        justifyContent: "flex-end",
-                                                        flexWrap: "wrap",
-                                                    }}
-                                                >
-                                                    {/* bottom row */}
-
-                                                    <div
-                                                        style={{
-                                                            display: "flex",
-                                                            gap: "0.5rem",
-                                                            flexWrap: "wrap",
-                                                            justifyContent: "center",
-                                                        }}
-                                                    >
-                                                        {(!EntryDB.config.app ||
-                                                            EntryDB.config.app
-                                                                .enable_private_pastes !==
-                                                                false) && (
-                                                            <details
-                                                                class={
-                                                                    "details-confined"
-                                                                }
-                                                            >
-                                                                <summary>
-                                                                    Private Pastes
-                                                                </summary>
-
-                                                                <div className="details-flex-content-list-box ">
-                                                                    <h4
-                                                                        style={{
-                                                                            margin: "0",
-                                                                        }}
-                                                                    >
-                                                                        Private
-                                                                        Pastes
-                                                                    </h4>
-
-                                                                    <p>
-                                                                        Providing a
-                                                                        view code
-                                                                        makes your
-                                                                        paste
-                                                                        private. The
-                                                                        view code is
-                                                                        used to
-                                                                        decrypt your
-                                                                        paste for
-                                                                        viewing.
-                                                                    </p>
-
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder={
-                                                                            "View code - optional"
-                                                                        }
-                                                                        minLength={
-                                                                            EntryDB.MinPasswordLength
-                                                                        }
-                                                                        maxLength={
-                                                                            EntryDB.MaxPasswordLength
-                                                                        }
-                                                                        name={
-                                                                            "ViewPassword"
-                                                                        }
-                                                                        autoComplete={
-                                                                            "off"
-                                                                        }
-                                                                    />
-                                                                </div>
-                                                            </details>
-                                                        )}
-
-                                                        {(!EntryDB.config.app ||
-                                                            EntryDB.config.app
-                                                                .enable_groups !==
-                                                                false) && (
-                                                            <details
-                                                                class={
-                                                                    "details-confined"
-                                                                }
-                                                            >
-                                                                <summary>
-                                                                    Group Pastes
-                                                                </summary>
-
-                                                                <div className="details-flex-content-list-box ">
-                                                                    <h4
-                                                                        style={{
-                                                                            margin: "0",
-                                                                        }}
-                                                                    >
-                                                                        Group Pastes
-                                                                    </h4>
-
-                                                                    <p>
-                                                                        Groups cannot
-                                                                        be made
-                                                                        private. The
-                                                                        group post
-                                                                        code is only
-                                                                        required when
-                                                                        submitting to
-                                                                        an existing
-                                                                        group or
-                                                                        creating a
-                                                                        new group.
-                                                                    </p>
-
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder={
-                                                                            "Group name - optional"
-                                                                        }
-                                                                        minLength={
-                                                                            EntryDB.MinCustomURLLength
-                                                                        }
-                                                                        maxLength={
-                                                                            EntryDB.MaxCustomURLLength
-                                                                        }
-                                                                        id={
-                                                                            "GroupName"
-                                                                        }
-                                                                        name={
-                                                                            "GroupName"
-                                                                        }
-                                                                    />
-
-                                                                    <input
-                                                                        type="text"
-                                                                        placeholder={
-                                                                            "Group post code - optional"
-                                                                        }
-                                                                        minLength={
-                                                                            EntryDB.MinPasswordLength
-                                                                        }
-                                                                        maxLength={
-                                                                            EntryDB.MaxPasswordLength
-                                                                        }
-                                                                        name={
-                                                                            "GroupSubmitPassword"
-                                                                        }
-                                                                        autoComplete={
-                                                                            "off"
-                                                                        }
-                                                                    />
-                                                                </div>
-                                                            </details>
-                                                        )}
-
-                                                        {(!EntryDB.config.app ||
-                                                            EntryDB.config.app
-                                                                .enable_expiry !==
-                                                                false) && (
-                                                            <details
-                                                                class={
-                                                                    "details-confined"
-                                                                }
-                                                            >
-                                                                <summary>
-                                                                    Paste Expiry
-                                                                </summary>
-
-                                                                <div
-                                                                    class={
-                                                                        "details-flex-content-list-box"
-                                                                    }
-                                                                >
-                                                                    <h4
-                                                                        style={{
-                                                                            margin: "0",
-                                                                        }}
-                                                                    >
-                                                                        Paste Expiry
-                                                                    </h4>
-
-                                                                    <label htmlFor="ExpireOn">
-                                                                        Delete Paste
-                                                                        On
-                                                                    </label>
-
-                                                                    <input
-                                                                        type={
-                                                                            "datetime-local"
-                                                                        }
-                                                                        name={
-                                                                            "ExpireOn"
-                                                                        }
-                                                                        id={
-                                                                            "ExpireOn"
-                                                                        }
-                                                                    />
-
-                                                                    <hr />
-                                                                    <DateOptions />
-                                                                </div>
-                                                            </details>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )
-                                    }
 
                                     {/* hidden */}
 

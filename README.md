@@ -130,7 +130,7 @@ Entry provides an admin panel that is locked behind a set password that allows t
 
 #### Logs
 
-Through the admin panel, you can view certain logs that are automatically saved whenever an event occurs on the server. These logs are not sent from the client. Logs can be set to automatically be deleted when the server exists using the `log.clear_on_start` option in the server `config.json` file. No events are enabled by default.
+Through the admin panel, you can view certain logs that are automatically saved whenever an event occurs on the server. These logs are not sent from the client. Logs can be set to automatically be deleted when the server exists using the `log.clear_on_start` option in the server `config.json` file. No events are enabled by default. This will not delete `comment`, `session`, `report` or `view_paste` type logs, as these should be retained.
 
 The following options can be used as events:
 

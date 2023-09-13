@@ -17,7 +17,12 @@ export default function Modal(props: {
                     for (const button of document.getElementsByClassName("modal\:${props.buttonid}"))
                         button.addEventListener("click", () => {
                             document.getElementById("${props.modalid}").showModal(); 
-                        });`,
+                        });
+                        
+                    if (!window.modals) window.modals = {};
+                    window.modals["${props.modalid}"] = () => {
+                        document.getElementById("${props.modalid}").close(); 
+                    }`.replaceAll("\n", ""),
                 }}
             />
         </>
