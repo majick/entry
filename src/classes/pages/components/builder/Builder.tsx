@@ -578,7 +578,11 @@ function RenderPage() {
                                     OldEditPassword:
                                         target.OldEditPassword.value || "",
                                     NewContent: encodeURIComponent(
-                                        `_builder:${btoa(JSON.stringify(Document))}`
+                                        `_builder:${btoa(
+                                            encodeURIComponent(
+                                                JSON.stringify(Document)
+                                            )
+                                        )}`
                                     ),
                                 };
 
