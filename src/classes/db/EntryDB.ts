@@ -64,7 +64,7 @@ export default class EntryDB {
 
     public static readonly MaxContentLength = 200000;
     public static readonly MaxPasswordLength = 256;
-    public static readonly MaxCustomURLLength = 100;
+    public static readonly MaxCustomURLLength = 500;
 
     public static readonly MinContentLength = 1;
     public static readonly MinPasswordLength = 5;
@@ -659,6 +659,7 @@ export default class EntryDB {
                 "group",
                 "comments",
                 "reports",
+                "components",
             ];
 
             if (NotAllowed.includes(PasteInfo.GroupName))
@@ -749,6 +750,12 @@ export default class EntryDB {
                 Type: "report",
                 Content: `create;${PasteInfo.ReportOn};${PasteInfo.CustomURL}`,
             });
+        }
+
+        // if paste is a builder component, set the groupname
+        if (PasteInfo.Content.startsWith("_builder.component:")) {
+            PasteInfo.GroupName = "components";
+            PasteInfo.CustomURL = `components/${PasteInfo.CustomURL}`;
         }
 
         // create paste

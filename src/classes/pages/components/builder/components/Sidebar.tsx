@@ -1,3 +1,9 @@
+/**
+ * @file Handle builder sidebar
+ * @name Sidebar.tsx
+ * @license MIT
+ */
+
 import {
     Update,
     SetSidebar,
@@ -12,8 +18,25 @@ import {
 } from "../Builder";
 
 import { Node } from "../schema";
+import Toolbox from "./Toolbox";
 import parser from "../parser";
 
+/**
+ * @function QuickInput
+ *
+ * @export
+ * @param {({
+ *     name: string;
+ *     property: string;
+ *     type: "input" | "textarea" | "select";
+ *     inputType?: string; // input only
+ *     default?: any; // input/textarea only
+ *     step?: number; // inputType number only
+ *     value?: string; // input/textarea only
+ *     options?: { label: string; value: string }[]; // select only
+ * })} props
+ * @return {*}
+ */
 export function QuickInput(props: {
     name: string;
     property: string;
@@ -23,7 +46,7 @@ export function QuickInput(props: {
     step?: number; // inputType number only
     value?: string; // input/textarea only
     options?: { label: string; value: string }[]; // select only
-}) {
+}): any {
     return (
         <div className="option">
             <label htmlFor={props.name.replaceAll(" ", "_")}>
@@ -132,6 +155,9 @@ export function QuickInput(props: {
  * @return {*}
  */
 export default function Sidebar(props: { Page?: string }): any {
+    const search = new URLSearchParams(window.location.search);
+
+    // return
     return (
         <div
             className="builder:sidebar"
@@ -140,14 +166,13 @@ export default function Sidebar(props: { Page?: string }): any {
             }}
         >
             <button
-                class={"mobile-only"}
                 style={{
                     position: "sticky",
                     top: 0,
                 }}
                 onClick={() => SetSidebar(false)}
             >
-                Back
+                Close Sidebar
             </button>
 
             {Selected && Selected.NotRemovable !== true && !props.Page && (
@@ -602,50 +627,83 @@ export default function Sidebar(props: { Page?: string }): any {
                         />
 
                         {/* import/export */}
-                        <button
-                            onClick={() => {
-                                // remove EditMode
-                                Selected.EditMode = undefined;
+                        {!(search.get("edit") || "").startsWith("components/") && (
+                            <button
+                                onClick={() => {
+                                    // @ts-ignore
+                                    window.modals["entry:modal.SaveToToolbox"](true);
+                                }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                >
+                                    <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                    <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
+                                </svg>
+                                Publish
+                            </button>
+                        )}
 
-                                // create blob
-                                const blob = new Blob([JSON.stringify(Selected)], {
-                                    type: "application/json",
-                                });
+                        <details className="option">
+                            <summary>Advanced</summary>
 
-                                // get url and open
-                                window.open(URL.createObjectURL(blob), "_blank");
-                            }}
-                        >
-                            Export
-                        </button>
+                            <div class={"details-flex-content-list-box"}>
+                                <button
+                                    onClick={() => {
+                                        // remove EditMode
+                                        Selected.EditMode = undefined;
 
-                        <button
-                            onClick={() => {
-                                // ask for element json
-                                const element = prompt(
-                                    "Enter exported component JSON below:"
-                                );
-                                if (!element) return;
+                                        // create blob
+                                        const blob = new Blob(
+                                            [JSON.stringify(Selected)],
+                                            {
+                                                type: "application/json",
+                                            }
+                                        );
 
-                                // parse
-                                const parsed = JSON.parse(element) as Node;
+                                        // get url and open
+                                        window.open(
+                                            URL.createObjectURL(blob),
+                                            "_blank"
+                                        );
+                                    }}
+                                >
+                                    Export
+                                </button>
 
-                                // randomize ID (so we don't have any ID conflicts)
-                                parsed.ID = crypto.randomUUID();
+                                <button
+                                    onClick={() => {
+                                        // ask for element json
+                                        const element = prompt(
+                                            "Enter exported component JSON below:"
+                                        );
+                                        if (!element) return;
 
-                                // set node
-                                SelectedParent[SelectedParent.indexOf(Selected)] =
-                                    parsed;
+                                        // parse
+                                        const parsed = JSON.parse(element) as Node;
 
-                                // refresh all nodes
-                                parser.ResetNodes();
+                                        // randomize ID (so we don't have any ID conflicts)
+                                        parsed.ID = crypto.randomUUID();
 
-                                // return and update
-                                return Update();
-                            }}
-                        >
-                            Import
-                        </button>
+                                        // set node
+                                        SelectedParent[
+                                            SelectedParent.indexOf(Selected)
+                                        ] = parsed;
+
+                                        // refresh all nodes
+                                        parser.ResetNodes();
+
+                                        // return and update
+                                        return Update();
+                                    }}
+                                >
+                                    Import
+                                </button>
+                            </div>
+                        </details>
                     </>
                 ))}
         </div>

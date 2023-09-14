@@ -376,6 +376,12 @@ Users can build multi-page "pastes" using the paste builder. These pages are bui
 
 These pages can be published as normal pastes, and will open rendered when viewed.
 
+#### Toolbox
+
+Components created in the builder can be saved to the component toolbox, allowing them to be shared and used by other users. Components saved to the toolbox are saved under the `components` paste group. Their content is just a JSON export of the component.
+
+Saved toolbox components can be found in the paste builder on the top right. These components can be inserted into a paste builder page by selecting them in the library.
+
 #### Technical
 
 Pastes built in this way follow a basic "schema" that is detailed in the types used for each node. This schema can be viewed [here](https://codeberg.org/hkau/entry/src/branch/master/src/classes/pages/components/builder/schema.tsx).

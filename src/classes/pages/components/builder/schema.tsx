@@ -1,6 +1,6 @@
 /**
  * @file Builder schema
- * @name schema.ts
+ * @name schema.tsx
  * @license MIT
  */
 
@@ -17,6 +17,12 @@ export type BaseNode = {
     EditMode?: boolean;
     StyleString?: string; // injected directly into the element style attribute
     ClassString?: string; // injected directly into the element class
+    Events?: {
+        // TODO, make these work
+        click?: (event: Event<HTMLElement>) => void;
+        hover?: (event: Event<HTMLElement>) => void;
+        keypress?: (event: Event<HTMLElement>) => void;
+    };
 };
 
 export interface PageNode extends BaseNode {

@@ -10,6 +10,9 @@ import EntryDB, { Paste } from "../../../db/EntryDB";
 import { PageHeaders, db } from "../../api/API";
 import _404Page from "../404";
 
+import { BuilderDocument } from "./schema";
+import parser from "./parser";
+
 /**
  * @export
  * @class Builder
@@ -29,7 +32,7 @@ export default class Builder implements Endpoint {
             return new _404Page().request(request);
 
         // get document
-        let Document = {
+        let Document: BuilderDocument = {
             Pages: [
                 {
                     Type: "Page",
@@ -60,16 +63,33 @@ export default class Builder implements Endpoint {
             const result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
 
             // make sure paste exists AND is a builder paste
-            if (!result || !result.Content.startsWith("_builder:"))
+            if (
+                !result ||
+                (!result.Content.startsWith("_builder:") &&
+                    result.GroupName !== "components")
+            )
                 return new _404Page().request(request);
 
+            // convert component to page
+            if (result.GroupName === "components") {
+                // get content
+                const ComponentMeta = JSON.parse(
+                    result.Content.split("_builder.component:")[1]
+                );
+
+                // get component node
+                const Node = parser.parse(ComponentMeta.Component);
+
+                // add to page and regenerate content
+                Document.Pages[0].Children[0] = Node as any;
+                result.Content = `_builder:${parser.stringify(Document)}`;
+            }
+
             // parse content
-            const TrueContent = JSON.parse(
-                decodeURIComponent(atob(result.Content.split("_builder:")[1]))
-            );
+            const TrueContent = parser.parse(result.Content.split("_builder:")[1]);
 
             // set document
-            Document = TrueContent;
+            Document = TrueContent as BuilderDocument;
         }
 
         // return

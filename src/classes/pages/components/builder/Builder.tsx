@@ -10,8 +10,10 @@ import parser from "./parser";
 import { render } from "preact";
 
 import type { Paste } from "../../../db/EntryDB";
-import Sidebar from "./components/Sidebar";
 import Modal from "../Modal";
+
+import Sidebar from "./components/Sidebar";
+import Toolbox from "./components/Toolbox";
 
 // render
 export let Document: BuilderDocument;
@@ -347,21 +349,18 @@ function RenderPage() {
                 </button>
 
                 <button
-                    aria-label={"Toggle Sidebar"}
-                    title={"Toggle Sidebar"}
-                    onClick={() => {
-                        SidebarOpen = !SidebarOpen;
-                        RenderSidebar();
-                    }}
+                    aria-label={"Library"}
+                    title={"Library"}
+                    id={"entry:button.Toolbox"}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 16 16"
                         width="16"
                         height="16"
-                        aria-label={"Menu Symbol"}
+                        aria-label={"Package Symbol"}
                     >
-                        <path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"></path>
+                        <path d="m8.878.392 5.25 3.045c.54.314.872.89.872 1.514v6.098a1.75 1.75 0 0 1-.872 1.514l-5.25 3.045a1.75 1.75 0 0 1-1.756 0l-5.25-3.045A1.75 1.75 0 0 1 1 11.049V4.951c0-.624.332-1.201.872-1.514L7.122.392a1.75 1.75 0 0 1 1.756 0ZM7.875 1.69l-4.63 2.685L8 7.133l4.755-2.758-4.63-2.685a.248.248 0 0 0-.25 0ZM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432Zm6.25 8.271 4.625-2.683a.25.25 0 0 0 .125-.216V5.677L8.75 8.432Z"></path>
                     </svg>
                 </button>
 
@@ -472,7 +471,7 @@ function RenderPage() {
                                 flexDirection: "column",
                                 width: "100%",
                             }}
-                            onSubmit={async (event) => {
+                            onSubmit={async (event: Event<HTMLFormElement>) => {
                                 event.preventDefault();
 
                                 // get target
@@ -486,11 +485,7 @@ function RenderPage() {
                                 const Paste: Paste = {
                                     CustomURL: target.CustomURL.value || "",
                                     Content: encodeURIComponent(
-                                        `_builder:${btoa(
-                                            encodeURIComponent(
-                                                JSON.stringify(Document)
-                                            )
-                                        )}`
+                                        `_builder:${parser.stringify(Document)}`
                                     ),
                                     EditPassword: target.EditPassword.value || "",
                                     PubDate: new Date().getTime(),
@@ -527,7 +522,7 @@ function RenderPage() {
                             <input
                                 type="text"
                                 placeholder={"Custom URL"}
-                                maxLength={100}
+                                maxLength={500}
                                 minLength={2}
                                 name={"CustomURL"}
                                 id={"CustomURL"}
@@ -562,7 +557,7 @@ function RenderPage() {
                                 flexDirection: "column",
                                 width: "100%",
                             }}
-                            onSubmit={async (event) => {
+                            onSubmit={async (event: Event<HTMLFormElement>) => {
                                 event.preventDefault();
 
                                 // get target
@@ -577,13 +572,25 @@ function RenderPage() {
                                     OldURL: EditingPaste || "",
                                     OldEditPassword:
                                         target.OldEditPassword.value || "",
-                                    NewContent: encodeURIComponent(
-                                        `_builder:${btoa(
-                                            encodeURIComponent(
-                                                JSON.stringify(Document)
-                                            )
-                                        )}`
-                                    ),
+                                    NewContent: !(
+                                        search.get("edit") || ""
+                                    ).startsWith("components/") // editing page, save entire page
+                                        ? encodeURIComponent(
+                                              `_builder:${parser.stringify(
+                                                  Document
+                                              )}`
+                                          ) // editing component, save only that
+                                        : encodeURIComponent(
+                                              `_builder.component:${JSON.stringify({
+                                                  Name:
+                                                      search.get("component") ||
+                                                      "blank",
+                                                  Component: parser.stringify(
+                                                      Document.Pages[CurrentPage]
+                                                          .Children[0]
+                                                  ),
+                                              })}`
+                                          ),
                                 };
 
                                 // create formdata body
@@ -759,6 +766,32 @@ function RenderPage() {
                     </div>
                 </Modal>
             )}
+
+            <Toolbox.SaveModal />
+
+            <Modal buttonid="entry:button.Toolbox" modalid="entry:modal.Toolbox">
+                <div
+                    style={{
+                        width: "40rem",
+                        maxWidth: "100%",
+                    }}
+                >
+                    <Toolbox.Browser />
+
+                    <hr />
+
+                    <form
+                        method={"dialog"}
+                        className="full mobile-flex-center"
+                        style={{
+                            display: "flex",
+                            justifyContent: "flex-end",
+                        }}
+                    >
+                        <button className="green">Close</button>
+                    </form>
+                </div>
+            </Modal>
         </>,
         document.getElementById("builder") as HTMLElement
     );

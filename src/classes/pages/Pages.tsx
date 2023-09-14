@@ -311,7 +311,14 @@ export class GetPasteFromURL implements Endpoint {
                     },
                 }
             );
-        }
+        } else if (result.GroupName === "components")
+            // component viewer
+            return new Response(await ComponentView(request, result), {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            });
 
         // ...otherwise
 
@@ -1752,10 +1759,208 @@ export class PasteCommentsPage implements Endpoint {
     }
 }
 
+/**
+ * @function ComponentView
+ *
+ * @export
+ * @param {Request} request
+ * @param {Paste} paste
+ * @return {Promise<string>}
+ */
+export async function ComponentView(
+    request: Request,
+    paste: Paste
+): Promise<string> {
+    // get component information
+    const Body = JSON.parse(paste.Content.split("_builder.component:")[1]);
+
+    const Component = {
+        Name: Body.Name,
+        Node: BuilderParser.parse(Body.Component),
+    };
+
+    // return
+    return Renderer.Render(
+        <>
+            <main>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "0.5rem",
+                    }}
+                >
+                    <div
+                        className="builder:card full mobile-flex-center"
+                        style={{
+                            "--Display": "flex",
+                            "--JustifyContent": "space-between",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <h4 class={"no-margin"}>{Component.Name}</h4>
+
+                        <button
+                            class={"border"}
+                            id={"librarybutton"}
+                            style={{
+                                borderRadius: "0.4rem",
+                            }}
+                            // @ts-ignore
+                            onclick={`// check if library exists
+                                const library =
+                                    window.localStorage.getItem("entry:library");
+
+                                // create library if it doesn't
+                                if (!library)
+                                    window.localStorage.setItem("entry:library", JSON.stringify([[
+                                        "${Component.Name}",
+                                        "${paste.CustomURL}"
+                                    ]]));
+                                // push to library if it does
+                                else {
+                                    const ParsedLibrary = JSON.parse(library);
+                                    const ExistingRecord = ParsedLibrary.find((r) => 
+                                        r !== null && r[0] === "${Component.Name}"
+                                    );
+
+                                    // check if library includes component
+                                    if (ExistingRecord)
+                                        // remove from library
+                                        ParsedLibrary[ParsedLibrary.indexOf(ExistingRecord)] = undefined;
+                                    // push to library if it doesn't
+                                    else ParsedLibrary.push([
+                                        "${Component.Name}",
+                                        "${paste.CustomURL}"
+                                    ]);
+
+                                    // update
+                                    window.localStorage.setItem("entry:library", JSON.stringify(ParsedLibrary));
+                                }
+
+                                // reload
+                                window.location.reload();`}
+                        >
+                            Save to Library
+                        </button>
+                    </div>
+
+                    <div
+                        className="builder:card full mobile-flex-center"
+                        style={{
+                            "--Display": "flex",
+                            "--Direction": "column",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <h5 class={"no-margin"}>Builder Preview</h5>
+
+                        <div
+                            className="builder:card builder:page full"
+                            style={{
+                                "--Display": "flex",
+                                "--JustifyContent": "center",
+                                "--AlignItems": "center",
+                                borderRadius: "0.4rem",
+                                border: "dashed 1px var(--background-surface2)",
+                                background: "var(--background-surface)",
+                            }}
+                        >
+                            {BuilderParser.ParseNodes([Component.Node as any])}
+                        </div>
+                    </div>
+
+                    <div
+                        className="builder:card full"
+                        style={{
+                            "--Display": "flex",
+                            "--Direction": "column",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <h5 class={"no-margin"}>General Information</h5>
+
+                        <ul>
+                            <li>
+                                Type: <code>{(Component.Node as any).Type}</code>
+                            </li>
+
+                            <li>Views: {paste.Views}</li>
+
+                            {EntryDB.config.log &&
+                                EntryDB.config.log.events.includes("comment") && (
+                                    <li>
+                                        Comments:{" "}
+                                        <a
+                                            href={`/paste/comments/${paste.CustomURL}`}
+                                        >
+                                            {paste.Comments}
+                                        </a>
+                                    </li>
+                                )}
+
+                            <li>
+                                Published:{" "}
+                                <span class={"utc-date-to-localize"}>
+                                    {new Date(paste.PubDate).toUTCString()}
+                                </span>
+                            </li>
+
+                            <li>
+                                Edited:{" "}
+                                <span class={"utc-date-to-localize"}>
+                                    {new Date(paste.EditDate).toUTCString()}
+                                </span>
+                            </li>
+
+                            <li>
+                                <a
+                                    href={`/paste/builder?edit=${paste.CustomURL}&component=${Component.Name}`}
+                                >
+                                    Edit
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <Footer />
+            </main>
+
+            <script
+                dangerouslySetInnerHTML={{
+                    __html: `// check if library exists
+                    const library =
+                        window.localStorage.getItem("entry:library");
+                    
+                    if (library) {
+                        const ParsedLibrary = JSON.parse(library);
+                        const ExistingRecord = ParsedLibrary.find((r) => 
+                            r !== null && r[0] === "${Component.Name}"
+                        );
+                        
+                        // check if library includes component
+                        if (ExistingRecord)
+                            document.getElementById("librarybutton").innerText = "Remove From Library"
+                    }`,
+                }}
+            />
+        </>,
+        <>
+            <meta name="description" content="View component details" />
+
+            <title>
+                {Component.Name} - {EntryDB.config.name} Components
+            </title>
+        </>
+    );
+}
+
 // default export
 export default {
     GetPasteFromURL,
     PasteDocView,
     PastesSearch,
     PasteCommentsPage,
+    ComponentView,
 };

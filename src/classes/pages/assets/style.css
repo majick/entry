@@ -451,6 +451,10 @@ h6:focus .htag {
     display: none !important;
 }
 
+.full {
+    width: 100% !important;
+}
+
 @media screen and (max-width: 800px) {
     .mobile-center {
         margin: auto !important;
@@ -1245,6 +1249,7 @@ br:not(.cm-line br) {
     border-radius: 0.25rem;
     background: var(--background-surface1);
     display: flex;
+    flex-wrap: wrap;
     gap: 0.4rem;
     padding: 0.5rem;
     box-shadow: 0 0 4px var(--background-surface3);
@@ -1284,8 +1289,11 @@ br:not(.cm-line br) {
     padding: 0.5rem;
     border-bottom: solid 1px var(--background-surface2);
     display: flex;
-    flex-direction: column;
     gap: 0.4rem;
+}
+
+.option {
+    flex-direction: column;
 }
 
 .builder\:drag-element {
@@ -1321,10 +1329,6 @@ br:not(.cm-line br) {
     cursor: pointer;
 }
 
-.component.builder\:page[data-edit="true"] {
-    padding-top: 3.5rem;
-}
-
 .component.hover,
 .component.active {
     outline: solid 2px var(--blue2);
@@ -1352,6 +1356,11 @@ br:not(.cm-line br) {
 }
 
 @media screen and (max-width: 900px) {
+    .component.builder\:page[data-edit="true"] {
+        /* adjust for toolbar */
+        padding-top: 3.5rem;
+    }
+
     .builder\:toolbar:not(.always-absolute) {
         width: 100vw;
         top: 0;
