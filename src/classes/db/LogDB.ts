@@ -40,10 +40,10 @@ export default class LogDB {
     public readonly db: Database;
 
     /**
-     * Creates an instance of EntryDB.
-     * @memberof EntryDB
+     * Creates an instance of LogDB.
+     * @memberof LogDB
      */
-    constructor(config: Config) {
+    constructor() {
         // create db link
         const [db, isNew] = SQL.CreateDB("log", EntryDB.DataDirectory);
 

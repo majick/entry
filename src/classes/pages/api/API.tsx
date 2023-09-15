@@ -11,6 +11,7 @@ import _404Page from "../components/404";
 
 // create database
 import { CreateHash, Decrypt } from "../../db/helpers/Hash";
+import BaseParser from "../../db/helpers/BaseParser";
 import EntryDB, { Paste } from "../../db/EntryDB";
 export const db = new EntryDB();
 
@@ -179,7 +180,12 @@ export async function GetAssociation(
                 `${split[0]};_with;${SetAssociation}`
             );
 
-            return [true, ""];
+            return [
+                true,
+                `associated=${SetAssociation}; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                    60 * 60 * 24 * 365
+                }`,
+            ];
         } else if (Delete) {
             // update log to remove association
             await EntryDB.Logs.UpdateLog(log[2].ID, split[0]);
@@ -318,8 +324,25 @@ export class CreatePaste implements Endpoint {
         const Association = await GetAssociation(request);
 
         // load associated
-        if (!Association[1].startsWith("associated"))
-            body.Associated = Association[1];
+        if (!Association[1].startsWith("associated") && !Association[0]) {
+            // try to set association
+            if (
+                // can't (shouldn't) set association with a comment
+                !body.CommentOn &&
+                !body.ReportOn &&
+                // make sure auto_tag is enabled
+                (!EntryDB.config.app || EntryDB.config.app.auto_tag !== false)
+            ) {
+                // update association with this paste
+                const UpdateResult = await GetAssociation(
+                    request,
+                    true,
+                    body.CustomURL
+                );
+
+                if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
+            }
+        } else body.Associated = Association[1];
 
         // create paste
         const result = await db.CreatePaste(body);
@@ -407,6 +430,23 @@ export class EditPaste implements Endpoint {
 
         // get paste
         const paste = await db.GetPasteFromURL(body.OldURL);
+        if (!paste) return new _404Page().request(request);
+
+        // get association
+        const Association = await GetAssociation(request);
+
+        if (
+            Association[0] === true &&
+            !Association[1].startsWith("association") &&
+            paste.Metadata &&
+            !paste.ViewPassword
+        ) {
+            // edit paste metadata (keep owner up-to-date)
+            paste.Metadata.Owner = Association[1];
+
+            // add to content
+            body.NewContent += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
+        }
 
         // edit paste
         const result = await db.EditPaste(

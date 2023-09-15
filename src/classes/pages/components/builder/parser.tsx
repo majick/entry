@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import schema, { BuilderDocument, Node, PageNode } from "./schema";
+import schema, { Node, PageNode } from "./schema";
 import { VNode } from "preact";
 
 // ...
@@ -131,28 +131,6 @@ export function ParseStyleString(style: string): { [key: string]: string } {
     return result;
 }
 
-/**
- * @function stringify
- *
- * @export
- * @param {(Node | BuilderDocument)} node
- * @return {string}
- */
-export function stringify(node: Node | BuilderDocument): string {
-    return btoa(encodeURIComponent(JSON.stringify(node)));
-}
-
-/**
- * @function parse
- *
- * @export
- * @param {string} node
- * @return {(Node | BuilderDocument)}
- */
-export function parse(node: string): Node | BuilderDocument {
-    return JSON.parse(decodeURIComponent(atob(node)));
-}
-
 // default export
 export default {
     AllNodes,
@@ -161,6 +139,4 @@ export default {
     ParseNodes,
     ParsePage,
     ParseStyleString,
-    stringify,
-    parse,
 };

@@ -370,6 +370,8 @@ Paste comments are disabled by default. They can be enabled by enabling the `com
 
 Paste comments can be disabled on individual pastes if the paste includes `&!lt% disable comments %&gt;`
 
+Users are automatically tagged with an association with first paste (not comment) that they create. This can be disabled by changing config `app.auto_tag` to false.
+
 ### Paste Builder
 
 Users can build multi-page "pastes" using the paste builder. These pages are built using drag-and-drop (desktop only, automatic move on mobile) components, allowing users to build with text, images, buttons and more. These pages are highly customizable, from the width of the containing box to the overall theme of the page. Users can also directly add CSS styles to components.

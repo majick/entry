@@ -5,6 +5,8 @@
  */
 
 import schema, { BuilderDocument, Node } from "./schema";
+
+import BaseParser from "../../../db/helpers/BaseParser";
 import parser from "./parser";
 
 import { render } from "preact";
@@ -485,7 +487,7 @@ function RenderPage() {
                                 const Paste: Paste = {
                                     CustomURL: target.CustomURL.value || "",
                                     Content: encodeURIComponent(
-                                        `_builder:${parser.stringify(Document)}`
+                                        `_builder:${BaseParser.stringify(Document)}`
                                     ),
                                     EditPassword: target.EditPassword.value || "",
                                     PubDate: new Date().getTime(),
@@ -576,7 +578,7 @@ function RenderPage() {
                                         search.get("edit") || ""
                                     ).startsWith("components/") // editing page, save entire page
                                         ? encodeURIComponent(
-                                              `_builder:${parser.stringify(
+                                              `_builder:${BaseParser.stringify(
                                                   Document
                                               )}`
                                           ) // editing component, save only that
@@ -585,7 +587,7 @@ function RenderPage() {
                                                   Name:
                                                       search.get("component") ||
                                                       "blank",
-                                                  Component: parser.stringify(
+                                                  Component: BaseParser.stringify(
                                                       Document.Pages[CurrentPage]
                                                           .Children[0]
                                                   ),

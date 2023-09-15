@@ -10,8 +10,8 @@ import EntryDB, { Paste } from "../../../db/EntryDB";
 import { PageHeaders, db } from "../../api/API";
 import _404Page from "../404";
 
+import parser from "../../../db/helpers/BaseParser";
 import { BuilderDocument } from "./schema";
-import parser from "./parser";
 
 /**
  * @export

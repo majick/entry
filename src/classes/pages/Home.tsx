@@ -4,7 +4,7 @@ import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/Footer";
 import Modal from "./components/Modal";
 
-import { DecryptPaste, db, PageHeaders, Session } from "./api/API";
+import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import pack from "../../../package.json";
@@ -12,6 +12,7 @@ import pack from "../../../package.json";
 import { Config } from "../..";
 import DateOptions from "./components/form/DateOptions";
 import Checkbox from "./components/form/Checkbox";
+import { AuthModals } from "./components/AuthModals";
 let config: Config;
 
 /**
@@ -74,10 +75,13 @@ export default class Home implements Endpoint {
             search.delete("ReportOn");
         }
 
+        // get association
+        const Association = await GetAssociation(request);
+
         // return
         return new Response(
             Renderer.Render(
-                <>
+                <div class="builder:page">
                     <main
                         style={{
                             height: "calc(100% - 1rem)",
@@ -202,25 +206,74 @@ export default class Home implements Endpoint {
                                 </button>
                             </div>
 
-                            {config.app && config.app.info && (
-                                <a
-                                    href={`/${config.app.info}`}
-                                    class={"button secondary"}
-                                    target={"_blank"}
-                                    title={"Server Info & Announcements"}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        aria-label={"Info Symbol"}
+                            <div
+                                style={{
+                                    display: "flex",
+                                }}
+                            >
+                                {config.app && config.app.info && (
+                                    <a
+                                        href={`/${config.app.info}`}
+                                        class={"button secondary"}
+                                        target={"_blank"}
+                                        title={"Server Info & Announcements"}
                                     >
-                                        <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
-                                    </svg>
-                                    Info
-                                </a>
-                            )}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Info Symbol"}
+                                        >
+                                            <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                                        </svg>
+                                        Info
+                                    </a>
+                                )}
+
+                                {(!EntryDB.config.app ||
+                                    EntryDB.config.app.auto_tag !== false) && (
+                                    <>
+                                        {(!Association[0] && (
+                                            <button
+                                                title="Associate Paste"
+                                                style={{ padding: "0.75rem" }}
+                                                class={
+                                                    "modal:entry:button.login secondary"
+                                                }
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Sign Out Symbol"}
+                                                >
+                                                    <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm6.56 4.5h5.69a.75.75 0 0 1 0 1.5H8.56l1.97 1.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L6.22 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734Z"></path>
+                                                </svg>
+                                            </button>
+                                        )) || (
+                                            <button
+                                                title="Disassociate Paste"
+                                                style={{ padding: "0.75rem" }}
+                                                class={
+                                                    "modal:entry:button.logout secondary"
+                                                }
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Sign Out Symbol"}
+                                                >
+                                                    <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 4.5-1.97-1.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"></path>
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
 
                         <div class={"tab-container"}>
@@ -885,7 +938,20 @@ export default class Home implements Endpoint {
                                 ))}
                         </div>
 
-                        <Footer />
+                        <Footer
+                            ShowBottomRow={
+                                search.get("mode") !== "edit" ||
+                                (
+                                    (
+                                        EntryDB.config.app || {
+                                            footer: {
+                                                show_name_on_all_pages: false,
+                                            },
+                                        }
+                                    ).footer || { show_name_on_all_pages: false }
+                                ).show_name_on_all_pages === true
+                            }
+                        />
                     </main>
 
                     {paste && (
@@ -988,7 +1054,10 @@ export default class Home implements Endpoint {
                             )}\`);`,
                         }}
                     />
-                </>,
+
+                    {/* auth flow modals */}
+                    <AuthModals use={Association[0] ? "logout" : "login"} />
+                </div>,
                 <>
                     {
                         // this is the head vnode, it goes into the HTML head instead of body

@@ -34,6 +34,7 @@ export type Config = {
         enable_expiry?: boolean;
         enable_not_editable_pastes?: boolean;
         enable_builder?: boolean;
+        auto_tag?: boolean;
         footer?: {
             show_name_on_all_pages?: boolean;
             rows: Array<{

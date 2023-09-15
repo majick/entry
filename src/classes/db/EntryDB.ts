@@ -4,11 +4,11 @@
  * @license MIT
  */
 
+import { Database } from "bun:sqlite";
 import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs";
 
-import { Database } from "bun:sqlite";
 import { CreateHash, Encrypt } from "./helpers/Hash";
 import SQL from "./helpers/SQL";
 import Expiry from "./Expiry";
@@ -16,6 +16,8 @@ import LogDB from "./LogDB";
 
 import pack from "../../../package.json";
 import type { Config } from "../..";
+
+import BaseParser from "./helpers/BaseParser";
 
 export type Paste = {
     // * = value is not stored in database record
@@ -40,7 +42,13 @@ export type Paste = {
     CommentOn?: string; // * the paste the that this paste is commenting on
     Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)
     ReportOn?: string; // * the paste that this paste is reporting
-    Associated?: string | undefined; // * the paste that is associated with this new paste
+    Associated?: string; // * the paste that is associated with this new paste
+    Metadata?: PasteMetadata;
+};
+
+export type PasteMetadata = {
+    Version: 1;
+    Owner: string; // the owner of the paste
 };
 
 let StaticInit = false;
@@ -247,7 +255,7 @@ export default class EntryDB {
         if (!EntryDB.config.log || EntryDB.Logs) return;
 
         // init logs
-        EntryDB.Logs = new LogDB((await EntryDB.GetConfig()) as Config);
+        EntryDB.Logs = new LogDB();
 
         // delete bot sessions
         if (EntryDB.config.log.events.includes("session")) {
@@ -475,6 +483,18 @@ export default class EntryDB {
                     record.Comments = comments[2].length;
                 } else record.Comments = 0;
 
+                // remove metadata
+                const [RealContent, _Metadata] = record.Content.split("_metadata:");
+
+                record.Content = RealContent;
+
+                if (_Metadata) record.Metadata = BaseParser.parse(_Metadata) as any;
+                else
+                    record.Metadata = {
+                        Version: 1,
+                        Owner: "",
+                    };
+
                 // return
                 return resolve(record);
             } else {
@@ -693,7 +713,7 @@ export default class EntryDB {
 
         // encrypt (if needed)
         if (PasteInfo.ViewPassword) {
-            const result = Encrypt(PasteInfo.Content);
+            const result = Encrypt(PasteInfo.Content.split("_metadata:")[0]);
             if (!result) return [false, "Encryption error!", PasteInfo];
 
             PasteInfo.Content = result[0];
@@ -757,6 +777,14 @@ export default class EntryDB {
             PasteInfo.GroupName = "components";
             PasteInfo.CustomURL = `components/${PasteInfo.CustomURL}`;
         }
+
+        // add metadata
+        const meatadata: PasteMetadata = {
+            Version: 1,
+            Owner: PasteInfo.Associated || "",
+        };
+
+        PasteInfo.Content += `_metadata:${BaseParser.stringify(meatadata)}`;
 
         // create paste
         await SQL.QueryOBJ({

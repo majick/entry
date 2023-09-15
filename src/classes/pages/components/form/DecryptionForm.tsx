@@ -20,8 +20,12 @@ export default function DecryptionForm(props: {
                     marginBottom: "0.5rem",
                     flexWrap: "wrap",
                 }}
-                action={`/paste/dec/${props.paste.CustomURL}`}
-                method={"POST"}
+                action={
+                    props.isEdit !== true
+                        ? `/paste/dec/${props.paste.CustomURL}`
+                        : ""
+                }
+                method={props.isEdit !== true ? "POST" : ""}
             >
                 <button>Decrypt</button>
 

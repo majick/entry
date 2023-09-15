@@ -326,6 +326,7 @@ export function CardNode(props: {
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}
                 draggable={props.node.EditMode}
+                onClick={props.node.Events && props.node.Events.click}
             >
                 {props.children}
             </div>
