@@ -5,7 +5,7 @@
  */
 
 import type { Paste } from "../../../../db/EntryDB";
-import Modal from "../../Modal";
+import Modal from "../../site/modals/Modal";
 
 import { CurrentPage, Document, Selected, Update } from "../Builder";
 import parser from "../parser";

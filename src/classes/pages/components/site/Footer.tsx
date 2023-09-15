@@ -1,10 +1,10 @@
 import ToggleTheme from "./ToggleTheme";
-import Modal from "./Modal";
+import Modal from "./modals/Modal";
 
-import EntryDB, { Paste } from "../../db/EntryDB";
+import EntryDB, { Paste } from "../../../db/EntryDB";
 import { HoneybeeConfig } from "honeybee";
 
-import { db } from "../api/API";
+import { db } from "../../api/API";
 
 // get version
 let version: Partial<Paste> | undefined;

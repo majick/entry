@@ -8,7 +8,7 @@
 // THE ENTRYDB THAT IS USED IS ACCESSED FROM global.EntryDB
 // ...make sure this only imports type so the Entry source isn't built again
 import type EntryDB from "entry/src/classes/db/EntryDB";
-import type Footer from "entry/src/classes/pages/components/Footer";
+import type Footer from "entry/src/classes/pages/components/site/Footer";
 
 // import honeybee
 import { Renderer, Endpoint, HoneybeeConfig } from "honeybee";

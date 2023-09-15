@@ -1,19 +1,17 @@
 import { Endpoint, Renderer } from "honeybee";
 
 import DecryptionForm from "./components/form/DecryptionForm";
-import Footer from "./components/Footer";
-import Modal from "./components/Modal";
+import Footer from "./components/site/Footer";
+import Modal from "./components/site/modals/Modal";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import pack from "../../../package.json";
 
-import { Config } from "../..";
+import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
 import Checkbox from "./components/form/Checkbox";
-import { AuthModals } from "./components/AuthModals";
-let config: Config;
 
 /**
  * @export
@@ -24,7 +22,6 @@ export default class Home implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
 
         // if search.server, add server to paste.CustomURL
         if (search.get("server"))
@@ -211,9 +208,9 @@ export default class Home implements Endpoint {
                                     display: "flex",
                                 }}
                             >
-                                {config.app && config.app.info && (
+                                {EntryDB.config.app && EntryDB.config.app.info && (
                                     <a
-                                        href={`/${config.app.info}`}
+                                        href={`/${EntryDB.config.app.info}`}
                                         class={"button secondary"}
                                         target={"_blank"}
                                         title={"Server Info & Announcements"}
@@ -1067,7 +1064,7 @@ export default class Home implements Endpoint {
                         content="Entry - A Markdown Pastebin"
                     ></meta>
 
-                    <title>{config.name} - A Markdown Pastebin</title>
+                    <title>{EntryDB.config.name} - A Markdown Pastebin</title>
                 </>
             ),
             {

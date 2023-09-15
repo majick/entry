@@ -23,7 +23,13 @@ import { ParseMarkdown } from "../components/Markdown";
 
 // headers
 export const DefaultHeaders = {
-    "Cache-Control": "public, max-age=604800, must-revalidate",
+    "Cache-Control":
+        // check "do not cache"
+        process.env.DO_NOT_CACHE !== "true"
+            ? // use normal cache
+              "public, max-age=604800, must-revalidate"
+            : // jk, we're still gonna cache... but not as long and not public
+              "private, max-age=86400, must-revalidate",
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     Vary: "Accept-Encoding",

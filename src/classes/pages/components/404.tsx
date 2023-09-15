@@ -1,6 +1,6 @@
 import { Endpoint, Renderer } from "honeybee";
 
-import Footer from "./Footer";
+import Footer from "./site/Footer";
 
 import EntryDB from "../../db/EntryDB";
 import { Config } from "../../..";

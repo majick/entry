@@ -1,4 +1,4 @@
-import EntryDB from "../../db/EntryDB";
+import EntryDB from "../../../../db/EntryDB";
 import Modal from "./Modal";
 
 export function AuthModals(props: { use: "login" | "logout" }) {

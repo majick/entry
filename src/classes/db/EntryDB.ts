@@ -49,6 +49,10 @@ export type Paste = {
 export type PasteMetadata = {
     Version: 1;
     Owner: string; // the owner of the paste
+    // comments stuff
+    Comments?: {
+        IsCommentOn: string;
+    };
 };
 
 let StaticInit = false;
@@ -741,6 +745,12 @@ export default class EntryDB {
                 PasteInfo.ExpireOn
             );
 
+        // create metadata
+        const metadata: PasteMetadata = {
+            Version: 1,
+            Owner: PasteInfo.Associated || "",
+        };
+
         // if paste is a comment, create the respective log entry and set groupname to "comments"
         if (PasteInfo.CommentOn) {
             // set group
@@ -749,6 +759,11 @@ export default class EntryDB {
 
             if (PasteInfo.Associated)
                 PasteInfo.Associated = `;${PasteInfo.Associated}`;
+
+            // update metadata
+            metadata.Comments = {
+                IsCommentOn: PasteInfo.CommentOn,
+            };
 
             // create log
             await EntryDB.Logs.CreateLog({
@@ -779,12 +794,7 @@ export default class EntryDB {
         }
 
         // add metadata
-        const meatadata: PasteMetadata = {
-            Version: 1,
-            Owner: PasteInfo.Associated || "",
-        };
-
-        PasteInfo.Content += `_metadata:${BaseParser.stringify(meatadata)}`;
+        PasteInfo.Content += `_metadata:${BaseParser.stringify(metadata)}`;
 
         // create paste
         await SQL.QueryOBJ({
@@ -909,7 +919,10 @@ export default class EntryDB {
         // that means it is safe to compare with what we got from the client
         // ...comparing paste.EditPassword and PasteInfo.EditPassword because if we DID supply a new password,
         // PasteInfo will not have it, only NewPasteInfo will
-        if (paste.EditPassword !== PasteInfo.EditPassword)
+        if (
+            paste.EditPassword !== PasteInfo.EditPassword &&
+            PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin)
+        )
             return [false, "Invalid password!", NewPasteInfo];
 
         // if custom url was changed, add the group back to it

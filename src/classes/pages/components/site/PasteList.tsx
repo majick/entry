@@ -1,7 +1,7 @@
-import EntryDB, { Paste } from "../../db/EntryDB";
-import { CreateHash } from "../../db/helpers/Hash";
+import EntryDB, { Paste } from "../../../db/EntryDB";
+import { CreateHash } from "../../../db/helpers/Hash";
 
-import Modal from "./Modal";
+import Modal from "./modals/Modal";
 
 export default function PasteList(props: {
     Pastes: Paste[];

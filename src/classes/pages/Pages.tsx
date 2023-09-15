@@ -9,8 +9,8 @@ import Honeybee, { Endpoint, Renderer } from "honeybee";
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import BuilderParser from "./components/builder/parser";
+import Footer from "./components/site/Footer";
 import _404Page from "./components/404";
-import Footer from "./components/Footer";
 import Home from "./Home";
 
 // create database
@@ -30,11 +30,11 @@ import API, {
 } from "./api/API";
 
 // ...
+import { AuthModals } from "./components/site/modals/AuthModals";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 import BaseParser from "../db/helpers/BaseParser";
-import Modal from "./components/Modal";
-import { AuthModals } from "./components/AuthModals";
+import Modal from "./components/site/modals/Modal";
 
 // ...
 
@@ -619,16 +619,19 @@ export class GetPasteFromURL implements Endpoint {
 
                                     {result.Metadata && (
                                         <>
-                                            {result.Metadata.Owner && (
-                                                <span>
-                                                    Owner:{" "}
-                                                    <a
-                                                        href={`/${result.Metadata.Owner}`}
-                                                    >
-                                                        {result.Metadata.Owner}
-                                                    </a>
-                                                </span>
-                                            )}
+                                            {result.Metadata.Owner &&
+                                                !result.Content.includes(
+                                                    "<% disable show_owner %>"
+                                                ) && (
+                                                    <span>
+                                                        Owner:{" "}
+                                                        <a
+                                                            href={`/${result.Metadata.Owner}`}
+                                                        >
+                                                            {result.Metadata.Owner}
+                                                        </a>
+                                                    </span>
+                                                )}
                                         </>
                                     )}
 
@@ -1198,11 +1201,10 @@ export class PasteCommentsPage implements Endpoint {
 
         // check if paste is a comment on another paste
         const PreviousInThread = (
-            await EntryDB.Logs.QueryLogs(
-                `(Content LIKE "%;${result.CustomURL}" OR Content LIKE "%;${result.CustomURL};%")
-                AND Content NOT LIKE "%;%;${result.CustomURL}"`
-            )
-        )[2][0];
+            (result.Metadata || { Comments: { IsCommentOn: "" } }).Comments || {
+                Comments: { IsCommentOn: "" },
+            }
+        ).IsCommentOn;
 
         // get associated paste
         let PostingAs = undefined;
@@ -1244,9 +1246,7 @@ export class PasteCommentsPage implements Endpoint {
                         {PreviousInThread && (
                             <a
                                 class={"button"}
-                                href={`/paste/comments/${
-                                    PreviousInThread.Content.split(";")[0]
-                                }`}
+                                href={`/paste/comments/${PreviousInThread}`}
                             >
                                 Back
                             </a>
@@ -1354,11 +1354,7 @@ export class PasteCommentsPage implements Endpoint {
                                     <>
                                         {", "}
                                         <a
-                                            href={`/paste/comments/${
-                                                PreviousInThread.Content.split(
-                                                    ";"
-                                                )[0]
-                                            }`}
+                                            href={`/paste/comments/${PreviousInThread}`}
                                         >
                                             up thread
                                         </a>

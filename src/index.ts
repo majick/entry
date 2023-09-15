@@ -9,7 +9,7 @@ import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
 
 // create global
-import Footer, { InitFooterExtras } from "./classes/pages/components/Footer";
+import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer";
 
 (global as any).EntryDB = EntryDB;
 (global as any).Footer = Footer;
@@ -26,6 +26,7 @@ export type Config = {
     config: string;
     plugin_file?: string;
     env?: "production" | "development";
+    do_not_cache?: boolean;
     app?: {
         info?: string;
         enable_search?: boolean;
@@ -177,6 +178,7 @@ const config: HoneybeeConfig = {
             Method: "POST",
             Page: Admin.ViewReport,
         },
+        "/admin/metadata": { Method: "POST", Page: Admin.MetadataEditor },
         "/admin/plugins": { Method: "POST", Page: Admin.PluginsPage },
         "/admin/api/delete": { Method: "POST", Page: AdminAPI.APIDeletePaste },
         "/admin/api/export": { Method: "POST", Page: AdminAPI.APIExport },
@@ -192,6 +194,7 @@ const config: HoneybeeConfig = {
             Method: "POST",
             Page: AdminAPI.APIExportConfig,
         },
+        "/admin/api/metadata": { Method: "POST", Page: AdminAPI.APIEditMetadata },
         // POST api
         "/api/new": { Method: "POST", Page: API.CreatePaste },
         "/api/edit": { Method: "POST", Page: API.EditPaste },

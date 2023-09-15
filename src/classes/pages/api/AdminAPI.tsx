@@ -8,6 +8,7 @@ import Honeybee, { Endpoint } from "honeybee";
 
 import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../../db/helpers/Hash";
+import _404Page from "../components/404";
 import EntryDB from "../../db/EntryDB";
 
 import { Login } from "../Admin";
@@ -343,6 +344,63 @@ export class APIExportConfig implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class APIEditMetadata
+ * @implements {Endpoint}
+ */
+export class APIEditMetadata implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+            return new Login().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+
+        // update metadata
+        paste.Content += `_metadata:${body.Metadata}`;
+
+        // update paste
+        const result = await db.EditPaste(
+            {
+                Content: "",
+                EditPassword: body.AdminPassword,
+                CustomURL: paste.CustomURL!,
+                PubDate: 0,
+                EditDate: 0,
+            },
+            {
+                Content: paste.Content!,
+                EditPassword: body.AdminPasswrdo,
+                CustomURL: paste.CustomURL!,
+                PubDate: (paste || { PubDate: 0 }).PubDate!,
+                EditDate: paste.EditDate!,
+            }
+        );
+
+        // return
+        return new Response(JSON.stringify(result), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     APIDeletePaste,
@@ -353,4 +411,5 @@ export default {
     APIExportLogs,
     APIMassDeleteLogs,
     APIExportConfig,
+    APIEditMetadata,
 };

@@ -48,6 +48,10 @@ An instance with all features enable is hosted at [sentrytwo.com](https://sentry
 
 Many features are able to be disabled or enabled through the server configuration file. An example file can be seen [here](https://sentrytwo.com/config). It is the file used in the primary Entry instance.
 
+If your server is having cache issues you can add `DO_NOT_CACHE=true` to your environment variables. Contrary to what its name suggests, files are still cached! Though they are cache only for a day and in a private cache.
+
+You can define a custom [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) through the `CONTENT_SECURITY_POLICY` environment variable.
+
 ### API
 
 All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
@@ -77,6 +81,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /admin/api/logs/export`, Get all server logs: `AdminPassword`
 - `POST /admin/api/logs/mass-delete`, Delete logs by sql query: `AdminPassword, logs`
 - `POST /admin/api/config.json`, Get server config file contents: `AdminPassword`
+- `POST /admin/api/metadata`, Update the metadata of a paste: `AdminPassword, CustomURL, Metadata`
 
 ### (very basic) Decentralization
 
@@ -206,6 +211,10 @@ Plugins can load HTML content into the site footer by adding an endpoint beginni
 #### Paste Reports
 
 Paste reports can be enabled by adding the `report` [log type](#logs). With paste reports enabled, you can view reported pastes from the [admin panel](#admin-panel). The panel will allow you to view the contents of a report, as well as archive and delete reports.
+
+#### Metadata Editor
+
+The admin panel allows admins to edit the metadata values of a paste. Note that these values are not the record data (such as the edit data or edit password), but rather the unique metadata properties stored in every paste content.
 
 ### Customization
 
