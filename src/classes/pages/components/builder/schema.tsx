@@ -8,6 +8,8 @@ import { ParseMarkdownSync } from "../Markdown";
 import { Update } from "./Builder";
 import parser from "./parser";
 
+import RenderToString from "preact-render-to-string";
+
 // types
 export type BaseNode = {
     Type: string;
@@ -17,12 +19,11 @@ export type BaseNode = {
     EditMode?: boolean;
     StyleString?: string; // injected directly into the element style attribute
     ClassString?: string; // injected directly into the element class
-    Events?: {
-        // TODO, make these work
-        click?: (event: Event<HTMLElement>) => void;
-        hover?: (event: Event<HTMLElement>) => void;
-        keypress?: (event: Event<HTMLElement>) => void;
-    };
+    // ...events
+    onClick?: string;
+    onMouseEnter?: string;
+    onMouseLeave?: string;
+    onKeyPress?: string;
 };
 
 export interface PageNode extends BaseNode {
@@ -244,6 +245,56 @@ function DragZones(props: {
 }
 
 /**
+ * @function EventZone
+ *
+ * @param {{ children: any; node: Node }} props
+ * @return {*}
+ */
+function EventZone(props: { children: any; node: Node }): any {
+    if (
+        !props.node.onClick &&
+        !props.node.onMouseEnter &&
+        !props.node.onMouseLeave &&
+        !props.node.onKeyPress
+    )
+        return props.children;
+
+    return (
+        <div
+            class={"builder:event-zone"}
+            dangerouslySetInnerHTML={{
+                __html: `<div${
+                    props.node.onClick
+                        ? ` onclick="${props.node.onClick.replaceAll('"', "'")}"`
+                        : ""
+                }${
+                    props.node.onMouseEnter
+                        ? ` onmouseenter="${props.node.onMouseEnter.replaceAll(
+                              '"',
+                              "'"
+                          )}"`
+                        : ""
+                }${
+                    props.node.onMouseLeave
+                        ? ` onmouseleave="${props.node.onMouseLeave.replaceAll(
+                              '"',
+                              "'"
+                          )}"`
+                        : ""
+                }${
+                    props.node.onKeyPress
+                        ? ` onkeypress="${props.node.onKeyPress.replaceAll(
+                              '"',
+                              "'"
+                          )}"`
+                        : ""
+                }>${RenderToString(props.children)}</div>`,
+            }}
+        />
+    );
+}
+
+/**
  * @function PageNode
  *
  * @export
@@ -272,25 +323,29 @@ export function PageNode(props: {
 
     // return page
     return (
-        <div
-            id={props.node.ID || crypto.randomUUID()}
-            class={`component builder:page ${props.node.ClassString || ""}`}
-            style={{
-                "--AlignX": props.node.AlignX || "center",
-                "--AlignY": props.node.AlignY || "center",
-                "--Spacing": props.node.Spacing ? `${props.node.Spacing}px` : "",
-            }}
-            data-component={props.node.Type}
-            data-edit={props.node.EditMode}
-        >
-            {props.children}
+        <EventZone node={props.node}>
+            <div
+                id={props.node.ID || crypto.randomUUID()}
+                class={`component builder:page ${props.node.ClassString || ""}`}
+                style={{
+                    "--AlignX": props.node.AlignX || "center",
+                    "--AlignY": props.node.AlignY || "center",
+                    "--Spacing": props.node.Spacing ? `${props.node.Spacing}px` : "",
+                }}
+                data-component={props.node.Type}
+                data-edit={props.node.EditMode}
+            >
+                {props.children}
 
-            <style
-                // the StyleString on pages can change more than just the page element,
-                // so it's within its own style element... instead of just the attribute!
-                dangerouslySetInnerHTML={{ __html: props.node.StyleString || "" }}
-            />
-        </div>
+                <style
+                    // the StyleString on pages can change more than just the page element,
+                    // so it's within its own style element... instead of just the attribute!
+                    dangerouslySetInnerHTML={{
+                        __html: props.node.StyleString || "",
+                    }}
+                />
+            </div>
+        </EventZone>
     );
 }
 
@@ -314,33 +369,36 @@ export function CardNode(props: {
             fornode={props.node}
             fordocument={props.document}
         >
-            <div
-                id={props.node.ID}
-                className={`component builder:card ${props.node.ClassString || ""}`}
-                style={{
-                    "--Background": props.node.Background,
-                    "--Width": props.node.Width
-                        ? `${props.node.Width}px`
-                        : undefined,
-                    "--Padding": props.node.Padding
-                        ? `${props.node.Padding}rem`
-                        : undefined,
-                    "--Display": props.node.Display || undefined,
-                    "--JustifyContent": props.node.JustifyContent || undefined,
-                    "--AlignItems": props.node.AlignItems || undefined,
-                    "--Direction": props.node.Direction || undefined,
-                    "--Gap": props.node.Gap ? `${props.node.Gap}px` : undefined,
-                    ...(props.node.StyleString
-                        ? parser.ParseStyleString(props.node.StyleString)
-                        : {}),
-                }}
-                data-component={props.node.Type}
-                data-edit={props.node.EditMode}
-                draggable={props.node.EditMode}
-                onClick={props.node.Events && props.node.Events.click}
-            >
-                {props.children}
-            </div>
+            <EventZone node={props.node}>
+                <div
+                    id={props.node.ID}
+                    className={`component builder:card ${
+                        props.node.ClassString || ""
+                    }`}
+                    style={{
+                        "--Background": props.node.Background,
+                        "--Width": props.node.Width
+                            ? `${props.node.Width}px`
+                            : undefined,
+                        "--Padding": props.node.Padding
+                            ? `${props.node.Padding}rem`
+                            : undefined,
+                        "--Display": props.node.Display || undefined,
+                        "--JustifyContent": props.node.JustifyContent || undefined,
+                        "--AlignItems": props.node.AlignItems || undefined,
+                        "--Direction": props.node.Direction || undefined,
+                        "--Gap": props.node.Gap ? `${props.node.Gap}px` : undefined,
+                        ...(props.node.StyleString
+                            ? parser.ParseStyleString(props.node.StyleString)
+                            : {}),
+                    }}
+                    data-component={props.node.Type}
+                    data-edit={props.node.EditMode}
+                    draggable={props.node.EditMode}
+                >
+                    {props.children}
+                </div>
+            </EventZone>
         </DragZones>
     );
 }
@@ -365,41 +423,45 @@ export function TextNode(props: {
             fornode={props.node}
             fordocument={props.document}
         >
-            <p
-                id={props.node.ID}
-                class={`component builder:text ${props.node.ClassString || ""}`}
-                style={{
-                    "--Size": props.node.Size ? `${props.node.Size}px` : undefined,
-                    "--Weight": props.node.Weight || undefined,
-                    "--LineSpacing": props.node.LineSpacing || undefined,
-                    "--LetterSpacing": props.node.LetterSpacing
-                        ? `${props.node.LetterSpacing}px`
-                        : undefined,
-                    "--Margins": props.node.Margins
-                        ? `${props.node.Margins}rem`
-                        : undefined,
-                    "--Padding": props.node.Padding
-                        ? `${props.node.Padding}rem`
-                        : undefined,
-                    "--BorderRadius": props.node.BorderRadius
-                        ? `${props.node.BorderRadius}px`
-                        : undefined,
-                    "--Alignment": props.node.Alignment || undefined,
-                    "--Background": props.node.Background || undefined,
-                    "--Color": props.node.Color || undefined,
-                    "--Width": props.node.Width || undefined,
-                    ...(props.node.StyleString
-                        ? parser.ParseStyleString(props.node.StyleString)
-                        : {}),
-                }}
-                dangerouslySetInnerHTML={{
-                    // set content, supports markdown!
-                    __html: ParseMarkdownSync(props.node.Content),
-                }}
-                data-component={props.node.Type}
-                data-edit={props.node.EditMode}
-                draggable={props.node.EditMode}
-            />
+            <EventZone node={props.node}>
+                <p
+                    id={props.node.ID}
+                    class={`component builder:text ${props.node.ClassString || ""}`}
+                    style={{
+                        "--Size": props.node.Size
+                            ? `${props.node.Size}px`
+                            : undefined,
+                        "--Weight": props.node.Weight || undefined,
+                        "--LineSpacing": props.node.LineSpacing || undefined,
+                        "--LetterSpacing": props.node.LetterSpacing
+                            ? `${props.node.LetterSpacing}px`
+                            : undefined,
+                        "--Margins": props.node.Margins
+                            ? `${props.node.Margins}rem`
+                            : undefined,
+                        "--Padding": props.node.Padding
+                            ? `${props.node.Padding}rem`
+                            : undefined,
+                        "--BorderRadius": props.node.BorderRadius
+                            ? `${props.node.BorderRadius}px`
+                            : undefined,
+                        "--Alignment": props.node.Alignment || undefined,
+                        "--Background": props.node.Background || undefined,
+                        "--Color": props.node.Color || undefined,
+                        "--Width": props.node.Width || undefined,
+                        ...(props.node.StyleString
+                            ? parser.ParseStyleString(props.node.StyleString)
+                            : {}),
+                    }}
+                    dangerouslySetInnerHTML={{
+                        // set content, supports markdown!
+                        __html: ParseMarkdownSync(props.node.Content),
+                    }}
+                    data-component={props.node.Type}
+                    data-edit={props.node.EditMode}
+                    draggable={props.node.EditMode}
+                />
+            </EventZone>
         </DragZones>
     );
 }
@@ -424,21 +486,23 @@ export function ImageNode(props: {
             fornode={props.node}
             fordocument={props.document}
         >
-            <img
-                id={props.node.ID || crypto.randomUUID()}
-                class={`component builder:image ${props.node.ClassString || ""}`}
-                src={props.node.Source}
-                alt={props.node.Alt}
-                title={props.node.Alt}
-                data-component={props.node.Type}
-                data-edit={props.node.EditMode}
-                style={{
-                    ...(props.node.StyleString
-                        ? parser.ParseStyleString(props.node.StyleString)
-                        : {}),
-                }}
-                draggable={props.node.EditMode}
-            />
+            <EventZone node={props.node}>
+                <img
+                    id={props.node.ID || crypto.randomUUID()}
+                    class={`component builder:image ${props.node.ClassString || ""}`}
+                    src={props.node.Source}
+                    alt={props.node.Alt}
+                    title={props.node.Alt}
+                    data-component={props.node.Type}
+                    data-edit={props.node.EditMode}
+                    style={{
+                        ...(props.node.StyleString
+                            ? parser.ParseStyleString(props.node.StyleString)
+                            : {}),
+                    }}
+                    draggable={props.node.EditMode}
+                />
+            </EventZone>
         </DragZones>
     );
 }

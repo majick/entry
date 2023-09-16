@@ -148,9 +148,7 @@ export function RenderSidebar(props?: { Page: string }) {
 
     // render
     return render(
-        <>
-            <Sidebar Page={props !== undefined ? props.Page : undefined} />
-        </>,
+        <Sidebar Page={props !== undefined ? props.Page : undefined} />,
         document.getElementById("builder:sidebar")!
     );
 }

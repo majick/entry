@@ -65,6 +65,9 @@ export function QuickInput(props: {
                         ""
                     }
                     onBlur={(event) => {
+                        if ((event.target as HTMLInputElement).value === "\n")
+                            return;
+
                         (Selected as { [key: string]: any })[props.property] = (
                             event.target as HTMLInputElement
                         ).value;
@@ -87,6 +90,9 @@ export function QuickInput(props: {
                             (Selected as { [key: string]: any })[props.property]
                         }
                         onBlur={(event) => {
+                            if ((event.target as HTMLInputElement).value === "\n")
+                                return;
+
                             (Selected as { [key: string]: any })[props.property] = (
                                 event.target as HTMLInputElement
                             ).value;
@@ -626,7 +632,7 @@ export default function Sidebar(props: { Page?: string }): any {
                             name="CSS Style String"
                             property="StyleString"
                             type="textarea"
-                            value={(Selected.StyleString || "").replaceAll(
+                            value={(Selected.StyleString || "\n").replaceAll(
                                 Selected.Type !== "Page"
                                     ? // don't preserve whitespace on components that aren't pages
                                       /\;\s*(?!\n)/g
@@ -634,6 +640,43 @@ export default function Sidebar(props: { Page?: string }): any {
                                 ";\n"
                             )}
                         />
+
+                        {/* events (not supported on some elements!!) */}
+                        {Selected.Type !== "Embed" && Selected.Type !== "Source" && (
+                            <details class={"option"}>
+                                <summary>Events</summary>
+
+                                <div class={"details-flex-content-list-box"}>
+                                    <QuickInput
+                                        name="on:click"
+                                        property={"onClick"}
+                                        value={Selected.onClick || "\n"}
+                                        type="textarea"
+                                    />
+
+                                    <QuickInput
+                                        name="on:mouseenter"
+                                        property={"onMouseEnter"}
+                                        value={Selected.onMouseEnter || "\n"}
+                                        type="textarea"
+                                    />
+
+                                    <QuickInput
+                                        name="on:mouseleave"
+                                        property={"onMouseLeave"}
+                                        value={Selected.onMouseLeave || "\n"}
+                                        type="textarea"
+                                    />
+
+                                    <QuickInput
+                                        name="on:keypress"
+                                        property={"onKeyPress"}
+                                        value={Selected.onKeyPress || "\n"}
+                                        type="textarea"
+                                    />
+                                </div>
+                            </details>
+                        )}
 
                         {/* import/export */}
                         {!(search.get("edit") || "").startsWith("components/") && (

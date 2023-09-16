@@ -498,7 +498,7 @@ ol > li {
     margin-top: 0.25rem;
 }
 
-p:not(.mdnote p):not(.builder\:page p),
+p:not(.mdnote p):not(.builder\:text),
 pre,
 table,
 ul,
@@ -1309,12 +1309,22 @@ br:not(.cm-line br) {
     border-radius: 0.4rem !important;
 }
 
+.builder\:sidebar details[open] .details-flex-content-list-box {
+    outline: dashed 1px var(--background-surface2);
+    border-radius: 0.4rem;
+}
+
 .option {
     flex-direction: column;
 }
 
+.builder\:event-zone {
+    display: contents;
+}
+
 .builder\:drag-element {
     position: relative;
+    max-width: 100%;
 }
 
 .builder\:drag-zone {
