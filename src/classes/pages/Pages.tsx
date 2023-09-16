@@ -471,7 +471,11 @@ export class GetPasteFromURL implements Endpoint {
                                         result.Comments !== undefined &&
                                         !result.Content.includes(
                                             "<% disable comments %>"
-                                        ) && (
+                                        ) &&
+                                        (!result.Metadata ||
+                                            !result.Metadata.Comments ||
+                                            result.Metadata.Comments.Enabled !==
+                                                false) && (
                                             <a
                                                 class={"button"}
                                                 href={`/paste/comments/${result.CustomURL}`}
@@ -495,7 +499,11 @@ export class GetPasteFromURL implements Endpoint {
                                         EntryDB.config.log.events.includes(
                                             "report"
                                         ) &&
-                                        !result.HostServer && (
+                                        !result.HostServer &&
+                                        (!result.Metadata ||
+                                            !result.Metadata.Comments ||
+                                            result.Metadata.Comments
+                                                .ReportsEnabled !== false) && (
                                             <a
                                                 class={"button"}
                                                 href={`/?ReportOn=${result.CustomURL}`}
@@ -622,7 +630,9 @@ export class GetPasteFromURL implements Endpoint {
                                             {result.Metadata.Owner &&
                                                 !result.Content.includes(
                                                     "<% disable show_owner %>"
-                                                ) && (
+                                                ) &&
+                                                result.Metadata.ShowOwnerEnabled !==
+                                                    false && (
                                                     <span>
                                                         Owner:{" "}
                                                         <a
@@ -1154,7 +1164,12 @@ export class PasteCommentsPage implements Endpoint {
         if (result.HostServer) return new _404Page().request(request);
 
         // return 404 if page does not allow comments
-        if (result.Content.includes("<% disable comments %>"))
+        if (
+            result.Content.includes("<% disable comments %>") ||
+            (result.Metadata &&
+                result.Metadata.Comments &&
+                result.Metadata.Comments.Enabled !== false)
+        )
             return new _404Page().request(request);
 
         // get offset

@@ -5,6 +5,7 @@ export default function Checkbox(props: {
     disabled?: boolean;
     label?: boolean;
     secondary?: boolean;
+    changed?: (event: Event<HTMLElement>) => void;
 }) {
     return (
         <label
@@ -16,6 +17,7 @@ export default function Checkbox(props: {
             style={{
                 width: props.label ? "fit-content" : "2.5rem",
             }}
+            onChange={props.changed}
         >
             <input
                 type="checkbox"

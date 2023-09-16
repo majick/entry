@@ -18,7 +18,6 @@ import {
 } from "../Builder";
 
 import { Node } from "../schema";
-import Toolbox from "./Toolbox";
 import parser from "../parser";
 
 /**

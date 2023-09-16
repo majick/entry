@@ -49,9 +49,12 @@ export type Paste = {
 export type PasteMetadata = {
     Version: 1;
     Owner: string; // the owner of the paste
-    // comments stuff
+    ShowOwnerEnabled?: boolean;
+    // comments/reports stuff
     Comments?: {
-        IsCommentOn: string;
+        IsCommentOn?: string;
+        Enabled: boolean;
+        ReportsEnabled?: boolean;
     };
 };
 
@@ -749,6 +752,9 @@ export default class EntryDB {
         const metadata: PasteMetadata = {
             Version: 1,
             Owner: PasteInfo.Associated || "",
+            Comments: {
+                Enabled: true,
+            },
         };
 
         // if paste is a comment, create the respective log entry and set groupname to "comments"
@@ -763,6 +769,7 @@ export default class EntryDB {
             // update metadata
             metadata.Comments = {
                 IsCommentOn: PasteInfo.CommentOn,
+                Enabled: true,
             };
 
             // create log

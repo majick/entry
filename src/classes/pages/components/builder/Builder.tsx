@@ -810,7 +810,7 @@ export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) 
     function RenderCurrentPage() {
         return render(
             parser.ParsePage(doc.Pages[CurrentPage], _EditMode),
-            document.getElementById("_doc")!
+            document.getElementById("_doc")!,
         );
     }
 

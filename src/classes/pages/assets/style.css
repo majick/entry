@@ -132,6 +132,12 @@
     scroll-behavior: smooth;
 }
 
+strong,
+em,
+a {
+    font-family: inherit;
+}
+
 body,
 html {
     margin: 0;
@@ -278,7 +284,8 @@ button:disabled,
     opacity: 50%;
 }
 
-button:focus, .button:focus {
+button:focus,
+.button:focus {
     outline: solid 2px var(--blue);
 }
 

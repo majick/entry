@@ -4,15 +4,28 @@
  * @license MIT
  */
 
-import type { PasteMetadata } from "../../../db/EntryDB";
 import BaseParser from "../../../db/helpers/BaseParser";
-
 import { render } from "preact";
+import Checkbox from "../form/Checkbox";
 
 export default function Editor(_metadata: string, id: string) {
     const metadata: { [key: string]: any } = {
         root: JSON.parse(_metadata),
     };
+
+    // fill missing values from schema
+    // ...comments
+    if (!metadata.root.Comments) metadata.root.Comments = { Enabled: true };
+
+    if (metadata.root.Comments.Enabled === undefined)
+        metadata.root.Comments.Enabled = true;
+
+    if (metadata.root.Comments.ReportsEnabled === undefined)
+        metadata.root.Comments.ReportsEnabled = true;
+
+    // ...extras
+    if (metadata.root.ShowOwnerEnabled === undefined)
+        metadata.root.ShowOwnerEnabled = true;
 
     // ...
     function UpdateMetadata() {
@@ -30,53 +43,112 @@ export default function Editor(_metadata: string, id: string) {
             }
 
             // push to inputs
-            Inputs.push(
-                <div
-                    className="card"
-                    style={{
-                        background: "var(--background-surface)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                    }}
-                >
-                    <label htmlFor={data[0]}>
-                        <b>
-                            {(nested || ["root"]).join(".")}.{data[0]}
-                        </b>
-                    </label>
+            const ValueType = typeof data[1];
 
-                    <input
-                        type={typeof data[1] === "string" ? "text" : "number"}
-                        name={data[0]}
-                        id={data[0]}
-                        value={data[1]}
-                        onBlur={(event: Event<HTMLInputElement>) => {
-                            // update value (handle json nesting too)
-                            let prev = metadata;
-
-                            for (const _key of nested || ["root"]) {
-                                prev = prev[_key]; // set new previous
-                                if (prev === undefined) continue; // validate
-
-                                // update value
-                                prev[data[0]] = (
-                                    event.target as HTMLInputElement
-                                ).value;
-                            }
-
-                            // regenerate metadata
-                            UpdateMetadata();
-                        }}
+            if (ValueType !== "boolean") {
+                Inputs.push(
+                    <div
+                        className="card"
                         style={{
-                            width: "20rem",
-                            maxWidth: "100%",
+                            background: "var(--background-surface)",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            gap: "0.5rem",
                         }}
-                    />
-                </div>
-            );
+                    >
+                        <label htmlFor={data[0]}>
+                            <b>
+                                {(nested || ["root"]).join(".")}.{data[0]}
+                            </b>
+                        </label>
+
+                        <input
+                            type={ValueType === "string" ? "text" : "number"}
+                            name={data[0]}
+                            id={data[0]}
+                            value={data[1]}
+                            onBlur={(event: Event<HTMLInputElement>) => {
+                                // update value (handle json nesting too)
+                                let prev = metadata;
+
+                                for (const _key of nested || ["root"]) {
+                                    prev = prev[_key]; // set new previous
+
+                                    // validate
+                                    if (
+                                        prev === undefined ||
+                                        prev[data[0]] === undefined
+                                    )
+                                        continue;
+
+                                    // update value
+                                    prev[data[0]] = (
+                                        event.target as HTMLInputElement
+                                    ).value;
+                                }
+
+                                // regenerate metadata
+                                UpdateMetadata();
+                            }}
+                            style={{
+                                width: "20rem",
+                                maxWidth: "100%",
+                            }}
+                        />
+                    </div>
+                );
+            } else {
+                Inputs.push(
+                    <div
+                        className="card"
+                        style={{
+                            background: "var(--background-surface)",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            flexWrap: "wrap",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                        }}
+                    >
+                        <label htmlFor={data[0]}>
+                            <b>
+                                {(nested || ["root"]).join(".")}.{data[0]}
+                            </b>
+                        </label>
+
+                        <Checkbox
+                            name={data[0]}
+                            title={`${(nested || ["root"]).join(".")}.${data[0]}`}
+                            checked={data[1]}
+                            changed={(event: Event<HTMLInputElement>) => {
+                                // update value (handle json nesting too)
+                                let prev = metadata;
+
+                                // validate
+                                for (const _key of nested || ["root"]) {
+                                    prev = prev[_key]; // set new previous
+
+                                    if (
+                                        prev === undefined ||
+                                        prev[data[0]] === undefined
+                                    )
+                                        continue;
+
+                                    // update value
+                                    prev[data[0]] = (
+                                        event.target as HTMLInputElement
+                                    ).checked;
+                                }
+
+                                // regenerate metadata
+                                UpdateMetadata();
+                            }}
+                        />
+                    </div>
+                );
+            }
         }
     }
 
@@ -107,7 +179,7 @@ export default function Editor(_metadata: string, id: string) {
                 <b>Key</b>
                 <span>Value</span>
             </div>
-            
+
             {Inputs}
         </div>,
         document.getElementById(id) as HTMLElement

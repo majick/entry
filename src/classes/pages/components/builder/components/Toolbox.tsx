@@ -8,6 +8,7 @@ import type { Paste } from "../../../../db/EntryDB";
 import Modal from "../../site/modals/Modal";
 
 import { CurrentPage, Document, Selected, Update } from "../Builder";
+import BaseParser from "../../../../db/helpers/BaseParser";
 import parser from "../parser";
 
 /**
@@ -49,7 +50,7 @@ export function SaveModal(): any {
                             encodeURIComponent(
                                 `_builder.component:${JSON.stringify({
                                     Name: target.ComponentName.value,
-                                    Component: parser.stringify(Selected),
+                                    Component: BaseParser.stringify(Selected),
                                 })}`
                             ),
                         EditPassword: target.EditCode.value,
@@ -167,7 +168,7 @@ export function Browser(): any {
                                     ).text();
 
                                     // parse response
-                                    const parsed = parser.parse(
+                                    const parsed = BaseParser.parse(
                                         JSON.parse(
                                             res.split("_builder.component:")[1]
                                         ).Component
