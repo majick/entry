@@ -62,13 +62,21 @@ export default class Builder implements Endpoint {
             // get paste
             const result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
 
-            // make sure paste exists AND is a builder paste
+            // make sure paste exists
+            if (!result) return new _404Page().request(request);
+
+            // if paste isn't a builder paste, convert it
             if (
-                !result ||
-                (!result.Content.startsWith("_builder:") &&
-                    result.GroupName !== "components")
-            )
-                return new _404Page().request(request);
+                !result.Content.startsWith("_builder:") &&
+                result.GroupName !== "components"
+            ) {
+                Document.Pages[0].Children[0] = {
+                    Type: "Text",
+                    Content: result.Content,
+                };
+
+                result.Content = `_builder:${parser.stringify(Document)}`;
+            }
 
             // convert component to page
             if (result.GroupName === "components") {

@@ -874,6 +874,12 @@ export class DeleteComment implements Endpoint {
                 "Cannot delete comments on a paste you're not associated with! Please change your paste association."
             );
 
+        // make sure paste isn't locked
+        if (paste.Metadata && paste.Metadata.Locked)
+            return new Response(
+                "Cannot delete comments while your paste is locked."
+            );
+
         // get comment log
         const CommentLog = (
             await EntryDB.Logs.QueryLogs(

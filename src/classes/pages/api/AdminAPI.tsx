@@ -9,6 +9,8 @@ import Honeybee, { Endpoint } from "honeybee";
 import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../../db/helpers/Hash";
 import _404Page from "../components/404";
+
+import SQL from "../../db/helpers/SQL";
 import EntryDB from "../../db/EntryDB";
 
 import { Login } from "../Admin";
@@ -374,26 +376,15 @@ export class APIEditMetadata implements Endpoint {
         paste.Content += `_metadata:${body.Metadata}`;
 
         // update paste
-        const result = await db.EditPaste(
-            {
-                Content: "",
-                EditPassword: body.AdminPassword,
-                CustomURL: paste.CustomURL!,
-                PubDate: 0,
-                EditDate: 0,
-            },
-            {
-                Content: paste.Content!,
-                EditPassword: body.AdminPasswrdo,
-                CustomURL: paste.CustomURL!,
-                PubDate: (paste || { PubDate: 0 }).PubDate!,
-                EditDate: paste.EditDate!,
-            },
-            true
-        );
+        await SQL.QueryOBJ({
+            db: db.db,
+            query: "UPDATE Pastes SET (Content) = (?) WHERE CustomURL = ?",
+            params: [paste.Content, paste.CustomURL],
+            use: "Prepare",
+        });
 
         // return
-        return new Response(JSON.stringify(result), {
+        return new Response(JSON.stringify(paste), {
             headers: {
                 ...DefaultHeaders,
                 "Content-Type": "application/json",

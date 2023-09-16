@@ -908,10 +908,18 @@ export default class EntryDB {
         // ...everything after this assumes paste is NOT from another server, as the
         // logic for the paste being from another server SHOULD have been handled above!
 
+        // we're not allowing users to change ViewPasswords currently
+
+        // make sure a paste exists
+        const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
+        if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
+
         // hash passwords
         PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
-        NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
-        // we're not allowing users to change ViewPasswords currently
+
+        if (NewPasteInfo.EditPassword)
+            NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
+        else NewPasteInfo.EditPassword = CreateHash(paste.EditPassword as string);
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
@@ -929,10 +937,6 @@ export default class EntryDB {
                 `Custom URL does not pass test: ${EntryDB.URLRegex}`,
                 PasteInfo,
             ];
-
-        // make sure a paste exists
-        const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
-        if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
 
         // make sure paste isn't locked
         if (paste.Metadata && paste.Metadata.Locked === true && Force === false)
