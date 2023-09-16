@@ -600,6 +600,16 @@ export default function Sidebar(props: { Page?: string }): any {
                                         type="input"
                                     />
                                 </>
+                            )) ||
+                            (Selected.Type === "Source" && (
+                                <>
+                                    {/* source element controls */}
+                                    <QuickInput
+                                        name="HTML Content"
+                                        property="Content"
+                                        type="textarea"
+                                    />
+                                </>
                             ))}
 
                         {/* inputs everything supports!! */}

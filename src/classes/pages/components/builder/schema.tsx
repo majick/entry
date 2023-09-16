@@ -81,8 +81,19 @@ export interface EmbedNode extends BaseNode {
     Alt: string;
 }
 
+export interface SourceNode extends BaseNode {
+    Type: "Source";
+    Content: string;
+}
+
 // ...base type
-export type Node = PageNode | CardNode | TextNode | ImageNode | EmbedNode;
+export type Node =
+    | PageNode
+    | CardNode
+    | TextNode
+    | ImageNode
+    | EmbedNode
+    | SourceNode;
 
 export type BuilderDocument = {
     Pages: PageNode[];
@@ -469,6 +480,39 @@ export function EmbedNode(props: {
     );
 }
 
+/**
+ * @function SourceNode
+ *
+ * @export
+ * @param {{ node: SourceNode; document: Node[]; children: any }} props
+ * @return {*}
+ */
+export function SourceNode(props: {
+    node: SourceNode;
+    document: Node[];
+    children: any;
+}): any {
+    if (!props.node.ID) props.node.ID = crypto.randomUUID();
+
+    return (
+        <DragZones
+            visible={props.node.EditMode}
+            fornode={props.node}
+            fordocument={props.document}
+        >
+            <div
+                id={props.node.ID}
+                class={`component builder:source ${props.node.ClassString || ""}`}
+                style={props.node.StyleString}
+                data-component={props.node.Type}
+                data-edit={props.node.EditMode}
+                draggable={props.node.EditMode}
+                dangerouslySetInnerHTML={{ __html: props.node.Content }}
+            />
+        </DragZones>
+    );
+}
+
 // default export
 export default {
     SetDrag,
@@ -478,4 +522,5 @@ export default {
     TextNode,
     ImageNode,
     EmbedNode,
+    SourceNode,
 };

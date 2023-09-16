@@ -994,6 +994,19 @@ export class PasteLogout implements Endpoint {
         if (!paste) return new _404Page().request(request);
         if (paste.HostServer) return new _404Page().request(request); // can't post comments as a paste from another server... right now!
 
+        // make sure paste isn't locked
+        if (paste.Metadata && paste.Metadata.Locked === true)
+            return new Response(
+                "Cannot remove association with this paste while it is locked.",
+                {
+                    status: 302,
+                    headers: {
+                        Location:
+                            "/?err=Cannot remove association with this paste while it is locked.",
+                    },
+                }
+            );
+
         // remove association from session
         await GetAssociation(request, false, "", true);
 

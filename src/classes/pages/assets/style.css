@@ -1303,6 +1303,12 @@ br:not(.cm-line br) {
     gap: 0.4rem;
 }
 
+.builder\:sidebar input,
+.builder\:sidebar textarea,
+.builder\:sidebar select {
+    border-radius: 0.4rem !important;
+}
+
 .option {
     flex-direction: column;
 }

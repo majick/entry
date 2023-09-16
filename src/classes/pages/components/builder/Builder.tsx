@@ -76,6 +76,12 @@ export function AddComponent(Type: string) {
             Alt: "blank embed",
             StyleString: "width: 100%; height: initial;",
         });
+    else if (Type === "Source")
+        Document.Pages[CurrentPage].Children.push({
+            Type: "Source",
+            Content: "<span>Hello, world!</span>",
+            StyleString: "width: max-content; height: max-content;",
+        });
 
     // update
     return (NeedsUpdate = true);
@@ -430,6 +436,15 @@ function RenderPage() {
                             }}
                         >
                             Embed
+                        </button>
+
+                        <button
+                            className="border"
+                            onClick={() => {
+                                AddComponent("Source");
+                            }}
+                        >
+                            Source
                         </button>
                     </form>
 
@@ -810,7 +825,7 @@ export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) 
     function RenderCurrentPage() {
         return render(
             parser.ParsePage(doc.Pages[CurrentPage], _EditMode),
-            document.getElementById("_doc")!,
+            document.getElementById("_doc")!
         );
     }
 

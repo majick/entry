@@ -74,6 +74,12 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                             {children}
                         </schema.EmbedNode>
                     );
+                else if (node.Type === "Source")
+                    return (
+                        <schema.SourceNode node={node} document={nodes}>
+                            {children}
+                        </schema.SourceNode>
+                    );
             })}
         </>
     );
