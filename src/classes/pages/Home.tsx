@@ -1043,9 +1043,7 @@ export default class Home implements Endpoint {
                     <script
                         type="module"
                         dangerouslySetInnerHTML={{
-                            __html: `import CreateEditor from "/Editor.js?v=${
-                                pack.version
-                            }";
+                            __html: `import CreateEditor from "/Editor.js";
                             CreateEditor("editor-tab-text", \`${encodeURIComponent(
                                 (paste || { Content: "" })!.Content!
                             )}\`);`,

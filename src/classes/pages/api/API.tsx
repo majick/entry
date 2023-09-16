@@ -781,7 +781,7 @@ export class GetPasteHTML implements Endpoint {
                 <script
                     type="module"
                     dangerouslySetInnerHTML={{
-                        __html: `import fix from "/ClientFixMarkdown.js?v=${pack.version}"; fix();`,
+                        __html: `import fix from "/ClientFixMarkdown.js"; fix();`,
                     }}
                 />
             </>,

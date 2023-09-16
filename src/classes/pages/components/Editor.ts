@@ -427,6 +427,10 @@ export default function CreateEditor(ElementID: string, content: string) {
                 false
             )
         );
+
+        // update contentInput with initial content
+        (document.getElementById("contentInput") as HTMLInputElement).value =
+            content; // encoded so we can send it through form
     })();
 
     // add attributes
