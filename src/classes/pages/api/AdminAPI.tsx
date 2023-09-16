@@ -388,7 +388,8 @@ export class APIEditMetadata implements Endpoint {
                 CustomURL: paste.CustomURL!,
                 PubDate: (paste || { PubDate: 0 }).PubDate!,
                 EditDate: paste.EditDate!,
-            }
+            },
+            true
         );
 
         // return

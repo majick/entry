@@ -49,6 +49,7 @@ export type Paste = {
 export type PasteMetadata = {
     Version: 1;
     Owner: string; // the owner of the paste
+    Locked?: boolean; // locked pastes cannot be edited, and the paste cannot be used as an association
     ShowOwnerEnabled?: boolean;
     // comments/reports stuff
     Comments?: {
@@ -757,6 +758,18 @@ export default class EntryDB {
             },
         };
 
+        // get owner paste (if it exists)
+        if (PasteInfo.Associated) {
+            const Associated = await this.GetPasteFromURL(PasteInfo.Associated);
+
+            if (Associated && Associated.Metadata && Associated.Metadata.Locked)
+                return [
+                    false,
+                    "This paste is locked and cannot be used as an association at this time.",
+                    PasteInfo,
+                ];
+        }
+
         // if paste is a comment, create the respective log entry and set groupname to "comments"
         if (PasteInfo.CommentOn) {
             // set group
@@ -843,12 +856,14 @@ export default class EntryDB {
      *
      * @param {Paste} PasteInfo
      * @param {Paste} NewPasteInfo
+     * @param {boolean} Force
      * @return {Promise<[boolean, string, Paste]>}
      * @memberof EntryDB
      */
     public async EditPaste(
         PasteInfo: Paste,
-        NewPasteInfo: Paste
+        NewPasteInfo: Paste,
+        Force: boolean = false
     ): Promise<[boolean, string, Paste]> {
         // check if paste is from another server
         const server = PasteInfo.CustomURL.split(":")[1];
@@ -918,6 +933,14 @@ export default class EntryDB {
         // make sure a paste exists
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
         if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
+
+        // make sure paste isn't locked
+        if (paste.Metadata && paste.Metadata.Locked === true && Force === false)
+            return [
+                false,
+                "This paste has been locked by a server administrator.",
+                NewPasteInfo,
+            ];
 
         // validate password
         // don't use NewPasteInfo to get the password because NewPasteInfo will automatically have the old password
@@ -1023,8 +1046,6 @@ export default class EntryDB {
         if (server) {
             // we aren't checking for admin password here or anything because it shouldn't
             // be provided because the admin panel cannot show federated pastes
-            // TODO: i do think it would be cool to allow the server admin to see an analytics panel
-            //       with the top viewed pastes (maybe)
 
             // send request
             const [isBad, record] = await this.ForwardRequest(
@@ -1058,6 +1079,14 @@ export default class EntryDB {
 
         // make sure a paste exists
         if (!paste) return [false, "This paste does not exist!", PasteInfo];
+
+        // make sure paste isn't locked
+        if (paste.Metadata && paste.Metadata.Locked === true)
+            return [
+                false,
+                "This paste has been locked by a server administrator.",
+                PasteInfo,
+            ];
 
         // make sure paste is not "v" (version paste)
         if (paste.CustomURL === "v")

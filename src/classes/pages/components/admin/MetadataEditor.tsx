@@ -27,6 +27,8 @@ export default function Editor(_metadata: string, id: string) {
     if (metadata.root.ShowOwnerEnabled === undefined)
         metadata.root.ShowOwnerEnabled = true;
 
+    if (metadata.root.Locked === undefined) metadata.root.Locked = false;
+
     // ...
     function UpdateMetadata() {
         return ((document.getElementById("Metadata") as HTMLInputElement).value =
