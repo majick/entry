@@ -217,6 +217,7 @@ const config: HoneybeeConfig = {
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
+        "/paste/settings": { Page: Pages.UserSettings },
         "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/": {

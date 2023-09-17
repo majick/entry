@@ -1976,6 +1976,98 @@ export async function ComponentView(
     );
 }
 
+/**
+ * @export
+ * @class UserSettings
+ * @implements {Endpoint}
+ */
+export class UserSettings implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        return new Response(
+            Renderer.Render(
+                <>
+                    <main>
+                        <div
+                            style={{
+                                padding: "0.5rem",
+                            }}
+                        >
+                            <div
+                                className="builder\:card"
+                                style={{
+                                    width: "100%",
+                                    borderRadius: "0.4rem",
+                                }}
+                            >
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        gap: "0.5rem",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        margin: "2rem 0 1rem 0",
+                                    }}
+                                >
+                                    <h4 class={"no-margin"}>User Settings</h4>
+                                    <a href={"javascript:window.history.back()"} class={"button secondary round"}>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Undo Symbol"}
+                                        >
+                                            <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                        </svg>
+                                        back
+                                    </a>
+                                </div>
+
+                                <hr />
+
+                                <div
+                                    id="_doc"
+                                    style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: "0.5rem",
+                                    }}
+                                >
+                                    <noscript>
+                                        Unable to render user settings options
+                                        without JavaScript enabled! The user settings
+                                        are rendered client-side using Preact, and
+                                        saved to the browser's localStorage.
+                                    </noscript>
+                                </div>
+                            </div>
+                        </div>
+
+                        <Footer />
+
+                        <script
+                            type={"module"}
+                            dangerouslySetInnerHTML={{
+                                __html: `import UserSettings from "/UserSettings.js";
+                                UserSettings("_doc");`,
+                            }}
+                        />
+                    </main>
+                </>,
+                <>
+                    <title>User Settings - {EntryDB.config.name}</title>
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     GetPasteFromURL,
@@ -1983,4 +2075,5 @@ export default {
     PastesSearch,
     PasteCommentsPage,
     ComponentView,
+    UserSettings,
 };

@@ -233,6 +233,10 @@ html.purple-theme {
 }
 ```
 
+#### User Settings
+
+Custom themes can cause contrast and accessibility issues. The settings button located in the footer allows users to toggle certain settings to improve their experience on the website.
+
 #### Special Elements
 
 You can customize the way your pastes are displayed using some custom elements.

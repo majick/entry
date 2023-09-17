@@ -6,6 +6,7 @@ export default function Checkbox(props: {
     label?: boolean;
     secondary?: boolean;
     changed?: (event: Event<HTMLElement>) => void;
+    round?: boolean;
 }) {
     return (
         <label
@@ -16,6 +17,7 @@ export default function Checkbox(props: {
             title={props.title || "Checkbox"}
             style={{
                 width: props.label ? "fit-content" : "2.5rem",
+                borderRadius: props.round ? "0.4rem" : "",
             }}
             onChange={props.changed}
         >

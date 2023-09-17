@@ -22,44 +22,63 @@ export function HandleCustomElements() {
     // handle style elements
     let style = "";
 
+    // ...make sure we can set theme
+    const CanSetCustomTheme =
+        window.localStorage.getItem("entry:user.ForceClientTheme") !== "true";
+
     // ...theme customization
-    const hue = document.querySelector("#editor-tab-preview hue") as HTMLElement;
-    const sat = document.querySelector("#editor-tab-preview sat") as HTMLElement;
-    const lit = document.querySelector("#editor-tab-preview lit") as HTMLElement;
+    if (CanSetCustomTheme) {
+        const hue = document.querySelector("#editor-tab-preview hue") as HTMLElement;
+        const sat = document.querySelector("#editor-tab-preview sat") as HTMLElement;
+        const lit = document.querySelector("#editor-tab-preview lit") as HTMLElement;
 
-    if (hue) style += `--base-hue: ${hue.innerText};`;
-    if (sat) style += `--base-sat: ${sat.innerText};`;
-    if (lit) style += `--base-lit: ${lit.innerText};`;
+        if (hue) style += `--base-hue: ${hue.innerText};`;
+        if (sat) style += `--base-sat: ${sat.innerText};`;
+        if (lit) style += `--base-lit: ${lit.innerText};`;
 
-    if (hue || sat || lit) (window as any).PASTE_USES_CUSTOM_THEME = true;
+        if (hue || sat || lit) (window as any).PASTE_USES_CUSTOM_THEME = true;
 
-    // ...set style attribute
-    document.documentElement.setAttribute("style", style);
+        // ...set style attribute
+        document.documentElement.setAttribute("style", style);
 
-    // handle class elements
-    const themes = document.querySelectorAll(
-        "#editor-tab-preview theme"
-    ) as any as HTMLElement[];
+        // handle class elements
+        const themes = document.querySelectorAll(
+            "#editor-tab-preview theme"
+        ) as any as HTMLElement[];
 
-    if (themes.length > 0) {
-        document.documentElement.classList.value = ""; // reset, we don't need to check for
-        //                                                light theme, dark will be removed by this
+        if (themes.length > 0) {
+            document.documentElement.classList.value = ""; // reset, we don't need to check for
+            //                                                light theme, dark will be removed by this
 
-        for (let theme of themes) {
-            if (theme.innerText === "dark")
-                document.documentElement.classList.add("dark-theme");
-            else if (theme.innerText === "purple")
-                document.documentElement.classList.add("purple-theme", "dark-theme");
-            else if (theme.innerText === "blue")
-                document.documentElement.classList.add("blue-theme", "dark-theme");
-            else if (theme.innerText === "pink")
-                document.documentElement.classList.add("pink-theme");
-            else if (theme.innerText === "green")
-                document.documentElement.classList.add("green-theme");
+            for (let theme of themes) {
+                if (theme.innerText === "dark")
+                    document.documentElement.classList.add("dark-theme");
+                else if (theme.innerText === "purple")
+                    document.documentElement.classList.add(
+                        "purple-theme",
+                        "dark-theme"
+                    );
+                else if (theme.innerText === "blue")
+                    document.documentElement.classList.add(
+                        "blue-theme",
+                        "dark-theme"
+                    );
+                else if (theme.innerText === "pink")
+                    document.documentElement.classList.add("pink-theme");
+                else if (theme.innerText === "green")
+                    document.documentElement.classList.add("green-theme");
+            }
+
+            (window as any).PASTE_USES_CUSTOM_THEME = true; // don't allow user to set their own theme when a custom theme is active!
         }
-
-        (window as any).PASTE_USES_CUSTOM_THEME = true; // don't allow user to set their own theme when a custom theme is active!
     }
+
+    // remove images
+    if (window.localStorage.getItem("entry:user.DisableImages") === "true")
+        for (const image of document.querySelectorAll(
+            "img"
+        ) as any as HTMLImageElement[])
+            image.remove();
 }
 
 /**
