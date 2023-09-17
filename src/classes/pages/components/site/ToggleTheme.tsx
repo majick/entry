@@ -32,22 +32,19 @@ export default function ToggleTheme() {
                         !window.localStorage.getItem("theme")
                     ) {
                         document.documentElement.classList.add("dark-theme");
+                        window.localStorage.setItem("theme", "dark");
                     } else if (
                         window.matchMedia("(prefers-color-scheme: light)").matches && 
                         !window.localStorage.getItem("theme")
                     ) {
                         document.documentElement.classList.remove("dark-theme");
+                        window.localStorage.setItem("theme", "light");
                     }
                     
                     /* restore theme */
                     else if (window.localStorage.getItem("theme")) {
                         const current = window.localStorage.getItem("theme");
-
-                        if (current === "dark") {
-                            document.documentElement.classList.add("dark-theme");
-                        } else {
-                            document.documentElement.classList.remove("dark-theme");
-                        }
+                        document.documentElement.className = \`\${current}-theme\`;
                     }`
                         .replaceAll("\n", "")
                         .replaceAll("    ", ""),

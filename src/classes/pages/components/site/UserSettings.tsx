@@ -18,13 +18,20 @@ export default function UserSettings(id: string): any {
     // build options
     const options: any[] = [];
 
-    function AddOption(label: string, key: string) {
+    function AddOption(
+        label: string,
+        key: string,
+        type: string = "checkbox",
+        selectOptions: Array<{ label: string; value: string }> = [],
+        refresh: boolean = false
+    ) {
         options.push(
             <div
                 class={"builder:card"}
                 style={{
                     display: "flex",
                     justifyContent: "space-between",
+                    gap: "0.4rem",
                     alignItems: "center",
                     background: "var(--background-surface)",
                     borderRadius: "0.4rem",
@@ -35,26 +42,94 @@ export default function UserSettings(id: string): any {
                     <b>{label}</b>
                 </label>
 
-                <Checkbox
-                    name={key}
-                    checked={window.localStorage.getItem(key) === "true"}
-                    round={true}
-                    changed={(event) => {
-                        const target = event.target as HTMLInputElement;
+                {(type === "checkbox" && (
+                    <Checkbox
+                        name={key}
+                        checked={window.localStorage.getItem(key) === "true"}
+                        round={true}
+                        changed={(event) => {
+                            const target = event.target as HTMLInputElement;
 
-                        window.localStorage.setItem(
-                            key,
-                            target.checked === true ? "true" : "false"
-                        );
-                    }}
-                />
+                            window.localStorage.setItem(
+                                key,
+                                target.checked === true ? "true" : "false"
+                            );
+                        }}
+                    />
+                )) ||
+                    (type === "select" && (
+                        <select
+                            name={key}
+                            id={key}
+                            class={"mobile-max round"}
+                            style={{
+                                width: "20rem",
+                            }}
+                            onChange={(event) => {
+                                const target = event.target as HTMLSelectElement;
+
+                                window.localStorage.setItem(
+                                    key,
+                                    target.selectedOptions[0].value as any
+                                );
+
+                                if (refresh) window.location.reload();
+                            }}
+                        >
+                            {selectOptions!.map((option) => (
+                                <option
+                                    value={option.value}
+                                    selected={
+                                        window.localStorage.getItem(key) ===
+                                        option.value
+                                    }
+                                >
+                                    {option.label}
+                                </option>
+                            ))}
+                        </select>
+                    ))}
             </div>
         );
     }
 
     // ...
-    AddOption("Force Client Theme", "entry:user.ForceClientTheme");
+    AddOption(
+        "Global Theme",
+        "theme",
+        "select",
+        [
+            {
+                label: "Light",
+                value: "light",
+            },
+            {
+                label: "Dark",
+                value: "dark",
+            },
+            {
+                label: "Purple",
+                value: "purple-theme dark",
+            },
+            {
+                label: "Pink",
+                value: "pink",
+            },
+            {
+                label: "Green",
+                value: "green",
+            },
+            {
+                label: "Blue",
+                value: "blue-theme dark",
+            },
+        ],
+        true
+    );
+
+    AddOption("Force Global Theme", "entry:user.ForceClientTheme");
     AddOption("Disable Images", "entry:user.DisableImages");
+    AddOption("Disable Animations", "entry:user.DisableAnimations");
     AddOption("Editor Hints", "entry:user.EditorHints");
 
     // render

@@ -73,12 +73,19 @@ export function HandleCustomElements() {
         }
     }
 
-    // remove images
+    // remove images (if needed)
     if (window.localStorage.getItem("entry:user.DisableImages") === "true")
         for (const image of document.querySelectorAll(
             "img"
         ) as any as HTMLImageElement[])
-            image.remove();
+            image.src = "about:blank"; // this will force just the alt text to show
+
+    // disable animations (if needed)
+    if (window.localStorage.getItem("entry:user.DisableAnimations") === "true")
+        for (const element of document.querySelectorAll(
+            ".anim"
+        ) as any as HTMLElement[])
+            element.style.animation = "";
 }
 
 /**

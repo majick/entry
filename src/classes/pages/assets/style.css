@@ -598,6 +598,12 @@ select {
         filter 0.15s;
 }
 
+input.round,
+textarea.round,
+select.round {
+    border-radius: 0.4rem !important;
+}
+
 input:invalid,
 textarea:invalid,
 select:invalid,
@@ -839,6 +845,10 @@ details summary {
     align-items: center;
 }
 
+details.secondary summary {
+    background: var(--background-surface);
+}
+
 details summary::before {
     content: "▸"; /* rip correctly aligned triangle (U+2BC8) */
     margin-right: 5px;
@@ -868,6 +878,11 @@ details[open] summary {
     box-shadow: inset 0 0 0 2px var(--background-surface1);
 }
 
+details.secondary[open] summary {
+    background: var(--background-surface-1);
+    box-shadow: inset 0 0 0 2px var(--background-surface1-5);
+}
+
 details input {
     background: var(--background-surface);
 }
@@ -878,6 +893,12 @@ details .details-flex-content-list-box {
     flex-wrap: wrap;
     flex-direction: column;
     padding: 0rem 0.75rem 0.5rem;
+}
+
+.editor\:sidebar details[open] .details-flex-content-list-box,
+details.secondary[open] .details-flex-content-list-box {
+    outline: dashed 1px var(--background-surface2);
+    border-radius: 0.4rem;
 }
 
 details details:nth-child(even) {
@@ -1205,16 +1226,10 @@ br:not(.cm-line br) {
 
     display: flex;
     flex-direction: column;
-
     align-items: var(--AlignX);
     justify-content: var(--AlignY);
 
     animation: FadeIn 0.5s 0s running;
-}
-
-.builder\:page.flex {
-    display: flex;
-    flex-direction: column;
 }
 
 .builder\:text {
@@ -1294,7 +1309,7 @@ br:not(.cm-line br) {
     flex-wrap: wrap;
     gap: 0.4rem;
     padding: 0.5rem;
-    box-shadow: 0 0 4px var(--background-surface3);
+    border: solid 1px var(--background-surface2);
     justify-content: center;
     align-items: center;
     height: 3.5rem;
@@ -1338,11 +1353,6 @@ br:not(.cm-line br) {
 .builder\:sidebar textarea,
 .builder\:sidebar select {
     border-radius: 0.4rem !important;
-}
-
-.builder\:sidebar details[open] .details-flex-content-list-box {
-    outline: dashed 1px var(--background-surface2);
-    border-radius: 0.4rem;
 }
 
 .option {

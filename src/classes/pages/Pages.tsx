@@ -15,6 +15,7 @@ import Home from "./Home";
 
 // create database
 import EntryDB, { Paste } from "../db/EntryDB";
+import type { Log } from "../db/LogDB";
 export const db = new EntryDB();
 
 import API, {
@@ -1347,7 +1348,7 @@ export class PasteCommentsPage implements Endpoint {
         return new Response(
             Renderer.Render(
                 <div
-                    class="sidebar-layout-wrapper builder:page flex"
+                    class="sidebar-layout-wrapper builder:page"
                     style={{
                         flexDirection: "row",
                         gap: 0,
@@ -1369,7 +1370,12 @@ export class PasteCommentsPage implements Endpoint {
                         </div>
                     </details>
 
-                    <div className="tab-container editor-tab page-content">
+                    <div
+                        className="tab-container editor-tab page-content"
+                        style={{
+                            marginBottom: "0",
+                        }}
+                    >
                         <div
                             style={{
                                 display: "flex",
@@ -1431,17 +1437,19 @@ export class PasteCommentsPage implements Endpoint {
                                     // private comments cannot be privately commented on
                                     // ...because then the original paste owner wouldn't
                                     // be able to see the comments deeper in the thread!
+                                    // cannot post private comments if you're not associated with a paste!
                                     (!result.Metadata ||
                                         !result.Metadata.Comments ||
                                         !result.Metadata.Comments
-                                            .IsPrivateMessage) && (
-                                        <a
-                                            href={`/?CommentOn=${result.CustomURL}&pm=true`}
-                                            className="button secondary round"
-                                        >
-                                            Private Comment
-                                        </a>
-                                    )
+                                            .IsPrivateMessage) &&
+                                        PostingAs !== undefined && (
+                                            <a
+                                                href={`/?CommentOn=${result.CustomURL}&pm=true`}
+                                                className="button secondary round"
+                                            >
+                                                Private Comment
+                                            </a>
+                                        )
                                 }
 
                                 {(search.get("edit") !== "true" && (
@@ -1985,6 +1993,25 @@ export async function ComponentView(
  */
 export class UserSettings implements Endpoint {
     public async request(request: Request): Promise<Response> {
+        // get association
+        const Association = await GetAssociation(request);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        // if user have an association, get all comments they have posted
+        let Comments: Log[] = [];
+
+        if (
+            Association[0] &&
+            EntryDB.config.log &&
+            EntryDB.config.log.events.includes("comment")
+        )
+            Comments = (
+                await EntryDB.Logs.QueryLogs(
+                    `Type = "comment" AND Content LIKE "%;%;${Association[1]}" ORDER BY cast(Timestamp as float) DESC`
+                )
+            )[2];
+
+        // render
         return new Response(
             Renderer.Render(
                 <>
@@ -2030,6 +2057,38 @@ export class UserSettings implements Endpoint {
 
                                 <hr />
 
+                                <p>
+                                    <b>Associated With:</b>{" "}
+                                    {Association[0] === true
+                                        ? Association[1]
+                                        : "anonymous"}{" "}
+                                    (
+                                    {Association[0] === true ? (
+                                        <a
+                                            href={"javascript:"}
+                                            class={"modal:entry:button.logout"}
+                                        >
+                                            logout
+                                        </a>
+                                    ) : (
+                                        <a
+                                            href={"javascript:"}
+                                            class={"modal:entry:button.login"}
+                                        >
+                                            login
+                                        </a>
+                                    )}
+                                    )
+                                </p>
+
+                                <AuthModals
+                                    use={
+                                        Association[0] === true ? "logout" : "login"
+                                    }
+                                />
+
+                                <hr />
+
                                 <div
                                     id="_doc"
                                     style={{
@@ -2045,6 +2104,46 @@ export class UserSettings implements Endpoint {
                                         saved to the browser's localStorage.
                                     </noscript>
                                 </div>
+
+                                {Comments.length > 0 && (
+                                    <>
+                                        <hr />
+
+                                        <details class={"secondary"}>
+                                            <summary>Comment History</summary>
+
+                                            <div
+                                                style={{
+                                                    display: "block",
+                                                    padding: "0.75rem",
+                                                }}
+                                                class={
+                                                    "details-flex-content-list-box"
+                                                }
+                                            >
+                                                {Comments.map((Comment) => (
+                                                    <span>
+                                                        <a
+                                                            class={
+                                                                "utc-date-to-localize"
+                                                            }
+                                                            href={`/${
+                                                                Comment.Content.split(
+                                                                    ";"
+                                                                )[1].split(";")[0]
+                                                            }`}
+                                                        >
+                                                            {new Date(
+                                                                Comment.Timestamp
+                                                            ).toUTCString()}
+                                                        </a>
+                                                        ,{" "}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </details>
+                                    </>
+                                )}
                             </div>
                         </div>
 

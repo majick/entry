@@ -38,6 +38,7 @@ export const DefaultHeaders = {
         [
             "default-src 'self'",
             "img-src *",
+            "font-src *",
             "style-src 'unsafe-inline' 'self'",
             "script-src 'self' 'unsafe-inline'",
             "upgrade-insecure-requests",
@@ -359,6 +360,10 @@ export class CreatePaste implements Endpoint {
         // return without redirect if content starts with _builder:
         if (result[0] === true && result[2].Content.startsWith("_builder:"))
             return new Response(JSON.stringify(result), { status: 200 });
+
+        // if result[0] IS NOT TRUE, set association to nothing!!! this makes sure
+        // people don't get associated with a paste that is already taken.,..
+        if (result[0] !== true) Association[1] = "";
 
         // return
         return new Response(JSON.stringify(result), {
