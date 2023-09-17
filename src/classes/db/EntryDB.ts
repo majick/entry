@@ -40,10 +40,11 @@ export type Paste = {
     UnhashedEditPassword?: string; // * only used on paste creation
     Views?: number; // * amount of log records LIKE "%{CustomURL}%"
     CommentOn?: string; // * the paste the that this paste is commenting on
+    IsPM?: string; // * details if the **comment** is a private message, boolean string
     Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)
     ReportOn?: string; // * the paste that this paste is reporting
     Associated?: string; // * the paste that is associated with this new paste
-    Metadata?: PasteMetadata;
+    Metadata?: PasteMetadata; // * (kinda), stored in paste content after "_metadata:" as base64 encoded JSON string
 };
 
 export type PasteMetadata = {
@@ -54,6 +55,8 @@ export type PasteMetadata = {
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;
+        ParentCommentOn?: string; // (if paste is a reply) stores the IsCommentOn of the comment it is replying to
+        IsPrivateMessage?: boolean;
         Enabled: boolean;
         ReportsEnabled?: boolean;
     };
@@ -772,26 +775,51 @@ export default class EntryDB {
 
         // if paste is a comment, create the respective log entry and set groupname to "comments"
         if (PasteInfo.CommentOn) {
-            // set group
-            PasteInfo.GroupName = "comments";
-            PasteInfo.CustomURL = `comments/${PasteInfo.CustomURL}`;
+            // get the paste we're commenting on
+            const CommentingOn = await this.GetPasteFromURL(PasteInfo.CommentOn);
 
-            if (PasteInfo.Associated)
-                PasteInfo.Associated = `;${PasteInfo.Associated}`;
+            // make sure it exists
+            if (CommentingOn) {
+                // set group
+                PasteInfo.GroupName = "comments";
+                PasteInfo.CustomURL = `comments/${PasteInfo.CustomURL}`;
 
-            // update metadata
-            metadata.Comments = {
-                IsCommentOn: PasteInfo.CommentOn,
-                Enabled: true,
-            };
+                if (PasteInfo.Associated)
+                    PasteInfo.Associated = `;${PasteInfo.Associated}`;
 
-            // create log
-            await EntryDB.Logs.CreateLog({
-                Type: "comment",
-                Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}${
-                    PasteInfo.Associated || ""
-                }`,
-            });
+                // get parent comment on
+                let ParentCommentOn: string | undefined = undefined;
+
+                if (CommentingOn.Metadata && CommentingOn.Metadata.Comments) {
+                    if (CommentingOn.Metadata.Comments.ParentCommentOn)
+                        ParentCommentOn =
+                            CommentingOn.Metadata.Comments.ParentCommentOn;
+                    else if (
+                        CommentingOn.Metadata.Comments.IsCommentOn &&
+                        !CommentingOn.Metadata.Comments.IsCommentOn.startsWith(
+                            "comments"
+                        )
+                    )
+                        ParentCommentOn = CommentingOn.Metadata.Comments.IsCommentOn;
+                    else ParentCommentOn = CommentingOn.CustomURL; // use the paste we're commenting on (fixes weird bug with this)
+                }
+
+                // update metadata
+                metadata.Comments = {
+                    IsCommentOn: PasteInfo.CommentOn,
+                    ParentCommentOn: ParentCommentOn,
+                    Enabled: true,
+                    IsPrivateMessage: PasteInfo.IsPM === "true",
+                };
+
+                // create log
+                await EntryDB.Logs.CreateLog({
+                    Type: "comment",
+                    Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}${
+                        PasteInfo.Associated || ""
+                    }`,
+                });
+            }
         }
 
         // if paste is a report, create the respective log entry and set groupname to "reports"

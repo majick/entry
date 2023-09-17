@@ -23,7 +23,7 @@ describe("app-usage", () => {
         const beforeMem = process.memoryUsage.rss();
 
         // run test
-        console.log("Sending 100 create-paste requests to /v");
+        console.log("Sending 100 create-paste requests");
         for (let i = 0; i < 110; i++) await request(i);  // 110 because for some reason 10 are skipped normally???
 
         // collect results

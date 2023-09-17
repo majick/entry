@@ -236,6 +236,7 @@ button.secondary:hover,
 
 button.tertiary,
 .button.tertiary {
+    --ChipColor: var(--background-surface1-5a);
     background: var(--background-surface1-5a);
 }
 
@@ -456,6 +457,23 @@ h5:focus .htag,
 h6:focus .htag {
     opacity: 100%;
     transform: scale(1);
+}
+
+.chip {
+    border-radius: 1rem;
+    padding: 0 0.5rem;
+    border: dashed 1px currentColor;
+    transition: all 0.15s;
+}
+
+.chip.solid {
+    border-style: solid;
+}
+
+.chip.button {
+    border-color: var(--background-surface1-5);
+    padding: 0.25rem 0.75rem !important;
+    height: max-content !important;
 }
 
 .mobile-only {

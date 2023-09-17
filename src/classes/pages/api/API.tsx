@@ -293,9 +293,12 @@ export class WellKnown implements Endpoint {
 export class RobotsTXT implements Endpoint {
     async request(request: Request): Promise<Response> {
         return new Response(
-            `User-agent: *\nAllow: /\nDisallow: /api${["", "/admin", "/paste"].join(
-                "\nDisallow: "
-            )}`,
+            `User-agent: *\nAllow: /\nDisallow: /api${[
+                "",
+                "/admin",
+                "/paste",
+                "/*?",
+            ].join("\nDisallow: ")}`,
             {
                 headers: {
                     "Content-Type": "text/plain",
@@ -869,9 +872,14 @@ export class DeleteComment implements Endpoint {
                 status: 401,
             });
 
-        if (association[1].startsWith("associated"))
+        if (
+            // if paste does not have metadata OR we're not the paste owner, say we can'do that
+            !paste.Metadata ||
+            (paste.Metadata && association[1] !== paste.Metadata.Owner)
+        )
             return new Response(
-                "Cannot delete comments on a paste you're not associated with! Please change your paste association."
+                "Cannot delete comments on a paste you're not associated with! Please change your paste association.",
+                { status: 401 }
             );
 
         // make sure paste isn't locked
@@ -952,7 +960,7 @@ export class PasteLogin implements Endpoint {
             });
 
         // generate association
-        const Association = await GetAssociation(request, true, paste.CustomURL);
+        await GetAssociation(request, true, paste.CustomURL);
 
         // return
         return new Response(paste.CustomURL, {

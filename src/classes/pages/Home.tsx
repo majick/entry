@@ -123,9 +123,18 @@ export default class Home implements Endpoint {
                                 }}
                             >
                                 <b class={"mdnote-title"}>Just so you know!</b>
+                                <p
+                                    style={{
+                                        marginBottom: "0.5rem",
+                                    }}
+                                >
+                                    You're{" "}
+                                    {search.get("pm") === "true" && <b>privately</b>}{" "}
+                                    commenting on a paste, write something short and
+                                    simple!
+                                </p>
                                 <p>
-                                    You're commenting on a paste, write something
-                                    short and simple! Not what you want?{" "}
+                                    Not what you want?{" "}
                                     <a href="javascript:history.back()">Go Back</a>
                                 </p>
                             </div>
@@ -774,6 +783,15 @@ export default class Home implements Endpoint {
                                         id={"CommentOn"}
                                         value={search.get("CommentOn") || ""}
                                     />
+
+                                    {search.get("pm") === "true" && (
+                                        <input
+                                            type="hidden"
+                                            name="IsPM"
+                                            id={"IsPM"}
+                                            value={"true"}
+                                        />
+                                    )}
 
                                     <input
                                         type="hidden"

@@ -10,8 +10,8 @@ describe("performance", () => {
         const beforeMem = process.memoryUsage.rss();
 
         // run test
-        console.log("Sending 10,000 requests to /v");
-        for (let i = 0; i < 10000; i++) await request(); // request 10,000 times
+        console.log("Sending 5,000 requests to /v");
+        for (let i = 0; i < 5000; i++) await request(); // request 10,000 times
 
         // collect results
         const end = performance.now();

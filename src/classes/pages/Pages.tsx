@@ -17,8 +17,6 @@ import Home from "./Home";
 import EntryDB, { Paste } from "../db/EntryDB";
 export const db = new EntryDB();
 
-import pack from "../../../package.json";
-
 import API, {
     VerifyContentType,
     DecryptPaste,
@@ -1172,6 +1170,17 @@ export class PasteCommentsPage implements Endpoint {
         )
             return new _404Page().request(request);
 
+        // get associated paste
+        let PostingAs: string | undefined = undefined;
+
+        const _Association = await GetAssociation(request);
+        if (
+            _Association[1] &&
+            !_Association[1].startsWith("associated") &&
+            !_Association[1].startsWith("Session does not exist")
+        )
+            PostingAs = _Association[1];
+
         // get offset
         const OFFSET = parseInt(search.get("offset") || "0");
 
@@ -1210,6 +1219,23 @@ export class PasteCommentsPage implements Endpoint {
             // render comment
             paste.Content = await ParseMarkdown(paste.Content!);
 
+            // set paste.IsPM
+            if (
+                paste.Metadata &&
+                paste.Metadata.Comments &&
+                paste.Metadata.Comments.IsPrivateMessage
+            )
+                paste.IsPM = "true";
+
+            // if comment is private and we are not associated with paste owner, continue
+            if (
+                paste.IsPM &&
+                PostingAs !== result.CustomURL &&
+                paste.Metadata &&
+                paste.Metadata.Owner !== PostingAs
+            )
+                continue;
+
             // push comment
             CommentPastes.push(paste);
         }
@@ -1221,15 +1247,22 @@ export class PasteCommentsPage implements Endpoint {
             }
         ).IsCommentOn;
 
-        // get associated paste
-        let PostingAs = undefined;
-
-        const _Association = await GetAssociation(request);
-        if (_Association[1] && !_Association[1].startsWith("associated"))
-            PostingAs = _Association[1];
+        // make sure paste has an owner
+        if (search.get("edit") === "true" && result.Metadata!.Owner === "")
+            return new Response(
+                "This paste does not have an owner, so we cannot verify if you have permission to manage its comments." +
+                    "\nPlease associate with a paste and edit this paste to add ownership to it.",
+                { status: 401 }
+            );
 
         // if edit mode is enabled, but we aren't associated with this paste... return 404
-        if (search.get("edit") === "true" && PostingAs !== result.CustomURL)
+        if (
+            search.get("edit") === "true" &&
+            result.Metadata &&
+            result.Metadata.Comments &&
+            PostingAs !== result.Metadata.Owner &&
+            PostingAs !== result.Metadata.Comments.ParentCommentOn
+        )
             return new _404Page().request(request);
 
         // ...
@@ -1241,7 +1274,11 @@ export class PasteCommentsPage implements Endpoint {
                             width: "100%",
                         }}
                     >
-                        {result.CustomURL}
+                        {(result.GroupName === "comments" &&
+                            result.Metadata &&
+                            result.Metadata.Comments &&
+                            result.Metadata.Comments.ParentCommentOn) ||
+                            result.CustomURL}
                     </h1>
 
                     <hr />
@@ -1378,6 +1415,7 @@ export class PasteCommentsPage implements Endpoint {
                             </span>
 
                             <div
+                                class={"mobile-flex-center"}
                                 style={{
                                     display: "flex",
                                     gap: "0.5rem",
@@ -1391,19 +1429,45 @@ export class PasteCommentsPage implements Endpoint {
                                     Add Comment
                                 </a>
 
+                                {
+                                    // private comments cannot be privately commented on
+                                    // ...because then the original paste owner wouldn't
+                                    // be able to see the comments deeper in the thread!
+                                    (!result.Metadata ||
+                                        !result.Metadata.Comments ||
+                                        !result.Metadata.Comments
+                                            .IsPrivateMessage) && (
+                                        <a
+                                            href={`/?CommentOn=${result.CustomURL}&pm=true`}
+                                            className="button secondary"
+                                        >
+                                            Private Comment
+                                        </a>
+                                    )
+                                }
+
                                 {(search.get("edit") !== "true" && (
                                     <>
                                         {PostingAs !== undefined ? (
-                                            (PostingAs !== result.CustomURL && (
-                                                <button
-                                                    // show logout button if we're already associated with a paste
-                                                    class={
-                                                        "tertiary modal:entry:button.logout"
-                                                    }
-                                                >
-                                                    Manage
-                                                </button>
-                                            )) || (
+                                            (result.Metadata &&
+                                                result.Metadata.Comments &&
+                                                PostingAs !==
+                                                    result.Metadata.Owner &&
+                                                PostingAs !==
+                                                    // if we're posting as the paste that
+                                                    // this comment (or its parent) is in reply to,
+                                                    // allow manage access
+                                                    result.Metadata.Comments
+                                                        .ParentCommentOn && (
+                                                    <button
+                                                        // show logout button if we're already associated with a paste
+                                                        class={
+                                                            "tertiary modal:entry:button.logout"
+                                                        }
+                                                    >
+                                                        Manage
+                                                    </button>
+                                                )) || (
                                                 <a
                                                     // show edit button if we're associated with this paste
                                                     class={"button tertiary"}
@@ -1426,7 +1490,7 @@ export class PasteCommentsPage implements Endpoint {
                                 )) || (
                                     <a
                                         href={"?edit=false"}
-                                        className="button secondary"
+                                        className="button tertiary"
                                     >
                                         Stop Editing
                                     </a>
@@ -1510,41 +1574,50 @@ export class PasteCommentsPage implements Endpoint {
                                                 }}
                                             >
                                                 posted by{" "}
-                                                <a href={`/${comment.Associated}`}>
+                                                <a
+                                                    class={"chip solid"}
+                                                    href={`/${comment.Associated}`}
+                                                    style={{
+                                                        color:
+                                                            // if comment poster is the paste owner, make color yellow
+                                                            // otherwise if comment poster is current user, make color green
+                                                            comment.Metadata!
+                                                                .Owner ===
+                                                            result.CustomURL
+                                                                ? "var(--yellow)"
+                                                                : PostingAs ===
+                                                                  comment.Associated
+                                                                ? "var(--green)"
+                                                                : "inherit",
+                                                    }}
+                                                    title={
+                                                        PostingAs ===
+                                                        comment.Associated
+                                                            ? "You"
+                                                            : ""
+                                                    }
+                                                >
                                                     {comment.Associated}
                                                 </a>
                                             </li>
                                         )}
 
-                                        <li
-                                            style={{
-                                                color: "var(--text-color-faded)",
-                                            }}
-                                        >
-                                            {comment.Views} view
-                                            {comment.Views! > 1
-                                                ? "s"
-                                                : comment.Views === 1
-                                                ? ""
-                                                : "s"}
-                                        </li>
-
-                                        <li>
-                                            <a
-                                                href={`/${comment.CustomURL}`}
-                                                target={"_blank"}
+                                        {comment.IsPM === "true" && (
+                                            <li
+                                                title={
+                                                    "This is a private comment, but it can still be seen by people with a direct link."
+                                                }
                                             >
-                                                open
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <a
-                                                href={`/?CommentOn=${comment.CustomURL}`}
-                                            >
-                                                reply
-                                            </a>
-                                        </li>
+                                                <span
+                                                    class={"chip"}
+                                                    style={{
+                                                        color: "var(--text-color-faded)",
+                                                    }}
+                                                >
+                                                    🔒 private
+                                                </span>
+                                            </li>
+                                        )}
                                     </ul>
 
                                     <div
@@ -1564,21 +1637,58 @@ export class PasteCommentsPage implements Endpoint {
                                             <a
                                                 href={`/paste/comments/${comment.CustomURL}`}
                                             >
-                                                View <b>{comment.Comments}</b>{" "}
-                                                comment
+                                                View <b>{comment.Comments}</b> repl
                                                 {comment.Comments! > 1
-                                                    ? "s"
+                                                    ? "ies"
                                                     : comment.Comments === 1
-                                                    ? ""
-                                                    : "s"}
+                                                    ? "y"
+                                                    : "ies"}
                                             </a>
                                         </div>
                                     )}
 
-                                    {search.get("edit") === "true" && (
-                                        <div>
-                                            <hr />
+                                    <hr />
 
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <a
+                                            class={"chip button secondary"}
+                                            href={`/?CommentOn=${comment.CustomURL}`}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Reply Symbol"}
+                                            >
+                                                <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+                                            </svg>
+                                            reply
+                                        </a>
+
+                                        <a
+                                            class={"chip button secondary"}
+                                            href={`/${comment.CustomURL}`}
+                                            target={"_blank"}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"External Link Symbol"}
+                                            >
+                                                <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
+                                            </svg>
+                                            open
+                                        </a>
+
+                                        {search.get("edit") === "true" && (
                                             <form
                                                 action="/api/comments/delete"
                                                 method={"POST"}
@@ -1597,10 +1707,23 @@ export class PasteCommentsPage implements Endpoint {
                                                     required
                                                 />
 
-                                                <button>Delete</button>
+                                                <button
+                                                    class={"chip button secondary"}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={"Trash Symbol"}
+                                                    >
+                                                        <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                                                    </svg>
+                                                    delete
+                                                </button>
                                             </form>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
