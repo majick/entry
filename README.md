@@ -280,8 +280,8 @@ content goes here!
 The animation element also supports more attributes to allow you to customize your animation. Each attribute requires the attributes before to be present.
 
 - Animation Name
-- Duration
-- Delay
+- Duration (number seconds, ex: `1s`, `2s`)
+- Delay (number seconds, ex: `1s`, `0`)
 - Repeat (`infinite` makes the animation repeat forever, set to 1 for an animation to play once)
 - Inline (Set to `inline` to make the animation block fit with text, set to `full` to make the animation full width **makes centered animation works**)
 
@@ -379,7 +379,7 @@ Paste comments are disabled by default. They can be enabled by enabling the `com
 
 Paste comments can be disabled on individual pastes if the paste includes `&!lt% disable comments %&gt;`
 
-Users are automatically tagged with an association with first paste (not comment) that they create. This can be disabled by changing config `app.auto_tag` to false.
+Users are automatically tagged with an association with the first paste (not comment) that they create. This can be disabled by changing config `app.auto_tag` to false.
 
 ### Paste Builder
 

@@ -176,9 +176,15 @@ function DragZones(props: {
         const previousIndex = draggingDocument.indexOf(dragging);
         const index = props.fordocument.indexOf(props.fornode) || 1;
 
-        // move dragging
-        draggingDocument.splice(previousIndex, 1);
-        props.fordocument.splice(index + direction, 0, dragging);
+        // if direction === 1, put node in props.fornode.Children
+        if (direction === 1 && props.fornode.Type === "Card") {
+            draggingDocument.splice(previousIndex, 1);
+            props.fornode.Children.push(dragging);
+        } else {
+            // move dragging normally
+            draggingDocument.splice(previousIndex, 1);
+            props.fordocument.splice(index + direction, 0, dragging);
+        }
 
         // reset all nodes
         parser.ResetNodes();
@@ -223,7 +229,13 @@ function DragZones(props: {
                 onDragOver={(event) => {
                     event.preventDefault();
                 }}
-                onDrop={() => Drag(-1)}
+                onDrop={() =>
+                    // drag into node if node is a card and has no children nodes
+                    props.fornode.Type === "Card" &&
+                    props.fornode.Children.length === 0
+                        ? Drag(1)
+                        : Drag(-1)
+                }
             />
 
             {props.children}
@@ -236,7 +248,13 @@ function DragZones(props: {
                 onDragOver={(event) => {
                     event.preventDefault();
                 }}
-                onDrop={() => Drag(0)}
+                onDrop={() =>
+                    // drag into node if node is a card and has no children nodes
+                    props.fornode.Type === "Card" &&
+                    props.fornode.Children.length === 0
+                        ? Drag(1)
+                        : Drag(0)
+                }
             />
         </div>
     ) : (

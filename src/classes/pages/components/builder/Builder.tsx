@@ -213,7 +213,9 @@ function RenderPage() {
 
                                   // get user input
                                   const before = confirm(
-                                      "Move component before element? Cancel to move after element. Continue to move before element."
+                                      "Move component before element? Cancel to move after element. Continue to move before element." +
+                                          "\n\nIf you're moving into an element with no children, the element you're dragging will go inside the element" +
+                                          " for both options."
                                   );
 
                                   // move

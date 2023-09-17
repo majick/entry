@@ -996,7 +996,7 @@ export default class EntryDB {
             // ALSO... delete all view_paste logs that have to do with the old URL
             await SQL.QueryOBJ({
                 db: EntryDB.Logs.db,
-                query: "DELETE FROM Logs WHERE Content LIKE ?",
+                query: 'DELETE FROM Logs WHERE Type = "view_paste" AND Content LIKE ?',
                 params: [`%${paste.CustomURL}%`],
                 use: "Prepare",
             });

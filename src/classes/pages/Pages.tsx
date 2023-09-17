@@ -1202,7 +1202,7 @@ export class PasteCommentsPage implements Endpoint {
             if (!paste) {
                 // deleted comment
                 CommentPastes.push({
-                    CustomURL: "",
+                    CustomURL: comment.Content.split(";")[1],
                     PubDate: new Date().getTime(),
                     Content: "[comment deleted]",
                     Views: -1,
@@ -1344,7 +1344,13 @@ export class PasteCommentsPage implements Endpoint {
         // return
         return new Response(
             Renderer.Render(
-                <div class="sidebar-layout-wrapper">
+                <div
+                    class="sidebar-layout-wrapper builder:page"
+                    style={{
+                        flexDirection: "row",
+                        gap: 0,
+                    }}
+                >
                     <div className="sidebar">
                         <div>
                             <CommentsNav />
@@ -1402,16 +1408,6 @@ export class PasteCommentsPage implements Endpoint {
                                         )
                                     </>
                                 )}
-                                {PreviousInThread && (
-                                    <>
-                                        {", "}
-                                        <a
-                                            href={`/paste/comments/${PreviousInThread}`}
-                                        >
-                                            up thread
-                                        </a>
-                                    </>
-                                )}
                             </span>
 
                             <div
@@ -1424,7 +1420,7 @@ export class PasteCommentsPage implements Endpoint {
                             >
                                 <a
                                     href={`/?CommentOn=${result.CustomURL}`}
-                                    className="button secondary"
+                                    className="button secondary round"
                                 >
                                     Add Comment
                                 </a>
@@ -1439,7 +1435,7 @@ export class PasteCommentsPage implements Endpoint {
                                             .IsPrivateMessage) && (
                                         <a
                                             href={`/?CommentOn=${result.CustomURL}&pm=true`}
-                                            className="button secondary"
+                                            className="button secondary round"
                                         >
                                             Private Comment
                                         </a>
@@ -1462,7 +1458,7 @@ export class PasteCommentsPage implements Endpoint {
                                                     <button
                                                         // show logout button if we're already associated with a paste
                                                         class={
-                                                            "tertiary modal:entry:button.logout"
+                                                            "tertiary round modal:entry:button.logout"
                                                         }
                                                     >
                                                         Manage
@@ -1470,7 +1466,7 @@ export class PasteCommentsPage implements Endpoint {
                                                 )) || (
                                                 <a
                                                     // show edit button if we're associated with this paste
-                                                    class={"button tertiary"}
+                                                    class={"button round tertiary"}
                                                     href={"?edit=true"}
                                                 >
                                                     Manage
@@ -1480,7 +1476,7 @@ export class PasteCommentsPage implements Endpoint {
                                             <button
                                                 // show login button if we're not already associated with a paste
                                                 class={
-                                                    "tertiary modal:entry:button.login"
+                                                    "tertiary round modal:entry:button.login"
                                                 }
                                             >
                                                 Manage
@@ -1490,7 +1486,7 @@ export class PasteCommentsPage implements Endpoint {
                                 )) || (
                                     <a
                                         href={"?edit=false"}
-                                        className="button tertiary"
+                                        className="button round tertiary"
                                     >
                                         Stop Editing
                                     </a>
@@ -1499,6 +1495,28 @@ export class PasteCommentsPage implements Endpoint {
                         </div>
 
                         <hr />
+
+                        {PreviousInThread && (
+                            <>
+                                <a
+                                    href={`/paste/comments/${PreviousInThread}`}
+                                    class={"button secondary round"}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Undo Symbol"}
+                                    >
+                                        <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                    </svg>
+                                    up thread
+                                </a>
+
+                                <hr />
+                            </>
+                        )}
 
                         <div
                             style={{
@@ -1551,7 +1569,12 @@ export class PasteCommentsPage implements Endpoint {
                             )}
 
                             {CommentPastes.map((comment) => (
-                                <div class={"card"}>
+                                <div
+                                    class={"card"}
+                                    style={{
+                                        borderRadius: "0.4rem",
+                                    }}
+                                >
                                     <ul
                                         className="__footernav"
                                         style={{
@@ -1708,7 +1731,9 @@ export class PasteCommentsPage implements Endpoint {
                                                 />
 
                                                 <button
-                                                    class={"chip button secondary"}
+                                                    class={
+                                                        "chip solid button secondary"
+                                                    }
                                                 >
                                                     <svg
                                                         xmlns="http://www.w3.org/2000/svg"
