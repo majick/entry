@@ -31,7 +31,7 @@ export default function UserSettings(id: string): any {
                     width: "100%",
                 }}
             >
-                <label htmlFor={key}>
+                <label htmlFor={key} title={key}>
                     <b>{label}</b>
                 </label>
 
@@ -55,6 +55,7 @@ export default function UserSettings(id: string): any {
     // ...
     AddOption("Force Client Theme", "entry:user.ForceClientTheme");
     AddOption("Disable Images", "entry:user.DisableImages");
+    AddOption("Editor Hints", "entry:user.EditorHints");
 
     // render
     return render(<>{options}</>, document.getElementById(id)!);

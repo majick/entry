@@ -258,7 +258,12 @@ function DragZones(props: {
             />
         </div>
     ) : (
-        props.children
+        // a lot of people use absolute positioning and build their pastes so they look good
+        // IN THE EDITOR, which has these stupid look drag-element things, which TAKE UP SPACE...
+        // i've tried just giving those "display: contents;" but THEN THAT MAKES THEM NOT ACCEPTS "position: relative;"
+        // ...i've tried grid but that makes the whole thing barely work...
+        // the best solution is to just include the drag elements in the final product
+        <div className="builder:drag-element">{props.children}</div>
     );
 }
 

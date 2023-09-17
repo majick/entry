@@ -406,7 +406,9 @@ export default function CreateEditor(ElementID: string, content: string) {
             }),
             autocompletion({
                 override: [BasicCompletion],
-                activateOnTyping: window.location.search.includes("hints=true"),
+                activateOnTyping:
+                    window.location.search.includes("hints=true") ||
+                    window.localStorage.getItem("entry:user.EditorHints") === "true",
             }),
         ],
     });

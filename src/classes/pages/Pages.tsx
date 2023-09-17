@@ -173,7 +173,9 @@ export class GetPasteFromURL implements Endpoint {
                             type={"module"}
                             dangerouslySetInnerHTML={{
                                 __html: `import Builder from "/Builder.js";
-                                Builder(${JSON.stringify(TrueContent)}, false);`,
+                                Builder("${BaseParser.stringify(
+                                    TrueContent
+                                )}", false);`,
                             }}
                         />
 
@@ -1345,7 +1347,7 @@ export class PasteCommentsPage implements Endpoint {
         return new Response(
             Renderer.Render(
                 <div
-                    class="sidebar-layout-wrapper builder:page"
+                    class="sidebar-layout-wrapper builder:page flex"
                     style={{
                         flexDirection: "row",
                         gap: 0,
@@ -2009,7 +2011,10 @@ export class UserSettings implements Endpoint {
                                     }}
                                 >
                                     <h4 class={"no-margin"}>User Settings</h4>
-                                    <a href={"javascript:window.history.back()"} class={"button secondary round"}>
+                                    <a
+                                        href={"javascript:window.history.back()"}
+                                        class={"button secondary round"}
+                                    >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 16 16"

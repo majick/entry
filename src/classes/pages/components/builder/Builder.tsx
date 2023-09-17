@@ -815,22 +815,23 @@ function RenderPage() {
 }
 
 // ...
-export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) {
+export function RenderDocument(_doc: string, _EditMode: boolean = true) {
+    const doc = BaseParser.parse(_doc) as BuilderDocument;
+
     // update document
     Document = doc;
     CurrentPage = 0;
     EditMode = _EditMode;
 
     // ...
-    function RenderCurrentPage() {
-        return render(
-            parser.ParsePage(doc.Pages[CurrentPage], _EditMode),
-            document.getElementById("_doc")!
-        );
+    function RenderCurrentPage(element: HTMLElement | ShadowRoot) {
+        return render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
     }
 
     // ...edit mode stuff
     if (!_EditMode) {
+        const _page = document.getElementById("_doc")!;
+
         // handle pages
         function CheckHash() {
             if (window.location.hash && window.location.hash.startsWith("#/")) {
@@ -842,7 +843,7 @@ export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) 
                 // set CurrentPage
                 if (Page) {
                     CurrentPage = doc.Pages.indexOf(Page);
-                    RenderCurrentPage(); // render
+                    RenderCurrentPage(_page); // render
                 }
             }
         }
@@ -851,15 +852,16 @@ export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) 
         CheckHash(); // initial run
 
         // initial page render
-        RenderCurrentPage();
+        RenderCurrentPage(_page);
     }
 
     // edit mode stuff
     if (_EditMode) {
         RenderPage(); // render full editor
+        const _page = document.getElementById("_doc")!;
 
         // initial page render
-        RenderCurrentPage();
+        RenderCurrentPage(_page);
 
         // render sidebar
         SidebarOpen = false;
@@ -872,10 +874,7 @@ export function RenderDocument(doc: BuilderDocument, _EditMode: boolean = true) 
             NeedsUpdate = false;
 
             // render
-            render(
-                parser.ParsePage(doc.Pages[CurrentPage], EditMode),
-                document.getElementById("_doc")!
-            );
+            render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
         }, 1000);
     }
 }

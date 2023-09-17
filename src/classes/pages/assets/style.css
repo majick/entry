@@ -1200,14 +1200,21 @@ br:not(.cm-line br) {
     width: 100vw;
     height: 100vh;
 
+    gap: var(--Spacing);
+    overflow-x: hidden;
+
     display: flex;
     flex-direction: column;
-    gap: var(--Spacing);
 
     align-items: var(--AlignX);
     justify-content: var(--AlignY);
 
     animation: FadeIn 0.5s 0s running;
+}
+
+.builder\:page.flex {
+    display: flex;
+    flex-direction: column;
 }
 
 .builder\:text {
@@ -1355,10 +1362,10 @@ br:not(.cm-line br) {
     user-select: none;
     -webkit-user-select: none;
     width: 100%;
-    position: absolute;
     padding: 0.5rem;
     display: none;
     height: 5px;
+    position: absolute;
 }
 
 .builder\:drag-zone.top {

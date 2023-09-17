@@ -78,7 +78,7 @@ export default class Home implements Endpoint {
         // return
         return new Response(
             Renderer.Render(
-                <div class="builder:page">
+                <div class="builder:page flex">
                     <main
                         style={{
                             height: "calc(100% - 1rem)",

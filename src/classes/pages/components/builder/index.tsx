@@ -122,7 +122,7 @@ export default class Builder implements Endpoint {
                         type={"module"}
                         dangerouslySetInnerHTML={{
                             __html: `import Builder from "/Builder.js";
-                            Builder(${JSON.stringify(Document)}, true);`,
+                            Builder("${parser.stringify(Document)}", true);`,
                         }}
                     />
                 </>,
