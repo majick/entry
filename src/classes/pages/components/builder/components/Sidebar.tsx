@@ -140,7 +140,11 @@ export function QuickInput(props: {
                                 selected={
                                     (Selected as { [key: string]: any })[
                                         props.property
-                                    ] === option.value
+                                    ] === option.value ||
+                                    ((Selected as { [key: string]: any })[
+                                        props.property
+                                    ] === undefined &&
+                                        props.default === option.value)
                                 }
                             >
                                 {option.label}
@@ -614,6 +618,23 @@ export default function Sidebar(props: { Page?: string }): any {
                                         name="HTML Content"
                                         property="Content"
                                         type="textarea"
+                                    />
+
+                                    <QuickInput
+                                        name="Use Content Box"
+                                        property="UseContentBox"
+                                        type="select"
+                                        default={"false"}
+                                        options={[
+                                            {
+                                                label: "True",
+                                                value: "true",
+                                            },
+                                            {
+                                                label: "False",
+                                                value: "false",
+                                            },
+                                        ]}
                                     />
                                 </>
                             ))}

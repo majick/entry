@@ -174,9 +174,17 @@ function RenderPage() {
                 onMouseOver={
                     EditMode
                         ? (event) => {
-                              const target: HTMLElement =
-                                  event.target as HTMLElement;
-                              if (!target.classList.contains("component")) return;
+                              let target: HTMLElement = event.target as HTMLElement;
+
+                              if (!target.classList.contains("component"))
+                                  if (
+                                      target.parentElement &&
+                                      target.parentElement.classList.contains(
+                                          "component"
+                                      )
+                                  )
+                                      target = target.parentElement;
+                                  else return;
 
                               if (Hovered) Hovered.classList.remove("hover");
                               target.classList.add("hover");

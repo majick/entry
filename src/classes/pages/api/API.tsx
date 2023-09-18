@@ -12,7 +12,7 @@ import _404Page from "../components/404";
 // create database
 import { CreateHash, Decrypt } from "../../db/helpers/Hash";
 import BaseParser from "../../db/helpers/BaseParser";
-import EntryDB, { Paste } from "../../db/EntryDB";
+import EntryDB, { Paste, PasteMetadata } from "../../db/EntryDB";
 export const db = new EntryDB();
 
 import pack from "../../../../package.json";
@@ -20,6 +20,7 @@ import { Config } from "../../..";
 
 // ...
 import { ParseMarkdown } from "../components/Markdown";
+import SQL from "../../db/helpers/SQL";
 
 // headers
 export const DefaultHeaders = {
@@ -1036,6 +1037,88 @@ export class PasteLogout implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class APIEditMetadata
+ * @implements {Endpoint}
+ */
+export class EditMetadata implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+
+        // validate password
+        const admin =
+            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+
+        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+            return new Response("Invalid password", {
+                status: 302,
+                headers: {
+                    Location: "/?err=Cannot edit metadata: Invalid password!",
+                },
+            });
+
+        // make sure paste isn't locked... as long EditPassword isn't the edit password!
+        if (!admin && paste.Metadata && paste.Metadata.Locked === true)
+            return new Response("Invalid password", {
+                status: 302,
+                headers: {
+                    Location: "/?err=Cannot edit metadata: Paste is locked",
+                },
+            });
+
+        // unpack metadata
+        const Unpacked = BaseParser.parse(body.Metadata) as PasteMetadata;
+
+        // if !admin, force some values to be kept the way they are
+        if (!admin && paste.Metadata) {
+            Unpacked.Version = paste.Metadata.Version;
+            Unpacked.Locked = paste.Metadata.Locked;
+            Unpacked.Owner = paste.Metadata.Owner;
+
+            if (Unpacked.Comments) {
+                Unpacked.Comments = {
+                    ...paste.Metadata.Comments,
+                    Enabled: Unpacked.Comments!.Enabled,
+                };
+            }
+        }
+
+        // update metadata
+        paste.Content += `_metadata:${BaseParser.stringify(Unpacked)}`;
+
+        // update paste
+        await SQL.QueryOBJ({
+            db: db.db,
+            query: "UPDATE Pastes SET (Content) = (?) WHERE CustomURL = ?",
+            params: [paste.Content, paste.CustomURL],
+            use: "Prepare",
+        });
+
+        // return
+        return new Response(JSON.stringify(paste.Metadata), {
+            status: 302,
+            headers: {
+                "Content-Type": "application/json",
+                Location: "/?msg=Metadata updated!",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -1058,4 +1141,5 @@ export default {
     DeleteComment,
     PasteLogin,
     PasteLogout,
+    EditMetadata,
 };

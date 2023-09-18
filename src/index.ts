@@ -194,7 +194,6 @@ const config: HoneybeeConfig = {
             Method: "POST",
             Page: AdminAPI.APIExportConfig,
         },
-        "/admin/api/metadata": { Method: "POST", Page: AdminAPI.APIEditMetadata },
         // POST api
         "/api/new": { Method: "POST", Page: API.CreatePaste },
         "/api/edit": { Method: "POST", Page: API.EditPaste },
@@ -208,6 +207,7 @@ const config: HoneybeeConfig = {
         },
         "/api/associate": { Method: "POST", Page: API.PasteLogin },
         "/api/disassociate": { Method: "POST", Page: API.PasteLogout },
+        "/api/metadata": { Method: "POST", Page: API.EditMetadata },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET search
         "/search": { Page: Pages.PastesSearch },
@@ -217,7 +217,7 @@ const config: HoneybeeConfig = {
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
-        "/paste/settings": { Page: Pages.UserSettings },
+        "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
         "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/": {

@@ -1677,7 +1677,9 @@ export class MetadataEditor implements Endpoint {
             return new Login().request(request);
 
         // get paste
-        const result = await db.GetPasteFromURL(body.paste_customurl || "");
+        const result = await db.GetPasteFromURL(
+            (body.paste_customurl || "").toLowerCase()
+        );
 
         // return
         return new Response(
@@ -1750,7 +1752,7 @@ export class MetadataEditor implements Endpoint {
                             <button class={"secondary"}>Select Paste</button>
                         </form>
 
-                        <form action="/admin/api/metadata" method={"POST"}>
+                        <form action="/api/metadata" method={"POST"}>
                             <input
                                 type={"hidden"}
                                 name={"CustomURL"}
@@ -1762,7 +1764,7 @@ export class MetadataEditor implements Endpoint {
                             <input
                                 type="hidden"
                                 required
-                                name="AdminPassword"
+                                name="EditPassword"
                                 value={body.AdminPassword}
                             />
 
@@ -1787,7 +1789,7 @@ export class MetadataEditor implements Endpoint {
                             type={"module"}
                             dangerouslySetInnerHTML={{
                                 __html: `import _e from "/MetadataEditor.js";
-                                _e(\`${JSON.stringify(
+                                _e.Editor(\`${JSON.stringify(
                                     result.Metadata
                                 )}\`, "_editor");`,
                             }}

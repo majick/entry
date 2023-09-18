@@ -52,6 +52,7 @@ export type PasteMetadata = {
     Owner: string; // the owner of the paste
     Locked?: boolean; // locked pastes cannot be edited, and the paste cannot be used as an association
     ShowOwnerEnabled?: boolean;
+    ShowViewCount?: boolean;
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;

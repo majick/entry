@@ -10,7 +10,6 @@ import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../../db/helpers/Hash";
 import _404Page from "../components/404";
 
-import SQL from "../../db/helpers/SQL";
 import EntryDB from "../../db/EntryDB";
 
 import { Login } from "../Admin";
@@ -346,53 +345,6 @@ export class APIExportConfig implements Endpoint {
     }
 }
 
-/**
- * @export
- * @class APIEditMetadata
- * @implements {Endpoint}
- */
-export class APIEditMetadata implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
-        // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
-
-        // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
-
-        // get paste
-        const paste = await db.GetPasteFromURL(body.CustomURL);
-        if (!paste) return new _404Page().request(request);
-
-        // update metadata
-        paste.Content += `_metadata:${body.Metadata}`;
-
-        // update paste
-        await SQL.QueryOBJ({
-            db: db.db,
-            query: "UPDATE Pastes SET (Content) = (?) WHERE CustomURL = ?",
-            params: [paste.Content, paste.CustomURL],
-            use: "Prepare",
-        });
-
-        // return
-        return new Response(JSON.stringify(paste), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json",
-            },
-        });
-    }
-}
-
 // default export
 export default {
     APIDeletePaste,
@@ -403,5 +355,4 @@ export default {
     APIExportLogs,
     APIMassDeleteLogs,
     APIExportConfig,
-    APIEditMetadata,
 };

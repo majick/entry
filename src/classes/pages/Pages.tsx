@@ -264,7 +264,14 @@ export class GetPasteFromURL implements Endpoint {
 
                                 <hr />
 
-                                <p>Views: {result.Views}</p>
+                                {EntryDB.config.log &&
+                                    EntryDB.config.log.events.includes(
+                                        "view_paste"
+                                    ) &&
+                                    (!result.Metadata ||
+                                        result.Metadata.ShowViewCount !== false) && (
+                                        <p>Views: {result.Views}</p>
+                                    )}
 
                                 <p>
                                     Publish:{" "}
@@ -446,6 +453,24 @@ export class GetPasteFromURL implements Endpoint {
                                             }`}
                                         >
                                             Edit
+                                        </a>
+                                    )}
+
+                                    {result.Metadata && (
+                                        <a
+                                            href={`/paste/settings/${result.CustomURL}`}
+                                            class={"button"}
+                                            title={"Paste Settings"}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Gear Symbol"}
+                                            >
+                                                <path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.102-.302c-.067-.019-.177-.011-.3.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.211.224l-.29 1.106c-.168.646-.715 1.196-1.458 1.26a8.006 8.006 0 0 1-1.402 0c-.743-.064-1.289-.614-1.458-1.26l-.289-1.106c-.018-.066-.079-.158-.212-.224a5.738 5.738 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.102.302c.067.019.177.011.3-.071.214-.143.437-.272.668-.386.133-.066.194-.158.211-.224l.29-1.106C6.009.645 6.556.095 7.299.03 7.53.01 7.764 0 8 0Zm-.571 1.525c-.036.003-.108.036-.137.146l-.289 1.105c-.147.561-.549.967-.998 1.189-.173.086-.34.183-.5.29-.417.278-.97.423-1.529.27l-1.103-.303c-.109-.03-.175.016-.195.045-.22.312-.412.644-.573.99-.014.031-.021.11.059.19l.815.806c.411.406.562.957.53 1.456a4.709 4.709 0 0 0 0 .582c.032.499-.119 1.05-.53 1.456l-.815.806c-.081.08-.073.159-.059.19.162.346.353.677.573.989.02.03.085.076.195.046l1.102-.303c.56-.153 1.113-.008 1.53.27.161.107.328.204.501.29.447.222.85.629.997 1.189l.289 1.105c.029.109.101.143.137.146a6.6 6.6 0 0 0 1.142 0c.036-.003.108-.036.137-.146l.289-1.105c.147-.561.549-.967.998-1.189.173-.086.34-.183.5-.29.417-.278.97-.423 1.529-.27l1.103.303c.109.029.175-.016.195-.045.22-.313.411-.644.573-.99.014-.031.021-.11-.059-.19l-.815-.806c-.411-.406-.562-.957-.53-1.456a4.709 4.709 0 0 0 0-.582c-.032-.499.119-1.05.53-1.456l.815-.806c.081-.08.073-.159.059-.19a6.464 6.464 0 0 0-.573-.989c-.02-.03-.085-.076-.195-.046l-1.102.303c-.56.153-1.113.008-1.53-.27a4.44 4.44 0 0 0-.501-.29c-.447-.222-.85-.629-.997-1.189l-.289-1.105c-.029-.11-.101-.143-.137-.146a6.6 6.6 0 0 0-1.142 0ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM9.5 8a1.5 1.5 0 1 0-3.001.001A1.5 1.5 0 0 0 9.5 8Z"></path>
+                                            </svg>
                                         </a>
                                     )}
 
@@ -649,7 +674,10 @@ export class GetPasteFromURL implements Endpoint {
                                     {EntryDB.config.log &&
                                         EntryDB.config.log.events.includes(
                                             "view_paste"
-                                        ) && (
+                                        ) &&
+                                        (!result.Metadata ||
+                                            result.Metadata.ShowViewCount !==
+                                                false) && (
                                             <span
                                                 style={{
                                                     display: "flex",
@@ -964,6 +992,7 @@ export class PastesSearch implements Endpoint {
             // get pastes
             const query = `CustomURL LIKE "%${search
                 .get("q")!
+                .toLowerCase()
                 .replaceAll('"', "'")}%" LIMIT 100`;
 
             const pastes =
@@ -1993,182 +2022,371 @@ export async function ComponentView(
  */
 export class UserSettings implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        // get association
-        const Association = await GetAssociation(request);
-        if (Association[1].startsWith("associated=")) Association[0] = false;
+        const url = new URL(request.url);
 
-        // if user have an association, get all comments they have posted
-        let Comments: Log[] = [];
+        // get paste name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("paste/settings/"))
+            name = name.split("paste/settings/")[1];
 
-        if (
-            Association[0] &&
-            EntryDB.config.log &&
-            EntryDB.config.log.events.includes("comment")
-        )
-            Comments = (
-                await EntryDB.Logs.QueryLogs(
-                    `Type = "comment" AND Content LIKE "%;%;${Association[1]}" ORDER BY cast(Timestamp as float) DESC`
-                )
-            )[2];
+        // if no paste is provided, show global settings
+        if (name === "paste/settings") {
+            // get association
+            const Association = await GetAssociation(request);
+            if (Association[1].startsWith("associated=")) Association[0] = false;
 
-        // render
-        return new Response(
-            Renderer.Render(
-                <>
-                    <main>
-                        <div
-                            style={{
-                                padding: "0.5rem",
-                            }}
-                        >
+            // if user have an association, get all comments they have posted
+            let Comments: Log[] = [];
+
+            if (
+                Association[0] &&
+                EntryDB.config.log &&
+                EntryDB.config.log.events.includes("comment")
+            )
+                Comments = (
+                    await EntryDB.Logs.QueryLogs(
+                        `Type = "comment" AND Content LIKE "%;%;${Association[1]}" ORDER BY cast(Timestamp as float) DESC`
+                    )
+                )[2];
+
+            // render
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <main>
                             <div
-                                className="builder\:card"
                                 style={{
-                                    width: "100%",
-                                    borderRadius: "0.4rem",
+                                    padding: "0.5rem",
                                 }}
                             >
                                 <div
+                                    className="builder\:card"
                                     style={{
-                                        display: "flex",
-                                        gap: "0.5rem",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
-                                        margin: "2rem 0 1rem 0",
+                                        width: "100%",
+                                        borderRadius: "0.4rem",
                                     }}
                                 >
-                                    <h4 class={"no-margin"}>User Settings</h4>
-                                    <a
-                                        href={"javascript:window.history.back()"}
-                                        class={"button secondary round"}
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            gap: "0.5rem",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            margin: "2rem 0 1rem 0",
+                                        }}
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            aria-label={"Undo Symbol"}
-                                        >
-                                            <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
-                                        </svg>
-                                        back
-                                    </a>
-                                </div>
-
-                                <hr />
-
-                                <p>
-                                    <b>Associated With:</b>{" "}
-                                    {Association[0] === true
-                                        ? Association[1]
-                                        : "anonymous"}{" "}
-                                    (
-                                    {Association[0] === true ? (
+                                        <h4 class={"no-margin"}>User Settings</h4>
                                         <a
-                                            href={"javascript:"}
-                                            class={"modal:entry:button.logout"}
+                                            href={"javascript:window.history.back()"}
+                                            class={"button secondary round"}
                                         >
-                                            logout
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Undo Symbol"}
+                                            >
+                                                <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                            </svg>
+                                            back
                                         </a>
-                                    ) : (
-                                        <a
-                                            href={"javascript:"}
-                                            class={"modal:entry:button.login"}
-                                        >
-                                            login
-                                        </a>
+                                    </div>
+
+                                    <hr />
+
+                                    <p>
+                                        <b>Associated With:</b>{" "}
+                                        {Association[0] === true
+                                            ? Association[1]
+                                            : "anonymous"}{" "}
+                                        (
+                                        {Association[0] === true ? (
+                                            <a
+                                                href={"javascript:"}
+                                                class={"modal:entry:button.logout"}
+                                            >
+                                                logout
+                                            </a>
+                                        ) : (
+                                            <a
+                                                href={"javascript:"}
+                                                class={"modal:entry:button.login"}
+                                            >
+                                                login
+                                            </a>
+                                        )}
+                                        )
+                                    </p>
+
+                                    <AuthModals
+                                        use={
+                                            Association[0] === true
+                                                ? "logout"
+                                                : "login"
+                                        }
+                                    />
+
+                                    <hr />
+
+                                    <div
+                                        id="_doc"
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <noscript>
+                                            Unable to render user settings options
+                                            without JavaScript enabled! The user
+                                            settings are rendered client-side using
+                                            Preact, and saved to the browser's
+                                            localStorage.
+                                        </noscript>
+                                    </div>
+
+                                    {Comments.length > 0 && (
+                                        <>
+                                            <hr />
+
+                                            <details class={"secondary"}>
+                                                <summary>Comment History</summary>
+
+                                                <div
+                                                    style={{
+                                                        display: "block",
+                                                        padding: "0.75rem",
+                                                    }}
+                                                    class={
+                                                        "details-flex-content-list-box"
+                                                    }
+                                                >
+                                                    {Comments.map((Comment) => (
+                                                        <span>
+                                                            <a
+                                                                class={
+                                                                    "utc-date-to-localize"
+                                                                }
+                                                                href={`/${
+                                                                    Comment.Content.split(
+                                                                        ";"
+                                                                    )[1].split(
+                                                                        ";"
+                                                                    )[0]
+                                                                }`}
+                                                            >
+                                                                {new Date(
+                                                                    Comment.Timestamp
+                                                                ).toUTCString()}
+                                                            </a>
+                                                            ,{" "}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </details>
+                                        </>
                                     )}
-                                    )
-                                </p>
+                                </div>
+                            </div>
 
-                                <AuthModals
-                                    use={
-                                        Association[0] === true ? "logout" : "login"
-                                    }
-                                />
+                            <Footer />
 
-                                <hr />
+                            <script
+                                type={"module"}
+                                dangerouslySetInnerHTML={{
+                                    __html: `import UserSettings from "/UserSettings.js";
+                                UserSettings("_doc");`,
+                                }}
+                            />
+                        </main>
+                    </>,
+                    <>
+                        <title>User Settings - {EntryDB.config.name}</title>
+                    </>
+                ),
+                {
+                    headers: {
+                        ...PageHeaders,
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        } else {
+            // show paste settings
 
+            // get paste
+            const result = await db.GetPasteFromURL(name);
+            if (!result) return new _404Page().request(request);
+
+            // paste cannot be from another server (for now)
+            if (result.HostServer) return new _404Page().request(request);
+
+            // render
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <main>
+                            <div
+                                style={{
+                                    padding: "0.5rem",
+                                }}
+                            >
                                 <div
-                                    id="_doc"
+                                    className="builder\:card"
                                     style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        gap: "0.5rem",
+                                        width: "100%",
+                                        borderRadius: "0.4rem",
                                     }}
                                 >
-                                    <noscript>
-                                        Unable to render user settings options
-                                        without JavaScript enabled! The user settings
-                                        are rendered client-side using Preact, and
-                                        saved to the browser's localStorage.
-                                    </noscript>
-                                </div>
+                                    <div
+                                        class={"mobile-flex-center"}
+                                        style={{
+                                            display: "flex",
+                                            gap: "0.5rem",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            margin: "2rem 0 1rem 0",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <h4
+                                            class={"no-margin"}
+                                            style={{
+                                                textAlign: "center",
+                                            }}
+                                        >
+                                            Paste Settings ({name})
+                                        </h4>
 
-                                {Comments.length > 0 && (
-                                    <>
-                                        <hr />
-
-                                        <details class={"secondary"}>
-                                            <summary>Comment History</summary>
-
-                                            <div
-                                                style={{
-                                                    display: "block",
-                                                    padding: "0.75rem",
-                                                }}
-                                                class={
-                                                    "details-flex-content-list-box"
-                                                }
+                                        <a
+                                            href={"javascript:window.history.back()"}
+                                            class={"button secondary round"}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Undo Symbol"}
                                             >
-                                                {Comments.map((Comment) => (
-                                                    <span>
-                                                        <a
-                                                            class={
-                                                                "utc-date-to-localize"
-                                                            }
-                                                            href={`/${
-                                                                Comment.Content.split(
-                                                                    ";"
-                                                                )[1].split(";")[0]
-                                                            }`}
-                                                        >
-                                                            {new Date(
-                                                                Comment.Timestamp
-                                                            ).toUTCString()}
-                                                        </a>
-                                                        ,{" "}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </details>
-                                    </>
-                                )}
+                                                <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                            </svg>
+                                            back
+                                        </a>
+                                    </div>
+
+                                    <p>
+                                        Paste settings require the paste edit code to
+                                        save. If you want to change how this paste
+                                        looks for you, view{" "}
+                                        <a href={"/paste/settings"}>User Settings</a>
+                                    </p>
+
+                                    <hr />
+
+                                    <div
+                                        class={"mobile-flex-center"}
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "right",
+                                            alignItems: "center",
+                                            marginBottom: "1rem",
+                                            flexWrap: "wrap",
+                                        }}
+                                    >
+                                        <form
+                                            action="/api/metadata"
+                                            method={"POST"}
+                                            style={{
+                                                display: "flex",
+                                                gap: "0.5rem",
+                                                flexWrap: "wrap",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            <input
+                                                type={"hidden"}
+                                                name={"CustomURL"}
+                                                value={result.CustomURL}
+                                                class={"secondary"}
+                                                required
+                                            />
+
+                                            <input
+                                                class={"secondary"}
+                                                type="text"
+                                                placeholder={"Edit code"}
+                                                maxLength={EntryDB.MaxPasswordLength}
+                                                minLength={EntryDB.MinPasswordLength}
+                                                name={"EditPassword"}
+                                                id={"EditPassword"}
+                                                required
+                                                style={{
+                                                    borderRadius:
+                                                        "0.4rem !important",
+                                                }}
+                                            />
+
+                                            <input
+                                                type="hidden"
+                                                required
+                                                name="Metadata"
+                                                id={"Metadata"}
+                                                value={""}
+                                            />
+
+                                            <button class={"secondary round green"}>
+                                                Save
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <hr />
+
+                                    <div
+                                        id="_doc"
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: "0.5rem",
+                                        }}
+                                    >
+                                        <noscript>
+                                            Unable to render paste settings options
+                                            without JavaScript enabled! The paste
+                                            settings are rendered client-side using
+                                            Preact.
+                                        </noscript>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        <Footer />
+                            <Footer />
 
-                        <script
-                            type={"module"}
-                            dangerouslySetInnerHTML={{
-                                __html: `import UserSettings from "/UserSettings.js";
-                                UserSettings("_doc");`,
-                            }}
-                        />
-                    </main>
-                </>,
-                <>
-                    <title>User Settings - {EntryDB.config.name}</title>
-                </>
-            ),
-            {
-                headers: {
-                    ...PageHeaders,
-                    "Content-Type": "text/html",
-                },
-            }
-        );
+                            <script
+                                type={"module"}
+                                dangerouslySetInnerHTML={{
+                                    __html: `import _e from "/MetadataEditor.js";
+                                    _e.ClientEditor(\`${JSON.stringify(
+                                        result.Metadata
+                                    )}\`, "_doc")`,
+                                }}
+                            />
+                        </main>
+                    </>,
+                    <>
+                        <title>Paste Settings - {EntryDB.config.name}</title>
+                    </>
+                ),
+                {
+                    headers: {
+                        ...PageHeaders,
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        }
     }
 }
 

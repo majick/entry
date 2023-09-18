@@ -64,6 +64,8 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /api/comments/delete`, Delete a comment from a paste, expects FormData with the fields: `CustomURL, EditPassword, CommentURL`
 - `POST /api/associate`, Associate (Login) as a paste, expects FormData with the fields: `CustomURL, EditPassword`
     - Links posted comments with this paste
+- `POST /api/metadata`, Update paste metadata, expects FormData with the fields: `CustomURL, EditPassword, metadata`
+    - The `metadata` field is JSON stringified, URI encoded and base64 encoded **ON CLIENT**
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content

@@ -11,7 +11,7 @@ const output = await build({
         "./src/classes/pages/assets/ClientFixMarkdown.ts",
         "./src/classes/pages/components/Markdown.ts",
         "./src/classes/pages/components/builder/Builder.tsx",
-        "./src/classes/pages/components/admin/MetadataEditor.tsx",
+        "./src/classes/pages/components/MetadataEditor.tsx",
         "./src/classes/pages/components/site/UserSettings.tsx",
     ],
     minify: {

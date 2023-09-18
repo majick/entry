@@ -1299,6 +1299,11 @@ br:not(.cm-line br) {
     cursor: move !important;
 }
 
+.builder\:source {
+    --Display: block;
+    display: var(--Display);
+}
+
 .builder\:toolbar {
     position: fixed;
     top: 0.5rem;

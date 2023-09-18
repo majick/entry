@@ -85,6 +85,7 @@ export interface EmbedNode extends BaseNode {
 export interface SourceNode extends BaseNode {
     Type: "Source";
     Content: string;
+    UseContentBox?: string; // use "display: contents;" if "true"
 }
 
 // ...base type
@@ -590,7 +591,11 @@ export function SourceNode(props: {
             <div
                 id={props.node.ID}
                 class={`component builder:source ${props.node.ClassString || ""}`}
-                style={props.node.StyleString}
+                style={{
+                    "--Display":
+                        props.node.UseContentBox !== "true" ? undefined : "contents",
+                    ...parser.ParseStyleString(props.node.StyleString || ""),
+                }}
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}
                 draggable={props.node.EditMode}
