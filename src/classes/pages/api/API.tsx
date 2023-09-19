@@ -353,7 +353,8 @@ export class CreatePaste implements Endpoint {
 
                 if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
             }
-        } else body.Associated = Association[1];
+        } else if (!Association[1].startsWith("associated=refresh"))
+            body.Associated = Association[1];
 
         // create paste
         const result = await db.CreatePaste(body);

@@ -119,12 +119,12 @@ export default class Expiry {
         // find paste
         // we're looking for {CustomURL}| so if there is a paste url including the
         // custom url, it doesn't get matched
-        if (!ExpiryFile.includes(`${CustomURL}|`)) return [false];
+        if (!ExpiryFile.includes(`&${CustomURL}|`)) return [false];
 
         // gc
         Bun.gc(true);
 
         // return
-        return [true, new Date(ExpiryFile.split(`${CustomURL}|`)[1].split("&")[0])];
+        return [true, new Date(ExpiryFile.split(`&${CustomURL}|`)[1].split("&")[0])];
     }
 }
