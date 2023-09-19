@@ -272,6 +272,9 @@ export function ClientEditor(_metadata: string, id: string): any {
                             let prev = metadata;
 
                             // validate
+                            if (nested && !nested.includes("root"))
+                                nested = ["root", ...nested];
+
                             for (const _key of nested || ["root"]) {
                                 prev = prev[_key]; // set new previous
 
@@ -305,7 +308,10 @@ export function ClientEditor(_metadata: string, id: string): any {
         ShowViewCount: metadata.root.ShowViewCount,
     });
 
-    if (metadata.root.Comments) {
+    if (
+        metadata.root.Comments &&
+        (window as any).ENTRYDB_CONFIG_ENABLE_COMMENTS === true
+    ) {
         GenerateInputFields(
             {
                 Enabled: metadata.root.Comments.Enabled,

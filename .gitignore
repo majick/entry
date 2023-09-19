@@ -171,3 +171,9 @@ dist
 # testing
 data/
 bun.lockb
+
+# favicon
+
+favicon.ico
+favicon.png
+favicon.svg

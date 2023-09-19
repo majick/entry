@@ -1085,20 +1085,19 @@ export class EditMetadata implements Endpoint {
 
         // if !admin, force some values to be kept the way they are
         if (!admin && paste.Metadata) {
-            Unpacked.Version = paste.Metadata.Version;
-            Unpacked.Locked = paste.Metadata.Locked;
-            Unpacked.Owner = paste.Metadata.Owner;
+            paste.Metadata.ShowViewCount = Unpacked.ShowViewCount;
+            paste.Metadata.ShowOwnerEnabled = Unpacked.ShowOwnerEnabled;
 
-            if (Unpacked.Comments) {
-                Unpacked.Comments = {
-                    ...paste.Metadata.Comments,
-                    Enabled: Unpacked.Comments!.Enabled,
-                };
-            }
+            if (Unpacked.Comments)
+                if (!paste.Metadata.Comments)
+                    paste.Metadata.Comments = Unpacked.Comments;
+                else {
+                    paste.Metadata.Comments.Enabled = Unpacked.Comments!.Enabled;
+                }
         }
 
         // update metadata
-        paste.Content += `_metadata:${BaseParser.stringify(Unpacked)}`;
+        paste.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;
 
         // update paste
         await SQL.QueryOBJ({

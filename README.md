@@ -383,7 +383,7 @@ Users can anonymously leave comments on pastes through paste comments. For comme
 
 Paste comments are disabled by default. They can be enabled by enabling the `comment` log type.
 
-Paste comments can be disabled on individual pastes if the paste includes `&!lt% disable comments %&gt;`
+Paste comments can be disabled on individual pastes using the paste settings menu. The paste settings menu can be disabled by changing config `app.enable_paste_settings` to false.
 
 Users are automatically tagged with an association with the first paste (not comment) that they create. This can be disabled by changing config `app.auto_tag` to false.
 
