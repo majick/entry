@@ -446,6 +446,7 @@ export class GetPasteFromURL implements Endpoint {
                                         display: "flex",
                                         gap: "0.5rem",
                                         flexWrap: "wrap",
+                                        justifyContent: "center",
                                     }}
                                 >
                                     {editable[2] === true && (
@@ -467,22 +468,6 @@ export class GetPasteFromURL implements Endpoint {
                                             }`}
                                         >
                                             Edit
-                                        </a>
-                                    )}
-
-                                    {result.GroupName && (
-                                        <a
-                                            class={"button"}
-                                            href={`/search?q=${
-                                                result.GroupName
-                                            }%2F&group=${result.GroupName}${
-                                                // add host server (if it exists)
-                                                result.HostServer
-                                                    ? `:${result.HostServer}`
-                                                    : ""
-                                            }`}
-                                        >
-                                            View Group
                                         </a>
                                     )}
 
@@ -517,48 +502,28 @@ export class GetPasteFromURL implements Endpoint {
                                             </a>
                                         )}
 
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
-                                            "report"
-                                        ) &&
-                                        !result.HostServer &&
-                                        (!result.Metadata ||
-                                            !result.Metadata.Comments ||
-                                            result.Metadata.Comments
-                                                .ReportsEnabled !== false) && (
-                                            <a
-                                                class={"button"}
-                                                href={`/?ReportOn=${result.CustomURL}`}
-                                                title={"Report Paste"}
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 16 16"
-                                                    width="16"
-                                                    height="16"
-                                                >
-                                                    <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
-                                                </svg>
-
-                                                <span>Report</span>
-                                            </a>
-                                        )}
-
-                                    {result.Content.includes(
-                                        "<% enable template %>"
-                                    ) && (
-                                        <a
-                                            href={`/?Template=${result.CustomURL}`}
-                                            class={"button"}
+                                    <a
+                                        href={"javascript:"}
+                                        id={"entry:button.PasteOptions"}
+                                        title={"More Options"}
+                                        class={"button"}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Ellipsis Symbol"}
                                         >
-                                            Use Template
-                                        </a>
-                                    )}
+                                            <path d="M0 5.75C0 4.784.784 4 1.75 4h12.5c.966 0 1.75.784 1.75 1.75v4.5A1.75 1.75 0 0 1 14.25 12H1.75A1.75 1.75 0 0 1 0 10.25ZM12 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0ZM4 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
+                                        </svg>
+                                        More
+                                    </a>
 
                                     <details
                                         class={"horizontal"}
                                         style={{
-                                            width: "calc(80px * 3)",
+                                            width: "max-content",
                                         }}
                                     >
                                         <summary
@@ -570,7 +535,12 @@ export class GetPasteFromURL implements Endpoint {
                                             Export
                                         </summary>
 
-                                        <div class={"details-content"}>
+                                        <div
+                                            class={"details-content"}
+                                            style={{
+                                                minWidth: "calc(80px * 3)",
+                                            }}
+                                        >
                                             <a
                                                 class={"button"}
                                                 target={"_blank"}
@@ -604,6 +574,88 @@ export class GetPasteFromURL implements Endpoint {
                                             </a>
                                         </div>
                                     </details>
+
+                                    <Modal
+                                        buttonid="entry:button.PasteOptions"
+                                        modalid="entry:modal.PasteOptions"
+                                    >
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                gap: "0.5rem",
+                                                justifyContent: "center",
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
+                                            {result.Content.includes(
+                                                "<% enable template %>"
+                                            ) && (
+                                                <a
+                                                    href={`/?Template=${result.CustomURL}`}
+                                                    class={"button"}
+                                                >
+                                                    Use Template
+                                                </a>
+                                            )}
+
+                                            {result.GroupName && (
+                                                <a
+                                                    class={"button"}
+                                                    href={`/search?q=${
+                                                        result.GroupName
+                                                    }%2F&group=${result.GroupName}${
+                                                        // add host server (if it exists)
+                                                        result.HostServer
+                                                            ? `:${result.HostServer}`
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    View Group
+                                                </a>
+                                            )}
+
+                                            {EntryDB.config.log &&
+                                                EntryDB.config.log.events.includes(
+                                                    "report"
+                                                ) &&
+                                                !result.HostServer &&
+                                                (!result.Metadata ||
+                                                    !result.Metadata.Comments ||
+                                                    result.Metadata.Comments
+                                                        .ReportsEnabled !==
+                                                        false) && (
+                                                    <a
+                                                        class={"button"}
+                                                        href={`/?ReportOn=${result.CustomURL}`}
+                                                        title={"Report Paste"}
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                        >
+                                                            <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
+                                                        </svg>
+
+                                                        <span>Report</span>
+                                                    </a>
+                                                )}
+                                        </div>
+
+                                        <hr />
+
+                                        <form method="dialog" class={"mobile-max"}>
+                                            <button
+                                                class={"green"}
+                                                style={{
+                                                    width: "100%",
+                                                }}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </form>
+                                    </Modal>
                                 </div>
 
                                 <div className="mobile-only">
@@ -1213,60 +1265,15 @@ export class PasteCommentsPage implements Endpoint {
         const OFFSET = parseInt(search.get("offset") || "0");
 
         // get comments
-        const comments = await EntryDB.Logs.QueryLogs(
-            `Type = "comment" AND Content LIKE "${result.CustomURL.replaceAll(
-                "_",
-                "\\_"
-            )};%" ESCAPE "\\" ORDER BY cast(Timestamp as float) DESC LIMIT 100 OFFSET ${OFFSET}`
+        const _result = await db.GetPasteComments(
+            result.CustomURL,
+            OFFSET,
+            PostingAs
         );
 
-        const CommentPastes: Partial<Paste>[] = [];
+        if (!_result[0]) return new _404Page().request(request);
 
-        for (const comment of comments[2]) {
-            // get paste
-            const paste = await db.GetPasteFromURL(comment.Content.split(";")[1]);
-
-            // make sure comment paste exists
-            if (!paste) {
-                // deleted comment
-                CommentPastes.push({
-                    CustomURL: comment.Content.split(";")[1],
-                    PubDate: new Date().getTime(),
-                    Content: "[comment deleted]",
-                    Views: -1,
-                    Comments: 0,
-                });
-
-                continue;
-            }
-
-            // add associated info
-            const Associated = comment.Content.split(";")[2];
-            if (Associated) paste.Associated = Associated;
-
-            // render comment
-            paste.Content = await ParseMarkdown(paste.Content!);
-
-            // set paste.IsPM
-            if (
-                paste.Metadata &&
-                paste.Metadata.Comments &&
-                paste.Metadata.Comments.IsPrivateMessage
-            )
-                paste.IsPM = "true";
-
-            // if comment is private and we are not associated with paste owner, continue
-            if (
-                paste.IsPM &&
-                PostingAs !== result.CustomURL &&
-                paste.Metadata &&
-                paste.Metadata.Owner !== PostingAs
-            )
-                continue;
-
-            // push comment
-            CommentPastes.push(paste);
-        }
+        const CommentPastes: Partial<Paste>[] = _result[2];
 
         // check if paste is a comment on another paste
         const PreviousInThread = (
@@ -1680,7 +1687,7 @@ export class PasteCommentsPage implements Endpoint {
 
                                     <div
                                         style={{
-                                            maxHeight: "20rem",
+                                            maxHeight: "50rem",
                                             overflow: "auto",
                                         }}
                                         dangerouslySetInnerHTML={{

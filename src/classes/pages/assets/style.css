@@ -921,6 +921,7 @@ details.horizontal .details-content {
     display: none;
     z-index: 1;
     width: 20rem;
+    min-width: calc(80px * 3);
 }
 
 details.horizontal summary {
@@ -1070,6 +1071,11 @@ details[open].horizontal .details-content * {
 
     .sidebar-mobile {
         display: block;
+    }
+
+    .details-content {
+        /* switch dropdown direction on mobile */
+        left: -140% !important;
     }
 }
 

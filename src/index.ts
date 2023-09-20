@@ -169,6 +169,7 @@ const config: HoneybeeConfig = {
         "/api/raw": { Type: "begins", Page: API.GetRawPaste },
         "/api/exists": { Type: "begins", Page: API.PasteExists },
         "/api/html": { Type: "begins", Page: API.GetPasteHTML },
+        "/api/comments": { Type: "begins", Page: API.GetPasteComments },
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },

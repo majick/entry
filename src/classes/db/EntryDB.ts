@@ -1552,4 +1552,106 @@ export default class EntryDB {
         // return
         return [true, sql, result];
     }
+
+    /**
+     * @method GetPasteComments
+     *
+     * @param {string} url
+     * @param {number} [offset=0]
+     * @param {string} [associated]
+     * @return {Promise<[boolean, string, Paste[]]>}
+     * @memberof EntryDB
+     */
+    public async GetPasteComments(
+        url: string,
+        offset: number = 0,
+        associated?: string
+    ): Promise<[boolean, string, Paste[]]> {
+        // make sure comments are enabled globally
+        if (!EntryDB.config.log || !EntryDB.config.log.events.includes("comment"))
+            return [false, "Comments disabled globally", []];
+
+        // make sure paste exists
+        const result = (await this.GetPasteFromURL(url)) as Paste;
+        if (!result) return [false, "Paste does not exist", []];
+
+        // return false if page does not allow comments
+        if (
+            result.Content.includes("<% disable comments %>") ||
+            (result.Metadata &&
+                result.Metadata.Comments &&
+                result.Metadata.Comments.Enabled === false)
+        )
+            return [false, "Paste has comments disabled", []];
+
+        // get comments
+        const comments = await EntryDB.Logs.QueryLogs(
+            `Type = "comment" AND Content LIKE "${result.CustomURL.replaceAll(
+                "_",
+                "\\_"
+            )};%" ESCAPE "\\" ORDER BY cast(Timestamp as float) DESC LIMIT 100 OFFSET ${offset}`
+        );
+
+        const CommentPastes: Paste[] = [];
+
+        for (const comment of comments[2]) {
+            // get paste
+            const paste = (await this.GetPasteFromURL(
+                comment.Content.split(";")[1]
+            )) as Paste | undefined;
+
+            // make sure comment paste exists
+            if (!paste) {
+                // deleted comment
+                CommentPastes.push({
+                    CustomURL: comment.Content.split(";")[1],
+                    PubDate: new Date().getTime(),
+                    EditDate: new Date().getTime(),
+                    Content: "[comment deleted]",
+                    Views: -1,
+                    Comments: 0,
+                    EditPassword: "",
+                });
+
+                continue;
+            }
+
+            // add associated info
+            const Associated = comment.Content.split(";")[2];
+            if (Associated) paste.Associated = Associated;
+
+            // set paste.IsPM
+            if (
+                paste.Metadata &&
+                paste.Metadata.Comments &&
+                paste.Metadata.Comments.IsPrivateMessage
+            )
+                paste.IsPM = "true";
+
+            // if we're provided with an association and paste is a pm, make sure we're
+            // allowed to view this comment!
+            if (
+                paste.IsPM === "true" &&
+                associated !== result.CustomURL &&
+                paste.Metadata &&
+                paste.Metadata.Owner !== associated
+            )
+                continue;
+
+            // remove paste edit passwords
+            const cleaned = this.CleanPaste(paste);
+
+            // push comment
+            CommentPastes.push(cleaned);
+        }
+
+        // return
+        return [
+            true,
+            `${CommentPastes.length} result${
+                CommentPastes.length === 0 || CommentPastes.length > 1 ? "s" : ""
+            }`,
+            CommentPastes,
+        ];
+    }
 }

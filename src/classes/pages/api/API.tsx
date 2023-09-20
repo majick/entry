@@ -1119,6 +1119,35 @@ export class EditMetadata implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetPasteComments
+ * @implements {Endpoint}
+ */
+export class GetPasteComments implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // get paste name
+        let name = url.pathname.slice("/api/comments/".length, url.pathname.length);
+
+        // get offset
+        const OFFSET = parseInt(search.get("offset") || "0");
+
+        // get comments
+        const comments = await db.GetPasteComments(name, OFFSET);
+
+        // return
+        return new Response(JSON.stringify(comments), {
+            status: comments[0] ? 200 : 400,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -1142,4 +1171,5 @@ export default {
     PasteLogin,
     PasteLogout,
     EditMetadata,
+    GetPasteComments,
 };
