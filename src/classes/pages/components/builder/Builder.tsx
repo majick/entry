@@ -146,6 +146,12 @@ export function RenderSidebar(props?: { Page: string }) {
     // make sure we're in edit mode
     if (!EditMode) return;
 
+    // if page is component tree, reset all nodes (prevent duplicate entries)
+    if (props && props.Page === "Tree") {
+        parser.ResetNodes();
+        parser.ParsePage(Document.Pages[CurrentPage], EditMode);
+    }
+
     // render
     return render(
         <Sidebar Page={props !== undefined ? props.Page : undefined} />,

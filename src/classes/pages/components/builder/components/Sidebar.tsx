@@ -15,6 +15,9 @@ import {
     Move,
     Delete,
     SelectedParent,
+    RenderSidebar,
+    Select,
+    CurrentPage,
 } from "../Builder";
 
 import { Node } from "../schema";
@@ -200,6 +203,29 @@ export default function Sidebar(props: { Page?: string }): any {
                 ((props.Page === "PagesView" && (
                     <>
                         {/* pages list */}
+                        <button
+                            onClick={() => {
+                                RenderSidebar({
+                                    Page: "Tree",
+                                });
+                            }}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                height="16"
+                                aria-label={"Tree Symbol"}
+                                style={{
+                                    marginBottom: "1px",
+                                }}
+                            >
+                                <path d="M4.75 7a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5ZM5 4.75A.75.75 0 0 1 5.75 4h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 5 4.75ZM6.75 10a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z"></path>
+                                <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path>
+                            </svg>
+                            Component Tree
+                        </button>
+
                         <button onClick={() => AddComponent("Page")}>
                             Add Page
                         </button>
@@ -254,6 +280,69 @@ export default function Sidebar(props: { Page?: string }): any {
                             <button class={"red"} onClick={() => Move(false)}>
                                 Cancel
                             </button>
+                        </>
+                    )) ||
+                    (props.Page === "Tree" && (
+                        <>
+                            {/* component tree */}
+                            {parser.GetNodes().map((node) => {
+                                return (
+                                    <button
+                                        title={node.ID}
+                                        onClick={() => {
+                                            // get parent node
+                                            let parent = parser
+                                                .GetNodes()
+                                                .find(
+                                                    (n) =>
+                                                        n.Type === "Card" &&
+                                                        n.Children.includes(node)
+                                                );
+
+                                            if (!parent) {
+                                                // try to find in current page
+                                                if (
+                                                    Document.Pages[
+                                                        CurrentPage
+                                                    ].Children.includes(node)
+                                                )
+                                                    parent =
+                                                        Document.Pages[CurrentPage];
+                                                else return;
+                                            }
+
+                                            // select
+                                            Select(node, parent.Children!);
+                                        }}
+                                        onMouseEnter={() => {
+                                            // try to get rendered node
+                                            const rendered = document.getElementById(
+                                                node.ID!
+                                            );
+
+                                            if (!rendered) return;
+
+                                            // add hover
+                                            return rendered.classList.add("hover");
+                                        }}
+                                        onMouseLeave={() => {
+                                            // try to get rendered node
+                                            const rendered = document.getElementById(
+                                                node.ID!
+                                            );
+
+                                            if (!rendered) return;
+
+                                            // remove hover
+                                            return rendered.classList.remove(
+                                                "hover"
+                                            );
+                                        }}
+                                    >
+                                        {node.Type}
+                                    </button>
+                                );
+                            })}
                         </>
                     )))) ||
                 (Selected && (

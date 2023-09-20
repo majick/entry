@@ -991,6 +991,19 @@ export default class EntryDB {
         // if custom url was changed, add the group back to it
         // ...users cannot add the group manually because of the custom url regex
         if (NewPasteInfo.CustomURL !== paste.CustomURL) {
+            // make sure the paste we're changing to doesn't already exist
+            const _existingPaste = await this.GetPasteFromURL(
+                NewPasteInfo.CustomURL
+            );
+
+            if (_existingPaste)
+                return [
+                    false,
+                    "Cannot change url to a url that is already taken!",
+                    PasteInfo, // return old paste info because we didn't actually update anything!!
+                ];
+
+            // ...
             if (paste.GroupName)
                 NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
 
