@@ -1238,9 +1238,6 @@ export class PasteCommentsPage implements Endpoint {
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
-        // no cross-server commenting (for now)
-        if (result.HostServer) return new _404Page().request(request);
-
         // return 404 if page does not allow comments
         if (
             result.Content.includes("<% disable comments %>") ||
@@ -1273,7 +1270,12 @@ export class PasteCommentsPage implements Endpoint {
 
         if (!_result[0]) return new _404Page().request(request);
 
+        // ...
         const CommentPastes: Partial<Paste>[] = _result[2];
+
+        // render all comment pastes
+        for (const paste of CommentPastes)
+            paste.Content = await ParseMarkdown(paste.Content || "");
 
         // check if paste is a comment on another paste
         const PreviousInThread = (

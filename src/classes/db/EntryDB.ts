@@ -512,7 +512,7 @@ export default class EntryDB {
             } else {
                 // ...everything after this assumes paste IS from another server!
 
-                // just send an /api/get request to the other server
+                // just send a /api/get request to the other server
                 const request = fetch(
                     `https://${server}/api/raw/${PasteURL.split(":")[0]}`
                 );
@@ -1204,7 +1204,7 @@ export default class EntryDB {
         const request = fetch(
             `${https === true ? "https" : "http"}://${server}/api/${endpoint}`,
             {
-                body: body.join("&"),
+                body: method !== "GET" ? body.join("&") : "",
                 method,
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
@@ -1574,6 +1574,32 @@ export default class EntryDB {
         // make sure paste exists
         const result = (await this.GetPasteFromURL(url)) as Paste;
         if (!result) return [false, "Paste does not exist", []];
+
+        // check if paste is from another server
+        if (result.HostServer) {
+            result.CustomURL = result.CustomURL.split(":")[0];
+
+            // send request
+            const [isBad, record] = await this.ForwardRequest(
+                result.HostServer,
+                `comments/${result.CustomURL}`,
+                [],
+                "GET",
+                true
+            );
+
+            // check if promise rejected
+            if (isBad) return [false, "Connection failed", []];
+
+            // return
+            const err = this.GetErrorFromResponse(record);
+            const body = !err ? await record.json() : undefined;
+
+            if (body) return body;
+            else if (err) return [false, err, []];
+
+            return [false, "Unknown", []];
+        }
 
         // return false if page does not allow comments
         if (
