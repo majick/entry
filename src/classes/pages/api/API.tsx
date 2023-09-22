@@ -1095,7 +1095,7 @@ export class EditMetadata implements Endpoint {
                 else {
                     paste.Metadata.Comments.Enabled = Unpacked.Comments!.Enabled;
                 }
-        }
+        } else paste.Metadata = Unpacked;
 
         // update metadata
         paste.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;

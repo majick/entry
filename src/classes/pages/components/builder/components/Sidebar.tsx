@@ -98,7 +98,12 @@ export function QuickInput(props: {
 
                             (Selected as { [key: string]: any })[props.property] = (
                                 event.target as HTMLInputElement
-                            ).value;
+                            ).value
+                                .replaceAll("<!DOCTYPE html>", "")
+                                .replaceAll("<html>", "")
+                                .replaceAll("</html>", "")
+                                .replaceAll("<head>", "")
+                                .replaceAll("</head>", "");
 
                             Update();
                         }}

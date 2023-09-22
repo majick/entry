@@ -1349,6 +1349,7 @@ br:not(.cm-line br) {
     flex-direction: column;
     animation: SlideInFromLeft 0.15s 0s running;
     overflow: auto;
+    z-index: 10000000;
 }
 
 .builder\:sidebar button,
