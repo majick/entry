@@ -49,7 +49,7 @@ export const DefaultHeaders = {
     "Referrer-Policy": "same-origin",
 };
 
-export const PageHeaders = {
+export const PageHeaders: { [key: string]: string } = {
     ...DefaultHeaders,
     "Cache-Control": "no-cache",
 };
@@ -307,6 +307,21 @@ export class RobotsTXT implements Endpoint {
                 },
             }
         );
+    }
+}
+
+/**
+ * @export
+ * @class Favicon
+ * @implements {Endpoint}
+ */
+export class Favicon implements Endpoint {
+    async request(request: Request): Promise<Response> {
+        if (!EntryDB.config.app || !EntryDB.config.app.favicon)
+            return new _404Page().request(request);
+
+        // return
+        return new Response(Bun.file(EntryDB.config.app.favicon));
     }
 }
 
@@ -797,6 +812,7 @@ export class GetPasteHTML implements Endpoint {
             </>,
             <>
                 <title>{result.CustomURL}</title>
+                <link rel="icon" href="/favicon" />
             </>
         );
 
@@ -1155,6 +1171,7 @@ export default {
     Session,
     WellKnown,
     RobotsTXT,
+    Favicon,
     CreatePaste,
     GetPasteRecord,
     EditPaste,

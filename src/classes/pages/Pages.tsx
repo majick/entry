@@ -209,6 +209,7 @@ export class GetPasteFromURL implements Endpoint {
                         <Modal
                             buttonid="entry:button.PasteOptions"
                             modalid="entry:modal.PasteOptions"
+                            round={true}
                         >
                             <div
                                 style={{
@@ -217,7 +218,7 @@ export class GetPasteFromURL implements Endpoint {
                                 }}
                             >
                                 <h4 style={{ textAlign: "center", width: "100%" }}>
-                                    {result.CustomURL}
+                                    {result.CustomURL.split(":")[0]}
                                 </h4>
 
                                 <hr />
@@ -233,7 +234,7 @@ export class GetPasteFromURL implements Endpoint {
                                 >
                                     <a
                                         href={`/paste/builder?edit=${result.CustomURL}`}
-                                        className="button"
+                                        className="button round"
                                     >
                                         Edit
                                     </a>
@@ -243,7 +244,7 @@ export class GetPasteFromURL implements Endpoint {
                                             false) && (
                                         <a
                                             href={`/paste/settings/${result.CustomURL}`}
-                                            className="button"
+                                            className="button round"
                                         >
                                             Settings
                                         </a>
@@ -253,14 +254,15 @@ export class GetPasteFromURL implements Endpoint {
                                         EntryDB.config.log.events.includes(
                                             "comment"
                                         ) &&
-                                        (!result.Metadata!.Comments ||
+                                        (!result.Metadata ||
+                                            !result.Metadata!.Comments ||
                                             result.Metadata!.Comments.Enabled !==
                                                 false) && (
                                             <a
                                                 href={`/paste/comments/${result.CustomURL}`}
-                                                className="button"
+                                                className="button round"
                                             >
-                                                Comments ({result.Comments})
+                                                Comments ({result.Comments || 0})
                                             </a>
                                         )}
 
@@ -270,7 +272,7 @@ export class GetPasteFromURL implements Endpoint {
                                         ) && (
                                             <a
                                                 href={`/?ReportOn=${result.CustomURL}`}
-                                                className="button"
+                                                className="button round"
                                             >
                                                 Report Paste
                                             </a>
@@ -311,7 +313,7 @@ export class GetPasteFromURL implements Endpoint {
                                     }}
                                 >
                                     <button
-                                        className="green"
+                                        className="green round"
                                         style={{
                                             width: "100%",
                                         }}
@@ -327,6 +329,7 @@ export class GetPasteFromURL implements Endpoint {
                     <>
                         <meta name="description" content={result.CustomURL} />
                         <title>{result.CustomURL}</title>
+                        <link rel="icon" href="/favicon" />
                     </>
                 ),
                 {
@@ -642,6 +645,17 @@ export class GetPasteFromURL implements Endpoint {
                                                         <span>Report</span>
                                                     </a>
                                                 )}
+
+                                            {EntryDB.config.app &&
+                                                EntryDB.config.app.enable_builder !==
+                                                    false && (
+                                                    <a
+                                                        class={"button"}
+                                                        href={`/paste/builder?edit=${result.CustomURL}`}
+                                                    >
+                                                        Edit in Builder
+                                                    </a>
+                                                )}
                                         </div>
 
                                         <hr />
@@ -795,6 +809,7 @@ export class GetPasteFromURL implements Endpoint {
                     />
 
                     <title>{result.CustomURL}</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -1010,6 +1025,7 @@ export class PasteDocView implements Endpoint {
                         />
 
                         <title>{result.CustomURL}</title>
+                        <link rel="icon" href="/favicon" />
                     </>
                 ),
                 {
@@ -1149,6 +1165,7 @@ export class PastesSearch implements Endpoint {
                     </>,
                     <>
                         <title>Results for "{search.get("q")}"</title>
+                        <link rel="icon" href="/favicon" />
                     </>
                 ),
                 {
@@ -1201,6 +1218,7 @@ export class PastesSearch implements Endpoint {
                         ></meta>
 
                         <title>Search Pastes</title>
+                        <link rel="icon" href="/favicon" />
                     </>
                 ),
                 {
@@ -1770,6 +1788,7 @@ export class PasteCommentsPage implements Endpoint {
                 </div>,
                 <>
                     <title>Comments on {result.CustomURL}</title>
+                    <link rel="icon" href="/favicon" />
 
                     <meta
                         name="description"
@@ -1983,6 +2002,7 @@ export async function ComponentView(
             <title>
                 {Component.Name} - {EntryDB.config.name} Components
             </title>
+            <link rel="icon" href="/favicon" />
         </>
     );
 }
@@ -2169,6 +2189,7 @@ export class UserSettings implements Endpoint {
                     </>,
                     <>
                         <title>User Settings - {EntryDB.config.name}</title>
+                        <link rel="icon" href="/favicon" />
                     </>
                 ),
                 {
@@ -2356,6 +2377,7 @@ export class UserSettings implements Endpoint {
                     </>,
                     <>
                         <title>Paste Settings - {EntryDB.config.name}</title>
+                        <link rel="icon" href="/favicon" />
                     </>
                 ),
                 {
@@ -2378,6 +2400,7 @@ export class Dashboard implements Endpoint {
                 </>,
                 <>
                     <title>Dashboard</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {

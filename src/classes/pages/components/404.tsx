@@ -55,6 +55,7 @@ export default class _404PageEndpoint implements Endpoint {
                 _404Page(),
                 <>
                     <title>404 - {config.name}</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {

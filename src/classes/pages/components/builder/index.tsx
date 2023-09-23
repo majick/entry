@@ -128,6 +128,7 @@ export default class Builder implements Endpoint {
                 </>,
                 <>
                     <title>Builder</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {

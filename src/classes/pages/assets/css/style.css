@@ -548,9 +548,9 @@ code * {
 
 pre code {
     white-space: pre;
-    background: var(--background-surface);
     color: currentColor;
     padding: 0;
+    background: inherit;
 }
 
 pre code p {
@@ -564,14 +564,21 @@ pre code span {
 }
 
 pre {
-    --base-brightness: 11%;
-    background: var(--background-surface);
     border-left: solid 5px var(--red3);
     padding-left: 0.5rem;
     white-space: pre;
     overflow-x: auto;
     overflow-y: hidden;
     height: max-content;
+}
+
+pre .line-numbers {
+    text-align: right;
+    color: var(--text-color-faded);
+    user-select: none;
+    padding-right: 0.5rem;
+    margin-right: 0.5rem;
+    border-right: solid 1px var(--background-surface1-5);
 }
 
 input,

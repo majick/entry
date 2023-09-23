@@ -287,6 +287,7 @@ export class Login implements Endpoint {
                 </>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -493,6 +494,8 @@ export class ManagePastes implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
+                    <link rel="icon" href="/favicon" type={"image/png"} />
                 </>
             ),
             {
@@ -566,6 +569,7 @@ export class QueryPastesPage implements Endpoint {
                 </>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -735,6 +739,7 @@ export class ExportPastesPage implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -1054,6 +1059,7 @@ export class LogsPage implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -1152,6 +1158,7 @@ export class PluginsPage implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -1411,6 +1418,7 @@ export class ManageReports implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -1642,6 +1650,7 @@ export class ViewReport implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -1798,6 +1807,7 @@ export class MetadataEditor implements Endpoint {
                 </AdminLayout>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {

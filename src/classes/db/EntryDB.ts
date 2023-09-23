@@ -18,6 +18,7 @@ import pack from "../../../package.json";
 import type { Config } from "../..";
 
 import BaseParser from "./helpers/BaseParser";
+import { PageHeaders } from "../pages/api/API";
 
 export type Paste = {
     // * = value is not stored in database record

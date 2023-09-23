@@ -63,8 +63,22 @@ export function ParseMarkdownSync(
             code = code.replaceAll("#", "&#35;");
             code = code.replaceAll("(", "&lpar;");
 
+            // build line numbers
+            let LineNumbers = "";
+            let _current = 0;
+
+            for (const _line of code.split("\n")) {
+                if (!_line) continue;
+
+                _current++;
+                LineNumbers += `${_current}\n`;
+            }
+
             // return
-            return `<pre><code class="language-${lang}">${code}</code></pre>\n`;
+            return `<pre class="flex">
+                <code class="line-numbers">${LineNumbers}</code>
+                <code class="language-${lang}">${code}</code>
+            </pre>\n`;
         }
     );
 

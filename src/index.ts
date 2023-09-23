@@ -38,6 +38,7 @@ export type Config = {
         enable_builder?: boolean;
         enable_paste_settings?: boolean;
         auto_tag?: boolean;
+        favicon?: string;
         footer?: {
             show_name_on_all_pages?: boolean;
             rows: Array<{
@@ -224,6 +225,7 @@ const config: HoneybeeConfig = {
         "/paste/dashboard": { Page: Pages.Dashboard },
         "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
+        "/favicon": { Page: API.Favicon },
         "/": {
             // return paste view, will return homepage if no paste is provided
             // at the end so it tests this last because everything starts with /, which means
