@@ -1,0 +1,121 @@
+/* css utility classes */
+
+/* units */
+:root {
+    --u-02: 0.2rem;
+    --u-04: 0.4rem;
+    --u-06: 0.6rem;
+    --u-08: 0.8rem;
+    --u-10: 1rem;
+    --u-12: 1.2rem;
+    --u-14: 1.4rem;
+}
+
+/* flex */
+.flex {
+    display: flex !important;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-space-between {
+    justify-content: space-between;
+}
+
+.justify-right {
+    justify-content: right;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.align-right {
+    align-items: right;
+}
+
+@media screen and (max-width: 800px) {
+    .flex-mobile-center {
+        justify-content: center;
+        align-items: center;
+    }
+
+    .flex-column-mobile {
+        flex-direction: column;
+    }
+
+    .mobile-max {
+        width: 100% !important;
+    }
+}
+
+.gap-2,
+.g-2 {
+    gap: var(--u-02);
+}
+
+.gap-4,
+.g-4 {
+    gap: var(--u-04);
+}
+
+.gap-6,
+.g-6 {
+    gap: var(--u-06);
+}
+
+.gap-8,
+.g-8 {
+    gap: var(--u-08);
+}
+
+.gap-10,
+.g-10 {
+    gap: var(--u-10);
+}
+
+.gap-12,
+.g-12 {
+    gap: var(--u-12);
+}
+
+.gap-14,
+.g-14 {
+    gap: var(--u-14);
+}
+
+.gap-24,
+.g-24 {
+    gap: calc(var(--u-14) * 2);
+}
+
+/* background */
+.background-0,
+.bg-0 {
+    background: var(--background-surface);
+}
+
+.background-1,
+.bg-1 {
+    background: var(--background-surface1);
+}
+
+.background-2,
+.bg-2 {
+    background: var(--background-surface2);
+}
+
+.background-3,
+.bg-3 {
+    background: var(--background-surface3);
+}

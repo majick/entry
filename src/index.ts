@@ -15,7 +15,8 @@ import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer
 (global as any).Footer = Footer;
 
 // includes
-import "./classes/pages/assets/style.css";
+import "./classes/pages/assets/css/style.css";
+import "./classes/pages/assets/css/utility.css";
 
 // ...
 export type Config = {
@@ -220,6 +221,7 @@ const config: HoneybeeConfig = {
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
         "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
+        "/paste/dashboard": { Page: Pages.Dashboard },
         "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/": {

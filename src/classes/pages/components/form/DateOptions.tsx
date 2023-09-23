@@ -7,15 +7,7 @@ export default function DateOptions() {
 
     // return
     return (
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexWrap: "wrap",
-                gap: "0.5rem",
-            }}
-        >
+        <div class={"flex justify-center align-center flex-wrap g-4"}>
             <a
                 href={`javascript:SetExpire("${Date.now() + 60 * 10 * 1000}")`}
                 className="button secondary"

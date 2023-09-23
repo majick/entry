@@ -1,13 +1,13 @@
 export default function ToggleTheme() {
     return (
         <>
-            <a id={"ThemeButton"} href={"javascript:"}>
+            <a id={"ThemeButton"} href={"javascript:ToggleTheme()"}>
                 theme
             </a>
 
             <script
                 dangerouslySetInnerHTML={{
-                    __html: `document.getElementById("ThemeButton").addEventListener("click", () => {
+                    __html: `function ToggleTheme() {
                         if (
                             window.PASTE_USES_CUSTOM_THEME && 
                             window.localStorage.getItem("entry:user.ForceClientTheme") !== "true"
@@ -24,7 +24,7 @@ export default function ToggleTheme() {
                             document.documentElement.classList.add("dark-theme");
                             window.localStorage.setItem("theme", "dark");
                         }
-                    });
+                    }
                     
                     /* prefer theme */
                     if (

@@ -50,11 +50,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                         action="/api/associate"
                         method={"POST"}
                         target={"association_frame"}
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "0.5rem",
-                        }}
+                        class={"flex flex-column g-4"}
                     >
                         <input
                             type="text"
@@ -120,11 +116,9 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                     <hr />
 
                     <div
+                        class={"flex g-4"}
                         style={{
                             width: "100%",
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: "0.5rem",
                         }}
                     >
                         <form

@@ -3,10 +3,22 @@ export default function Modal(props: {
     buttonid: string;
     modalid: string;
     noIdMatch?: boolean;
+    round?: boolean;
 }) {
     return (
         <>
-            <dialog id={props.modalid}>{props.children}</dialog>
+            <dialog
+                id={props.modalid}
+                style={{
+                    borderRadius: props.round ? "var(--u-04)" : undefined,
+                    padding: props.round ? "var(--u-12)" : undefined,
+                    border: props.round
+                        ? "solid 1px var(--background-surface1-5)"
+                        : undefined,
+                }}
+            >
+                {props.children}
+            </dialog>
 
             <script
                 dangerouslySetInnerHTML={{
@@ -39,7 +51,21 @@ export default function Modal(props: {
                         else document.getElementById("${
                             props.modalid
                         }").showModal(); 
-                    }`.replaceAll("\n", ""),
+                    };
+                    
+                    (() => {
+                        /* remove extra versions of modal using XPathEvaluator */
+                        /* "evaluate" will return a snapshotLength of however many of this modal exist */
+                        const result = (new XPathEvaluator())
+                            .createExpression('//*[@id="${props.modalid}"]')
+                            .evaluate(document, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE);
+                        
+                        if (result.snapshotLength > 1) document.getElementById("${
+                            props.modalid
+                        }").remove();
+                    })();`
+                        .replaceAll("\n", "")
+                        .replaceAll("    ", ""),
                 }}
             />
         </>

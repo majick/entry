@@ -9,6 +9,7 @@ import Honeybee, { Endpoint, Renderer } from "honeybee";
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import BuilderParser from "./components/builder/parser";
+import TopNav from "./components/site/TopNav";
 import Footer from "./components/site/Footer";
 import _404Page from "./components/404";
 import Home from "./Home";
@@ -1063,6 +1064,8 @@ export class PastesSearch implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
+                        <TopNav breadcrumbs={["search"]} />
+
                         <main>
                             <div
                                 style={{
@@ -1320,14 +1323,7 @@ export class PasteCommentsPage implements Endpoint {
 
                     <hr />
 
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                        }}
-                    >
+                    <div class={"flex justify-center align-center g-4"}>
                         <a href={`/${result.CustomURL}`} class={"button"}>
                             View Paste
                         </a>
@@ -1344,14 +1340,7 @@ export class PasteCommentsPage implements Endpoint {
 
                     <hr />
 
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                        }}
-                    >
+                    <div class={"flex justify-center align-center g-4"}>
                         {OFFSET !== 0 && (
                             <>
                                 {/* only shown if we're not at the first page */}
@@ -1411,13 +1400,9 @@ export class PasteCommentsPage implements Endpoint {
                         }}
                     >
                         <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                flexWrap: "wrap",
-                                gap: "0.5rem",
-                            }}
+                            class={
+                                "flex flex-wrap justify-space-between align-center g-4"
+                            }
                         >
                             <span>
                                 <b>{result.Comments}</b> comment
@@ -1452,14 +1437,7 @@ export class PasteCommentsPage implements Endpoint {
                                 )}
                             </span>
 
-                            <div
-                                class={"mobile-flex-center"}
-                                style={{
-                                    display: "flex",
-                                    gap: "0.5rem",
-                                    flexWrap: "wrap",
-                                }}
-                            >
+                            <div class={"mobile-flex-center flex flex-wrap g-4"}>
                                 <a
                                     href={`/?CommentOn=${result.CustomURL}`}
                                     className="button secondary round"
@@ -1562,13 +1540,7 @@ export class PasteCommentsPage implements Endpoint {
                             </>
                         )}
 
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: "0.5rem",
-                            }}
-                        >
+                        <div class={"flex flex-column g-4"}>
                             {(search.get("err") && (
                                 <div
                                     class={"mdnote note-error"}
@@ -1716,12 +1688,7 @@ export class PasteCommentsPage implements Endpoint {
 
                                     <hr />
 
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            gap: "0.5rem",
-                                        }}
-                                    >
+                                    <div class={"flex g-4"}>
                                         <a
                                             class={"chip button secondary"}
                                             href={`/?CommentOn=${comment.CustomURL}`}
@@ -2058,6 +2025,8 @@ export class UserSettings implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
+                        <TopNav breadcrumbs={["paste", "settings"]} />
+
                         <main>
                             <div
                                 style={{
@@ -2072,11 +2041,10 @@ export class UserSettings implements Endpoint {
                                     }}
                                 >
                                     <div
+                                        class={
+                                            "flex g-4 align-center justify-space-between"
+                                        }
                                         style={{
-                                            display: "flex",
-                                            gap: "0.5rem",
-                                            alignItems: "center",
-                                            justifyContent: "space-between",
                                             margin: "2rem 0 1rem 0",
                                         }}
                                     >
@@ -2134,14 +2102,7 @@ export class UserSettings implements Endpoint {
 
                                     <hr />
 
-                                    <div
-                                        id="_doc"
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: "0.5rem",
-                                        }}
-                                    >
+                                    <div id="_doc" class={"flex flex-column g-4"}>
                                         <noscript>
                                             Unable to render user settings options
                                             without JavaScript enabled! The user
@@ -2201,7 +2162,7 @@ export class UserSettings implements Endpoint {
                                 type={"module"}
                                 dangerouslySetInnerHTML={{
                                     __html: `import UserSettings from "/UserSettings.js";
-                                UserSettings("_doc");`,
+                                    UserSettings("_doc");`,
                                 }}
                             />
                         </main>
@@ -2238,6 +2199,8 @@ export class UserSettings implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
+                        <TopNav breadcrumbs={["paste", "settings", name]} />
+
                         <main>
                             <div
                                 style={{
@@ -2298,13 +2261,11 @@ export class UserSettings implements Endpoint {
                                     <hr />
 
                                     <div
-                                        class={"mobile-flex-center"}
+                                        class={
+                                            "mobile-flex-center flex justify-center align-center flex-wrap"
+                                        }
                                         style={{
-                                            display: "flex",
-                                            justifyContent: "right",
-                                            alignItems: "center",
                                             marginBottom: "1rem",
-                                            flexWrap: "wrap",
                                         }}
                                     >
                                         <form
@@ -2408,6 +2369,26 @@ export class UserSettings implements Endpoint {
     }
 }
 
+export class Dashboard implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        return new Response(
+            Renderer.Render(
+                <>
+                    <TopNav breadcrumbs={["paste", "dashboard"]} />
+                </>,
+                <>
+                    <title>Dashboard</title>
+                </>
+            ),
+            {
+                headers: {
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     GetPasteFromURL,
@@ -2416,4 +2397,5 @@ export default {
     PasteCommentsPage,
     ComponentView,
     UserSettings,
+    Dashboard,
 };

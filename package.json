@@ -7,7 +7,7 @@
   "devDependencies": {
     "@types/highlight.js": "^10.1.0",
     "@types/marked": "^5.0.0",
-    "bun-types": "0.8.0",
+    "bun-types": "latest",
     "prettier": "^3.0.0"
   },
   "peerDependencies": {

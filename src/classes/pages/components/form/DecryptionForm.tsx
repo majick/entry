@@ -13,12 +13,9 @@ export default function DecryptionForm(props: {
                 // form to do is the default thing (where it puts inputs in the url)
             }
             <form
+                class={"flex justify-space-between align-center flex-wrap g-4"}
                 style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
                     marginBottom: "0.5rem",
-                    flexWrap: "wrap",
                 }}
                 action={
                     props.isEdit !== true

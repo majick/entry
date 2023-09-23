@@ -13,13 +13,9 @@ export default function PasteList(props: {
     return (
         <div>
             <div
+                class={"flex justify-space-between align-center flex-wrap g-4"}
                 style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
                     marginBottom: "1rem",
-                    flexWrap: "wrap",
-                    gap: "0.5rem",
                 }}
             >
                 {(props.Query !== undefined && (
@@ -71,14 +67,7 @@ export default function PasteList(props: {
                     </>
                 )) || <span></span>}
 
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "1rem",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
-                >
+                <div class={"flex g-10 justify-center align-center"}>
                     {props.ShowDelete && props.AdminPassword && (
                         <>
                             <button
@@ -107,13 +96,9 @@ export default function PasteList(props: {
                                 <hr />
 
                                 <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        flexWrap: "wrap",
-                                        gap: "1rem",
-                                    }}
+                                    class={
+                                        "flex justify-space-between align-center flex-wrap g-10"
+                                    }
                                 >
                                     <form method="dialog" class={"mobile-max"}>
                                         <button class={"green mobile-max"}>
@@ -162,14 +147,7 @@ export default function PasteList(props: {
                         </>
                     )}
 
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                        }}
-                    >
+                    <div class={"flex justify-center align-center g-4"}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"

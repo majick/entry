@@ -34,14 +34,7 @@ export async function InitFooterExtras(plugins: HoneybeeConfig["Pages"]) {
 // ...
 export default function Footer(props: { ShowBottomRow?: boolean }) {
     return (
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "column",
-            }}
-        >
+        <div class={"flex justify-center align-center flex-column"}>
             <hr
                 style={{
                     width: "425px",
@@ -59,7 +52,10 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 <li>
                     {!EntryDB.config.app ||
                         (EntryDB.config.app.enable_builder !== false && (
-                            <a href="javascript:" id={"entry:button.NewPaste"}>
+                            <a
+                                href="javascript:"
+                                class={"modal:entry:button.NewPaste"}
+                            >
                                 new
                             </a>
                         )) || <a href="/">new</a>}
@@ -88,9 +84,8 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                         {/* custom footer rows */}
                         {EntryDB.config.app.footer.rows.map((row) => (
                             <ul
-                                class={"__footernav"}
+                                class={"__footernav flex"}
                                 style={{
-                                    display: "flex",
                                     gap: "0.25rem",
                                     padding: "0",
                                     margin: "0",
@@ -179,20 +174,16 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
             ))}
 
             {/* modals */}
-            <Modal buttonid="entry:button.NewPaste" modalid="entry:modal.NewPaste">
+            <Modal
+                buttonid="entry:button.NewPaste"
+                modalid="entry:modal.NewPaste"
+                noIdMatch={true}
+            >
                 <h4 style={{ textAlign: "center", width: "100%" }}>Create Paste</h4>
 
                 <hr />
 
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        flexWrap: "wrap",
-                    }}
-                >
+                <div class={"flex flex-wrap justify-center align-center g-4"}>
                     <a href="/" class={"button border dashed __footer_cardbtn"}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"

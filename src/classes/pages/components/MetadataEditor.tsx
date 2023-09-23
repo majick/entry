@@ -61,14 +61,9 @@ export function Editor(_metadata: string, id: string): any {
             if (ValueType !== "boolean") {
                 Inputs.push(
                     <div
-                        className="card"
+                        className="card flex justify-space-between align-center flex-wrap g-4"
                         style={{
                             background: "var(--background-surface)",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            flexWrap: "wrap",
-                            alignItems: "center",
-                            gap: "0.5rem",
                         }}
                     >
                         <label htmlFor={data[0]}>
@@ -115,14 +110,9 @@ export function Editor(_metadata: string, id: string): any {
             } else {
                 Inputs.push(
                     <div
-                        className="card"
+                        className="card flex justify-space-between align-center flex-wrap g-4"
                         style={{
                             background: "var(--background-surface)",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            flexWrap: "wrap",
-                            alignItems: "center",
-                            gap: "0.5rem",
                         }}
                     >
                         <label htmlFor={data[0]}>
@@ -171,22 +161,11 @@ export function Editor(_metadata: string, id: string): any {
 
     // render and return
     return render(
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-            }}
-        >
+        <div class={"flex flex-column g-4"}>
             <div
-                className="card"
+                className="card flex justify-space-between align-center flex-wrap g-4"
                 style={{
                     background: "var(--background-surface)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                    gap: "0.5rem",
                 }}
             >
                 <b>Key</b>
@@ -243,15 +222,9 @@ export function ClientEditor(_metadata: string, id: string): any {
             // these should all just be true or false inputs
             Inputs.push(
                 <div
-                    className="card"
+                    className="card flex justify-space-between align-center flex-wrap g-4"
                     style={{
                         background: "var(--background-surface)",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        borderRadius: "0.4rem",
                     }}
                 >
                     <label htmlFor={data[0]}>
@@ -322,15 +295,7 @@ export function ClientEditor(_metadata: string, id: string): any {
 
     // render and return
     return render(
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-            }}
-        >
-            {Inputs}
-        </div>,
+        <div class={"flex flex-column g-4"}>{Inputs}</div>,
         document.getElementById(id) as HTMLElement
     );
 }
