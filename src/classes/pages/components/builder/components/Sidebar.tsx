@@ -12,7 +12,7 @@ import {
     Document,
     SetPage,
     Selected,
-    Move,
+    EditOrder,
     Delete,
     SelectedParent,
     RenderSidebar,
@@ -199,8 +199,8 @@ export default function Sidebar(props: { Page?: string }): any {
             )}
 
             {Selected && Selected.Type !== "Page" && !props.Page && (
-                <button onClick={() => Move(true, Selected, SelectedParent)}>
-                    Move
+                <button onClick={() => EditOrder(true, Selected, SelectedParent)}>
+                    Edit Order
                 </button>
             )}
 
@@ -264,7 +264,7 @@ export default function Sidebar(props: { Page?: string }): any {
                         <>
                             {/* move instructions */}
                             <div className="option">
-                                <b>Moving Component</b>
+                                <b>Editing Component Order</b>
                             </div>
 
                             <div className="option">
@@ -282,7 +282,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                 Show Page
                             </button>
 
-                            <button class={"red"} onClick={() => Move(false)}>
+                            <button class={"red"} onClick={() => EditOrder(false)}>
                                 Cancel
                             </button>
                         </>
@@ -390,44 +390,81 @@ export default function Sidebar(props: { Page?: string }): any {
                                 />
 
                                 <QuickInput
-                                    name="Align X"
-                                    property="AlignX"
+                                    name="Automatic Positioning"
+                                    property="ManualPosition"
                                     type="select"
                                     options={[
                                         {
-                                            label: "Left",
-                                            value: "flex-start",
+                                            label: "True",
+                                            value: "false",
                                         },
                                         {
-                                            label: "Center",
-                                            value: "center",
-                                        },
-                                        {
-                                            label: "Right",
-                                            value: "flex-end",
+                                            label: "False",
+                                            value: "true",
                                         },
                                     ]}
                                 />
 
-                                <QuickInput
-                                    name="Align Y"
-                                    property="AlignY"
-                                    type="select"
-                                    options={[
-                                        {
-                                            label: "Top",
-                                            value: "flex-start",
-                                        },
-                                        {
-                                            label: "Center",
-                                            value: "center",
-                                        },
-                                        {
-                                            label: "Bottom",
-                                            value: "flex-end",
-                                        },
-                                    ]}
-                                />
+                                <details className="option">
+                                    <summary>Automatic Positioning Options</summary>
+
+                                    <div class={"details-flex-content-list-box"}>
+                                        <p className="option">
+                                            These options only apply if "Automatic
+                                            Positioning" is set to "True"
+                                        </p>
+
+                                        <QuickInput
+                                            name="Align X"
+                                            property="AlignX"
+                                            type="select"
+                                            options={[
+                                                {
+                                                    label: "Left",
+                                                    value: "flex-start",
+                                                },
+                                                {
+                                                    label: "Center",
+                                                    value: "center",
+                                                },
+                                                {
+                                                    label: "Right",
+                                                    value: "flex-end",
+                                                },
+                                            ]}
+                                        />
+
+                                        <QuickInput
+                                            name="Align Y"
+                                            property="AlignY"
+                                            type="select"
+                                            options={[
+                                                {
+                                                    label: "Top",
+                                                    value: "flex-start",
+                                                },
+                                                {
+                                                    label: "Center",
+                                                    value: "center",
+                                                },
+                                                {
+                                                    label: "Bottom",
+                                                    value: "flex-end",
+                                                },
+                                            ]}
+                                        />
+
+                                        <QuickInput
+                                            name="Spacing"
+                                            property="Spacing"
+                                            type="input"
+                                            inputType="number"
+                                            value={(
+                                                Selected.Spacing || 10
+                                            ).toString()}
+                                        />
+                                    </div>
+                                </details>
                             </>
                         )) ||
                             (Selected.Type === "Card" && (

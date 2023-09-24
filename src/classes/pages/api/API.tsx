@@ -1022,7 +1022,25 @@ export class PasteLogout implements Endpoint {
 
         // get paste
         const paste = await db.GetPasteFromURL(CustomURL);
-        if (!paste) return new _404Page().request(request);
+
+        // if paste doesn't exist, remove association (skip all checks)
+        if (!paste) {
+            // remove association from session
+            await GetAssociation(request, false, "", true);
+
+            // return
+            return new Response(CustomURL, {
+                status: 302,
+                headers: {
+                    Location: `/?msg=Removed association with ${encodeURIComponent(
+                        CustomURL
+                    )}`,
+                    "Set-Cookie": `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
+                },
+            });
+        }
+
+        // ...
         if (paste.HostServer) return new _404Page().request(request); // can't post comments as a paste from another server... right now!
 
         // make sure paste isn't locked

@@ -326,7 +326,10 @@ export default class Home implements Endpoint {
                                             }}
                                             class={"mobile-flex-center mobile-max"}
                                         >
-                                            <button style={{ minWidth: "5rem" }}>
+                                            <button
+                                                style={{ minWidth: "5rem" }}
+                                                id={"entry:button.Submit"}
+                                            >
                                                 Go
                                             </button>
 
@@ -862,7 +865,10 @@ export default class Home implements Endpoint {
                                                         gap: "0.5rem",
                                                     }}
                                                 >
-                                                    <button class={"green"}>
+                                                    <button
+                                                        class={"green"}
+                                                        id={"entry:button.Submit"}
+                                                    >
                                                         Save
                                                     </button>
 
@@ -1026,6 +1032,22 @@ export default class Home implements Endpoint {
                             )}\`);`,
                         }}
                     />
+
+                    <Modal
+                        buttonid="entry:button.Submit"
+                        modalid="entry:modal.Submit"
+                    >
+                        <div className="flex flex-column g-10">
+                            <span>Loading...</span>
+
+                            <a
+                                href="javascript:window.location.reload()"
+                                class={"button red"}
+                            >
+                                Refresh
+                            </a>
+                        </div>
+                    </Modal>
 
                     {/* auth flow modals */}
                     <AuthModals use={Association[0] ? "logout" : "login"} />

@@ -13,6 +13,7 @@ import PasteList from "./components/site/PasteList";
 import Footer from "./components/site/Footer";
 
 import { plugins } from "../..";
+import TopNav from "./components/site/TopNav";
 import Checkbox from "./components/form/Checkbox";
 import { ParseMarkdownSync } from "./components/Markdown";
 import _404Page from "./components/404";
@@ -262,28 +263,45 @@ export class Login implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <main>
+                    <TopNav breadcrumbs={["admin"]} margin={false} />
+
+                    <div
+                        class={"flex justify-center align-center"}
+                        style={{
+                            height: "calc(100vh - var(--nav-height))",
+                            width: "100vw",
+                        }}
+                    >
                         <form
                             action="/admin/manage-pastes"
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                            }}
+                            class={
+                                "flex flex-column g-4 align-center card border round"
+                            }
                             method={"POST"}
+                            style={{
+                                width: "max-content",
+                            }}
                         >
+                            <h2>Admin Panel</h2>
+
                             <input
                                 type="password"
                                 name={"AdminPassword"}
                                 required
                                 placeholder={"Password"}
+                                class={"round"}
                             />
 
-                            <button>Go</button>
+                            <button
+                                class={"green round"}
+                                style={{
+                                    width: "100%",
+                                }}
+                            >
+                                Go
+                            </button>
                         </form>
-
-                        <Footer />
-                    </main>
+                    </div>
                 </>,
                 <>
                     <title>{EntryDB.config.name} Admin</title>

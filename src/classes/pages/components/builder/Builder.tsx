@@ -89,7 +89,7 @@ export function AddComponent(Type: string) {
 
 // state
 export let SidebarOpen = false;
-export let MoveMode: boolean = false;
+export let EditOrderMode: boolean = false;
 
 export let Hovered: HTMLElement;
 export let CurrentPage: number = 0;
@@ -124,8 +124,8 @@ export function SetPage(page: number = 0) {
     return Update();
 }
 
-export function Move(state: boolean = false, dragging?: Node, doc?: Node[]) {
-    MoveMode = state;
+export function EditOrder(state: boolean = false, dragging?: Node, doc?: Node[]) {
+    EditOrderMode = state;
     if (dragging && doc) schema.SetDrag(dragging, doc);
 
     if (state) return RenderSidebar({ Page: "Move" });
@@ -206,7 +206,7 @@ function RenderPage() {
                               let target = event.target as HTMLElement;
 
                               // move mode
-                              if (MoveMode && EditMode) {
+                              if (EditOrderMode && EditMode) {
                                   const OriginTarget = document.getElementById(
                                       Selected.ID!
                                   )!;
@@ -243,7 +243,7 @@ function RenderPage() {
                                       );
 
                                   // return
-                                  return Move(false);
+                                  return EditOrder(false);
                               }
 
                               // ...

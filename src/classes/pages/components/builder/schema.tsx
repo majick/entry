@@ -35,6 +35,7 @@ export interface PageNode extends BaseNode {
     NotRemovable: boolean;
     Children: Node[];
     Theme?: "dark" | "light" | "purple" | "blue" | "green" | "pink";
+    ManualPosition?: string; // boolean string
 }
 
 export interface CardNode extends BaseNode {
@@ -354,7 +355,11 @@ export function PageNode(props: {
                 style={{
                     "--AlignX": props.node.AlignX || "center",
                     "--AlignY": props.node.AlignY || "center",
-                    "--Spacing": props.node.Spacing ? `${props.node.Spacing}px` : "",
+                    "--Spacing": props.node.Spacing
+                        ? `${props.node.Spacing}px`
+                        : undefined,
+                    "--Display":
+                        props.node.ManualPosition === "true" ? "block" : undefined,
                 }}
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}

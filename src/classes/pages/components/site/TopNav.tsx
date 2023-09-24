@@ -2,7 +2,7 @@ import EntryDB from "../../../db/EntryDB";
 import Modal from "./modals/Modal";
 import Footer from "./Footer";
 
-export default function TopNav(props: { breadcrumbs?: string[] }) {
+export default function TopNav(props: { breadcrumbs?: string[]; margin?: boolean }) {
     // build breadcrumbs
     const crumbs: any[] = [];
 
@@ -54,7 +54,7 @@ export default function TopNav(props: { breadcrumbs?: string[] }) {
             class={"g-8"}
             id={"entry:nav.Top"}
             style={{
-                marginBottom: "1rem",
+                marginBottom: props.margin !== false ? "1rem" : "",
             }}
         >
             {/* left */}
