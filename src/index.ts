@@ -10,6 +10,8 @@ import type { LogEvent } from "./classes/db/LogDB";
 
 // create global (for plugins)
 import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer";
+import { ParseMarkdown } from "./classes/pages/components/Markdown";
+import Modal from "./classes/pages/components/site/modals/Modal";
 import TopNav from "./classes/pages/components/site/TopNav";
 
 export type EntryGlobalType = {
@@ -17,7 +19,9 @@ export type EntryGlobalType = {
     Config: Config;
     Footer: typeof Footer; // needed for client theme
     TopNav: typeof TopNav;
+    Modal: typeof Modal;
     _404Page: typeof _404;
+    ParseMarkdown: typeof ParseMarkdown;
     Headers: {
         Default: typeof API.DefaultHeaders;
         Page: typeof API.PageHeaders;
@@ -31,7 +35,9 @@ export type EntryGlobalType = {
 (global as any).Config = EntryDB.config;
 (global as any).Footer = Footer;
 (global as any).TopNav = TopNav;
+(global as any).Modal = Modal;
 (global as any)._404Page = _404;
+(global as any).ParseMarkdown = ParseMarkdown;
 
 (global as any).Headers = {
     Default: API.DefaultHeaders,

@@ -250,7 +250,6 @@ button.secondary:hover,
 
 button.tertiary,
 .button.tertiary {
-    --ChipColor: var(--background-surface1-5a);
     background: var(--background-surface1-5a);
 }
 
@@ -478,6 +477,7 @@ h6:focus .htag {
     padding: 0 0.5rem;
     border: dashed 1px currentColor;
     transition: all 0.15s;
+    height: max-content !important;
 }
 
 .chip.solid {
@@ -499,6 +499,10 @@ h6:focus .htag {
 }
 
 @media screen and (max-width: 800px) {
+    .desktop-only {
+        display: none !important;
+    }
+
     .mobile-center {
         margin: auto !important;
     }
@@ -600,7 +604,7 @@ select {
     background: var(--background-surface1);
     color: currentColor;
     border: none;
-    outline: none;
+    outline: solid 2px transparent;
     padding: 0.5rem 0.75rem;
     font-size: 16px;
     height: max-content;
@@ -608,7 +612,7 @@ select {
     border-radius: 0 !important;
     transition:
         background 0.15s,
-        box-shadow 0.25s,
+        outline 0.15s,
         opacity 0.15s,
         filter 0.15s;
 }
@@ -626,13 +630,13 @@ input.invalid {
     /* so, the idea behind this is because the input is technically wrong... but it isn't required,
        we're only going to show a yellow "border" thing! */
     background-clip: padding-box;
-    box-shadow: inset 4px 0 var(--yellow) !important;
+    outline: solid 2px var(--yellow) !important;
 }
 
 input:invalid:required,
 textarea:invalid:required,
 select:invalid:required {
-    box-shadow: inset 4px 0 var(--red) !important;
+    outline: solid 2px var(--red) !important;
 }
 
 input:disabled,
@@ -986,6 +990,11 @@ details[open].horizontal .details-content {
 
 details[open].horizontal .details-content * {
     width: max-content;
+}
+
+details.round,
+details.round summary {
+    border-radius: 0.4rem;
 }
 
 /* codemirror styles */

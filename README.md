@@ -183,11 +183,7 @@ An example that doesn't clear logs on restart and has all events enabled looks l
 
 Entry servers are able to run plugins that extend the functionality of Entry.
 
-Plugins only need one dependency, Entry. You can add this through `https://codeberg.org/hkau/entry/archive/master.tar.gz` or `https://git.sentrytwo.com/hkau/entry/archive/master.tar.gz`.
-
-```bash
-bun a https://codeberg.org/hkau/entry/archive/master.tar.gz
-```
+Plugins only need one dependency, Entry. You can add this through using your locally installed Entry source, and running `bun link` to create a local link. Plugins will install from this directory using the [bun link](https://bun.sh/docs/cli/install#bun-link) system.
 
 Plugins can access the `EntryDB` class through `global.EntryDB`.
 
@@ -442,6 +438,10 @@ Adding a new node is handled similarly:
 - Creating a new interface and parse function in the schema (`schema.tsx`)
 - Creating the handler in the parser (`parser.tsx`)
 - Adding style attributes
+
+### Entry: Atlas
+
+The [Atlas](https://codeberg.org/hkau/entry/src/branch/master/packages/atlas) plugin is an optional plugin which adds a live paste editor and **required authentication**. It uses a separate database using [PocketBase](https://pocketbase.io). More information [here](https://codeberg.org/hkau/entry/src/branch/master/packages/atlas/README.md).
 
 ## Development
 

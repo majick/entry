@@ -5,7 +5,6 @@
 
 // ...
 import type { EntryGlobalType } from "entry/src";
-import type _404Page from "entry/src/classes/pages/components/404";
 
 // import honeybee
 import type { HoneybeeConfig } from "honeybee";
@@ -42,15 +41,20 @@ export function VerifyContentType(
 }
 
 // ...imports
-import Network from "./src/Network";
+import Pages from "./src/Pages";
 import API from "./src/API";
 
 // return
 export default {
-    // POST /api/drone/
-    "/api/drone/auth/signup": { Method: "POST", Page: API.SignUp },
-    "/api/drone/auth/login": { Method: "POST", Page: API.Login },
+    // POST /api/atlas/
+    "/api/atlas/auth/signup": { Method: "POST", Page: API.SignUp },
+    "/api/atlas/auth/login": { Method: "POST", Page: API.Login },
+    "/api/atlas/auth/logout": { Method: "POST", Page: API.Logout },
+    "/api/atlas/pastes/new": { Method: "POST", Page: API.CreatePaste },
+    "/api/atlas/pastes/edit": { Method: "POST", Page: API.EditPaste },
     // GET /app/
-    "/app": { Page: Network.Dashboard },
-    "/app/login": { Page: Network.Login },
+    "/app": { Page: Pages.Dashboard },
+    "/a/": { Type: "begins", Page: Pages.PasteView },
+    "/app/signup": { Page: Pages.SignUp },
+    "/app/login": { Page: Pages.Login },
 } as HoneybeeConfig["Pages"];

@@ -9,7 +9,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "entry": "https://git.sentrytwo.com/hkau/entry/archive/master.tar.gz",
+    "entry": "link:entry",
     "pocketbase": "^0.18.0"
   }
 }

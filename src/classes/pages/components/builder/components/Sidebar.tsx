@@ -405,7 +405,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                     ]}
                                 />
 
-                                <details className="option">
+                                <details className="option round">
                                     <summary>Automatic Positioning Options</summary>
 
                                     <div class={"details-flex-content-list-box"}>
@@ -511,7 +511,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                         ]}
                                     />
 
-                                    <details class={"option"}>
+                                    <details class={"option round"}>
                                         <summary>Container Display Options</summary>
 
                                         <div class={"details-flex-content-list-box"}>
@@ -795,7 +795,7 @@ export default function Sidebar(props: { Page?: string }): any {
 
                         {/* events (not supported on some elements!!) */}
                         {Selected.Type !== "Embed" && Selected.Type !== "Source" && (
-                            <details class={"option"}>
+                            <details class={"option round"}>
                                 <summary>Events</summary>
 
                                 <div class={"details-flex-content-list-box"}>
@@ -851,7 +851,7 @@ export default function Sidebar(props: { Page?: string }): any {
                             </button>
                         )}
 
-                        <details className="option">
+                        <details className="option round">
                             <summary>Advanced</summary>
 
                             <div class={"details-flex-content-list-box"}>

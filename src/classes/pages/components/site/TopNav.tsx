@@ -6,6 +6,7 @@ export default function TopNav(props: {
     breadcrumbs?: string[];
     margin?: boolean;
     children?: any;
+    border?: boolean;
 }) {
     // build breadcrumbs
     const crumbs: any[] = [];
@@ -55,14 +56,16 @@ export default function TopNav(props: {
     // return
     return (
         <nav
-            class={"g-8"}
+            class={"g-8 mobile-flex-center"}
             id={"entry:nav.Top"}
             style={{
                 marginBottom: props.margin !== false ? "1rem" : "",
+                borderBottom: props.border === false ? "none" : "",
             }}
         >
             {/* left */}
             <span
+                class={"desktop-only"}
                 style={{
                     maxWidth: "50%",
                     overflow: "hidden",
