@@ -154,6 +154,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                         justify-content: center;
                         align-items: center;
                         gap: 0.5rem;
+                        border-radius: 0.4rem;
                     }`,
                 }}
             />
@@ -178,6 +179,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 buttonid="entry:button.NewPaste"
                 modalid="entry:modal.NewPaste"
                 noIdMatch={true}
+                round={true}
             >
                 <h4 style={{ textAlign: "center", width: "100%" }}>Create Paste</h4>
 
@@ -227,7 +229,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     }}
                 >
                     <button
-                        className="green"
+                        className="green round"
                         style={{
                             width: "100%",
                         }}

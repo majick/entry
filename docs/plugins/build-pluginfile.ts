@@ -1,7 +1,6 @@
 import { build } from "bun";
 import fs from "node:fs";
 
-fs.rmSync("./dist", { recursive: true }); // reset dist directory
 const output = await build({
     entrypoints: [
         "./example-pluginfile.ts"
@@ -12,8 +11,8 @@ const output = await build({
         whitespace: true,
     },
     target: "bun",
-    outdir: "dist",
     splitting: true,
+    outdir: "dist",
     naming: {
         asset: "[name].[ext]",
         chunk: "[name].[ext]",

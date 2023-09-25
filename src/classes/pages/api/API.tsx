@@ -1185,6 +1185,7 @@ export class GetPasteComments implements Endpoint {
 // default export
 export default {
     DefaultHeaders,
+    PageHeaders,
     VerifyContentType,
     Session,
     WellKnown,

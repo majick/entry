@@ -168,6 +168,10 @@ main {
     margin-bottom: 0.5rem;
 }
 
+main.small {
+    width: 80ch;
+}
+
 @media screen and (max-width: 800px) {
     main {
         width: 100vw;
@@ -815,10 +819,15 @@ dialog[open] {
     padding: 1rem;
     display: block;
     width: 100%;
+    transition: all 0.15s;
 }
 
 .card.border {
     border: solid 1px var(--background-surface1-5);
+}
+
+.card.border.dashed {
+    border-style: dashed;
 }
 
 .card.round {
@@ -835,6 +844,10 @@ dialog[open] {
 
 .card.secondary.hover:hover {
     background: var(--background-surface1-5);
+}
+
+.card.GrowHover:hover {
+    transform: scale(1.01);
 }
 
 details {

@@ -8,11 +8,39 @@
 import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
 
-// create global
+// create global (for plugins)
 import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer";
+import TopNav from "./classes/pages/components/site/TopNav";
+
+export type EntryGlobalType = {
+    EntryDB: EntryDB;
+    Config: Config;
+    Footer: typeof Footer; // needed for client theme
+    TopNav: typeof TopNav;
+    _404Page: typeof _404;
+    Headers: {
+        Default: typeof API.DefaultHeaders;
+        Page: typeof API.PageHeaders;
+    };
+    Helpers: {
+        VerifyContentType: typeof API.VerifyContentType;
+    };
+};
 
 (global as any).EntryDB = EntryDB;
+(global as any).Config = EntryDB.config;
 (global as any).Footer = Footer;
+(global as any).TopNav = TopNav;
+(global as any)._404Page = _404;
+
+(global as any).Headers = {
+    Default: API.DefaultHeaders,
+    Page: API.PageHeaders,
+};
+
+(global as any).Helpers = {
+    VerifyContentType: API.VerifyContentType,
+};
 
 // includes
 import "./classes/pages/assets/css/style.css";
@@ -30,13 +58,13 @@ export type Config = {
     do_not_cache?: boolean;
     app?: {
         info?: string;
-        enable_search?: boolean;
-        enable_private_pastes?: boolean;
-        enable_groups?: boolean;
-        enable_expiry?: boolean;
-        enable_not_editable_pastes?: boolean;
-        enable_builder?: boolean;
-        enable_paste_settings?: boolean;
+        enable_search?: boolean; // true default
+        enable_private_pastes?: boolean; // true default
+        enable_groups?: boolean; // true default
+        enable_expiry?: boolean; // true default
+        enable_not_editable_pastes?: boolean; // true default
+        enable_builder?: boolean; // true default
+        enable_paste_settings?: boolean; // true default
         auto_tag?: boolean;
         favicon?: string;
         footer?: {
@@ -126,7 +154,7 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
 import Honeybee, { HoneybeeConfig } from "honeybee";
 
 // ...import endpoints
-import { _404Page } from "./classes/pages/components/404";
+import _404, { _404Page } from "./classes/pages/components/404";
 import Builder from "./classes/pages/components/builder";
 import AdminAPI from "./classes/pages/api/AdminAPI";
 import Admin from "./classes/pages/Admin";
@@ -222,7 +250,6 @@ const config: HoneybeeConfig = {
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
         "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
-        "/paste/dashboard": { Page: Pages.Dashboard },
         "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },

@@ -1,6 +1,6 @@
 /**
  * @file Example plugin import file
- * @name example-pluginfile.ts
+ * @name .pluginfile.example.ts
  */
 
 // import plugins

@@ -3,22 +3,14 @@
  * @name index.ts
  */
 
-// import entrydb
-// DO NOT USE THIS ENTRYDB, IT IS ONLY USED AS A TYPE
-// THE ENTRYDB THAT IS USED IS ACCESSED FROM global.EntryDB
-// ...make sure this only imports type so the Entry source isn't built again
-import type EntryDB from "entry/src/classes/db/EntryDB";
-import type Footer from "entry/src/classes/pages/components/site/Footer";
+// ...
+import type { EntryGlobalType } from "entry/src";
+import type _404Page from "entry/src/classes/pages/components/404";
 
 // import honeybee
 import { Renderer, Endpoint, HoneybeeConfig } from "honeybee";
 
 // create global
-export type EntryGlobalType = {
-    EntryDB: EntryDB;
-    Footer: typeof Footer; // needed for client theme
-};
-
 const EntryGlobal = global as unknown as EntryGlobalType;
 
 // create page...

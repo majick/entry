@@ -2391,27 +2391,6 @@ export class UserSettings implements Endpoint {
     }
 }
 
-export class Dashboard implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        return new Response(
-            Renderer.Render(
-                <>
-                    <TopNav breadcrumbs={["paste", "dashboard"]} />
-                </>,
-                <>
-                    <title>Dashboard</title>
-                    <link rel="icon" href="/favicon" />
-                </>
-            ),
-            {
-                headers: {
-                    "Content-Type": "text/html",
-                },
-            }
-        );
-    }
-}
-
 // default export
 export default {
     GetPasteFromURL,
@@ -2420,5 +2399,4 @@ export default {
     PasteCommentsPage,
     ComponentView,
     UserSettings,
-    Dashboard,
 };

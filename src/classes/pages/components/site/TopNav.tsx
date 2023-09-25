@@ -2,7 +2,11 @@ import EntryDB from "../../../db/EntryDB";
 import Modal from "./modals/Modal";
 import Footer from "./Footer";
 
-export default function TopNav(props: { breadcrumbs?: string[]; margin?: boolean }) {
+export default function TopNav(props: {
+    breadcrumbs?: string[];
+    margin?: boolean;
+    children?: any;
+}) {
     // build breadcrumbs
     const crumbs: any[] = [];
 
@@ -87,11 +91,12 @@ export default function TopNav(props: { breadcrumbs?: string[]; margin?: boolean
 
             {/* right */}
             <div className="flex justify-center align-center g-4 flex-wrap">
-                <a href="/" className="button round border">
-                    Home
-                </a>
-
-                <div className="hr-left" />
+                {props.children && (
+                    <>
+                        {props.children}
+                        <div className="hr-left" />
+                    </>
+                )}
 
                 <button
                     id={"entry:button.PageMenu"}
@@ -131,6 +136,27 @@ export default function TopNav(props: { breadcrumbs?: string[]; margin?: boolean
                         </div>
                     </>
                 )}
+
+                <hr />
+
+                <div className="flex justify-center align-center g-4">
+                    <a
+                        href={
+                            EntryDB.config.app &&
+                            EntryDB.config.app.enable_builder !== false
+                                ? "javascript:"
+                                : "/"
+                        }
+                        className={`button round border${
+                            EntryDB.config.app &&
+                            EntryDB.config.app.enable_builder !== false
+                                ? " modal:entry:button.NewPaste"
+                                : ""
+                        }`}
+                    >
+                        New Paste
+                    </a>
+                </div>
 
                 <hr />
 
