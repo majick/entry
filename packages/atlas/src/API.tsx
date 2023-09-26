@@ -317,6 +317,76 @@ export class EditPaste implements Endpoint {
 
 /**
  * @export
+ * @class DeletePaste
+ * @implements {Endpoint}
+ */
+export class DeletePaste implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // verify content type
+        const WrongType = EntryGlobal.Helpers.VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get body
+        const body = Honeybee.FormDataToJSON(await request.formData());
+        if (!body.CustomURL || !body.EditPassword)
+            return new EntryGlobal._404Page().request(request);
+
+        // connect to db
+        const db = new PocketBase(DatabaseURL);
+
+        // try to restore from cookie
+        const token = await Auth.LoginFromCookie(request, db);
+
+        // make sure token was provided (already in account)
+        if (token === "") return new EntryGlobal._404Page().request(request);
+
+        // delete paste
+        try {
+            // get paste
+            const result = await db
+                .collection("pastes")
+                .getFirstListItem(`CustomURL="${body.CustomURL}"`);
+
+            // verify password
+            if (
+                !(await Bun.password.verify(
+                    body.EditPassword,
+                    result.EditPassword,
+                    "bcrypt"
+                ))
+            )
+                throw new Error("Invalid password!");
+
+            // delete
+            const res = await db.collection("pastes").delete(result.id);
+
+            // return
+            return new Response(JSON.stringify(res), {
+                status: 301,
+                headers: {
+                    Location: "/app",
+                },
+            });
+        } catch (err: any) {
+            // return error
+            return new Response(err, {
+                status: 301,
+                headers: {
+                    Location: `/app?mode=edit&OldURL=${
+                        body.CustomURL
+                    }&err=${encodeURIComponent(err)}`,
+                },
+            });
+        }
+    }
+}
+
+/**
+ * @export
  * @class GetPaste
  * @implements {Endpoint}
  */
@@ -365,5 +435,6 @@ export default {
     // pastes
     CreatePaste,
     EditPaste,
+    DeletePaste,
     GetPaste,
 };

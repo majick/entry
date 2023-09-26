@@ -74,10 +74,11 @@ export class Dashboard implements Endpoint {
         // get paste if we're editing
         let paste: any;
 
-        if (
+        const EditingPaste =
             url.searchParams.get("mode") === "edit" &&
-            url.searchParams.get("OldURL")
-        )
+            url.searchParams.get("OldURL");
+
+        if (EditingPaste)
             paste = await db
                 .collection("pastes")
                 .getFirstListItem(`CustomURL="${url.searchParams.get("OldURL")}"`);
@@ -428,15 +429,139 @@ export class Dashboard implements Endpoint {
 
                                     <hr style={{ margin: "0" }} />
 
-                                    <button
-                                        className="green round"
+                                    <div
                                         style={{
-                                            width: "100%",
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            gap: "0.5rem",
                                         }}
                                     >
-                                        Publish
-                                    </button>
+                                        <button
+                                            className="green round"
+                                            style={{
+                                                width: "100%",
+                                            }}
+                                        >
+                                            Publish
+                                        </button>
+
+                                        <button
+                                            className="red round"
+                                            id={"entry:button.DeletePaste"}
+                                            style={{
+                                                width: "100%",
+                                            }}
+                                        >
+                                            Delete Paste
+                                        </button>
+                                    </div>
                                 </form>
+
+                                {EditingPaste && (
+                                    <EntryGlobal.Modal
+                                        buttonid="entry:button.DeletePaste"
+                                        modalid="entry:modal.DeletePaste"
+                                        round={true}
+                                    >
+                                        <h4
+                                            style={{
+                                                textAlign: "center",
+                                                width: "100%",
+                                            }}
+                                        >
+                                            Confirm Deletion
+                                        </h4>
+
+                                        <hr />
+
+                                        <ul>
+                                            <li>
+                                                If you delete your paste, it will be
+                                                gone forever
+                                            </li>
+                                            <li>
+                                                You cannot restore your paste and it
+                                                will be removed from the server
+                                            </li>
+                                            <li>
+                                                Your custom URL (
+                                                <b>
+                                                    {
+                                                        // everything before @ so (if there is a server),
+                                                        // it isn't included here
+                                                        EditingPaste!.split(":")[0]
+                                                    }
+                                                </b>
+                                                ) will be available
+                                            </li>
+                                        </ul>
+
+                                        <hr />
+
+                                        <div
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                alignItems: "center",
+                                                flexWrap: "wrap",
+                                                gap: "1rem",
+                                            }}
+                                        >
+                                            <form
+                                                method="dialog"
+                                                class={"mobile-max"}
+                                            >
+                                                <button
+                                                    class={"green round mobile-max"}
+                                                >
+                                                    Cancel
+                                                </button>
+
+                                                <div style={{ margin: "0.25rem 0" }}>
+                                                    <hr class={"mobile-only"} />
+                                                </div>
+                                            </form>
+
+                                            <form
+                                                method="POST"
+                                                action={"/api/atlas/pastes/delete"}
+                                                class={
+                                                    "mobile-max flex flex-wrap g-4"
+                                                }
+                                                style={{
+                                                    justifyContent: "right",
+                                                    maxWidth: "100%",
+                                                }}
+                                            >
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    minLength={5}
+                                                    maxLength={256}
+                                                    placeholder={"Edit password"}
+                                                    id={"DEL_EditPassword"}
+                                                    name={"EditPassword"}
+                                                    autoComplete={"off"}
+                                                    class={"round mobile-max"}
+                                                />
+
+                                                <input
+                                                    type="hidden"
+                                                    required
+                                                    name={"CustomURL"}
+                                                    value={EditingPaste!}
+                                                />
+
+                                                <button
+                                                    class={"red round mobile-max"}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </EntryGlobal.Modal>
+                                )}
                             </>
                         )}
 
@@ -919,10 +1044,112 @@ export class Login implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class UserProfile
+ * @implements {Endpoint}
+ */
+export class UserProfile implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // connect to db
+        const db = new PocketBase(DatabaseURL);
+
+        // try to restore from cookie
+        const token = await Auth.LoginFromCookie(request, db, true);
+
+        // get name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("u/")) name = name.split("u/")[1];
+
+        try {
+            // get paste if we're editing
+            const user = await db
+                .collection("users")
+                .getFirstListItem(`username="${name}"`);
+
+            // get user pastes
+            const pastes = await db.collection("pastes").getList(1, 100, {
+                filter: `Owner="${user.id}"`,
+                sort: "-created",
+            });
+
+            // return
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <TopNav
+                            breadcrumbs={["app", "u", name]}
+                            token={token}
+                            margin={false}
+                            border={false}
+                        >
+                            <a href="/app" class={"button border round"}>
+                                Home
+                            </a>
+
+                            <form action="/api/atlas/auth/logout" method={"POST"}>
+                                <button class={"round invisible"} title={"Logout"}>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Sign Out Symbol"}
+                                    >
+                                        <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 4.5-1.97-1.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        </TopNav>
+
+                        <main className="small">
+                            <div
+                                className="card round secondary flex flex-column g-8 justify-center align-center"
+                                style={{
+                                    padding: "5rem",
+                                }}
+                            >
+                                <h1 class={"no-margin"}>{user.username}</h1>
+                            </div>
+
+                            <hr />
+
+                            <p>
+                                Joined:{" "}
+                                <span className="utc-date-to-localize">
+                                    {new Date(user.created).toUTCString()}
+                                </span>
+                            </p>
+
+                            <hr />
+
+                            <div className="flex flex-column g-4 card border round"></div>
+                        </main>
+                    </>,
+                    <>
+                        <title>Dashboard - Atlas - {EntryGlobal.Config.name}</title>
+                        <link rel="icon" href="/favicon" />
+                    </>
+                ),
+                {
+                    headers: {
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        } catch {
+            return new EntryGlobal._404Page().request(request);
+        }
+    }
+}
+
 // default export
 export default {
     Dashboard,
     PasteView,
     SignUp,
     Login,
+    UserProfile,
 };
