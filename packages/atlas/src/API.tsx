@@ -315,6 +315,47 @@ export class EditPaste implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetPaste
+ * @implements {Endpoint}
+ */
+export class GetPaste implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("api/atlas/pastes/get/"))
+            name = name.split("api/atlas/pastes/get/")[1];
+
+        // connect to db
+        const db = new PocketBase(DatabaseURL);
+
+        // edit paste
+        try {
+            // get paste
+            const res = await db
+                .collection("pastes")
+                .getFirstListItem(`CustomURL="${name}"`);
+
+            // clean result
+            res.EditPassword = "";
+
+            // return
+            return new Response(JSON.stringify(res), {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        } catch (err: any) {
+            // return error
+            return new EntryGlobal._404Page().request(request);
+        }
+    }
+}
+
 // default export
 export default {
     // auth
@@ -324,4 +365,5 @@ export default {
     // pastes
     CreatePaste,
     EditPaste,
+    GetPaste,
 };

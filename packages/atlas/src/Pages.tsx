@@ -69,7 +69,7 @@ export class Dashboard implements Endpoint {
         const db = new PocketBase(DatabaseURL);
 
         // try to restore from cookie
-        const token = await Auth.LoginFromCookie(request, db);
+        const token = await Auth.LoginFromCookie(request, db, true);
 
         // get paste if we're editing
         let paste: any;
@@ -483,197 +483,249 @@ export class PasteView implements Endpoint {
 
         // connect to db
         const db = new PocketBase(DatabaseURL);
-
-        // try to restore from cookie
-        const token = await Auth.LoginFromCookie(request, db);
+        await Auth.LoginFromCookie(request, db, true);
 
         // get paste
-        const result = await db
-            .collection("pastes")
-            .getFirstListItem(`CustomURL="${name}"`);
+        let Viewed = false;
 
-        // return
-        return new Response(
-            Renderer.Render(
-                <>
-                    <main>
-                        <div
-                            class={"tab-container"}
-                            style={{
-                                height: "max-content",
-                                maxHeight: "initial",
-                            }}
-                        >
+        try {
+            const result = await db
+                .collection("pastes")
+                .getFirstListItem(`CustomURL="${name}"`);
+
+            // check view
+            if (db.authStore.model) {
+                try {
+                    await db
+                        .collection("views")
+                        .getFirstListItem(
+                            `Viewer="${db.authStore.model.id}" && Paste="${result.id}"`
+                        );
+
+                    // ... view record already exists
+                    Viewed = true;
+                } catch {
+                    // create view record! (since it doesn't exist)
+                    await db.collection("views").create({
+                        Viewer: db.authStore.model.id,
+                        Paste: result.id,
+                    });
+                }
+            }
+
+            // get view count
+            const ViewCount = (
+                await db.collection("views").getFullList({
+                    batch: 200000,
+                    fields: "",
+                    filter: `Paste="${result.id}"`,
+                })
+            ).length;
+
+            // return
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <main>
                             <div
-                                id="editor-tab-preview"
-                                class="editor-tab"
+                                class={"tab-container"}
                                 style={{
                                     height: "max-content",
-                                }}
-                                dangerouslySetInnerHTML={{
-                                    __html: await EntryGlobal.ParseMarkdown(
-                                        result.Content
-                                    ),
-                                }}
-                            />
-                        </div>
-
-                        <div
-                            style={{
-                                marginTop: "0.5rem",
-                                display: "flex",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <div
-                                class={"mobile-block"}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "flex-start",
-                                    gap: "0.5rem",
-                                    width: "100%",
+                                    maxHeight: "initial",
                                 }}
                             >
                                 <div
+                                    id="editor-tab-preview"
+                                    class="editor-tab"
+                                    style={{
+                                        height: "max-content",
+                                    }}
+                                    dangerouslySetInnerHTML={{
+                                        __html: await EntryGlobal.ParseMarkdown(
+                                            result.Content
+                                        ),
+                                    }}
+                                />
+                            </div>
+
+                            <div
+                                style={{
+                                    marginTop: "0.5rem",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                }}
+                            >
+                                <div
+                                    class={"mobile-block"}
                                     style={{
                                         display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "flex-start",
                                         gap: "0.5rem",
-                                        flexWrap: "wrap",
-                                        justifyContent: "center",
+                                        width: "100%",
                                     }}
                                 >
-                                    <a
-                                        class={"button"}
-                                        href={`/app?mode=edit&OldURL=${
-                                            result.CustomURL.split(":")[0]
-                                        }`}
-                                    >
-                                        Edit
-                                    </a>
-
-                                    <details
-                                        class={"horizontal"}
+                                    <div
                                         style={{
-                                            width: "max-content",
+                                            display: "flex",
+                                            gap: "0.5rem",
+                                            flexWrap: "wrap",
+                                            justifyContent: "center",
                                         }}
                                     >
-                                        <summary
+                                        <a
+                                            class={"button"}
+                                            href={`/app?mode=edit&OldURL=${
+                                                result.CustomURL.split(":")[0]
+                                            }`}
+                                        >
+                                            Edit
+                                        </a>
+
+                                        <details
+                                            class={"horizontal"}
                                             style={{
-                                                fontWeight: "normal",
-                                                width: "100px",
+                                                width: "max-content",
                                             }}
                                         >
-                                            Export
-                                        </summary>
-
-                                        <div
-                                            class={"details-content"}
-                                            style={{
-                                                minWidth: "calc(80px * 3)",
-                                            }}
-                                        >
-                                            <a
-                                                class={"button"}
-                                                target={"_blank"}
-                                                href={`/api/raw/${result.CustomURL}`}
+                                            <summary
                                                 style={{
-                                                    width: "80px",
-                                                }}
-                                            >
-                                                Raw
-                                            </a>
-
-                                            <a
-                                                class={"button"}
-                                                href={`/api/html/${result.CustomURL}`}
-                                                target={"_blank"}
-                                                style={{
+                                                    fontWeight: "normal",
                                                     width: "100px",
                                                 }}
                                             >
-                                                HTML
-                                            </a>
+                                                Export
+                                            </summary>
 
-                                            <a
-                                                class={"button"}
-                                                href={`?view=doc`}
+                                            <div
+                                                class={"details-content"}
                                                 style={{
-                                                    width: "80px",
+                                                    minWidth: "calc(80px * 3)",
                                                 }}
                                             >
-                                                Doc
-                                            </a>
-                                        </div>
-                                    </details>
-                                </div>
+                                                <a
+                                                    class={"button"}
+                                                    target={"_blank"}
+                                                    href={`/api/raw/${result.CustomURL}`}
+                                                    style={{
+                                                        width: "80px",
+                                                    }}
+                                                >
+                                                    Raw
+                                                </a>
 
-                                <div className="mobile-only">
-                                    <hr />
-                                </div>
+                                                <a
+                                                    class={"button"}
+                                                    href={`/api/html/${result.CustomURL}`}
+                                                    target={"_blank"}
+                                                    style={{
+                                                        width: "100px",
+                                                    }}
+                                                >
+                                                    HTML
+                                                </a>
 
-                                <div
-                                    class={"mobile-flex-center"}
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "flex-end",
-                                        color: "var(--text-color-faded)",
-                                        textAlign: "right",
-                                    }}
-                                >
-                                    {result.ExpireOn !== undefined && (
-                                        <span>Expires: {result.ExpireOn}</span>
-                                    )}
+                                                <a
+                                                    class={"button"}
+                                                    href={`?view=doc`}
+                                                    style={{
+                                                        width: "80px",
+                                                    }}
+                                                >
+                                                    Doc
+                                                </a>
+                                            </div>
+                                        </details>
+                                    </div>
 
-                                    <span
-                                        title={new Date(
-                                            result.created
-                                        ).toUTCString()}
+                                    <div className="mobile-only">
+                                        <hr />
+                                    </div>
+
+                                    <div
+                                        class={"mobile-flex-center"}
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            justifyContent: "center",
+                                            alignItems: "flex-end",
+                                            color: "var(--text-color-faded)",
+                                            textAlign: "right",
+                                        }}
                                     >
-                                        Pub:{" "}
-                                        <span className="utc-date-to-localize">
-                                            {new Date(result.created).toUTCString()}
-                                        </span>
-                                    </span>
+                                        {result.ExpireOn !== undefined && (
+                                            <span>Expires: {result.ExpireOn}</span>
+                                        )}
 
-                                    <span
-                                        title={new Date(
-                                            result.updated
-                                        ).toUTCString()}
-                                    >
-                                        Edit:{" "}
-                                        <span className="utc-date-to-localize">
-                                            {new Date(result.updated).toUTCString()}
+                                        <span
+                                            title={new Date(
+                                                result.created
+                                            ).toUTCString()}
+                                        >
+                                            Pub:{" "}
+                                            <span className="utc-date-to-localize">
+                                                {new Date(
+                                                    result.created
+                                                ).toUTCString()}
+                                            </span>
                                         </span>
-                                    </span>
+
+                                        <span
+                                            title={new Date(
+                                                result.updated
+                                            ).toUTCString()}
+                                        >
+                                            Edit:{" "}
+                                            <span className="utc-date-to-localize">
+                                                {new Date(
+                                                    result.updated
+                                                ).toUTCString()}
+                                            </span>
+                                        </span>
+
+                                        <p class={"flex align-center g-4"}>
+                                            {Viewed === true && (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Sparkle Symbol"}
+                                                >
+                                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
+                                                </svg>
+                                            )}
+                                            Views: {ViewCount}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <EntryGlobal.Footer />
-                    </main>
+                            <EntryGlobal.Footer />
+                        </main>
 
-                    <script
-                        // P.S. I hate this
-                        type="module"
-                        dangerouslySetInnerHTML={{
-                            __html: `import fix from "/ClientFixMarkdown.js"; fix();`,
-                        }}
-                    />
-                </>,
-                <>
-                    <title>{result.CustomURL}</title>
-                    <link rel="icon" href="/favicon" />
-                </>
-            ),
-            {
-                headers: {
-                    "Content-Type": "text/html",
-                },
-            }
-        );
+                        <script
+                            // P.S. I hate this
+                            type="module"
+                            dangerouslySetInnerHTML={{
+                                __html: `import fix from "/ClientFixMarkdown.js"; fix();`,
+                            }}
+                        />
+                    </>,
+                    <>
+                        <title>{result.CustomURL}</title>
+                        <link rel="icon" href="/favicon" />
+                    </>
+                ),
+                {
+                    headers: {
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        } catch (err) {
+            return new EntryGlobal._404Page().request(request);
+        }
     }
 }
 
@@ -690,7 +742,7 @@ export class SignUp implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <EntryGlobal.TopNav breadcrumbs={["app", "signup"]} />
+                    <TopNav breadcrumbs={["app", "signup"]} border={false} />
 
                     <main class={"flex flex-column align-center g-4"}>
                         <h2 class={"no-margin"}>sign up</h2>
@@ -785,7 +837,7 @@ export class Login implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <EntryGlobal.TopNav breadcrumbs={["app", "login"]} />
+                    <TopNav breadcrumbs={["app", "login"]} border={false} />
 
                     <main class={"flex flex-column align-center g-4"}>
                         <h2 class={"no-margin"}>login</h2>

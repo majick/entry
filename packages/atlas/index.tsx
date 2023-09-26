@@ -57,4 +57,6 @@ export default {
     "/a/": { Type: "begins", Page: Pages.PasteView },
     "/app/signup": { Page: Pages.SignUp },
     "/app/login": { Page: Pages.Login },
+    // GET /api/atlas/
+    "/api/atlas/pastes/get": { Type: "begins", Page: API.GetPaste },
 } as HoneybeeConfig["Pages"];

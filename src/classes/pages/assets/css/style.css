@@ -298,6 +298,10 @@ button:disabled,
     opacity: 50%;
 }
 
+button.invisible:not(:hover) {
+    background: inherit;
+}
+
 button:focus,
 .button:focus {
     box-shadow: inset 0 0 0 2px var(--blue);
@@ -1545,10 +1549,6 @@ nav a {
 nav.scroll {
     background: var(--background-surface1);
     border-color: var(--background-surface2);
-}
-
-nav button.invisible:not(:hover) {
-    background: inherit;
 }
 
 .hr-left {
