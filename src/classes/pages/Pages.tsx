@@ -582,6 +582,7 @@ export class GetPasteFromURL implements Endpoint {
                                     <Modal
                                         buttonid="entry:button.PasteOptions"
                                         modalid="entry:modal.PasteOptions"
+                                        round={true}
                                     >
                                         <div
                                             style={{
@@ -596,7 +597,7 @@ export class GetPasteFromURL implements Endpoint {
                                             ) && (
                                                 <a
                                                     href={`/?Template=${result.CustomURL}`}
-                                                    class={"button"}
+                                                    class={"button round"}
                                                 >
                                                     Use Template
                                                 </a>
@@ -604,7 +605,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                             {result.GroupName && (
                                                 <a
-                                                    class={"button"}
+                                                    class={"button round"}
                                                     href={`/search?q=${
                                                         result.GroupName
                                                     }%2F&group=${result.GroupName}${
@@ -629,7 +630,7 @@ export class GetPasteFromURL implements Endpoint {
                                                         .ReportsEnabled !==
                                                         false) && (
                                                     <a
-                                                        class={"button"}
+                                                        class={"button round"}
                                                         href={`/?ReportOn=${result.CustomURL}`}
                                                         title={"Report Paste"}
                                                     >
@@ -650,7 +651,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 EntryDB.config.app.enable_builder !==
                                                     false && (
                                                     <a
-                                                        class={"button"}
+                                                        class={"button round"}
                                                         href={`/paste/builder?edit=${result.CustomURL}`}
                                                     >
                                                         Edit in Builder
@@ -662,7 +663,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                         <form method="dialog" class={"mobile-max"}>
                                             <button
-                                                class={"green"}
+                                                class={"green round"}
                                                 style={{
                                                     width: "100%",
                                                 }}

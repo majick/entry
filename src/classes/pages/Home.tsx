@@ -529,6 +529,7 @@ export default class Home implements Endpoint {
                                     <Modal
                                         buttonid="entry:button.PasteExtras"
                                         modalid="entry:modal.PasteExtras"
+                                        round={true}
                                     >
                                         <div
                                             style={{
@@ -567,7 +568,7 @@ export default class Home implements Endpoint {
                                                             false) && (
                                                         <details
                                                             class={
-                                                                "details-confined"
+                                                                "details-confined round"
                                                             }
                                                         >
                                                             <summary>
@@ -621,7 +622,7 @@ export default class Home implements Endpoint {
                                                             false) && (
                                                         <details
                                                             class={
-                                                                "details-confined"
+                                                                "details-confined round"
                                                             }
                                                         >
                                                             <summary>
@@ -693,7 +694,7 @@ export default class Home implements Endpoint {
                                                             false) && (
                                                         <details
                                                             class={
-                                                                "details-confined"
+                                                                "details-confined round"
                                                             }
                                                         >
                                                             <summary>
@@ -744,7 +745,7 @@ export default class Home implements Endpoint {
                                             }}
                                         >
                                             <a
-                                                className="button green"
+                                                className="button green round"
                                                 href={
                                                     "javascript:modals['entry:modal.PasteExtras']();"
                                                 }
@@ -938,6 +939,7 @@ export default class Home implements Endpoint {
                         <Modal
                             buttonid="editor-open-delete-modal"
                             modalid="editor-modal-delete"
+                            round={true}
                         >
                             <h4 style={{ textAlign: "center", width: "100%" }}>
                                 Confirm Deletion
@@ -978,7 +980,7 @@ export default class Home implements Endpoint {
                                 }}
                             >
                                 <form method="dialog" class={"mobile-max"}>
-                                    <button class={"green mobile-max"}>
+                                    <button class={"green mobile-max round"}>
                                         Cancel
                                     </button>
 
@@ -1002,12 +1004,13 @@ export default class Home implements Endpoint {
                                     <input
                                         type="text"
                                         required
-                                        minLength={EntryDB.MinPasswordLength}
-                                        maxLength={EntryDB.MaxPasswordLength}
-                                        placeholder={"Edit code"}
+                                        minLength={5}
+                                        maxLength={256}
+                                        placeholder={"Edit password"}
+                                        id={"DEL_EditPassword"}
                                         name={"EditPassword"}
                                         autoComplete={"off"}
-                                        class={"mobile-max"}
+                                        class={"round mobile-max"}
                                     />
 
                                     <input
@@ -1017,7 +1020,9 @@ export default class Home implements Endpoint {
                                         value={paste!.CustomURL}
                                     />
 
-                                    <button class={"red mobile-max"}>Delete</button>
+                                    <button class={"red round mobile-max"}>
+                                        Delete
+                                    </button>
                                 </form>
                             </div>
                         </Modal>
@@ -1036,6 +1041,7 @@ export default class Home implements Endpoint {
                     <Modal
                         buttonid="entry:button.Submit"
                         modalid="entry:modal.Submit"
+                        round={true}
                     >
                         <div className="flex flex-column g-10">
                             <span>Loading...</span>

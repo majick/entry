@@ -831,7 +831,7 @@ dialog[open] {
 }
 
 .card.border {
-    border: solid 1px var(--background-surface1-5);
+    border: solid 1px var(--background-surface2);
 }
 
 .card.border.dashed {

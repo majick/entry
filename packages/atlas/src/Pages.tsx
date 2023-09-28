@@ -616,7 +616,9 @@ export class PasteView implements Endpoint {
         try {
             const result = await db
                 .collection("pastes")
-                .getFirstListItem(`CustomURL="${name}"`);
+                .getFirstListItem(`CustomURL="${name}"`, {
+                    expand: "Owner",
+                });
 
             // check view
             if (db.authStore.model) {
@@ -808,7 +810,18 @@ export class PasteView implements Endpoint {
                                             </span>
                                         </span>
 
-                                        <p class={"flex align-center g-4"}>
+                                        {result.expand && result.expand.Owner && (
+                                            <span>
+                                                Owner:{" "}
+                                                <a
+                                                    href={`/u/${result.expand.Owner.username}`}
+                                                >
+                                                    {result.expand.Owner.username}
+                                                </a>
+                                            </span>
+                                        )}
+
+                                        <span class={"flex align-center g-4"}>
                                             {Viewed === true && (
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
@@ -821,7 +834,7 @@ export class PasteView implements Endpoint {
                                                 </svg>
                                             )}
                                             Views: {ViewCount}
-                                        </p>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -1080,7 +1093,7 @@ export class UserProfile implements Endpoint {
                 Renderer.Render(
                     <>
                         <TopNav
-                            breadcrumbs={["app", "u", name]}
+                            breadcrumbs={["u", name]}
                             token={token}
                             margin={false}
                             border={false}
@@ -1104,28 +1117,70 @@ export class UserProfile implements Endpoint {
                             </form>
                         </TopNav>
 
-                        <main className="small">
+                        <main className="small card">
                             <div
-                                className="card round secondary flex flex-column g-8 justify-center align-center"
+                                className="card round secondary flex flex-wrap g-8 justify-center align-center"
                                 style={{
                                     padding: "5rem",
                                 }}
                             >
+                                {user.avatar && (
+                                    <img
+                                        src={`${DatabaseURL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`}
+                                        alt={`${user.username}'s profile picture`}
+                                        style={{
+                                            borderRadius: "360rem",
+                                            width: "5rem",
+                                        }}
+                                    />
+                                )}
+
                                 <h1 class={"no-margin"}>{user.username}</h1>
                             </div>
 
                             <hr />
 
-                            <p>
-                                Joined:{" "}
-                                <span className="utc-date-to-localize">
-                                    {new Date(user.created).toUTCString()}
-                                </span>
-                            </p>
+                            <div
+                                class={"card"}
+                                dangerouslySetInnerHTML={{
+                                    __html: await EntryGlobal.ParseMarkdown(
+                                        user.about
+                                    ),
+                                }}
+                            />
 
                             <hr />
 
-                            <div className="flex flex-column g-4 card border round"></div>
+                            <div className="flex flex-column g-4 card border round">
+                                {pastes.items.map((paste) => (
+                                    <div className="flex justify-space-between align-center card border dashed round">
+                                        <div class={"flex flex-column g-4"}>
+                                            <b>{paste.CustomURL}</b>
+                                            <span>
+                                                {paste.Content.length} characters
+                                            </span>
+                                        </div>
+
+                                        <a
+                                            href={`/a/${paste.CustomURL}`}
+                                            className="button round"
+                                        >
+                                            View
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <hr />
+
+                            <div className="card flex flex-column g-4">
+                                <span>
+                                    Joined:{" "}
+                                    <span className="utc-date-to-localize">
+                                        {new Date(user.created).toUTCString()}
+                                    </span>
+                                </span>
+                            </div>
                         </main>
                     </>,
                     <>
