@@ -125,7 +125,7 @@ export default function TopNav(props: {
             >
                 {props.breadcrumbs && (
                     <>
-                        <div className="flex justify-center align-center g-4">
+                        <div className="flex justify-center align-center g-4 flex-wrap">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 16 16"

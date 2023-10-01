@@ -34,6 +34,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                     buttonid="entry:button.login"
                     modalid="entry:modal.login"
                     noIdMatch={true}
+                    round={true}
                 >
                     <h1
                         style={{
@@ -50,7 +51,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                         action="/api/associate"
                         method={"POST"}
                         target={"association_frame"}
-                        class={"flex flex-column g-4"}
+                        class={"flex flex-column g-10"}
                     >
                         <input
                             type="text"
@@ -60,6 +61,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                             name={"CustomURL"}
                             id={"CustomURL"}
                             autoComplete={"off"}
+                            class={"round"}
                             required
                         />
 
@@ -71,10 +73,12 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                             name={"EditPassword"}
                             id={"EditPassword"}
                             autoComplete={"off"}
+                            class={"round"}
                             required
                         />
 
                         <button
+                            class={"round"}
                             style={{
                                 width: "100%",
                             }}
@@ -87,7 +91,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
 
                     <form method="dialog" class={"mobile-max"}>
                         <button
-                            class={"green"}
+                            class={"green round"}
                             style={{
                                 width: "100%",
                             }}
@@ -103,6 +107,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                     buttonid="entry:button.logout"
                     modalid="entry:modal.logout"
                     noIdMatch={true}
+                    round={true}
                 >
                     <h1
                         style={{
@@ -128,7 +133,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                             }}
                         >
                             <button
-                                class={"green"}
+                                class={"green round"}
                                 style={{
                                     width: "100%",
                                 }}
@@ -146,7 +151,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                             }}
                         >
                             <button
-                                class={"red"}
+                                class={"red round"}
                                 style={{
                                     width: "100%",
                                 }}

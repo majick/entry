@@ -298,7 +298,8 @@ button:disabled,
     opacity: 50%;
 }
 
-button.invisible:not(:hover) {
+button.invisible:not(:hover),
+.button.invisible:not(:hover) {
     background: inherit;
 }
 

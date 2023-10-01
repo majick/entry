@@ -492,7 +492,7 @@ export default class EntryDB {
                     )[2].length;
 
                 // count comments
-                if (EntryDB.Logs && !SkipExtras) {
+                if (EntryDB.Logs) {
                     const comments = await EntryDB.Logs.QueryLogs(
                         `Type = "comment" AND Content LIKE "${record.CustomURL.replaceAll(
                             "_",
@@ -1645,7 +1645,7 @@ export default class EntryDB {
             `Type = "comment" AND Content LIKE "${result.CustomURL.replaceAll(
                 "_",
                 "\\_"
-            )};%" ESCAPE "\\" ORDER BY cast(Timestamp as float) DESC LIMIT 100 OFFSET ${offset}`
+            )};%" ESCAPE "\\" ORDER BY cast(Timestamp as float) DESC LIMIT 50 OFFSET ${offset}`
         );
 
         const CommentPastes: Paste[] = [];

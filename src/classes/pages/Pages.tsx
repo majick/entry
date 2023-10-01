@@ -1282,6 +1282,7 @@ export class PasteCommentsPage implements Endpoint {
 
         // get offset
         const OFFSET = parseInt(search.get("offset") || "0");
+        const PER_PAGE = 50;
 
         // get comments
         const _result = await db.GetPasteComments(
@@ -1324,93 +1325,93 @@ export class PasteCommentsPage implements Endpoint {
         )
             return new _404Page().request(request);
 
-        // ...
-        function CommentsNav() {
-            return (
-                <>
-                    <h1
-                        style={{
-                            width: "100%",
-                        }}
-                    >
-                        {(result.GroupName === "comments" &&
-                            result.Metadata &&
-                            result.Metadata.Comments &&
-                            result.Metadata.Comments.ParentCommentOn) ||
-                            result.CustomURL}
-                    </h1>
-
-                    <hr />
-
-                    <div class={"flex justify-center align-center g-4"}>
-                        <a href={`/${result.CustomURL}`} class={"button"}>
-                            View Paste
-                        </a>
-
-                        {PreviousInThread && (
-                            <a
-                                class={"button"}
-                                href={`/paste/comments/${PreviousInThread}`}
-                            >
-                                Back
-                            </a>
-                        )}
-                    </div>
-
-                    <hr />
-
-                    <div class={"flex justify-center align-center g-4"}>
-                        {OFFSET !== 0 && (
-                            <>
-                                {/* only shown if we're not at the first page */}
-                                <a href={`?offset=${OFFSET - 100}`} class={"button"}>
-                                    Previous Page
-                                </a>
-                            </>
-                        )}
-
-                        {OFFSET / 100 < (result.Comments || 0) / 100 - 1 &&
-                            (result.Comments || 0) > 100 && (
-                                <>
-                                    {/* only shown if we're not at the last page (100 per page) */}
-                                    <a
-                                        href={`?offset=${OFFSET + 100}`}
-                                        class={"button"}
-                                    >
-                                        Next Page
-                                    </a>
-                                </>
-                            )}
-                    </div>
-                </>
-            );
-        }
-
         // return
         return new Response(
             Renderer.Render(
                 <div
-                    class="sidebar-layout-wrapper builder:page"
+                    class="builder:page"
                     style={{
-                        flexDirection: "row",
-                        gap: 0,
+                        gap: "0",
                     }}
                 >
-                    <div className="sidebar">
-                        <div>
-                            <CommentsNav />
+                    <TopNav
+                        breadcrumbs={[
+                            "paste",
+                            "comments",
+                            (result.GroupName === "comments" &&
+                                result.Metadata &&
+                                result.Metadata.Comments &&
+                                result.Metadata.Comments.ParentCommentOn) ||
+                                result.CustomURL,
+                        ]}
+                        margin={false}
+                    >
+                        <div class={"flex justify-center align-center g-4"}>
+                            {OFFSET !== 0 && (
+                                <>
+                                    {/* only shown if we're not at the first page */}
+                                    <a
+                                        href={`?offset=${OFFSET - PER_PAGE}`}
+                                        class={"button round"}
+                                        title={"Previous Page"}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Left Arrow"}
+                                        >
+                                            <path d="M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z"></path>
+                                        </svg>
+                                    </a>
+                                </>
+                            )}
+
+                            {OFFSET / PER_PAGE <
+                                (result.Comments || 0) / PER_PAGE - 1 &&
+                                (result.Comments || 0) > PER_PAGE && (
+                                    <>
+                                        {/* only shown if we're not at the last page (PER_PAGE) */}
+                                        <a
+                                            href={`?offset=${OFFSET + PER_PAGE}`}
+                                            class={"button round"}
+                                            title={"Next Page"}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Right Arrow"}
+                                            >
+                                                <path d="M8.22 2.97a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l2.97-2.97H3.75a.75.75 0 0 1 0-1.5h7.44L8.22 4.03a.75.75 0 0 1 0-1.06Z"></path>
+                                            </svg>
+                                        </a>
+                                    </>
+                                )}
+
+                            {(OFFSET !== 0 || (result.Comments || 0) > PER_PAGE) && (
+                                <div className="hr-left" />
+                            )}
                         </div>
 
-                        <Footer />
-                    </div>
-
-                    <details className="sidebar-mobile">
-                        <summary>Menu</summary>
-
-                        <div>
-                            <CommentsNav />
-                        </div>
-                    </details>
+                        <a
+                            href={`/?CommentOn=${result.CustomURL}`}
+                            className="button border round"
+                            title={"Add Comments"}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                height="16"
+                                aria-label={"Plus Symbol"}
+                            >
+                                <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path>
+                            </svg>
+                        </a>
+                    </TopNav>
 
                     <div
                         className="tab-container editor-tab page-content"
