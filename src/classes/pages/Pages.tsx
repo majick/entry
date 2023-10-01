@@ -2137,7 +2137,7 @@ export class UserSettings implements Endpoint {
                                         <>
                                             <hr />
 
-                                            <details class={"secondary"}>
+                                            <details class={"round secondary"}>
                                                 <summary>Comment History</summary>
 
                                                 <div

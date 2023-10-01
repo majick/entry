@@ -152,6 +152,11 @@ if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
 
     div();
 
+    // prefill extra values
+    config.app = {
+        auto_tag: false,
+    };
+
     // save file
     await Bun.write(EntryDB.ConfigLocation, JSON.stringify(config, undefined, 4));
     await EntryDB.GetConfig();

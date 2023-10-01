@@ -10,8 +10,8 @@ import { db } from "../../api/API";
 let version: Partial<Paste> | undefined;
 
 if (!EntryDB.config) {
-    await EntryDB.GetConfig();
-    version = await db.GetPasteFromURL("v");
+    const _r = await EntryDB.GetConfig();
+    if (_r) version = await db.GetPasteFromURL("v");
 }
 
 // plugin footer load

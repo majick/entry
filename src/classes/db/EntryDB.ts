@@ -154,6 +154,8 @@ export default class EntryDB {
             });
 
             // ...
+            if (!(await EntryDB.GetConfig())) return;
+
             // check version
             let storedVersion = await this.GetPasteFromURL("v");
 
@@ -212,7 +214,11 @@ export default class EntryDB {
      */
     public static async GetConfig(): Promise<Config | undefined> {
         // make sure config exists
-        if (!(await Bun.file(EntryDB.ConfigLocation).exists())) return undefined;
+        if (!(await Bun.file(EntryDB.ConfigLocation).exists())) {
+            // @ts-ignore - (most) values are prefilled when undefined anyways
+            EntryDB.config = { name: "Entry", app: { auto_tag: false } };
+            return undefined; // still return undefined so setup runs
+        }
 
         // get config
         const config = JSON.parse(await Bun.file(EntryDB.ConfigLocation).text());
