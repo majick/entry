@@ -1206,7 +1206,7 @@ export class PastesSearch implements Endpoint {
                                 }}
                             >
                                 <h1 class={"no-margin"}>Search</h1>
-                                <SearchForm />
+                                <SearchForm alwaysCenter={true} />
                             </main>
 
                             <Footer />

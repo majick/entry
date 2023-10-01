@@ -244,7 +244,7 @@ export class EditPaste implements Endpoint {
 
         // get body
         const body = Honeybee.FormDataToJSON(await request.formData());
-        if (!body.CustomURL || !body.EditPassword || !body.Content)
+        if (!body.OldURL || !body.EditPassword || !body.Content)
             return new EntryGlobal._404Page().request(request);
 
         // connect to db
@@ -261,7 +261,7 @@ export class EditPaste implements Endpoint {
             // get paste
             const result = await db
                 .collection("pastes")
-                .getFirstListItem(`CustomURL="${body.CustomURL}"`);
+                .getFirstListItem(`CustomURL="${body.OldURL}"`);
 
             // verify password
             if (
@@ -307,8 +307,9 @@ export class EditPaste implements Endpoint {
                 status: 301,
                 headers: {
                     Location: `/app?mode=edit&OldURL=${
-                        body.CustomURL
+                        body.OldURL
                     }&err=${encodeURIComponent(err)}`,
+                    "X-Entry-Error": err,
                 },
             });
         }

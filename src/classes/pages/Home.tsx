@@ -791,7 +791,7 @@ export default class Home implements Endpoint {
 
                                                 <input
                                                     type="hidden"
-                                                    name={"NewContent"}
+                                                    name={"Content"}
                                                     id={"contentInput"}
                                                     required
                                                 />
@@ -805,7 +805,7 @@ export default class Home implements Endpoint {
                                                     minLength={
                                                         EntryDB.MinPasswordLength
                                                     }
-                                                    name={"OldEditPassword"}
+                                                    name={"EditPassword"}
                                                     required
                                                 />
 

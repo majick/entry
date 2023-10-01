@@ -102,8 +102,8 @@ export class Entry {
             method: "POST",
             body: JSON.stringify({
                 OldURL: props.CustomURL,
-                OldEditPassword: props.EditPassword,
-                NewContent: props.Content,
+                EditPassword: props.EditPassword,
+                Content: props.Content,
                 NewEditPassword: props.NewEditPassword,
                 NewURL: props.NewCustomURL,
             }),

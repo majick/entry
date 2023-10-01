@@ -16,6 +16,7 @@ import Modal from "../site/modals/Modal";
 
 import Sidebar from "./components/Sidebar";
 import Toolbox from "./components/Toolbox";
+import PublishModals from "../site/modals/PublishModals";
 
 // render
 export let Document: BuilderDocument;
@@ -386,7 +387,20 @@ function RenderPage() {
                     </svg>
                 </button>
 
-                <button id={"entry:button.Publish"}>Publish</button>
+                <button
+                    id={"entry:button.PublishPaste"}
+                    onClick={() => {
+                        (
+                            document.getElementById(
+                                "contentInput"
+                            ) as HTMLInputElement
+                        ).value = encodeURIComponent(
+                            `_builder:${BaseParser.stringify(Document)}`
+                        );
+                    }}
+                >
+                    Publish
+                </button>
             </div>
 
             <div id="builder:sidebar" />
@@ -483,320 +497,14 @@ function RenderPage() {
                 </div>
             </Modal>
 
-            <Modal buttonid="entry:button.Publish" modalid="entry:modal.Publish">
-                <div
-                    style={{
-                        width: "25rem",
-                        maxWidth: "100%",
-                    }}
-                >
-                    <b>Publish</b>
-
-                    <hr />
-
-                    {(EditingPaste === null && (
-                        <form
-                            style={{
-                                display: "flex",
-                                gap: "0.5rem",
-                                flexDirection: "column",
-                                width: "100%",
-                            }}
-                            onSubmit={async (event: Event<HTMLFormElement>) => {
-                                event.preventDefault();
-
-                                // get target
-                                const target = event.target as HTMLFormElement;
-
-                                // disable EditMode
-                                for (const node of parser.AllNodes)
-                                    node.EditMode = undefined;
-
-                                // build paste
-                                const Paste: Paste = {
-                                    CustomURL: target.CustomURL.value || "",
-                                    Content: encodeURIComponent(
-                                        `_builder:${BaseParser.stringify(Document)}`
-                                    ),
-                                    EditPassword: target.EditPassword.value || "",
-                                    PubDate: new Date().getTime(),
-                                    EditDate: new Date().getTime(),
-                                    GroupName: "",
-                                    GroupSubmitPassword: "",
-                                };
-
-                                // create formdata body
-                                let body: string[] = [];
-
-                                // ...fill formdata body
-                                for (const [key, value] of Object.entries(Paste))
-                                    body.push(`${key}=${value}`);
-
-                                // send request
-                                const res = await fetch("/api/new", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type":
-                                            "application/x-www-form-urlencoded",
-                                    },
-                                    body: body.join("&"),
-                                });
-
-                                // check if there was an error
-                                if (res.headers.get("X-Entry-Error"))
-                                    return alert(res.headers.get("X-Entry-Error"));
-
-                                // redirect to view
-                                return (window.location.href = `/${Paste.CustomURL}`);
-                            }}
-                        >
-                            <input
-                                type="text"
-                                placeholder={"Custom URL"}
-                                maxLength={500}
-                                minLength={2}
-                                name={"CustomURL"}
-                                id={"CustomURL"}
-                                autoComplete={"off"}
-                                required
-                            />
-
-                            <input
-                                type="text"
-                                placeholder={"Custom edit code"}
-                                maxLength={256}
-                                minLength={5}
-                                name={"EditPassword"}
-                                id={"EditPassword"}
-                                autoComplete={"off"}
-                                required
-                            />
-
-                            <button
-                                style={{
-                                    width: "100%",
-                                }}
-                            >
-                                Publish
-                            </button>
-                        </form>
-                    )) || (
-                        <form
-                            style={{
-                                display: "flex",
-                                gap: "0.5rem",
-                                flexDirection: "column",
-                                width: "100%",
-                            }}
-                            onSubmit={async (event: Event<HTMLFormElement>) => {
-                                event.preventDefault();
-
-                                // get target
-                                const target = event.target as HTMLFormElement;
-
-                                // disable EditMode
-                                for (const node of parser.AllNodes)
-                                    node.EditMode = undefined;
-
-                                // build paste
-                                const Paste = {
-                                    OldURL: EditingPaste || "",
-                                    OldEditPassword:
-                                        target.OldEditPassword.value || "",
-                                    NewContent: !(
-                                        search.get("edit") || ""
-                                    ).startsWith("components/") // editing page, save entire page
-                                        ? encodeURIComponent(
-                                              `_builder:${BaseParser.stringify(
-                                                  Document
-                                              )}`
-                                          ) // editing component, save only that
-                                        : encodeURIComponent(
-                                              `_builder.component:${JSON.stringify({
-                                                  Name:
-                                                      search.get("component") ||
-                                                      "blank",
-                                                  Component: BaseParser.stringify(
-                                                      Document.Pages[CurrentPage]
-                                                          .Children[0]
-                                                  ),
-                                              })}`
-                                          ),
-                                };
-
-                                // create formdata body
-                                let body: string[] = [];
-
-                                // ...fill formdata body
-                                for (const [key, value] of Object.entries(Paste))
-                                    body.push(`${key}=${value}`);
-
-                                // send request
-                                const res = await fetch("/api/edit", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type":
-                                            "application/x-www-form-urlencoded",
-                                    },
-                                    body: body.join("&"),
-                                });
-
-                                // check if there was an error
-                                if (res.headers.get("X-Entry-Error"))
-                                    return alert(res.headers.get("X-Entry-Error"));
-
-                                // redirect to view
-                                return (window.location.href = `/${Paste.OldURL}`);
-                            }}
-                        >
-                            <input
-                                type="text"
-                                placeholder={"Edit code"}
-                                maxLength={256}
-                                minLength={5}
-                                name={"OldEditPassword"}
-                                id={"OldEditPassword"}
-                                autoComplete={"off"}
-                                required
-                            />
-
-                            <button
-                                style={{
-                                    width: "100%",
-                                }}
-                            >
-                                Publish Changes
-                            </button>
-                        </form>
-                    )}
-
-                    {search.get("edit") !== null && (
-                        <>
-                            <hr />
-
-                            <div
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    gap: "0.5rem",
-                                }}
-                            >
-                                <button
-                                    className="red"
-                                    id={"entry:button.DeletePaste"}
-                                >
-                                    Delete Paste
-                                </button>
-                            </div>
-                        </>
-                    )}
-
-                    <hr />
-
-                    <form
-                        method="dialog"
-                        style={{
-                            width: "25rem",
-                            maxWidth: "100%",
-                        }}
-                    >
-                        <button
-                            className="green"
-                            style={{
-                                width: "100%",
-                            }}
-                        >
-                            Cancel
-                        </button>
-                    </form>
-                </div>
-            </Modal>
-
-            {EditingPaste && (
-                <Modal
-                    buttonid="entry:button.DeletePaste"
-                    modalid="entry:modal.DeletePaste"
-                >
-                    <h4 style={{ textAlign: "center", width: "100%" }}>
-                        Confirm Deletion
-                    </h4>
-
-                    <hr />
-
-                    <ul>
-                        <li>If you delete your paste, it will be gone forever</li>
-                        <li>
-                            You cannot restore your paste and it will be removed from
-                            the server
-                        </li>
-                        <li>
-                            Your custom URL (
-                            <b>
-                                {
-                                    // everything before @ so (if there is a server),
-                                    // it isn't included here
-                                    EditingPaste!.split(":")[0]
-                                }
-                            </b>
-                            ) will be available
-                        </li>
-                    </ul>
-
-                    <hr />
-
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                            gap: "1rem",
-                        }}
-                    >
-                        <form method="dialog" class={"mobile-max"}>
-                            <button class={"green mobile-max"}>Cancel</button>
-
-                            <div style={{ margin: "0.25rem 0" }}>
-                                <hr class={"mobile-only"} />
-                            </div>
-                        </form>
-
-                        <form
-                            method="POST"
-                            action={"/api/delete"}
-                            class={"mobile-max"}
-                            style={{
-                                display: "flex",
-                                flexWrap: "wrap",
-                                justifyContent: "right",
-                                maxWidth: "100%",
-                                gap: "0.5rem",
-                            }}
-                        >
-                            <input
-                                type="text"
-                                required
-                                minLength={5}
-                                maxLength={256}
-                                placeholder={"Edit code"}
-                                name={"EditPassword"}
-                                autoComplete={"off"}
-                                class={"mobile-max"}
-                            />
-
-                            <input
-                                type="hidden"
-                                required
-                                name={"CustomURL"}
-                                value={EditingPaste!}
-                            />
-
-                            <button class={"red mobile-max"}>Delete</button>
-                        </form>
-                    </div>
-                </Modal>
-            )}
+            <PublishModals
+                EditingPaste={EditingPaste || undefined}
+                Endpoints={{
+                    new: "/api/new",
+                    edit: "/api/edit",
+                    delete: "/api/delete",
+                }}
+            />
 
             <Toolbox.SaveModal />
 

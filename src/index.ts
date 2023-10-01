@@ -10,6 +10,7 @@ import type { LogEvent } from "./classes/db/LogDB";
 
 // create global (for plugins)
 import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer";
+import PublishModals from "./classes/pages/components/site/modals/PublishModals";
 import { ParseMarkdown } from "./classes/pages/components/Markdown";
 import Modal from "./classes/pages/components/site/modals/Modal";
 import TopNav from "./classes/pages/components/site/TopNav";
@@ -29,6 +30,9 @@ export type EntryGlobalType = {
     Helpers: {
         VerifyContentType: typeof API.VerifyContentType;
     };
+    Modals: {
+        PublishModals: typeof PublishModals;
+    };
 };
 
 (global as any).EntryDB = EntryDB;
@@ -46,6 +50,10 @@ export type EntryGlobalType = {
 
 (global as any).Helpers = {
     VerifyContentType: API.VerifyContentType,
+};
+
+(global as any).Modals = {
+    PublishModals: PublishModals,
 };
 
 // includes

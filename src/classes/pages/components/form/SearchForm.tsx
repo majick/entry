@@ -1,15 +1,19 @@
 import EntryDB from "../../../db/EntryDB";
 
-export default function SearchForm(props: { query?: string }) {
+export default function SearchForm(props: {
+    query?: string;
+    alwaysCenter?: boolean;
+}) {
     return (
-        <search>
+        <search
+            class={`flex ${
+                props.alwaysCenter ? "justify-center" : "mobile-flex-center"
+            }`}
+        >
             <form
+                class={"flex g-4 justify-center"}
                 style={{
-                    display: "flex",
-                    width: "30rem",
-                    gap: "0.5rem",
-                    maxWidth: "100%",
-                    justifyContent: "center",
+                    maxWidth: "95%",
                 }}
             >
                 <input

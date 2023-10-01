@@ -51,7 +51,7 @@ export default {
     "/api/atlas/auth/login": { Method: "POST", Page: API.Login },
     "/api/atlas/auth/logout": { Method: "POST", Page: API.Logout },
     "/api/atlas/pastes/new": { Method: "POST", Page: API.CreatePaste },
-    "/api/atlas/pastes/edit": { Method: "POST", Page: API.EditPaste },
+    "/api/atlas/pastes/edit": { Method: "POST", Page: API.EditPaste }, // TODO: fix edit
     "/api/atlas/pastes/delete": { Method: "POST", Page: API.DeletePaste },
     // GET /app/
     "/app": { Page: Pages.Dashboard },

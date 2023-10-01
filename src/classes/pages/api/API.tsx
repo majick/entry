@@ -374,9 +374,11 @@ export class CreatePaste implements Endpoint {
         // create paste
         const result = await db.CreatePaste(body);
 
-        // return without redirect if content starts with _builder:
-        if (result[0] === true && result[2].Content.startsWith("_builder:"))
-            return new Response(JSON.stringify(result), { status: 200 });
+        // add CommentOn and ReportOn if content starts with _builder:
+        if (result[0] === true && result[2].Content.startsWith("_builder:")) {
+            body.CommentOn = "";
+            body.ReportOn = "";
+        }
 
         // if result[0] IS NOT TRUE, set association to nothing!!! this makes sure
         // people don't get associated with a paste that is already taken.,..
@@ -393,7 +395,7 @@ export class CreatePaste implements Endpoint {
                         ? // if successful, redirect to paste
                           body.CommentOn === ""
                             ? body.ReportOn === ""
-                                ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}&nobuilder=true`
+                                ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
                                 : "/?msg=Paste reported!"
                             : `/paste/comments/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message
@@ -451,10 +453,10 @@ export class EditPaste implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         if (body.OldContent) body.OldContent = decodeURIComponent(body.OldContent);
-        else body.OldContent = decodeURIComponent(body.NewContent);
+        else body.OldContent = decodeURIComponent(body.Content);
 
-        if (body.NewContent) body.NewContent = decodeURIComponent(body.NewContent);
-        else body.NewContent = decodeURIComponent(body.OldContent);
+        if (body.Content) body.Content = decodeURIComponent(body.Content);
+        else body.Content = decodeURIComponent(body.OldContent);
 
         body.OldURL = body.OldURL.toLowerCase();
         if (body.NewURL) body.NewURL = body.NewURL.toLowerCase();
@@ -476,22 +478,22 @@ export class EditPaste implements Endpoint {
             paste.Metadata.Owner = Association[1];
 
             // add to content
-            body.NewContent += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
+            body.Content += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
         }
 
         // edit paste
         const result = await db.EditPaste(
             {
                 Content: body.OldContent,
-                EditPassword: body.OldEditPassword,
+                EditPassword: body.EditPassword,
                 CustomURL: body.OldURL,
                 PubDate: 0,
                 EditDate: 0,
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             },
             {
-                Content: body.NewContent,
-                EditPassword: body.NewEditPassword || body.OldEditPassword,
+                Content: body.Content,
+                EditPassword: body.NewEditPassword || body.EditPassword,
                 CustomURL: body.NewURL || body.OldURL,
                 PubDate: (paste || { PubDate: 0 }).PubDate!,
                 EditDate: new Date().getTime(),
@@ -674,7 +676,6 @@ export class GetAllPastesInGroup implements Endpoint {
 export class GetRawPaste implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
-        const search = new URLSearchParams(url.search);
 
         // get paste name
         const name = url.pathname.slice("/api/raw/".length, url.pathname.length);

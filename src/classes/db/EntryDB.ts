@@ -18,7 +18,6 @@ import pack from "../../../package.json";
 import type { Config } from "../..";
 
 import BaseParser from "./helpers/BaseParser";
-import { PageHeaders } from "../pages/api/API";
 
 export type Paste = {
     // * = value is not stored in database record
@@ -419,10 +418,14 @@ export default class EntryDB {
      * @method GetPasteFromURL
      *
      * @param {string} PasteURL
+     * @param [SkipExtras=false]
      * @return {(Promise<Paste | undefined>)}
      * @memberof EntryDB
      */
-    public GetPasteFromURL(PasteURL: string): Promise<Partial<Paste> | undefined> {
+    public GetPasteFromURL(
+        PasteURL: string,
+        SkipExtras: boolean = false
+    ): Promise<Partial<Paste> | undefined> {
         return new Promise(async (resolve) => {
             // check if paste is from another server
             const server = PasteURL.split(":")[1];
@@ -435,7 +438,7 @@ export default class EntryDB {
                 const record = (await SQL.QueryOBJ({
                     db: this.db,
                     query: "SELECT * FROM Pastes WHERE CustomURL = ?",
-                    params: [PasteURL],
+                    params: [PasteURL.toLowerCase()],
                     get: true,
                     use: "Prepare",
                 })) as Paste;
@@ -443,7 +446,7 @@ export default class EntryDB {
                 if (!record) return resolve(undefined); // don't reject because we want this to be treated like an async function
 
                 // update encryption values
-                if (record.ViewPassword) {
+                if (record.ViewPassword && !SkipExtras) {
                     const encryption = await SQL.QueryOBJ({
                         db: this.db,
                         query: "SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
@@ -458,7 +461,7 @@ export default class EntryDB {
                 }
 
                 // update expiry information
-                if (EntryDB.Expiry && StaticInit) {
+                if (EntryDB.Expiry && StaticInit && !SkipExtras) {
                     const expires = await EntryDB.Expiry.GetExpiryDate(
                         record.CustomURL
                     );
@@ -470,9 +473,9 @@ export default class EntryDB {
                 if (
                     EntryDB.config.log &&
                     EntryDB.config.log.events.includes("view_paste") &&
-                    EntryDB.Logs
-                ) {
-                    // this is only here for compatability!!
+                    EntryDB.Logs &&
+                    !SkipExtras
+                )
                     record.Views = (
                         await EntryDB.Logs.QueryLogs(
                             `Content LIKE "${record.CustomURL.replaceAll(
@@ -481,10 +484,9 @@ export default class EntryDB {
                             )};%" ESCAPE "\\"`
                         )
                     )[2].length;
-                }
 
                 // count comments
-                if (EntryDB.Logs) {
+                if (EntryDB.Logs && !SkipExtras) {
                     const comments = await EntryDB.Logs.QueryLogs(
                         `Type = "comment" AND Content LIKE "${record.CustomURL.replaceAll(
                             "_",
@@ -915,8 +917,10 @@ export default class EntryDB {
         const server = PasteInfo.CustomURL.split(":")[1];
 
         if (server) {
-            PasteInfo.CustomURL = PasteInfo.CustomURL.split(":")[0];
-            NewPasteInfo.CustomURL = NewPasteInfo.CustomURL.split(":")[0];
+            PasteInfo.CustomURL = PasteInfo.CustomURL.split(":")[0].toLowerCase();
+
+            NewPasteInfo.CustomURL =
+                NewPasteInfo.CustomURL.split(":")[0].toLowerCase();
 
             // send request
             const [isBad, record] = await this.ForwardRequest(
@@ -924,10 +928,10 @@ export default class EntryDB {
                 "edit",
                 [
                     `OldContent=${PasteInfo.Content}`,
-                    `OldEditPassword=${PasteInfo.EditPassword}`,
+                    `EditPassword=${PasteInfo.EditPassword}`,
                     `OldURL=${PasteInfo.CustomURL}`,
                     // new
-                    `NewContent=${NewPasteInfo.Content}`,
+                    `Content=${NewPasteInfo.Content}`,
                     `NewEditPassword=${NewPasteInfo.EditPassword}`,
                     `NewURL=${NewPasteInfo.CustomURL.split(":")[0]}`,
                 ],
@@ -1430,7 +1434,10 @@ export default class EntryDB {
      * @return {Promise<Paste[]>}
      * @memberof EntryDB
      */
-    public async GetAllPastesInGroup(group: string): Promise<Paste[]> {
+    public async GetAllPastesInGroup(
+        group: string,
+        limit: number = 100
+    ): Promise<Paste[]> {
         // decentralization stuff
         const server = group.split(":")[1];
 
@@ -1463,8 +1470,8 @@ export default class EntryDB {
         // get pastes
         const pastes = await SQL.QueryOBJ({
             db: this.db,
-            query: "SELECT * From Pastes WHERE GroupName = ?",
-            params: [group],
+            query: "SELECT * From Pastes WHERE GroupName = ? LIMIT ?",
+            params: [group, limit],
             all: true,
             transaction: true,
             use: "Prepare",
@@ -1640,7 +1647,8 @@ export default class EntryDB {
         for (const comment of comments[2]) {
             // get paste
             const paste = (await this.GetPasteFromURL(
-                comment.Content.split(";")[1]
+                comment.Content.split(";")[1],
+                true // SkipExtras is true so comments are fetched faster, not wasting time on extra stuff
             )) as Paste | undefined;
 
             // make sure comment paste exists
