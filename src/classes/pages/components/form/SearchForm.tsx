@@ -26,8 +26,9 @@ export default function SearchForm(props: {
                     autocomplete={"off"}
                     value={props.query || ""}
                     required
+                    class={"round"}
                     style={{
-                        width: "100%",
+                        width: "65%",
                     }}
                 />
 
@@ -35,7 +36,7 @@ export default function SearchForm(props: {
                     style={{
                         width: "35%",
                     }}
-                    class={"mobile-max"}
+                    class={"round"}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

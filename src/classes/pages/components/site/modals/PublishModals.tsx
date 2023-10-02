@@ -98,7 +98,7 @@ export default function PublishModals(props: {
                         <hr style={{ margin: "0" }} />
 
                         <button
-                            className="green round"
+                            className="green round modal:entry:button.Submit"
                             style={{
                                 width: "100%",
                             }}
@@ -191,7 +191,7 @@ export default function PublishModals(props: {
                             }}
                         >
                             <button
-                                className="green round"
+                                className="green round modal:entry:button.Submit"
                                 style={{
                                     width: "100%",
                                 }}
@@ -298,13 +298,35 @@ export default function PublishModals(props: {
                                         value={props.EditingPaste!}
                                     />
 
-                                    <button class={"red round mobile-max"}>
+                                    <button
+                                        class={
+                                            "red round mobile-max modal:entry:button.Submit"
+                                        }
+                                    >
                                         Delete
                                     </button>
                                 </form>
                             </div>
                         </Modal>
                     )}
+
+                    <Modal
+                        buttonid="entry:button.Submit"
+                        modalid="entry:modal.Submit"
+                        noIdMatch={true}
+                        round={true}
+                    >
+                        <div className="flex flex-column g-10">
+                            <span>Loading...</span>
+
+                            <a
+                                href="javascript:window.location.reload()"
+                                class={"button red round"}
+                            >
+                                Refresh
+                            </a>
+                        </div>
+                    </Modal>
                 </>
             )}
 

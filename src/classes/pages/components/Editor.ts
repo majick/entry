@@ -455,7 +455,7 @@ function CloseAllTabs() {
     for (let element of document.getElementsByClassName(
         "editor-tab"
     ) as any as HTMLElement[]) {
-        element.style.display = "none";
+        element.classList.remove("active");
 
         const button = document.getElementById(
             `editor-open-${element.id.split("editor-")[1] || ""}`
@@ -469,7 +469,7 @@ document.getElementById("editor-open-tab-text")!.addEventListener("click", () =>
     CloseAllTabs();
 
     document.getElementById("editor-open-tab-text")!.classList.remove("secondary");
-    document.getElementById("editor-tab-text")!.style.display = "block";
+    document.getElementById("editor-tab-text")!.classList.add("active");
 });
 
 document.getElementById("editor-open-tab-preview")!.addEventListener("click", () => {
@@ -477,7 +477,7 @@ document.getElementById("editor-open-tab-preview")!.addEventListener("click", ()
     const tab = document.getElementById("editor-tab-preview")!;
 
     tab.innerHTML = window.sessionStorage.getItem("gen") || "";
-    tab.style.display = "block";
+    tab.classList.add("active");
 
     document
         .getElementById("editor-open-tab-preview")!

@@ -351,7 +351,7 @@ export class GetPasteFromURL implements Endpoint {
         // ...otherwise
 
         // tag paste
-        result.Content = `${result.Content}\n<% tag current_paste ${result.CustomURL} %>`;
+        // result.Content = `${result.Content}\n<% tag current_paste ${result.CustomURL} %>`;
 
         // return
         return new Response(
@@ -410,7 +410,7 @@ export class GetPasteFromURL implements Endpoint {
                             InformationPageNote()}
 
                         <div
-                            class={"tab-container"}
+                            class={"tab-container card secondary round"}
                             style={{
                                 height: "max-content",
                                 maxHeight: "initial",
@@ -455,7 +455,7 @@ export class GetPasteFromURL implements Endpoint {
                                 >
                                     {editable[2] === true && (
                                         <a
-                                            class={"button"}
+                                            class={"button round"}
                                             href={`/?mode=edit&OldURL=${
                                                 result.CustomURL.split(":")[0]
                                             }${
@@ -488,7 +488,7 @@ export class GetPasteFromURL implements Endpoint {
                                             result.Metadata.Comments.Enabled !==
                                                 false) && (
                                             <a
-                                                class={"button"}
+                                                class={"button round"}
                                                 href={`/paste/comments/${result.CustomURL}`}
                                                 title={"View Comments"}
                                             >
@@ -510,7 +510,7 @@ export class GetPasteFromURL implements Endpoint {
                                         href={"javascript:"}
                                         id={"entry:button.PasteOptions"}
                                         title={"More Options"}
-                                        class={"button"}
+                                        class={"button round"}
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
@@ -525,7 +525,7 @@ export class GetPasteFromURL implements Endpoint {
                                     </a>
 
                                     <details
-                                        class={"horizontal"}
+                                        class={"horizontal round"}
                                         style={{
                                             width: "max-content",
                                         }}
@@ -1055,12 +1055,20 @@ export class PastesSearch implements Endpoint {
 
         // ...
         if (search.get("q")) {
-            // get pastes
-            const query = `CustomURL LIKE "%${search
+            // build query
+            let query = `CustomURL LIKE "%${search
                 .get("q")!
                 .toLowerCase()
                 .replaceAll('"', "'")}%" LIMIT 100`;
 
+            // if q === "explore", explore recent pastes
+            let ExploreMode = false;
+            if (search.get("q") === "explore") {
+                query = `CustomURL IS NOT NULL ORDER BY cast(EditDate as float) DESC LIMIT 100`;
+                ExploreMode = true;
+            }
+
+            // get pastes
             const pastes =
                 search.get("group") === null
                     ? // search all pastes
@@ -1081,23 +1089,38 @@ export class PastesSearch implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <TopNav breadcrumbs={["search"]} />
+                        <TopNav breadcrumbs={["search"]}>
+                            {(!ExploreMode && (
+                                <a href={"?q=explore"} class={"button round"}>
+                                    Explore
+                                </a>
+                            )) || (
+                                <a href={"/search"} class={"button round"}>
+                                    Search
+                                </a>
+                            )}
+                        </TopNav>
 
                         <main>
                             <div
+                                class={
+                                    "flex flex-wrap justify-space-between mobile-flex-center align-center card border round"
+                                }
                                 style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "center",
-                                    flexWrap: "wrap",
                                     marginBottom: "0.5rem",
                                 }}
                             >
                                 {/* hide the search bar if search is disabled */}
-                                {!EntryDB.config.app ||
-                                    (EntryDB.config.app.enable_search !== false && (
-                                        <SearchForm query={search.get("q") || ""} />
-                                    ))}
+                                {(!ExploreMode &&
+                                    (!EntryDB.config.app ||
+                                        (EntryDB.config.app.enable_search !==
+                                            false && (
+                                            <SearchForm
+                                                query={search.get("q") || ""}
+                                            />
+                                        )))) || (
+                                    <div>Explore pastes, sorted by edit date</div>
+                                )}
 
                                 <span class={"mobile-center"}>
                                     <b>{pastes.length}</b> result
@@ -1108,17 +1131,14 @@ export class PastesSearch implements Endpoint {
                             </div>
 
                             <div
-                                className="tab-container editor-tab"
+                                className="card secondary round flex flex-column g-4"
                                 style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    gap: "0.5rem",
                                     maxHeight: "max-content",
                                     height: "max-content",
                                 }}
                             >
                                 {pastes.map((paste) => (
-                                    <div class={"search-result card"}>
+                                    <div class={"search-result card round border"}>
                                         <a
                                             href={`/${
                                                 paste.CustomURL.startsWith("/")
@@ -1146,7 +1166,11 @@ export class PastesSearch implements Endpoint {
                                                     paste.PubDate
                                                 ).toUTCString()}
                                             </span>{" "}
-                                            · Content length: {paste.Content.length}{" "}
+                                            · Content length:{" "}
+                                            {
+                                                paste.Content.split("_metadata:")[0]
+                                                    .length
+                                            }{" "}
                                             Characters
                                         </p>
                                     </div>
@@ -1156,7 +1180,7 @@ export class PastesSearch implements Endpoint {
                             <style
                                 dangerouslySetInnerHTML={{
                                     __html: `.search-result:hover {
-                                        outline: 1px solid var(--text-color-faded);
+                                        background: var(--background-surface1);
                                     }`,
                                 }}
                             />
@@ -1197,13 +1221,9 @@ export class PastesSearch implements Endpoint {
                             }}
                         >
                             <main
-                                style={{
-                                    display: "flex",
-                                    gap: "0.5rem",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
+                                class={
+                                    "small flex g-4 flex-column justify-center align-center"
+                                }
                             >
                                 <h1 class={"no-margin"}>Search</h1>
                                 <SearchForm alwaysCenter={true} />

@@ -189,7 +189,7 @@ svg {
 .tab-container {
     background: var(--background-surface1);
     transition: background 0.15s;
-    padding: 1.5rem;
+    padding: 1.5rem !important;
     height: 75vh;
     overflow-y: auto;
     max-height: 90vh;
@@ -203,6 +203,10 @@ svg {
         max-height: 65vh;
         padding: 1rem;
     }
+}
+
+.editor-tab.-editor:not(.active) {
+    display: none;
 }
 
 button,
@@ -283,6 +287,16 @@ button.border.dashed:hover,
     background: transparent;
 }
 
+button.border.dimmed,
+.button.border.dimmed {
+    box-shadow: inset 0 0 0 1px var(--background-surface2);
+}
+
+html.dark-theme button.border.dimmed,
+html.dark-theme .button.border.dimmed {
+    box-shadow: inset 0 0 0 1px var(--background-surface1-5);
+}
+
 button.green,
 .button.green {
     color: var(--green3);
@@ -310,12 +324,15 @@ button:focus,
 
 .tabbar {
     display: flex;
+    gap: var(--u-04);
+    margin-bottom: var(--u-02);
 }
 
 .tabbar button,
 .tabbar .button {
-    padding: 0.5rem 1rem;
+    padding: var(--u-04) var(--u-10);
     height: 40px; /* fixes weird webkit sizing issue (?) which caused the height to be calculated wrong */
+    border-radius: var(--u-04);
 }
 
 .tabbar button.secondary,
@@ -995,6 +1012,11 @@ details[open].horizontal .details-content {
 
 details[open].horizontal .details-content * {
     width: max-content;
+}
+
+details[open].round.horizontal summary {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 details.round,

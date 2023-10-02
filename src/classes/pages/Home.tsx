@@ -7,8 +7,6 @@ import Modal from "./components/site/modals/Modal";
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
-import pack from "../../../package.json";
-
 import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
 import Checkbox from "./components/form/Checkbox";
@@ -212,15 +210,11 @@ export default class Home implements Endpoint {
                                 </button>
                             </div>
 
-                            <div
-                                style={{
-                                    display: "flex",
-                                }}
-                            >
+                            <div class={"flex g-4"}>
                                 {EntryDB.config.app && EntryDB.config.app.info && (
                                     <a
                                         href={`/${EntryDB.config.app.info}`}
-                                        class={"button secondary"}
+                                        class={"button border dimmed"}
                                         target={"_blank"}
                                         title={"Server Info & Announcements"}
                                     >
@@ -245,7 +239,7 @@ export default class Home implements Endpoint {
                                                 title="Associate Paste"
                                                 style={{ padding: "0.75rem" }}
                                                 class={
-                                                    "modal:entry:button.login secondary"
+                                                    "modal:entry:button.login border dimmed"
                                                 }
                                             >
                                                 <svg
@@ -263,7 +257,7 @@ export default class Home implements Endpoint {
                                                 title="Disassociate Paste"
                                                 style={{ padding: "0.75rem" }}
                                                 class={
-                                                    "modal:entry:button.logout secondary"
+                                                    "modal:entry:button.logout border dimmed"
                                                 }
                                             >
                                                 <svg
@@ -282,14 +276,19 @@ export default class Home implements Endpoint {
                             </div>
                         </div>
 
-                        <div class={"tab-container"}>
-                            <div id="editor-tab-text" class="editor-tab"></div>
+                        <div
+                            class={"tab-container card secondary round"}
+                            id={"-editor"}
+                        >
+                            <div
+                                id="editor-tab-text"
+                                class="editor-tab -editor active"
+                            />
 
                             <div
                                 id="editor-tab-preview"
-                                class="editor-tab"
-                                style={{ display: "none" }}
-                            ></div>
+                                class="editor-tab -editor"
+                            />
                         </div>
 
                         <div>
@@ -327,6 +326,7 @@ export default class Home implements Endpoint {
                                             class={"mobile-flex-center mobile-max"}
                                         >
                                             <button
+                                                class={"round"}
                                                 style={{ minWidth: "5rem" }}
                                                 id={"entry:button.Submit"}
                                             >
@@ -361,7 +361,7 @@ export default class Home implements Endpoint {
                                                                 "entry:button.PasteExtras"
                                                             }
                                                             title={"More Options"}
-                                                            class={"button"}
+                                                            class={"button round"}
                                                         >
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
@@ -417,6 +417,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
+                                                    class={"round"}
                                                     type="text"
                                                     placeholder={"Custom URL"}
                                                     maxLength={
@@ -467,6 +468,7 @@ export default class Home implements Endpoint {
                                                         ))}
 
                                                     <input
+                                                        class={"round"}
                                                         type="text"
                                                         placeholder={
                                                             "Custom edit code"
@@ -595,6 +597,7 @@ export default class Home implements Endpoint {
                                                                 </p>
 
                                                                 <input
+                                                                    class={"round"}
                                                                     type="text"
                                                                     placeholder={
                                                                         "View code - optional"
@@ -650,6 +653,7 @@ export default class Home implements Endpoint {
                                                                 </p>
 
                                                                 <input
+                                                                    class={"round"}
                                                                     type="text"
                                                                     placeholder={
                                                                         "Group name - optional"
@@ -667,6 +671,7 @@ export default class Home implements Endpoint {
                                                                 />
 
                                                                 <input
+                                                                    class={"round"}
                                                                     type="text"
                                                                     placeholder={
                                                                         "Group post code - optional"
@@ -719,6 +724,7 @@ export default class Home implements Endpoint {
                                                                 </label>
 
                                                                 <input
+                                                                    class={"round"}
                                                                     type={
                                                                         "datetime-local"
                                                                     }
@@ -797,6 +803,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
+                                                    class={"round"}
                                                     type="text"
                                                     placeholder={"Edit code"}
                                                     maxLength={
@@ -814,6 +821,7 @@ export default class Home implements Endpoint {
                                                     // if we don't provide a new Custom URL, this will be used instead so we don't give up our url
                                                 }
                                                 <input
+                                                    class={"round"}
                                                     type="text"
                                                     placeholder={
                                                         "Change edit code - optional"
@@ -829,6 +837,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
+                                                    class={"round"}
                                                     type="text"
                                                     placeholder={
                                                         "Change Custom URL - optional"
@@ -867,7 +876,7 @@ export default class Home implements Endpoint {
                                                     }}
                                                 >
                                                     <button
-                                                        class={"green"}
+                                                        class={"green round"}
                                                         id={"entry:button.Submit"}
                                                     >
                                                         Save
@@ -879,7 +888,7 @@ export default class Home implements Endpoint {
                                                             false) && (
                                                         <a
                                                             href={`/paste/settings/${paste.CustomURL}`}
-                                                            class={"button"}
+                                                            class={"button round"}
                                                             title={"Paste Settings"}
                                                         >
                                                             <svg
@@ -900,7 +909,7 @@ export default class Home implements Endpoint {
                                                         href={
                                                             "javascript:history.back()"
                                                         }
-                                                        class={"button"}
+                                                        class={"button round"}
                                                     >
                                                         Back
                                                     </a>
@@ -908,7 +917,7 @@ export default class Home implements Endpoint {
 
                                                 <a
                                                     id={"editor-open-delete-modal"}
-                                                    class={"button red"}
+                                                    class={"button red round"}
                                                     href={"javascript:"}
                                                 >
                                                     Delete
@@ -1048,7 +1057,7 @@ export default class Home implements Endpoint {
 
                             <a
                                 href="javascript:window.location.reload()"
-                                class={"button red"}
+                                class={"button red round"}
                             >
                                 Refresh
                             </a>
