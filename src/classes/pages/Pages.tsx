@@ -86,28 +86,6 @@ export class GetPasteFromURL implements Endpoint {
         // return home if name === ""
         if (name === "") return new Home().request(request);
 
-        // ...check if we're from wildcard... if subdomain !== paste name, return 404!
-        if (
-            EntryDB.config.app &&
-            EntryDB.config.app.wildcard &&
-            EntryDB.config.app.hostname
-        ) {
-            const subdomain = url.hostname.split(
-                `.${EntryDB.config.app.hostname}`
-            )[0];
-
-            // return disallow all if from wildcard
-            if (
-                // check if from wildcard
-                subdomain &&
-                subdomain !== EntryDB.config.app.hostname &&
-                subdomain !== "www" &&
-                // check if we're trying to view a paste that isn't the wildcard
-                subdomain !== name
-            )
-                return new _404Page().request(request);
-        }
-
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
