@@ -268,8 +268,10 @@ export class WellKnown implements Endpoint {
                     users: {
                         // we're going to use total to display number of sessions...
                         total:
-                            (await EntryDB.Logs.QueryLogs('Type = "session"'))[2]
-                                .length - 1,
+                            (EntryDB.Logs &&
+                                (await EntryDB.Logs.QueryLogs('Type = "session"'))[2]
+                                    .length - 1) ||
+                            0,
                         activeMonth: 0,
                         activeHalfyear: 0,
                     },
@@ -294,6 +296,33 @@ export class WellKnown implements Endpoint {
  */
 export class RobotsTXT implements Endpoint {
     async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // check if this is from a wildcard match
+        if (
+            EntryDB.config.app &&
+            EntryDB.config.app.wildcard &&
+            EntryDB.config.app.hostname
+        ) {
+            const subdomain = url.hostname.split(
+                `.${EntryDB.config.app.hostname}`
+            )[0];
+
+            const IsFromWildcard =
+                subdomain &&
+                subdomain !== EntryDB.config.app.hostname &&
+                subdomain !== "www";
+
+            // return disallow all if from wildcard
+            if (IsFromWildcard)
+                return new Response(`User-agent: *\nDisallow: /`, {
+                    headers: {
+                        "Content-Type": "text/plain",
+                    },
+                });
+        }
+
+        // return
         return new Response(
             `User-agent: *\nAllow: /\nDisallow: /api${[
                 "",

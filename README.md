@@ -443,6 +443,23 @@ Adding a new node is handled similarly:
 
 The [Atlas](https://codeberg.org/hkau/entry/src/branch/master/packages/atlas) plugin is an optional plugin which adds a live paste editor and **required authentication**. It uses a separate database using [PocketBase](https://pocketbase.io). More information [here](https://codeberg.org/hkau/entry/src/branch/master/packages/atlas/README.md).
 
+### Wildcard Domains
+
+By enabling config `app.wildcard`, all subdomains that point to your server (besides `www`) will act as the paste view page, and will try to find a paste matching the subdomain to show. These pages have views and sessions disabled. With wildcard enabled, you must also provide an value for the server hostname. This is used to find the subdomain correctly.
+
+Example:
+
+```json
+{
+    "app": {
+        "wildcard": true,
+        "hostname": "sentrytwo.com"
+    }
+}
+```
+
+Note that wildcard paths cannot be indexed by search engines, and all relative links should redirect to the main site.
+
 ## Development
 
 1. Make sure you have [Bun](https://bun.sh) installed

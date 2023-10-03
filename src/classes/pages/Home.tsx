@@ -6,6 +6,7 @@ import Modal from "./components/site/modals/Modal";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
+import Pages from "./Pages";
 
 import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
@@ -20,6 +21,33 @@ export default class Home implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
+
+        // try to get subdomain, redirect to paste view page if we have one
+        // must be enabled in EntryDB.config!!
+        if (
+            EntryDB.config.app &&
+            EntryDB.config.app.wildcard &&
+            EntryDB.config.app.hostname
+        ) {
+            const subdomain = url.hostname.split(
+                `.${EntryDB.config.app.hostname}`
+            )[0];
+
+            if (
+                subdomain &&
+                subdomain !== EntryDB.config.app.hostname &&
+                subdomain !== "www"
+            ) {
+                // forward to paste view
+                // ...create new request
+                const req = new Request(
+                    `${url.protocol}//${EntryDB.config.app.hostname}/${subdomain}?_priv_isFromWildcard=true`
+                );
+
+                // ...return
+                return new Pages.GetPasteFromURL().request(req);
+            }
+        }
 
         // if search.server, add server to paste.CustomURL
         if (search.get("server"))

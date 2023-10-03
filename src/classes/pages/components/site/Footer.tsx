@@ -33,6 +33,14 @@ export async function InitFooterExtras(plugins: HoneybeeConfig["Pages"]) {
 
 // ...
 export default function Footer(props: { ShowBottomRow?: boolean }) {
+    const homepageLink =
+        (EntryDB.config &&
+            EntryDB.config.app &&
+            EntryDB.config.app.hostname &&
+            `https://${EntryDB.config.app.hostname}/`) ||
+        "/";
+
+    // return
     return (
         <div class={"flex justify-center align-center flex-column"}>
             <hr
@@ -58,7 +66,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                             >
                                 new
                             </a>
-                        )) || <a href="/">new</a>}
+                        )) || <a href={homepageLink}>new</a>}
                 </li>
 
                 <li>
@@ -186,7 +194,10 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 <hr />
 
                 <div class={"flex flex-wrap justify-center align-center g-4"}>
-                    <a href="/" class={"button border dashed __footer_cardbtn"}>
+                    <a
+                        href={homepageLink}
+                        class={"button border dashed __footer_cardbtn"}
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"

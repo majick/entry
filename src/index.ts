@@ -81,6 +81,8 @@ export type Config = {
         enable_paste_settings?: boolean; // true default
         auto_tag?: boolean;
         favicon?: string;
+        wildcard?: boolean; // https://sntry.cc/what#wildcard-domains
+        hostname?: string; // https://sntry.cc/what#wildcard-domains
         footer?: {
             show_name_on_all_pages?: boolean;
             rows: Array<{

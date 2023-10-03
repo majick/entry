@@ -66,7 +66,16 @@ export class GetPasteFromURL implements Endpoint {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
 
-        // load doc view is specified
+        // check if this is from a wildcard match
+        const IsFromWildcard = search.get("_priv_isFromWildcard") === "true";
+        const HostnameURL =
+            (EntryDB.config &&
+                EntryDB.config.app &&
+                EntryDB.config.app.hostname &&
+                `https://${EntryDB.config.app.hostname}/`) ||
+            "/";
+
+        // load doc view if specified
         if (search.get("view") && search.get("view") === "doc")
             return await new PasteDocView().request(request);
 
@@ -76,6 +85,28 @@ export class GetPasteFromURL implements Endpoint {
 
         // return home if name === ""
         if (name === "") return new Home().request(request);
+
+        // ...check if we're from wildcard... if subdomain !== paste name, return 404!
+        if (
+            EntryDB.config.app &&
+            EntryDB.config.app.wildcard &&
+            EntryDB.config.app.hostname
+        ) {
+            const subdomain = url.hostname.split(
+                `.${EntryDB.config.app.hostname}`
+            )[0];
+
+            // return disallow all if from wildcard
+            if (
+                // check if from wildcard
+                subdomain &&
+                subdomain !== EntryDB.config.app.hostname &&
+                subdomain !== "www" &&
+                // check if we're trying to view a paste that isn't the wildcard
+                subdomain !== name
+            )
+                return new _404Page().request(request);
+        }
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
@@ -117,11 +148,17 @@ export class GetPasteFromURL implements Endpoint {
         }
 
         // manage session
-        const SessionCookie = await Session(request);
+        // cannot be from a wildcard domain if we're creating a new session!
+        const SessionCookie = !IsFromWildcard ? await Session(request) : "";
 
         // count view
         let Viewed = false;
-        if (result && !result.HostServer && search.get("NoView") !== "true") {
+        if (
+            result &&
+            !result.HostServer &&
+            search.get("NoView") !== "true" &&
+            !IsFromWildcard // cannot view from wildcard domain!
+        ) {
             const SessionCookieValue = GetCookie(
                 request.headers.get("Cookie") || "",
                 "session-id"
@@ -233,7 +270,7 @@ export class GetPasteFromURL implements Endpoint {
                                     }}
                                 >
                                     <a
-                                        href={`/paste/builder?edit=${result.CustomURL}`}
+                                        href={`${HostnameURL}paste/builder?edit=${result.CustomURL}`}
                                         className="button round"
                                     >
                                         Edit
@@ -243,7 +280,7 @@ export class GetPasteFromURL implements Endpoint {
                                         EntryDB.config.app.enable_paste_settings !==
                                             false) && (
                                         <a
-                                            href={`/paste/settings/${result.CustomURL}`}
+                                            href={`${HostnameURL}paste/settings/${result.CustomURL}`}
                                             className="button round"
                                         >
                                             Settings
@@ -259,7 +296,7 @@ export class GetPasteFromURL implements Endpoint {
                                             result.Metadata!.Comments.Enabled !==
                                                 false) && (
                                             <a
-                                                href={`/paste/comments/${result.CustomURL}`}
+                                                href={`${HostnameURL}paste/comments/${result.CustomURL}`}
                                                 className="button round"
                                             >
                                                 Comments ({result.Comments || 0})
@@ -271,7 +308,7 @@ export class GetPasteFromURL implements Endpoint {
                                             "report"
                                         ) && (
                                             <a
-                                                href={`/?ReportOn=${result.CustomURL}`}
+                                                href={`${HostnameURL}?ReportOn=${result.CustomURL}`}
                                                 className="button round"
                                             >
                                                 Report Paste
@@ -456,7 +493,7 @@ export class GetPasteFromURL implements Endpoint {
                                     {editable[2] === true && (
                                         <a
                                             class={"button round"}
-                                            href={`/?mode=edit&OldURL=${
+                                            href={`${HostnameURL}?mode=edit&OldURL=${
                                                 result.CustomURL.split(":")[0]
                                             }${
                                                 // add host server (if it exists)
@@ -489,7 +526,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 false) && (
                                             <a
                                                 class={"button round"}
-                                                href={`/paste/comments/${result.CustomURL}`}
+                                                href={`${HostnameURL}paste/comments/${result.CustomURL}`}
                                                 title={"View Comments"}
                                             >
                                                 <svg
@@ -652,7 +689,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     false && (
                                                     <a
                                                         class={"button round"}
-                                                        href={`/paste/builder?edit=${result.CustomURL}`}
+                                                        href={`${HostnameURL}paste/builder?edit=${result.CustomURL}`}
                                                     >
                                                         Edit in Builder
                                                     </a>
@@ -982,7 +1019,7 @@ export class PasteDocView implements Endpoint {
 
                                     <li>
                                         <a
-                                            href={`/?mode=edit&OldURL=${
+                                            href={`?mode=edit&OldURL=${
                                                 result.CustomURL.split(":")[0]
                                             }${
                                                 // add host server (if it exists)
