@@ -36,7 +36,8 @@ export default class Home implements Endpoint {
             if (
                 subdomain &&
                 subdomain !== EntryDB.config.app.hostname &&
-                subdomain !== "www"
+                subdomain !== "www" &&
+                url.hostname.includes(EntryDB.config.app.hostname) // make sure hostname is actually in the url
             ) {
                 // forward to paste view
                 // ...create new request

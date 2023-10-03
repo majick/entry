@@ -763,7 +763,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     <span>
                                                         Owner:{" "}
                                                         <a
-                                                            href={`/${result.Metadata.Owner}`}
+                                                            href={`${HostnameURL}${result.Metadata.Owner}`}
                                                         >
                                                             {result.Metadata.Owner}
                                                         </a>
@@ -1019,7 +1019,7 @@ export class PasteDocView implements Endpoint {
 
                                     <li>
                                         <a
-                                            href={`?mode=edit&OldURL=${
+                                            href={`/?mode=edit&OldURL=${
                                                 result.CustomURL.split(":")[0]
                                             }${
                                                 // add host server (if it exists)
