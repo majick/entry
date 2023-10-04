@@ -1708,6 +1708,17 @@ export class MetadataEditor implements Endpoint {
             (body.paste_customurl || "").toLowerCase()
         );
 
+        if (!result && body.paste_customurl !== undefined)
+            return new _404Page().request(request);
+
+        // try to fetch paste associated session
+        const session =
+            body.paste_customurl !== undefined
+                ? await EntryDB.Logs.QueryLogs(
+                      `Content LIKE "%;_with;${result!.CustomURL}"`
+                  )
+                : ([false, "", []] as any[]);
+
         // return
         return new Response(
             Renderer.Render(
@@ -1806,6 +1817,25 @@ export class MetadataEditor implements Endpoint {
                             <button class={"secondary green"}>Save</button>
                         </form>
                     </div>
+
+                    <hr />
+
+                    {session[2][0] !== undefined && (
+                        <div className="flex flex-column g-4">
+                            <div className="card flex justify-space-between align-center">
+                                <b>User IP</b>
+                                <code>
+                                    {
+                                        (
+                                            session[2][0].Content.split(
+                                                ";_ip;"
+                                            )[1] || ""
+                                        ).split(";")[0]
+                                    }
+                                </code>
+                            </div>
+                        </div>
+                    )}
 
                     <hr />
 

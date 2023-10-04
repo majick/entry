@@ -1,4 +1,5 @@
 import { Endpoint, Renderer } from "honeybee";
+import { Server } from "bun";
 
 import DecryptionForm from "./components/form/DecryptionForm";
 import Footer from "./components/site/Footer";
@@ -18,7 +19,7 @@ import Checkbox from "./components/form/Checkbox";
  * @implements {Endpoint}
  */
 export default class Home implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
 
@@ -46,7 +47,7 @@ export default class Home implements Endpoint {
                 );
 
                 // ...return
-                return new Pages.GetPasteFromURL().request(req);
+                return new Pages.GetPasteFromURL().request(req, server);
             }
         }
 
@@ -90,6 +91,9 @@ export default class Home implements Endpoint {
             }
         }
 
+        // get association
+        const Association = await GetAssociation(request, null);
+
         // manage session
         const SessionCookie = await Session(request);
 
@@ -98,9 +102,6 @@ export default class Home implements Endpoint {
             search.delete("CommentOn");
             search.delete("ReportOn");
         }
-
-        // get association
-        const Association = await GetAssociation(request);
 
         // return
         return new Response(

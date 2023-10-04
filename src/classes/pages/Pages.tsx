@@ -5,6 +5,7 @@
  */
 
 import Honeybee, { Endpoint, Renderer } from "honeybee";
+import { Server } from "bun";
 
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
@@ -62,7 +63,7 @@ export function InformationPageNote() {
  * @implements {Endpoint}
  */
 export class GetPasteFromURL implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
 
@@ -77,14 +78,14 @@ export class GetPasteFromURL implements Endpoint {
 
         // load doc view if specified
         if (search.get("view") && search.get("view") === "doc")
-            return await new PasteDocView().request(request);
+            return await new PasteDocView().request(request, server);
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
         if (name.startsWith("paste/dec/")) name = name.split("paste/dec/")[1];
 
         // return home if name === ""
-        if (name === "") return new Home().request(request);
+        if (name === "") return new Home().request(request, server);
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
@@ -845,7 +846,7 @@ export class GetPasteFromURL implements Endpoint {
  * @implements {Endpoint}
  */
 export class PasteDocView implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
 
@@ -854,7 +855,7 @@ export class PasteDocView implements Endpoint {
         if (name.startsWith("paste/doc/")) name = name.split("paste/doc/")[1];
 
         // return home if name === ""
-        if (name === "") return new Home().request(request);
+        if (name === "") return new Home().request(request, server);
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
@@ -1275,7 +1276,7 @@ export class PastesSearch implements Endpoint {
  * @implements {Endpoint}
  */
 export class PasteCommentsPage implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.searchParams);
 
@@ -1289,7 +1290,7 @@ export class PasteCommentsPage implements Endpoint {
             name = name.split("paste/comments/")[1];
 
         // return home if name === ""
-        if (name === "") return new Home().request(request);
+        if (name === "") return new Home().request(request, server);
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
@@ -1307,7 +1308,9 @@ export class PasteCommentsPage implements Endpoint {
         // get associated paste
         let PostingAs: string | undefined = undefined;
 
-        const _Association = await GetAssociation(request);
+        const _ip = server.requestIP(request);
+        const _Association = await GetAssociation(request, _ip);
+
         if (
             _Association[1] &&
             !_Association[1].startsWith("associated") &&
@@ -2050,7 +2053,7 @@ export async function ComponentView(
  * @implements {Endpoint}
  */
 export class UserSettings implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
 
         // get paste name
@@ -2061,7 +2064,8 @@ export class UserSettings implements Endpoint {
         // if no paste is provided, show global settings
         if (name === "paste/settings") {
             // get association
-            const Association = await GetAssociation(request);
+            const _ip = server.requestIP(request);
+            const Association = await GetAssociation(request, _ip);
             if (Association[1].startsWith("associated=")) Association[0] = false;
 
             // if user have an association, get all comments they have posted

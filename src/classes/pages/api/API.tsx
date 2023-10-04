@@ -5,6 +5,7 @@
  */
 
 import Honeybee, { Endpoint, Renderer } from "honeybee";
+import { Server, SocketAddress } from "bun";
 
 // import components
 import _404Page from "../components/404";
@@ -158,6 +159,7 @@ export async function Session(request: Request): Promise<string> {
  */
 export async function GetAssociation(
     request: Request,
+    ip: SocketAddress | null,
     UpdateOnly: boolean = false,
     SetAssociation?: string,
     Delete: boolean = false
@@ -185,7 +187,9 @@ export async function GetAssociation(
             // update log
             await EntryDB.Logs.UpdateLog(
                 log[2].ID,
-                `${split[0]};_with;${SetAssociation}`
+                `${log[2].Content.split(";_")[0]}${
+                    ip !== null ? `;_ip;${ip.address}` : ""
+                };_with;${SetAssociation}`
             );
 
             return [
@@ -196,7 +200,7 @@ export async function GetAssociation(
             ];
         } else if (Delete) {
             // update log to remove association
-            await EntryDB.Logs.UpdateLog(log[2].ID, split[0]);
+            await EntryDB.Logs.UpdateLog(log[2].ID, log[2].Content.split(";_")[0]);
             return [true, ""];
         }
 
@@ -360,7 +364,9 @@ export class Favicon implements Endpoint {
  * @implements {Endpoint}
  */
 export class CreatePaste implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const _ip = server.requestIP(request);
+
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -376,7 +382,7 @@ export class CreatePaste implements Endpoint {
         if (body.CustomURL) body.CustomURL = body.CustomURL.toLowerCase();
 
         // make sure association is correct
-        const Association = await GetAssociation(request);
+        const Association = await GetAssociation(request, null);
 
         // load associated
         if (!Association[1].startsWith("associated") && !Association[0]) {
@@ -391,6 +397,7 @@ export class CreatePaste implements Endpoint {
                 // update association with this paste
                 const UpdateResult = await GetAssociation(
                     request,
+                    _ip,
                     true,
                     body.CustomURL
                 );
@@ -469,7 +476,7 @@ export class GetPasteRecord implements Endpoint {
  * @implements {Endpoint}
  */
 export class EditPaste implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -495,7 +502,7 @@ export class EditPaste implements Endpoint {
         if (!paste) return new _404Page().request(request);
 
         // get association
-        const Association = await GetAssociation(request);
+        const Association = await GetAssociation(request, null);
 
         if (
             Association[0] === true &&
@@ -900,7 +907,7 @@ export class JSONAPI implements Endpoint {
  * @implements {Endpoint}
  */
 export class DeleteComment implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -918,7 +925,7 @@ export class DeleteComment implements Endpoint {
         if (paste.HostServer) return new _404Page().request(request);
 
         // check association
-        const association = await GetAssociation(request);
+        const association = await GetAssociation(request, null);
 
         if (!association[0])
             return new Response("You must be associated with a paste to do this", {
@@ -983,7 +990,9 @@ export class DeleteComment implements Endpoint {
  * @implements {Endpoint}
  */
 export class PasteLogin implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const _ip = server.requestIP(request);
+
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -1013,7 +1022,7 @@ export class PasteLogin implements Endpoint {
             });
 
         // generate association
-        await GetAssociation(request, true, paste.CustomURL);
+        await GetAssociation(request, _ip, true, paste.CustomURL);
 
         // return
         return new Response(paste.CustomURL, {
@@ -1038,7 +1047,7 @@ export class PasteLogin implements Endpoint {
  * @implements {Endpoint}
  */
 export class PasteLogout implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // get customurl
         const CustomURL = GetCookie(
             request.headers.get("Cookie")! || "",
@@ -1056,7 +1065,7 @@ export class PasteLogout implements Endpoint {
         // if paste doesn't exist, remove association (skip all checks)
         if (!paste) {
             // remove association from session
-            await GetAssociation(request, false, "", true);
+            await GetAssociation(request, null, false, "", true);
 
             // return
             return new Response(CustomURL, {
@@ -1087,7 +1096,7 @@ export class PasteLogout implements Endpoint {
             );
 
         // remove association from session
-        await GetAssociation(request, false, "", true);
+        await GetAssociation(request, null, false, "", true);
 
         // return
         return new Response(paste.CustomURL, {
