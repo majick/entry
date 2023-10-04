@@ -365,7 +365,7 @@ export class Favicon implements Endpoint {
  */
 export class CreatePaste implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
-        const _ip = server.requestIP(request);
+        const _ip = server !== undefined ? server.requestIP(request) : null;
 
         // verify content type
         const WrongType = VerifyContentType(
@@ -991,7 +991,7 @@ export class DeleteComment implements Endpoint {
  */
 export class PasteLogin implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
-        const _ip = server.requestIP(request);
+        const _ip = server !== undefined ? server.requestIP(request) : null;
 
         // verify content type
         const WrongType = VerifyContentType(

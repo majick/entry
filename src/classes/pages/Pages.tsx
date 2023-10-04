@@ -1308,7 +1308,7 @@ export class PasteCommentsPage implements Endpoint {
         // get associated paste
         let PostingAs: string | undefined = undefined;
 
-        const _ip = server.requestIP(request);
+        const _ip = server !== undefined ? server.requestIP(request) : null;
         const _Association = await GetAssociation(request, _ip);
 
         if (
@@ -2064,7 +2064,7 @@ export class UserSettings implements Endpoint {
         // if no paste is provided, show global settings
         if (name === "paste/settings") {
             // get association
-            const _ip = server.requestIP(request);
+            const _ip = server !== undefined ? server.requestIP(request) : null;
             const Association = await GetAssociation(request, _ip);
             if (Association[1].startsWith("associated=")) Association[0] = false;
 
