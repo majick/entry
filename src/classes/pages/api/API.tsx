@@ -7,6 +7,8 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server, SocketAddress } from "bun";
 
+import { contentType } from "mime-types";
+
 // import components
 import _404Page from "../components/404";
 
@@ -1018,6 +1020,7 @@ export class PasteLogin implements Endpoint {
                 status: 302,
                 headers: {
                     Location: "/?err=Incorrect password",
+                    "X-Entry-Error": "Incorrect password",
                 },
             });
 
@@ -1091,6 +1094,8 @@ export class PasteLogout implements Endpoint {
                     headers: {
                         Location:
                             "/?err=Cannot remove association with this paste while it is locked.",
+                        "X-Entry-Erorr":
+                            "Cannot remove association with this paste while it is locked.",
                     },
                 }
             );
@@ -1142,6 +1147,7 @@ export class EditMetadata implements Endpoint {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot edit metadata: Invalid password!",
+                    "X-Entry-Error": "Cannot edit metadata: Invalid password!",
                 },
             });
 
@@ -1151,6 +1157,7 @@ export class EditMetadata implements Endpoint {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot edit metadata: Paste is locked",
+                    "X-Entry-Error": "Cannot edit metadata: Paste is locked",
                 },
             });
 
@@ -1221,6 +1228,164 @@ export class GetPasteComments implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetFile
+ * @implements {Endpoint}
+ */
+export class GetFile implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // make sure media is enabled (and exists)
+        if (!EntryDB.Media) return new _404Page().request(request);
+
+        // get owner name and ifle name
+        const name = url.pathname.slice(
+            "/api/media/file/".length,
+            url.pathname.length
+        );
+
+        const Owner = name.split("/")[0];
+        const File = name.split("/")[1];
+
+        if (!Owner || !File) return new _404Page().request(request);
+
+        // get file
+        const file = await EntryDB.Media.GetFile(Owner, File);
+        if (!file[0] && !file[2]) return new _404Page().request(request);
+
+        // return
+        return new Response(file[2], {
+            status: 200,
+            headers: {
+                // get file content type based on name
+                "Content-Type": contentType(File) || "application/octet-stream",
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class UploadFile
+ * @implements {Endpoint}
+ */
+export class UploadFile implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // make sure media is enabled (and exists)
+        if (!EntryDB.Media) return new _404Page().request(request);
+
+        // verify content type
+        const WrongType = VerifyContentType(request, "multipart/form-data");
+        if (WrongType) return WrongType;
+
+        // get request body
+        const FormData = await request.formData();
+
+        // create body
+        const body = {
+            CustomURL: FormData.get("CustomURL") as string | undefined,
+            EditPassword: FormData.get("EditPassword") as string | undefined,
+        };
+
+        const _file = FormData.get("File") as File | undefined;
+
+        if (!body.CustomURL || !body.EditPassword || !_file)
+            return new _404Page().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+
+        // validate password
+        const admin =
+            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+
+        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+            return new Response("Invalid password", {
+                status: 302,
+                headers: {
+                    Location: "/?err=Cannot upload file: Invalid password!",
+                    "X-Entry-Error": "Cannot upload file: Invalid password!",
+                },
+            });
+
+        // upload file
+        const res = await EntryDB.Media.UploadFile(paste.CustomURL as string, _file);
+
+        // return
+        return new Response(JSON.stringify(res), {
+            status: 302,
+            headers: {
+                "Content-Type": "application/json",
+                Location: res[0] === true ? `?msg=${res[1]}` : `?err=${res[1]}`,
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class DeleteFile
+ * @implements {Endpoint}
+ */
+export class DeleteFile implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        // make sure media is enabled (and exists)
+        if (!EntryDB.Media) return new _404Page().request(request);
+
+        // verify content type
+        const WrongType = VerifyContentType(request, "multipart/form-data");
+        if (WrongType) return WrongType;
+
+        // get request body
+        const FormData = await request.formData();
+
+        // create body
+        const body = {
+            CustomURL: FormData.get("CustomURL") as string | undefined,
+            EditPassword: FormData.get("EditPassword") as string | undefined,
+            File: FormData.get("File") as string | undefined,
+        };
+
+        if (!body.CustomURL || !body.EditPassword || !body.File)
+            return new _404Page().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+
+        // validate password
+        const admin =
+            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+
+        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+            return new Response("Invalid password", {
+                status: 302,
+                headers: {
+                    Location: "/?err=Cannot upload file: Invalid password!",
+                    "X-Entry-Error": "Cannot upload file: Invalid password!",
+                },
+            });
+
+        // upload file
+        const res = await EntryDB.Media.DeleteFile(
+            paste.CustomURL as string,
+            body.File
+        );
+
+        // return
+        return new Response(JSON.stringify(res), {
+            status: 302,
+            headers: {
+                "Content-Type": "application/json",
+                Location: res[0] === true ? `?msg=${res[1]}` : `?err=${res[1]}`,
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -1247,4 +1412,7 @@ export default {
     PasteLogout,
     EditMetadata,
     GetPasteComments,
+    GetFile,
+    UploadFile,
+    DeleteFile,
 };

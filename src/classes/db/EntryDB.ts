@@ -11,6 +11,8 @@ import fs from "node:fs";
 
 import { CreateHash, Encrypt } from "./helpers/Hash";
 import SQL from "./helpers/SQL";
+
+import Media from "./MediaDB";
 import Expiry from "./Expiry";
 import LogDB from "./LogDB";
 
@@ -81,6 +83,7 @@ export default class EntryDB {
     public readonly db: Database;
     public static Expiry: Expiry; // hold expiry registry
     public static Logs: LogDB; // hold log db
+    public static Media: Media; // hold media db
 
     public static readonly MaxContentLength = 200000;
     public static readonly MaxPasswordLength = 256;
@@ -125,6 +128,7 @@ export default class EntryDB {
             StaticInit = true;
 
             await EntryDB.CreateExpiry();
+            await EntryDB.InitMedia();
             await EntryDB.InitLogs();
 
             // ...
@@ -311,6 +315,30 @@ export default class EntryDB {
             },
             1000 * 60 * 60 * 24
         );
+    }
+
+    /**
+     * @method InitMedia
+     *
+     * @static
+     * @return {Promise<any>}
+     * @memberof EntryDB
+     */
+    public static async InitMedia(): Promise<any> {
+        if (
+            !EntryDB.config ||
+            !EntryDB.config.app ||
+            !EntryDB.config.app.media ||
+            EntryDB.config.app.media.enabled === false
+        )
+            return;
+
+        // create db
+        EntryDB.Media = new Media(new this());
+        EntryDB.Media.Initialize();
+
+        // return
+        return EntryDB.Media;
     }
 
     /**

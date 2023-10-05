@@ -66,6 +66,8 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
     - Links posted comments with this paste
 - `POST /api/metadata`, Update paste metadata, expects FormData with the fields: `CustomURL, EditPassword, metadata`
     - The `metadata` field is JSON stringified, URI encoded and base64 encoded **ON CLIENT**
+- `POST /api/media/upload`, Upload file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(binary)`
+- `POST /api/media/delete`, Delete file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string)`
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
@@ -73,6 +75,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `GET  /api/html/{paste}`, Get rendered paste content
 - `GET  /api/comments/{paste}`, Get all comments on a specific paste, accepts query string `offset` (multiples of 100, for pagination)
 - `GET  /api/group/{group}`, Get all pastes in specified group
+- `GET  /api/media/file/{file}`, Get media
 
 #### Admin Endpoints
 
@@ -439,9 +442,24 @@ Adding a new node is handled similarly:
 - Creating the handler in the parser (`parser.tsx`)
 - Adding style attributes
 
-### Entry: Atlas
+### Media Storage
 
-The [Atlas](https://codeberg.org/hkau/entry/src/branch/master/packages/atlas) plugin is an optional plugin which adds a live paste editor and **required authentication**. It uses a separate database using [PocketBase](https://pocketbase.io). More information [here](https://codeberg.org/hkau/entry/src/branch/master/packages/atlas/README.md).
+Entry allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accesible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`.
+
+Media can be enabled through the config key.
+
+```json
+{
+    ...
+    "app": {
+        ...
+        "media": {
+            "enabled" true,
+            "max_size": 52428800 // size in bytes, default is 50MB
+        }
+    }
+}
+```
 
 ### Wildcard Domains
 

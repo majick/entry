@@ -341,7 +341,7 @@ export class ManagePastes implements Endpoint {
             return new Login().request(request);
 
         // log event (only on first access)
-        if (request.headers.get("Referer")!) {
+        if (request.headers.get("Referer")! && EntryDB.Logs) {
             const RefURL = new URL(request.headers.get("Referer")!);
 
             if (

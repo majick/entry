@@ -89,6 +89,10 @@ export type Config = {
                 [key: string]: string;
             }>;
         };
+        media?: {
+            enabled: boolean; // note: why would this even be false?
+            max_size: number; // default 52428800 (50 MB)
+        };
     };
     log?: {
         clear_on_start: boolean;
@@ -221,6 +225,7 @@ const config: HoneybeeConfig = {
         "/api/exists": { Type: "begins", Page: API.PasteExists },
         "/api/html": { Type: "begins", Page: API.GetPasteHTML },
         "/api/comments": { Type: "begins", Page: API.GetPasteComments },
+        "/api/media/file": { Type: "begins", Page: API.GetFile },
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
@@ -261,6 +266,8 @@ const config: HoneybeeConfig = {
         "/api/associate": { Method: "POST", Page: API.PasteLogin },
         "/api/disassociate": { Method: "POST", Page: API.PasteLogout },
         "/api/metadata": { Method: "POST", Page: API.EditMetadata },
+        "/api/media/upload": { Method: "POST", Page: API.UploadFile },
+        "/api/media/delete": { Method: "POST", Page: API.DeleteFile },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET search
         "/search": { Page: Pages.PastesSearch },

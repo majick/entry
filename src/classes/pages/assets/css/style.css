@@ -348,6 +348,7 @@ button:focus,
 .mdnote {
     padding: 1rem;
     margin-bottom: 1rem;
+    border-radius: 0.4rem;
 
     /* default: note-note */
     background: var(--green1);

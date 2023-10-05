@@ -1,7 +1,5 @@
 import path from "node:path";
-
 import EntryDB from "./EntryDB";
-import { Config } from "../..";
 
 /**
  * @export
@@ -9,8 +7,6 @@ import { Config } from "../..";
  */
 export default class Expiry {
     public static ExpiryFileLocation = "";
-
-    private static config: Config;
     private readonly db: EntryDB;
 
     /**
@@ -31,7 +27,7 @@ export default class Expiry {
         Expiry.ExpiryFileLocation = location;
 
         // read config
-        Expiry.config = (await EntryDB.GetConfig()) as Config;
+        if (!EntryDB.config) await EntryDB.GetConfig();
 
         // check if expiry file exists
         if (!(await Bun.file(Expiry.ExpiryFileLocation).exists()))
@@ -90,7 +86,7 @@ export default class Expiry {
                     {
                         CustomURL,
                     },
-                    Expiry.config.admin // use admin password
+                    EntryDB.config.admin // use admin password
                 );
 
                 // remove from ExpiryFile
