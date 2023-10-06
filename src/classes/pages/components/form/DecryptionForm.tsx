@@ -24,7 +24,7 @@ export default function DecryptionForm(props: {
                 }
                 method={props.isEdit !== true ? "POST" : ""}
             >
-                <button>Decrypt</button>
+                <button class={"round"}>Decrypt</button>
 
                 {props.isEdit && (
                     <input type={"hidden"} name={"mode"} value={"edit"} required />
@@ -43,6 +43,7 @@ export default function DecryptionForm(props: {
                     placeholder={"View password"}
                     minLength={EntryDB.MinPasswordLength}
                     maxLength={EntryDB.MaxPasswordLength}
+                    class={"round"}
                     required
                 />
             </form>

@@ -70,7 +70,7 @@ export function VerifyContentType(
     expected: string
 ): Response | undefined {
     // verify content type
-    if (request.headers.get("Content-Type") !== expected)
+    if (!(request.headers.get("Content-Type") || "").startsWith(expected))
         return new Response(`Expected ${expected}`, {
             status: 406,
             headers: {
@@ -1237,8 +1237,7 @@ export class GetFile implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
 
-        // make sure media is enabled (and exists)
-        if (!EntryDB.Media) return new _404Page().request(request);
+        // don't check if media is disabled, as files should still be viewable even with media disabled!
 
         // get owner name and ifle name
         const name = url.pathname.slice(
@@ -1319,7 +1318,7 @@ export class UploadFile implements Endpoint {
             status: 302,
             headers: {
                 "Content-Type": "application/json",
-                Location: res[0] === true ? `?msg=${res[1]}` : `?err=${res[1]}`,
+                Location: res[0] === true ? `/?msg=${res[1]}` : `/?err=${res[1]}`,
             },
         });
     }
@@ -1364,8 +1363,8 @@ export class DeleteFile implements Endpoint {
             return new Response("Invalid password", {
                 status: 302,
                 headers: {
-                    Location: "/?err=Cannot upload file: Invalid password!",
-                    "X-Entry-Error": "Cannot upload file: Invalid password!",
+                    Location: "/?err=Cannot delete file: Invalid password!",
+                    "X-Entry-Error": "Cannot delete file: Invalid password!",
                 },
             });
 
@@ -1380,7 +1379,7 @@ export class DeleteFile implements Endpoint {
             status: 302,
             headers: {
                 "Content-Type": "application/json",
-                Location: res[0] === true ? `?msg=${res[1]}` : `?err=${res[1]}`,
+                Location: res[0] === true ? `/?msg=${res[1]}` : `/?err=${res[1]}`,
             },
         });
     }

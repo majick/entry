@@ -58,12 +58,7 @@ export default class Media {
         owner: string,
         name: string
     ): Promise<[boolean, string, BunFile?]> {
-        if (
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
-        )
-            return [false, "Media disabled"];
+        // don't check if media is disabled, as files should still be viewable even with media disabled!
 
         // ...
         const OwnerFolder = path.resolve(Media.MediaLocation, owner);
@@ -111,7 +106,7 @@ export default class Media {
             return [false, "File too large!"];
 
         // ...
-        const FilePath = path.resolve(owner, file.name);
+        const FilePath = path.resolve(OwnerFolder, file.name.replaceAll(" ", "_"));
 
         // make sure file doesn't already exist
         if (fs.existsSync(FilePath)) return [false, "File already exists"];
@@ -159,5 +154,35 @@ export default class Media {
 
         // return
         return [true, "File deleted"];
+    }
+
+    /**
+     * @method GetMediaByOwner
+     *
+     * @param {string} owner
+     * @return {Promise<[boolean, string, string[]?]>}
+     * @memberof Media
+     */
+    public async GetMediaByOwner(
+        owner: string
+    ): Promise<[boolean, string, string[]?]> {
+        if (
+            !EntryDB.config.app ||
+            !EntryDB.config.app.media ||
+            EntryDB.config.app.media.enabled === false
+        )
+            return [false, "Media disabled"];
+
+        // ...
+        const OwnerFolder = path.resolve(Media.MediaLocation, owner);
+
+        // return false if OwnerFolder doesn't exist
+        if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
+
+        // get all files
+        const files = fs.readdirSync(OwnerFolder);
+
+        // return files
+        return [true, `${files.length} files`, files];
     }
 }

@@ -278,6 +278,7 @@ const config: HoneybeeConfig = {
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
         "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
+        "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
         "/paste/builder": { Page: Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },

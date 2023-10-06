@@ -75,7 +75,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `GET  /api/html/{paste}`, Get rendered paste content
 - `GET  /api/comments/{paste}`, Get all comments on a specific paste, accepts query string `offset` (multiples of 100, for pagination)
 - `GET  /api/group/{group}`, Get all pastes in specified group
-- `GET  /api/media/file/{file}`, Get media
+- `GET  /api/media/file/{owner}/{file}`, Get media
 
 #### Admin Endpoints
 

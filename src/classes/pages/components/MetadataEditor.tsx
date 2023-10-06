@@ -222,7 +222,7 @@ export function ClientEditor(_metadata: string, id: string): any {
             // these should all just be true or false inputs
             Inputs.push(
                 <div
-                    className="card flex justify-space-between align-center flex-wrap g-4"
+                    className="card flex justify-space-between align-center flex-wrap g-4 round"
                     style={{
                         background: "var(--background-surface)",
                     }}

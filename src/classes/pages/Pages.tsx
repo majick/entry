@@ -2333,12 +2333,9 @@ export class UserSettings implements Endpoint {
                                         <form
                                             action="/api/metadata"
                                             method={"POST"}
-                                            style={{
-                                                display: "flex",
-                                                gap: "0.5rem",
-                                                flexWrap: "wrap",
-                                                justifyContent: "center",
-                                            }}
+                                            class={
+                                                "flex g-4 justify-center flex-wrap"
+                                            }
                                         >
                                             <input
                                                 type={"hidden"}
@@ -2349,7 +2346,7 @@ export class UserSettings implements Endpoint {
                                             />
 
                                             <input
-                                                class={"secondary"}
+                                                class={"secondary round"}
                                                 type="text"
                                                 placeholder={"Edit code"}
                                                 maxLength={EntryDB.MaxPasswordLength}
@@ -2357,10 +2354,6 @@ export class UserSettings implements Endpoint {
                                                 name={"EditPassword"}
                                                 id={"EditPassword"}
                                                 required
-                                                style={{
-                                                    borderRadius:
-                                                        "0.4rem !important",
-                                                }}
                                             />
 
                                             <input
@@ -2394,6 +2387,37 @@ export class UserSettings implements Endpoint {
                                             Preact.
                                         </noscript>
                                     </div>
+
+                                    {EntryDB.config.app &&
+                                        EntryDB.config.app.media &&
+                                        EntryDB.config.app.media.enabled ===
+                                            true && (
+                                            <>
+                                                <hr />
+
+                                                <div class="card round flex justify-space-between align-center flex-wrap g-4">
+                                                    <b>View Paste Media</b>
+
+                                                    <a
+                                                        href={`/paste/media/${result.CustomURL}`}
+                                                        className="button round"
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Picture Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M21.75 21.5H2.25A1.75 1.75 0 0 1 .5 19.75V4.25c0-.966.784-1.75 1.75-1.75h19.5c.966 0 1.75.784 1.75 1.75v15.5a1.75 1.75 0 0 1-1.75 1.75ZM2.25 4a.25.25 0 0 0-.25.25v15.5c0 .138.112.25.25.25h3.178L14 10.977a1.749 1.749 0 0 1 2.506-.032L22 16.44V4.25a.25.25 0 0 0-.25-.25ZM22 19.75v-1.19l-6.555-6.554a.248.248 0 0 0-.18-.073.247.247 0 0 0-.178.077L7.497 20H21.75a.25.25 0 0 0 .25-.25ZM10.5 9.25a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0Zm-1.5 0a1.75 1.75 0 1 0-3.501.001A1.75 1.75 0 0 0 9 9.25Z"></path>
+                                                        </svg>
+                                                        View Media
+                                                    </a>
+                                                </div>
+                                            </>
+                                        )}
                                 </div>
                             </div>
 
@@ -2432,6 +2456,357 @@ export class UserSettings implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class ViewPasteMedia
+ * @implements {Endpoint}
+ */
+export class ViewPasteMedia implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get paste name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("paste/media/")) name = name.split("paste/media/")[1];
+
+        // get paste
+        const paste = await db.GetPasteFromURL(name, true);
+        if (!paste) return new _404Page().request(request);
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        if (!Association[0]) return new _404Page().request(request);
+
+        // ...
+        const DeleteMode = url.searchParams.get("delete") === "true";
+
+        // get media files
+        const Files = await EntryDB.Media.GetMediaByOwner(paste.CustomURL as string);
+
+        // render
+        return new Response(
+            Renderer.Render(
+                <>
+                    <TopNav breadcrumbs={["paste", "media", name]} />
+
+                    <main>
+                        <div
+                            style={{
+                                padding: "0.5rem",
+                            }}
+                        >
+                            <div
+                                className="builder\:card"
+                                style={{
+                                    width: "100%",
+                                    borderRadius: "0.4rem",
+                                }}
+                            >
+                                <div
+                                    class={
+                                        "flex g-4 align-center justify-space-between"
+                                    }
+                                    style={{
+                                        margin: "2rem 0 1rem 0",
+                                    }}
+                                >
+                                    <h4 class={"no-margin"}>Paste Media</h4>
+
+                                    <div className="flex flex-wrap justify-right g-4">
+                                        {!DeleteMode && (
+                                            <>
+                                                <button
+                                                    id={"entry:button.UploadFile"}
+                                                    className="secondary round"
+                                                >
+                                                    Upload File
+                                                </button>
+
+                                                <a
+                                                    href={"?delete=true"}
+                                                    className="button secondary round"
+                                                >
+                                                    Delete Files
+                                                </a>
+                                            </>
+                                        )}
+
+                                        <a
+                                            href={"javascript:window.history.back()"}
+                                            class={"button secondary round"}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Undo Symbol"}
+                                            >
+                                                <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                            </svg>
+                                            back
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <hr />
+
+                                <div className="flex g-4 justify-center align-center flex-wrap">
+                                    {(DeleteMode === false &&
+                                        Files[2] &&
+                                        Files[2].map((file) => (
+                                            <a
+                                                className="button round border dashed"
+                                                href={`/api/media/file/${paste.CustomURL}/${file}`}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 24 24"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Binary File Symbol"}
+                                                >
+                                                    <path d="M3 3a2 2 0 0 1 2-2h9.982a2 2 0 0 1 1.414.586l4.018 4.018A2 2 0 0 1 21 7.018V21a2 2 0 0 1-2 2H4.75a.75.75 0 0 1 0-1.5H19a.5.5 0 0 0 .5-.5V8.5h-4a2 2 0 0 1-2-2v-4H5a.5.5 0 0 0-.5.5v6.25a.75.75 0 0 1-1.5 0Zm12-.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0-.146-.336l-4.018-4.018A.5.5 0 0 0 15 2.5Z"></path>
+                                                    <path d="M0 13.75C0 12.784.784 12 1.75 12h3c.966 0 1.75.784 1.75 1.75v4a1.75 1.75 0 0 1-1.75 1.75h-3A1.75 1.75 0 0 1 0 17.75Zm1.75-.25a.25.25 0 0 0-.25.25v4c0 .138.112.25.25.25h3a.25.25 0 0 0 .25-.25v-4a.25.25 0 0 0-.25-.25ZM9 12a.75.75 0 0 0 0 1.5h1.5V18H9a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5H12v-5.25a.75.75 0 0 0-.75-.75H9Z"></path>
+                                                </svg>
+                                                {file}
+                                            </a>
+                                        ))) ||
+                                        (Files[2] &&
+                                            ((url.searchParams.get(
+                                                "EditPassword"
+                                            ) && (
+                                                // no edit password provided, show delete table
+                                                <table
+                                                    class={"force-full"}
+                                                    style={{
+                                                        width: "100%",
+                                                    }}
+                                                >
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Delete File</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        {Files[2].map((file) => (
+                                                            <tr>
+                                                                <td>
+                                                                    <a
+                                                                        href={`/api/media/file/${paste.CustomURL}/${file}`}
+                                                                    >
+                                                                        {file}
+                                                                    </a>
+                                                                </td>
+
+                                                                <td
+                                                                    class={
+                                                                        "flex justify-center"
+                                                                    }
+                                                                    style={{
+                                                                        width: "100%",
+                                                                    }}
+                                                                >
+                                                                    <form
+                                                                        action="/api/media/delete"
+                                                                        encType={
+                                                                            "multipart/form-data"
+                                                                        }
+                                                                        method={
+                                                                            "POST"
+                                                                        }
+                                                                    >
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name="CustomURL"
+                                                                            value={
+                                                                                paste.CustomURL
+                                                                            }
+                                                                            required
+                                                                        />
+
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name="EditPassword"
+                                                                            value={
+                                                                                url.searchParams.get(
+                                                                                    "EditPassword"
+                                                                                ) ||
+                                                                                ""
+                                                                            }
+                                                                            required
+                                                                        />
+
+                                                                        <input
+                                                                            type="hidden"
+                                                                            name="File"
+                                                                            value={
+                                                                                file
+                                                                            }
+                                                                            required
+                                                                        />
+
+                                                                        <button className="round secondary red">
+                                                                            Delete
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            )) || (
+                                                // no edit password provided, ask for it
+                                                <div className="flex justify-center">
+                                                    <form
+                                                        class={
+                                                            "flex g-4 justify-center flex-wrap"
+                                                        }
+                                                    >
+                                                        <input
+                                                            class={"secondary round"}
+                                                            type="text"
+                                                            placeholder={"Edit code"}
+                                                            maxLength={
+                                                                EntryDB.MaxPasswordLength
+                                                            }
+                                                            minLength={
+                                                                EntryDB.MinPasswordLength
+                                                            }
+                                                            name={"EditPassword"}
+                                                            id={"EditPassword"}
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="delete"
+                                                            value={"true"}
+                                                            required
+                                                        />
+
+                                                        <button
+                                                            class={
+                                                                "secondary round green mobile-max"
+                                                            }
+                                                        >
+                                                            Continue
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            )))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <Modal
+                            modalid="entry:modal.UploadFile"
+                            buttonid="entry:button.UploadFile"
+                            round={true}
+                        >
+                            <h1
+                                style={{
+                                    width: "25rem",
+                                    maxWidth: "100%",
+                                }}
+                            >
+                                Upload File
+                            </h1>
+
+                            <hr />
+
+                            <form
+                                action="/api/media/upload"
+                                encType={"multipart/form-data"}
+                                method={"POST"}
+                                class={"flex flex-column g-8"}
+                            >
+                                <input
+                                    type="hidden"
+                                    name="CustomURL"
+                                    value={paste.CustomURL}
+                                    required
+                                />
+
+                                <label htmlFor="EditPassword">
+                                    <b>Paste Edit Code</b>
+                                </label>
+
+                                <input
+                                    class={"round"}
+                                    type="text"
+                                    placeholder={"Edit code"}
+                                    maxLength={EntryDB.MaxPasswordLength}
+                                    minLength={EntryDB.MinPasswordLength}
+                                    name={"EditPassword"}
+                                    id={"EditPassword"}
+                                    required
+                                />
+
+                                <label htmlFor="File">
+                                    <b>File</b>
+                                </label>
+
+                                <input
+                                    class={"round"}
+                                    type="file"
+                                    name="File"
+                                    id={"File"}
+                                    maxLength={
+                                        EntryDB.config.app!.media!.max_size || 0
+                                    }
+                                    accept={"image/*"}
+                                    required
+                                />
+
+                                <hr style={{ margin: 0 }} />
+
+                                <button
+                                    className="round green"
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    Upload File
+                                </button>
+                            </form>
+
+                            <hr />
+
+                            <form method={"dialog"}>
+                                <button
+                                    className="red round"
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </form>
+                        </Modal>
+
+                        <Footer />
+                    </main>
+                </>,
+                <>
+                    <title>Media - {EntryDB.config.name}</title>
+                    <link rel="icon" href="/favicon" />
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     GetPasteFromURL,
@@ -2440,4 +2815,5 @@ export default {
     PasteCommentsPage,
     ComponentView,
     UserSettings,
+    ViewPasteMedia,
 };
