@@ -564,7 +564,7 @@ export class GetPasteFromURL implements Endpoint {
                                             <a
                                                 class={"button"}
                                                 target={"_blank"}
-                                                href={`/api/raw/${result.CustomURL}`}
+                                                href={`${HostnameURL}api/raw/${result.CustomURL}`}
                                                 style={{
                                                     width: "80px",
                                                 }}
@@ -574,7 +574,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                             <a
                                                 class={"button"}
-                                                href={`/api/html/${result.CustomURL}`}
+                                                href={`${HostnameURL}api/html/${result.CustomURL}`}
                                                 target={"_blank"}
                                                 style={{
                                                     width: "100px",
@@ -585,7 +585,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                             <a
                                                 class={"button"}
-                                                href={`?view=doc`}
+                                                href={`${HostnameURL}paste/doc/${result.CustomURL}`}
                                                 style={{
                                                     width: "80px",
                                                 }}
@@ -612,7 +612,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 "<% enable template %>"
                                             ) && (
                                                 <a
-                                                    href={`/?Template=${result.CustomURL}`}
+                                                    href={`${HostnameURL}?Template=${result.CustomURL}`}
                                                     class={"button round"}
                                                 >
                                                     Use Template
@@ -622,7 +622,7 @@ export class GetPasteFromURL implements Endpoint {
                                             {result.GroupName && (
                                                 <a
                                                     class={"button round"}
-                                                    href={`/search?q=${
+                                                    href={`${HostnameURL}search?q=${
                                                         result.GroupName
                                                     }%2F&group=${result.GroupName}${
                                                         // add host server (if it exists)
@@ -647,7 +647,7 @@ export class GetPasteFromURL implements Endpoint {
                                                         false) && (
                                                     <a
                                                         class={"button round"}
-                                                        href={`/?ReportOn=${result.CustomURL}`}
+                                                        href={`${HostnameURL}?ReportOn=${result.CustomURL}`}
                                                         title={"Report Paste"}
                                                     >
                                                         <svg
@@ -790,19 +790,21 @@ export class GetPasteFromURL implements Endpoint {
                             </div>
                         </div>
 
-                        <Footer
-                            ShowBottomRow={
-                                (
+                        {!IsFromWildcard && (
+                            <Footer
+                                ShowBottomRow={
                                     (
-                                        EntryDB.config.app || {
-                                            footer: {
-                                                show_name_on_all_pages: false,
-                                            },
-                                        }
-                                    ).footer || { show_name_on_all_pages: false }
-                                ).show_name_on_all_pages === true
-                            }
-                        />
+                                        (
+                                            EntryDB.config.app || {
+                                                footer: {
+                                                    show_name_on_all_pages: false,
+                                                },
+                                            }
+                                        ).footer || { show_name_on_all_pages: false }
+                                    ).show_name_on_all_pages === true
+                                }
+                            />
+                        )}
                     </main>
 
                     <script
@@ -1280,6 +1282,13 @@ export class PasteCommentsPage implements Endpoint {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.searchParams);
 
+        const HostnameURL =
+            (EntryDB.config &&
+                EntryDB.config.app &&
+                EntryDB.config.app.hostname &&
+                `https://${EntryDB.config.app.hostname}/`) ||
+            "/";
+
         // return 404 if comments are disabled
         if (!EntryDB.config.log || !EntryDB.config.log.events.includes("comment"))
             return new _404Page().request(request);
@@ -1435,7 +1444,7 @@ export class PasteCommentsPage implements Endpoint {
                         </div>
 
                         <a
-                            href={`/?CommentOn=${result.CustomURL}`}
+                            href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
                             className="button border round"
                             title={"Add Comments"}
                         >
@@ -1497,7 +1506,7 @@ export class PasteCommentsPage implements Endpoint {
 
                             <div class={"mobile-flex-center flex flex-wrap g-4"}>
                                 <a
-                                    href={`/?CommentOn=${result.CustomURL}`}
+                                    href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
                                     className="button secondary round"
                                 >
                                     Add Comment
@@ -1514,7 +1523,7 @@ export class PasteCommentsPage implements Endpoint {
                                             .IsPrivateMessage) &&
                                         PostingAs !== undefined && (
                                             <a
-                                                href={`/?CommentOn=${result.CustomURL}&pm=true`}
+                                                href={`${HostnameURL}?CommentOn=${result.CustomURL}&pm=true`}
                                                 className="button secondary round"
                                             >
                                                 Private Comment
@@ -1635,7 +1644,9 @@ export class PasteCommentsPage implements Endpoint {
                                 >
                                     <span>
                                         No comments yet!{" "}
-                                        <a href={`/?CommentOn=${result.CustomURL}`}>
+                                        <a
+                                            href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
+                                        >
                                             Add Comment
                                         </a>
                                     </span>
@@ -1749,7 +1760,7 @@ export class PasteCommentsPage implements Endpoint {
                                     <div class={"flex g-4"}>
                                         <a
                                             class={"chip button secondary"}
-                                            href={`/?CommentOn=${comment.CustomURL}`}
+                                            href={`${HostnameURL}?CommentOn=${comment.CustomURL}`}
                                         >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -2353,7 +2364,7 @@ export class UserSettings implements Endpoint {
                                             />
 
                                             <input
-                                                class={"secondary round"}
+                                                class={"secondary round mobile-max"}
                                                 type="text"
                                                 placeholder={"Edit code"}
                                                 maxLength={EntryDB.MaxPasswordLength}
@@ -2660,6 +2671,7 @@ export class ViewPasteMedia implements Endpoint {
                                             <a
                                                 className="button round border dashed"
                                                 href={`/api/media/file/${paste.CustomURL}/${file}`}
+                                                title={file}
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
@@ -2768,7 +2780,9 @@ export class ViewPasteMedia implements Endpoint {
                                                         }
                                                     >
                                                         <input
-                                                            class={"secondary round"}
+                                                            class={
+                                                                "secondary round mobile-max"
+                                                            }
                                                             type="text"
                                                             placeholder={"Edit code"}
                                                             maxLength={

@@ -99,7 +99,8 @@ export default class Media {
         const OwnerFolder = path.resolve(Media.MediaLocation, owner);
 
         // create owner folder if it doesn't exist
-        if (!fs.existsSync(OwnerFolder)) fs.mkdirSync(OwnerFolder);
+        if (!fs.existsSync(OwnerFolder))
+            fs.mkdirSync(OwnerFolder, { recursive: true });
 
         // check size
         if (file.size > (EntryDB.config.app.media.max_size || 52428800))

@@ -275,6 +275,16 @@ export function ParseMarkdownSync(
 
     // ...image
     // these are actually so fragile, and the ordering of all of these operations matters
+
+    // ...image with sizing
+    content = content.replaceAll(
+        // this regex match is ended by either a space or a newline!
+        // ...same as normal image but with SIZE_X and SIZE_Y matching
+        /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)\:(?<SIZE_X>.+)x(?<SIZE_Y>.+)(\s|\n)/g,
+        '<img alt="$<TEXT>" title="$<TEXT>" src="$<URL>" style="width: $<SIZE_X>px; height: $<SIZE_Y>px" />'
+    );
+
+    // ...normal image
     content = content.replaceAll(
         /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)/g,
         '<img alt="$<TEXT>" title="$<TEXT>" src="$<URL>" />'

@@ -409,6 +409,22 @@ export class CreatePaste implements Endpoint {
         } else if (!Association[1].startsWith("associated=refresh"))
             body.Associated = Association[1];
 
+        // if servers requires an association, make sure we have one
+        if (
+            EntryDB.config.app &&
+            EntryDB.config.app.association_required === true &&
+            !body.Associated
+        )
+            return new Response("Association required!", {
+                status: 302,
+                headers: {
+                    Location:
+                        "/?err=This server requires a paste association to create new pastes",
+                    "X-Entry-Error":
+                        "This server requires a paste association to create new pastes",
+                },
+            });
+
         // create paste
         const result = await db.CreatePaste(body);
 

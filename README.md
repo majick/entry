@@ -389,7 +389,7 @@ Paste comments are disabled by default. They can be enabled by enabling the `com
 
 Paste comments can be disabled on individual pastes using the paste settings menu. The paste settings menu can be disabled by changing config `app.enable_paste_settings` to false.
 
-Users are automatically tagged with an association with the first paste (not comment) that they create. This can be disabled by changing config `app.auto_tag` to false.
+Users are automatically tagged with an association with the first paste (not comment) that they create. This can be disabled by changing config `app.auto_tag` to false. If you want to require somebody already has an association to create a paste, you can set config `app.association_required` to true.
 
 ### Paste Builder
 
