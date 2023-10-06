@@ -54,7 +54,7 @@ You can define a custom [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/
 
 ### API
 
-All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
+All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded` unless otherwise specified, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
 
 - `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
 - `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldURL, EditPassword, Content, OldURL, NewEditPassword`
@@ -68,6 +68,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
     - The `metadata` field is JSON stringified, URI encoded and base64 encoded **ON CLIENT**
 - `POST /api/media/upload`, Upload file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(binary)`
 - `POST /api/media/delete`, Delete file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string)`
+- `POST /api/domain`, Update paste custom domain, expects FormData with the fields: `CustomURL, EditPassword, Domain`
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
@@ -156,6 +157,7 @@ The following options can be used as events:
 - `report`, fires when a paste is reported (`Content` dependent on the report log type, see below)
     - `create`, followed by the paste that is being reported and the CustomURL of the report
     - `archive`, followed by the CustomURL of the report that is being archived
+- `custom_domain`, stores data about a custom domain link (`Content` is the paste that the domain is linked to, followed by the domain)
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:
@@ -477,6 +479,8 @@ Example:
 ```
 
 Note that wildcard paths cannot be indexed by search engines, and all relative links should redirect to the main site.
+
+You can allow people to use custom domains and link with a CNAME record by enabling the `custom_domain` log type.
 
 ## Development
 

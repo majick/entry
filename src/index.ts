@@ -268,6 +268,7 @@ const config: HoneybeeConfig = {
         "/api/metadata": { Method: "POST", Page: API.EditMetadata },
         "/api/media/upload": { Method: "POST", Page: API.UploadFile },
         "/api/media/delete": { Method: "POST", Page: API.DeleteFile },
+        "/api/domain": { Method: "POST", Page: API.UpdateCustomDomain },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
         // GET search
         "/search": { Page: Pages.PastesSearch },

@@ -22,7 +22,8 @@ export type LogEvent =
     | "error"
     | "view_paste"
     | "comment"
-    | "report";
+    | "report"
+    | "custom_domain";
 
 export type Log = {
     Content: string;
@@ -66,10 +67,12 @@ export default class LogDB {
                 for (const event of EntryDB.config.log.events) {
                     // make sure the event isn't something that we shouldn't clear
                     if (
+                        // should match the things excluded in the admin log page
                         event === "comment" ||
                         event === "report" ||
                         event === "session" ||
-                        event === "view_paste"
+                        event === "view_paste" ||
+                        event === "custom_domain"
                     )
                         continue;
 

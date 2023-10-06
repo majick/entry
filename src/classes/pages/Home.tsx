@@ -51,6 +51,34 @@ export default class Home implements Endpoint {
             }
         }
 
+        // if custom domains are enabled, try to match that
+        else if (
+            EntryDB.config.log &&
+            EntryDB.config.log.events.includes("custom_domain") &&
+            EntryDB.config.app &&
+            EntryDB.config.app.hostname
+        ) {
+            // try to fetch log based off hostname
+            const CustomDomainLog = (
+                await EntryDB.Logs.QueryLogs(
+                    `Type = "custom_domain" AND Content LIKE "%;${url.hostname}"`
+                )
+            )[2][0];
+
+            // if log exists, forward to paste view
+            if (CustomDomainLog) {
+                // ...create new request
+                const req = new Request(
+                    `${url.protocol}//${EntryDB.config.app.hostname}/${
+                        CustomDomainLog.Content.split(";")[0]
+                    }?_priv_isFromWildcard=true`
+                );
+
+                // ...return
+                return new Pages.GetPasteFromURL().request(req, server);
+            }
+        }
+
         // if search.server, add server to paste.CustomURL
         if (search.get("server"))
             search.set("OldURL", `${search.get("OldURL")}:${search.get("server")}`);

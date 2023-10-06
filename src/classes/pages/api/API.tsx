@@ -1385,6 +1385,117 @@ export class DeleteFile implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class UpdateCustomDomain
+ * @implements {Endpoint}
+ */
+export class UpdateCustomDomain implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        if (
+            !EntryDB.config.log ||
+            !EntryDB.config.log.events.includes("custom_domain")
+        )
+            return new _404Page().request(request);
+
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // verify body
+        if (!body.CustomURL || !body.Domain || !body.EditPassword)
+            return new _404Page().request(request);
+
+        // if domain is server hostname, return (that's no good!)
+        if (
+            EntryDB.config.app &&
+            EntryDB.config.app.hostname &&
+            body.Domain === EntryDB.config.app.hostname
+        )
+            return new _404Page().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+        if (paste.HostServer) return new _404Page().request(request);
+
+        // validate password
+        const admin =
+            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+
+        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+            return new Response("Invalid password", {
+                status: 302,
+                headers: {
+                    Location: "/?err=Cannot update domain: Invalid password!",
+                    "X-Entry-Error": "Cannot update domain: Invalid password!",
+                },
+            });
+
+        // check association
+        const association = await GetAssociation(request, null);
+
+        if (!association[0])
+            return new Response("You must be associated with a paste to do this", {
+                status: 401,
+            });
+
+        if (
+            // if paste does not have metadata OR we're not the paste owner, say we can'do that
+            !paste.Metadata ||
+            (paste.Metadata && association[1] !== paste.Metadata.Owner)
+        )
+            return new Response(
+                "Cannot edit the custom domain of a paste you're not associated with! Please change your paste association.",
+                { status: 401 }
+            );
+
+        // get log
+        const CustomDomainLog = (
+            await EntryDB.Logs.QueryLogs(
+                `Type = "custom_domain" AND Content LIKE "${paste.CustomURL};%"`
+            )
+        )[2][0];
+
+        if (!CustomDomainLog) {
+            // create log
+            await EntryDB.Logs.CreateLog({
+                Type: "custom_domain",
+                Content: `${paste.CustomURL};${body.Domain}`,
+            });
+
+            // return
+            return new Response(body.Domain, {
+                status: 302,
+                headers: {
+                    Location: "/?msg=Added domain link!",
+                },
+            });
+        }
+
+        // update log
+        await EntryDB.Logs.UpdateLog(
+            CustomDomainLog.ID,
+            `${paste.CustomURL};${body.Domain}`
+        );
+
+        // return
+        return new Response(body.Domain, {
+            status: 302,
+            headers: {
+                Location: "/?msg=Updated domain link!",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     DefaultHeaders,
@@ -1414,4 +1525,5 @@ export default {
     GetFile,
     UploadFile,
     DeleteFile,
+    UpdateCustomDomain,
 };

@@ -2257,6 +2257,13 @@ export class UserSettings implements Endpoint {
             // paste cannot be from another server (for now)
             if (result.HostServer) return new _404Page().request(request);
 
+            // try to fetch custom domain log
+            const CustomDomainLog = (
+                await EntryDB.Logs.QueryLogs(
+                    `Type = "custom_domain" AND Content LIKE "${result.CustomURL};%"`
+                )
+            )[2][0];
+
             // render
             return new Response(
                 Renderer.Render(
@@ -2364,13 +2371,15 @@ export class UserSettings implements Endpoint {
                                                 value={""}
                                             />
 
-                                            <button class={"secondary round green"}>
+                                            <button
+                                                class={
+                                                    "secondary round green mobile-max"
+                                                }
+                                            >
                                                 Save
                                             </button>
                                         </form>
                                     </div>
-
-                                    <hr />
 
                                     <div
                                         id="_doc"
@@ -2415,6 +2424,74 @@ export class UserSettings implements Endpoint {
                                                         </svg>
                                                         View Media
                                                     </a>
+                                                </div>
+                                            </>
+                                        )}
+
+                                    {EntryDB.config.log &&
+                                        EntryDB.config.log.events.includes(
+                                            "custom_domain"
+                                        ) && (
+                                            <>
+                                                <hr />
+
+                                                <div class="card round flex justify-space-between align-center flex-wrap g-4">
+                                                    <b>Custom Domain</b>
+
+                                                    <form
+                                                        action="/api/domain"
+                                                        method={"POST"}
+                                                        className="flex g-8 flex-wrap"
+                                                    >
+                                                        <input
+                                                            type="hidden"
+                                                            name="CustomURL"
+                                                            value={result.CustomURL}
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            class={
+                                                                "round mobile-max"
+                                                            }
+                                                            type="text"
+                                                            placeholder={"Edit code"}
+                                                            maxLength={
+                                                                EntryDB.MaxPasswordLength
+                                                            }
+                                                            minLength={
+                                                                EntryDB.MinPasswordLength
+                                                            }
+                                                            name={"EditPassword"}
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            class={
+                                                                "round mobile-max"
+                                                            }
+                                                            type="text"
+                                                            name={"Domain"}
+                                                            placeholder={
+                                                                "example.com"
+                                                            }
+                                                            minLength={4}
+                                                            maxLength={100}
+                                                            autoComplete={"off"}
+                                                            value={
+                                                                CustomDomainLog
+                                                                    ? CustomDomainLog.Content.split(
+                                                                          ";"
+                                                                      )[1]
+                                                                    : ""
+                                                            }
+                                                            required
+                                                        />
+
+                                                        <button className="green round mobile-max">
+                                                            Save
+                                                        </button>
+                                                    </form>
                                                 </div>
                                             </>
                                         )}
