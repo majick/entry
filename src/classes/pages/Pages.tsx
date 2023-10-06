@@ -2405,7 +2405,7 @@ export class UserSettings implements Endpoint {
                                                 <hr />
 
                                                 <div class="card round flex justify-space-between align-center flex-wrap g-4">
-                                                    <b>View Paste Media</b>
+                                                    <b>Paste Media Uploads</b>
 
                                                     <a
                                                         href={`/paste/media/${result.CustomURL}`}
@@ -2435,13 +2435,32 @@ export class UserSettings implements Endpoint {
                                             <>
                                                 <hr />
 
-                                                <div class="card round flex justify-space-between align-center flex-wrap g-4">
-                                                    <b>Custom Domain</b>
+                                                <div class="card round flex justify-space-between flex-wrap g-4">
+                                                    <div
+                                                        class={"mobile-max"}
+                                                        style={{
+                                                            width: "45%",
+                                                        }}
+                                                    >
+                                                        <b>Custom Domain</b>
+                                                        <p>
+                                                            Your domain must also be
+                                                            connected via your DNS
+                                                            using a CNAME record
+                                                            pointing to{" "}
+                                                            <code>
+                                                                {url.hostname}
+                                                            </code>
+                                                        </p>
+                                                    </div>
 
                                                     <form
                                                         action="/api/domain"
                                                         method={"POST"}
-                                                        className="flex g-8 flex-wrap"
+                                                        className="flex flex-column g-8 flex-wrap mobile-max"
+                                                        style={{
+                                                            width: "33.33%",
+                                                        }}
                                                     >
                                                         <input
                                                             type="hidden"
@@ -2478,6 +2497,7 @@ export class UserSettings implements Endpoint {
                                                             minLength={4}
                                                             maxLength={100}
                                                             autoComplete={"off"}
+                                                            pattern={"^(.+).(.+)$"}
                                                             value={
                                                                 CustomDomainLog
                                                                     ? CustomDomainLog.Content.split(
@@ -2488,7 +2508,10 @@ export class UserSettings implements Endpoint {
                                                             required
                                                         />
 
-                                                        <button className="green round mobile-max">
+                                                        <button
+                                                            className="green round"
+                                                            style={{ width: "100%" }}
+                                                        >
                                                             Save
                                                         </button>
                                                     </form>

@@ -49,33 +49,31 @@ export default class Home implements Endpoint {
                 // ...return
                 return new Pages.GetPasteFromURL().request(req, server);
             }
-        }
 
-        // if custom domains are enabled, try to match that
-        else if (
-            EntryDB.config.log &&
-            EntryDB.config.log.events.includes("custom_domain") &&
-            EntryDB.config.app &&
-            EntryDB.config.app.hostname
-        ) {
-            // try to fetch log based off hostname
-            const CustomDomainLog = (
-                await EntryDB.Logs.QueryLogs(
-                    `Type = "custom_domain" AND Content LIKE "%;${url.hostname}"`
-                )
-            )[2][0];
+            // if custom domains are enabled, try to match that
+            else if (
+                EntryDB.config.log &&
+                EntryDB.config.log.events.includes("custom_domain")
+            ) {
+                // try to fetch log based off hostname
+                const CustomDomainLog = (
+                    await EntryDB.Logs.QueryLogs(
+                        `Type = "custom_domain" AND Content LIKE "%;${url.hostname}"`
+                    )
+                )[2][0];
 
-            // if log exists, forward to paste view
-            if (CustomDomainLog) {
-                // ...create new request
-                const req = new Request(
-                    `${url.protocol}//${EntryDB.config.app.hostname}/${
-                        CustomDomainLog.Content.split(";")[0]
-                    }?_priv_isFromWildcard=true`
-                );
+                // if log exists, forward to paste view
+                if (CustomDomainLog) {
+                    // ...create new request
+                    const req = new Request(
+                        `${url.protocol}//${EntryDB.config.app.hostname}/${
+                            CustomDomainLog.Content.split(";")[0]
+                        }?_priv_isFromWildcard=true`
+                    );
 
-                // ...return
-                return new Pages.GetPasteFromURL().request(req, server);
+                    // ...return
+                    return new Pages.GetPasteFromURL().request(req, server);
+                }
             }
         }
 

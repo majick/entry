@@ -446,7 +446,7 @@ Adding a new node is handled similarly:
 
 ### Media Storage
 
-Entry allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accesible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`.
+Entry allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accessible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`.
 
 Media can be enabled through the config key.
 

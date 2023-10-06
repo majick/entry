@@ -1434,8 +1434,8 @@ export class UpdateCustomDomain implements Endpoint {
             return new Response("Invalid password", {
                 status: 302,
                 headers: {
-                    Location: "/?err=Cannot update domain: Invalid password!",
-                    "X-Entry-Error": "Cannot update domain: Invalid password!",
+                    Location: "/?err=Cannot update domain link: Invalid password!",
+                    "X-Entry-Error": "Cannot update domain link: Invalid password!",
                 },
             });
 
