@@ -61,7 +61,10 @@ export default class Media {
         // don't check if media is disabled, as files should still be viewable even with media disabled!
 
         // ...
-        const OwnerFolder = path.resolve(Media.MediaLocation, owner);
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
 
         // return false if OwnerFolder doesn't exist
         if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
@@ -96,7 +99,10 @@ export default class Media {
             return [false, "Media disabled"];
 
         // ...
-        const OwnerFolder = path.resolve(Media.MediaLocation, owner);
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
 
         // create owner folder if it doesn't exist
         if (!fs.existsSync(OwnerFolder))
@@ -141,7 +147,10 @@ export default class Media {
             return [false, "Media disabled"];
 
         // ...
-        const OwnerFolder = path.resolve(Media.MediaLocation, owner);
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
 
         // return false if OwnerFolder doesn't exist
         if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
@@ -175,7 +184,10 @@ export default class Media {
             return [false, "Media disabled"];
 
         // ...
-        const OwnerFolder = path.resolve(Media.MediaLocation, owner);
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
 
         // return false if OwnerFolder doesn't exist
         if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];

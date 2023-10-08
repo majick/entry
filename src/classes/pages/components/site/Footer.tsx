@@ -213,7 +213,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     {EntryDB.config.app &&
                         EntryDB.config.app.enable_builder !== false && (
                             <a
-                                href="/paste/builder"
+                                href={`${homepageLink}paste/builder`}
                                 class={"button border dashed __footer_cardbtn"}
                             >
                                 <svg

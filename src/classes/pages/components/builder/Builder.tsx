@@ -122,6 +122,7 @@ export function SetSidebar(state: boolean = false) {
 export function SetPage(page: number = 0) {
     CurrentPage = page;
     parser.ResetNodes(); // reset all nodes so we don't have cross-page id conflicts
+    Select(Document.Pages[CurrentPage], Document.Pages); // select page
     return Update();
 }
 

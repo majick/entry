@@ -280,7 +280,7 @@ export function ParseMarkdownSync(
     content = content.replaceAll(
         // this regex match is ended by either a space or a newline!
         // ...same as normal image but with SIZE_X and SIZE_Y matching
-        /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)\:(?<SIZE_X>.+)x(?<SIZE_Y>.+)(\s|\n)/g,
+        /(!)\[(?<TEXT>.*?)\]\((?<URL>.*?)\)\:\{(?<SIZE_X>.*?)x(?<SIZE_Y>.*?)\}/g,
         '<img alt="$<TEXT>" title="$<TEXT>" src="$<URL>" style="width: $<SIZE_X>px; height: $<SIZE_Y>px" />'
     );
 
@@ -298,6 +298,12 @@ export function ParseMarkdownSync(
     );
 
     content = content.replaceAll(/^(<img)(.*?)(\/\>)$\n/gm, "<img $2 /><br />"); // <- VERY important (for some reason (?))
+
+    // ...normal (with attributes)
+    content = content.replaceAll(
+        /\[(?<TEXT>.*?)\]\((?<URL>.*?)\)\:\{(?<ATTRS>.+)\}/g,
+        '<a href="$<URL>" $<ATTRS>>$<TEXT></a>'
+    );
 
     // ...normal
     content = content.replaceAll(

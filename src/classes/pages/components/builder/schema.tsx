@@ -401,7 +401,7 @@ export function CardNode(props: {
             <EventZone node={props.node}>
                 <div
                     id={props.node.ID}
-                    className={`component builder:card ${
+                    className={`component builder:card card ${
                         props.node.ClassString || ""
                     }`}
                     style={{
