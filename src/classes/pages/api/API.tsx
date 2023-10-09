@@ -555,6 +555,21 @@ export class EditPaste implements Endpoint {
             }
         );
 
+        // remove association from all associated sessions if the password has changed
+        if (body.NewEditPassword) {
+            const Sessions = await EntryDB.Logs.QueryLogs(
+                `Type = "session" AND Content LIKE ";_with;${paste.CustomURL}"`
+            );
+
+            if (Sessions[2])
+                // remove association
+                for (const session of Sessions[2])
+                    await EntryDB.Logs.UpdateLog(
+                        session.ID,
+                        session.Content.split(";")[0]
+                    );
+        }
+
         // return
         return new Response(JSON.stringify(result), {
             status: 302,

@@ -1679,7 +1679,7 @@ export default class EntryDB {
         const CommentPastes: Paste[] = [];
 
         for (const comment of comments[2]) {
-            await Bun.sleep(50); // **small** wait to give the paste fetch some time to think...
+            await Bun.sleep(15); // **small** wait to give the paste fetch some time to think...
 
             // get paste
             const paste = (await this.GetPasteFromURL(
