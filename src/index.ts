@@ -84,6 +84,11 @@ export type Config = {
         favicon?: string;
         wildcard?: boolean; // https://sntry.cc/what#wildcard-domains
         hostname?: string; // https://sntry.cc/what#wildcard-domains
+        curiosity?: {
+            // https://codeberg.org/hkau/curiosity/src/branch/master/README.md
+            api_key: string; // needed to create profiles from server
+            host: string; // needed to connect client drone script
+        };
         footer?: {
             show_name_on_all_pages?: boolean;
             rows: Array<{

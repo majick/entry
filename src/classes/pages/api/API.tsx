@@ -221,6 +221,7 @@ export async function GetAssociation(
             // otherwise, return associated paste
             else return [true, split[1]];
         else if (association)
+            // remove association if session does not have an association
             return [
                 true,
                 `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
@@ -556,9 +557,9 @@ export class EditPaste implements Endpoint {
         );
 
         // remove association from all associated sessions if the password has changed
-        if (body.NewEditPassword) {
+        if (body.NewEditPassword && result[0]) {
             const Sessions = await EntryDB.Logs.QueryLogs(
-                `Type = "session" AND Content LIKE ";_with;${paste.CustomURL}"`
+                `Type = "session" AND Content LIKE "%;_with;${paste.CustomURL}"`
             );
 
             if (Sessions[2])
@@ -566,7 +567,7 @@ export class EditPaste implements Endpoint {
                 for (const session of Sessions[2])
                     await EntryDB.Logs.UpdateLog(
                         session.ID,
-                        session.Content.split(";")[0]
+                        session.Content.split(";_")[0]
                     );
         }
 

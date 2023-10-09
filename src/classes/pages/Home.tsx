@@ -1122,6 +1122,13 @@ export default class Home implements Endpoint {
 
                     {/* auth flow modals */}
                     <AuthModals use={Association[0] ? "logout" : "login"} />
+
+                    {/* curiosity */}
+                    {EntryDB.config.app && EntryDB.config.app.curiosity && (
+                        <script
+                            src={`${EntryDB.config.app.curiosity.host}/drone.js`}
+                        />
+                    )}
                 </div>,
                 <>
                     {
@@ -1142,6 +1149,7 @@ export default class Home implements Endpoint {
                     ...PageHeaders,
                     "Content-Type": "text/html",
                     "Set-Cookie": SessionCookie,
+                    "set-cookie": Association[1],
                     "X-Entry-Error": search.get("err") || "",
                 },
             }
