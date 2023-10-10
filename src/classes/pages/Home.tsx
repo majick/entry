@@ -1124,11 +1124,22 @@ export default class Home implements Endpoint {
                     <AuthModals use={Association[0] ? "logout" : "login"} />
 
                     {/* curiosity */}
-                    {EntryDB.config.app && EntryDB.config.app.curiosity && (
-                        <script
-                            src={`${EntryDB.config.app.curiosity.host}/drone.js`}
-                        />
-                    )}
+                    {EntryDB.config.app &&
+                        EntryDB.config.app.curiosity &&
+                        Association[0] &&
+                        Association[1] && (
+                            <>
+                                <script
+                                    src={`${EntryDB.config.app.curiosity.host}/drone.js`}
+                                />
+
+                                <script
+                                    dangerouslySetInnerHTML={{
+                                        __html: `window.StartCuriosity("${Association[1]}");`,
+                                    }}
+                                />
+                            </>
+                        )}
                 </div>,
                 <>
                     {

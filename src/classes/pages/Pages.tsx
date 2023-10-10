@@ -164,6 +164,9 @@ export class GetPasteFromURL implements Endpoint {
             else Viewed = true;
         }
 
+        // get association
+        const Association = await GetAssociation(request, null);
+
         // check if paste was created in the builder (starts with _builder:)
         if (
             result.Content.startsWith("_builder:") &&
@@ -805,6 +808,24 @@ export class GetPasteFromURL implements Endpoint {
                                 }
                             />
                         )}
+
+                        {/* curiosity */}
+                        {EntryDB.config.app &&
+                            EntryDB.config.app.curiosity &&
+                            Association[0] &&
+                            Association[1] && (
+                                <>
+                                    <script
+                                        src={`${EntryDB.config.app.curiosity.host}/drone.js`}
+                                    />
+
+                                    <script
+                                        dangerouslySetInnerHTML={{
+                                            __html: `window.StartCuriosity("${Association[1]}");`,
+                                        }}
+                                    />
+                                </>
+                            )}
                     </main>
 
                     <script

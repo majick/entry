@@ -44,8 +44,9 @@ export const DefaultHeaders = {
             "img-src *",
             "font-src *",
             "style-src 'unsafe-inline' 'self'",
-            "script-src 'self' 'unsafe-inline'",
+            "script-src 'self' 'unsafe-inline' *", // <- REMOVE ASTERISK!!
             "upgrade-insecure-requests",
+            "connect-src *",
         ].join("; "),
     "X-Entry-Version": pack.version,
     "X-Frame-Options": "SAMEORIGIN",
@@ -1059,6 +1060,20 @@ export class PasteLogin implements Endpoint {
         // generate association
         await GetAssociation(request, _ip, true, paste.CustomURL);
 
+        // create profile
+        if (EntryDB.config.app && EntryDB.config.app.curiosity)
+            await fetch(`${EntryDB.config.app.curiosity.host}/api/profiles/create`, {
+                method: "POST",
+                body: [
+                    `APIKey=${EntryDB.config.app.curiosity.api_key}`,
+                    `ID=${paste.CustomURL}`,
+                    `Type=entry_paste_user`,
+                ].join("&"),
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
+
         // return
         return new Response(paste.CustomURL, {
             status: 302,
@@ -1134,6 +1149,19 @@ export class PasteLogout implements Endpoint {
 
         // remove association from session
         await GetAssociation(request, null, false, "", true);
+
+        // delete profile
+        if (EntryDB.config.app && EntryDB.config.app.curiosity)
+            await fetch(`${EntryDB.config.app.curiosity.host}/api/profiles/delete`, {
+                method: "POST",
+                body: [
+                    `APIKey=${EntryDB.config.app.curiosity.api_key}`,
+                    `ID=${paste.CustomURL}`,
+                ].join("&"),
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
 
         // return
         return new Response(paste.CustomURL, {
