@@ -57,6 +57,29 @@ export function InformationPageNote() {
     );
 }
 
+export function Curiosity(props: { Association: [boolean, string] }) {
+    return (
+        <>
+            {EntryDB.config.app &&
+                EntryDB.config.app.curiosity &&
+                props.Association[0] &&
+                props.Association[1] && (
+                    <>
+                        <script
+                            src={`${EntryDB.config.app.curiosity.host}/drone.js`}
+                        />
+
+                        <script
+                            dangerouslySetInnerHTML={{
+                                __html: `window.StartCuriosity("${props.Association[1]}");`,
+                            }}
+                        />
+                    </>
+                )}
+        </>
+    );
+}
+
 /**
  * @export
  * @class GetPasteFromURL
@@ -199,6 +222,9 @@ export class GetPasteFromURL implements Endpoint {
                                 )}\`, false);`,
                             }}
                         />
+
+                        {/* curiosity */}
+                        <Curiosity Association={Association} />
 
                         {/* toolbar */}
                         <div
@@ -810,22 +836,7 @@ export class GetPasteFromURL implements Endpoint {
                         )}
 
                         {/* curiosity */}
-                        {EntryDB.config.app &&
-                            EntryDB.config.app.curiosity &&
-                            Association[0] &&
-                            Association[1] && (
-                                <>
-                                    <script
-                                        src={`${EntryDB.config.app.curiosity.host}/drone.js`}
-                                    />
-
-                                    <script
-                                        dangerouslySetInnerHTML={{
-                                            __html: `window.StartCuriosity("${Association[1]}");`,
-                                        }}
-                                    />
-                                </>
-                            )}
+                        <Curiosity Association={Association} />
                     </main>
 
                     <script
@@ -2258,6 +2269,9 @@ export class UserSettings implements Endpoint {
                                     UserSettings("_doc");`,
                                 }}
                             />
+
+                            {/* curiosity */}
+                            <Curiosity Association={Association} />
                         </main>
                     </>,
                     <>
@@ -2926,6 +2940,9 @@ export class ViewPasteMedia implements Endpoint {
 
                         <Footer />
                     </main>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
                 </>,
                 <>
                     <title>Media - {EntryDB.config.name}</title>
@@ -2944,6 +2961,8 @@ export class ViewPasteMedia implements Endpoint {
 
 // default export
 export default {
+    Curiosity,
+    // pages
     GetPasteFromURL,
     PasteDocView,
     PastesSearch,

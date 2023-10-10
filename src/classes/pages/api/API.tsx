@@ -407,6 +407,23 @@ export class CreatePaste implements Endpoint {
                 );
 
                 if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
+
+                // update curiosity
+                if (EntryDB.config.app && EntryDB.config.app.curiosity)
+                    await fetch(
+                        `${EntryDB.config.app.curiosity.host}/api/profiles/create`,
+                        {
+                            method: "POST",
+                            body: [
+                                `APIKey=${EntryDB.config.app.curiosity.api_key}`,
+                                `ID=${body.CustomURL}`,
+                                `Type=entry_paste_user`,
+                            ].join("&"),
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                            },
+                        }
+                    );
             }
         } else if (!Association[1].startsWith("associated=refresh"))
             body.Associated = Association[1];
