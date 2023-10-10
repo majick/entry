@@ -1641,6 +1641,15 @@ export class ViewReport implements Endpoint {
                         </a>
                     </p>
 
+                    {report.Metadata && report.Metadata.Owner && (
+                        <p>
+                            Owner:{" "}
+                            <a href={`/${report.Metadata.Owner}`}>
+                                {report.Metadata.Owner}
+                            </a>
+                        </p>
+                    )}
+
                     <hr />
 
                     <div

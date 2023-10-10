@@ -11,9 +11,7 @@ import parser from "./parser";
 
 import { render } from "preact";
 
-import type { Paste } from "../../../db/EntryDB";
 import Modal from "../site/modals/Modal";
-
 import Sidebar from "./components/Sidebar";
 import Toolbox from "./components/Toolbox";
 import PublishModals from "../site/modals/PublishModals";

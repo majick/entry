@@ -100,6 +100,9 @@ export default class Builder implements Endpoint {
             Document = TrueContent as BuilderDocument;
         }
 
+        // stringify
+        const stringified = parser.stringify(Document);
+
         // return
         return new Response(
             Renderer.Render(
@@ -122,7 +125,7 @@ export default class Builder implements Endpoint {
                         type={"module"}
                         dangerouslySetInnerHTML={{
                             __html: `import Builder from "/Builder.js";
-                            Builder("${parser.stringify(Document)}", true);`,
+                            Builder(\`${stringified}\`, true);`,
                         }}
                     />
                 </>,

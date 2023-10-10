@@ -191,9 +191,9 @@ export class GetPasteFromURL implements Endpoint {
                             type={"module"}
                             dangerouslySetInnerHTML={{
                                 __html: `import Builder from "/Builder.js";
-                                Builder("${BaseParser.stringify(
+                                Builder(\`${BaseParser.stringify(
                                     TrueContent
-                                )}", false);`,
+                                )}\`, false);`,
                             }}
                         />
 

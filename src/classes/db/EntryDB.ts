@@ -1046,6 +1046,10 @@ export default class EntryDB {
         // if custom url was changed, add the group back to it
         // ...users cannot add the group manually because of the custom url regex
         if (NewPasteInfo.CustomURL !== paste.CustomURL) {
+            // add groupname
+            if (paste.GroupName)
+                NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
+
             // make sure the paste we're changing to doesn't already exist
             const _existingPaste = await this.GetPasteFromURL(
                 NewPasteInfo.CustomURL
@@ -1057,10 +1061,6 @@ export default class EntryDB {
                     "Cannot change url to a url that is already taken!",
                     PasteInfo, // return old paste info because we didn't actually update anything!!
                 ];
-
-            // ...
-            if (paste.GroupName)
-                NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
 
             // ALSO... delete all view_paste logs that have to do with the old URL
             await SQL.QueryOBJ({
@@ -1193,14 +1193,11 @@ export default class EntryDB {
         if (paste.CustomURL === "v")
             return [false, "Cannot delete version paste!", PasteInfo];
 
-        // get server config
-        const config = (await EntryDB.GetConfig()) as Config;
-
         // validate password
         // ...password can be either the paste EditPassword or the server admin password
         // ...if the custom url is v, then no password can be used (that's the version file, it is required)
         if (
-            (password !== config.admin &&
+            (password !== EntryDB.config.admin &&
                 CreateHash(password) !== paste.EditPassword) ||
             paste.CustomURL === "v"
         )
@@ -1225,11 +1222,20 @@ export default class EntryDB {
         });
 
         // register event
-        if (config.log && config.log.events.includes("delete_paste"))
+        if (EntryDB.config.log && EntryDB.config.log.events.includes("delete_paste"))
             await EntryDB.Logs.CreateLog({
                 Content: PasteInfo.CustomURL,
                 Type: "delete_paste",
             });
+
+        // delete all views
+        if (EntryDB.config.log && EntryDB.config.log.events.includes("view_paste")) {
+            const views = await EntryDB.Logs.QueryLogs(
+                `Type = "view_paste" AND Content LIKE "${PasteInfo.CustomURL};%"`
+            );
+
+            for (const view of views[2]) await EntryDB.Logs.DeleteLog(view.ID);
+        }
 
         // return
         return [true, "Paste deleted!", PasteInfo];

@@ -35,6 +35,7 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
 
                 // delete node if it was removed
                 if (node.ID === "node:removed") {
+                    node.Children = [];
                     nodes.splice(nodes.indexOf(node), 0);
                     return <></>;
                 }
