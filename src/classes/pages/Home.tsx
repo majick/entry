@@ -854,7 +854,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
-                                                    class={"round"}
+                                                    class={"round mobile-max"}
                                                     type="text"
                                                     placeholder={"Edit code"}
                                                     maxLength={
@@ -872,7 +872,7 @@ export default class Home implements Endpoint {
                                                     // if we don't provide a new Custom URL, this will be used instead so we don't give up our url
                                                 }
                                                 <input
-                                                    class={"round"}
+                                                    class={"round mobile-max"}
                                                     type="text"
                                                     placeholder={
                                                         "Change edit code - optional"
@@ -888,7 +888,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
-                                                    class={"round"}
+                                                    class={"round mobile-max"}
                                                     type="text"
                                                     placeholder={
                                                         "Change Custom URL - optional"
@@ -1106,12 +1106,21 @@ export default class Home implements Endpoint {
                         <div className="flex flex-column g-10">
                             <span>Loading...</span>
 
-                            <a
-                                href="javascript:window.location.reload()"
-                                class={"button red round"}
-                            >
-                                Refresh
-                            </a>
+                            <div className="flex g-4">
+                                <a
+                                    href="javascript:window.location.reload()"
+                                    class={"button red round"}
+                                >
+                                    Refresh
+                                </a>
+
+                                <a
+                                    href="javascript:window.modals['entry:modal.Submit'](false)"
+                                    class={"button red round"}
+                                >
+                                    Close
+                                </a>
+                            </div>
                         </div>
                     </Modal>
 

@@ -360,8 +360,10 @@ export default function CreateEditor(ElementID: string, content: string) {
             history(),
             EditorView.updateListener.of(async (update) => {
                 if (update.docChanged) {
-                    // basic session save
                     const content = update.state.doc.toString();
+                    if (content === "") return;
+
+                    // basic session save
                     window.sessionStorage.setItem("doc", content);
 
                     const html = await ParseMarkdown(content, false);

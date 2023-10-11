@@ -1868,6 +1868,9 @@ export class PasteCommentsPage implements Endpoint {
 
                     {/* auth flow modals */}
                     <AuthModals use={PostingAs !== undefined ? "logout" : "login"} />
+
+                    {/* curiosity */}
+                    <Curiosity Association={_Association} />
                 </div>,
                 <>
                     <title>Comments on {result.CustomURL}</title>
