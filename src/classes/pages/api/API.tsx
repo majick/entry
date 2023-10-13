@@ -637,6 +637,21 @@ export class DeletePaste implements Endpoint {
             body.EditPassword
         );
 
+        // remove association from all associated sessions if the password has changed
+        if (body.NewEditPassword && result[0]) {
+            const Sessions = await EntryDB.Logs.QueryLogs(
+                `Type = "session" AND Content LIKE "%;_with;${body.CustomURL}"`
+            );
+
+            if (Sessions[2])
+                // remove association
+                for (const session of Sessions[2])
+                    await EntryDB.Logs.UpdateLog(
+                        session.ID,
+                        session.Content.split(";_")[0]
+                    );
+        }
+
         // return
         return new Response(JSON.stringify(result), {
             status: 302,

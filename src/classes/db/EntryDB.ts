@@ -9,7 +9,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import fs from "node:fs";
 
-import { CreateHash, Encrypt } from "./helpers/Hash";
+import { ComputeRandomObjectHash, CreateHash, Encrypt } from "./helpers/Hash";
 import SQL from "./helpers/SQL";
 
 import Media from "./MediaDB";
@@ -624,7 +624,8 @@ export default class EntryDB {
         SkipHash: boolean = false
     ): Promise<[boolean, string, Paste]> {
         // if custom url was not provided, randomize it
-        if (!PasteInfo.CustomURL) PasteInfo.CustomURL = crypto.randomUUID();
+        if (!PasteInfo.CustomURL)
+            PasteInfo.CustomURL = ComputeRandomObjectHash().substring(0, 9);
 
         // if edit password was not provided, randomize it
         if (!SkipHash)
