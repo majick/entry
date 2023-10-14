@@ -845,11 +845,10 @@ export default class EntryDB {
 
             // make sure it exists
             if (CommentingOn) {
-                // all comments have the custom url: "{commenting_on}-{num_of_comments_on_paste + 1}"
                 PasteInfo.CustomURL = `c.${CommentingOn.CustomURL!.replaceAll(
                     "/",
                     "_"
-                )}-${(CommentingOn.Comments || 0) + 1}`;
+                )}-${PasteInfo.CustomURL}`;
 
                 if (PasteInfo.Associated)
                     PasteInfo.Associated = `;${PasteInfo.Associated}`;
@@ -1667,7 +1666,7 @@ export default class EntryDB {
         // get comments
         const comments: Paste[] = await SQL.QueryOBJ({
             db: this.db,
-            query: "SELECT * FROM Pastes WHERE CustomURL LIKE ? ORDER BY cast(Timestamp as float) DESC LIMIT 50 OFFSET ${offset}",
+            query: `SELECT * FROM Pastes WHERE CustomURL LIKE ? ORDER BY cast(PubDate as float) DESC LIMIT 50 OFFSET ${offset}`,
             params: [`c.${result.CustomURL.replaceAll("/", "_")}-%`],
             all: true,
             transaction: true,
