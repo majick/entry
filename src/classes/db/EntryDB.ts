@@ -534,7 +534,7 @@ export default class EntryDB {
                     const comments = await SQL.QueryOBJ({
                         db: this.db,
                         query: "SELECT CustomURL FROM Pastes WHERE CustomURL LIKE ?",
-                        params: [`c.${record.CustomURL}-%`],
+                        params: [`c.${record.CustomURL.replaceAll("/", "_")}-%`],
                         all: true,
                         transaction: true,
                         use: "Prepare",
@@ -846,9 +846,10 @@ export default class EntryDB {
             // make sure it exists
             if (CommentingOn) {
                 // all comments have the custom url: "{commenting_on}-{num_of_comments_on_paste + 1}"
-                PasteInfo.CustomURL = `c.${CommentingOn.CustomURL}-${
-                    (CommentingOn.Comments || 0) + 1
-                }`;
+                PasteInfo.CustomURL = `c.${CommentingOn.CustomURL!.replaceAll(
+                    "/",
+                    "_"
+                )}-${(CommentingOn.Comments || 0) + 1}`;
 
                 if (PasteInfo.Associated)
                     PasteInfo.Associated = `;${PasteInfo.Associated}`;
@@ -1108,7 +1109,7 @@ export default class EntryDB {
         // register event
         if (config.log && config.log.events.includes("edit_paste"))
             await EntryDB.Logs.CreateLog({
-                Content: `${PasteInfo.CustomURL}-c.${NewPasteInfo.CustomURL}`,
+                Content: `${PasteInfo.CustomURL}->${NewPasteInfo.CustomURL}`,
                 Type: "edit_paste",
             });
 
@@ -1666,8 +1667,8 @@ export default class EntryDB {
         // get comments
         const comments: Paste[] = await SQL.QueryOBJ({
             db: this.db,
-            query: "SELECT * FROM Pastes WHERE CustomURL LIKE ?",
-            params: [`c.${result.CustomURL}-%`],
+            query: "SELECT * FROM Pastes WHERE CustomURL LIKE ? ORDER BY cast(Timestamp as float) DESC LIMIT 50 OFFSET ${offset}",
+            params: [`c.${result.CustomURL.replaceAll("/", "_")}-%`],
             all: true,
             transaction: true,
             use: "Prepare",
@@ -1715,7 +1716,7 @@ export default class EntryDB {
                 await SQL.QueryOBJ({
                     db: this.db,
                     query: "SELECT CustomURL FROM Pastes WHERE CustomURL LIKE ?",
-                    params: [`c.${paste.CustomURL}-%`],
+                    params: [`c.${paste.CustomURL.replaceAll("/", "_")}-%`],
                     all: true,
                     transaction: true,
                     use: "Prepare",
