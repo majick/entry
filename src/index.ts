@@ -79,6 +79,7 @@ export type Config = {
         enable_not_editable_pastes?: boolean; // true default
         enable_builder?: boolean; // true default
         enable_paste_settings?: boolean; // true default
+        enable_comments?: boolean; // false default
         association_required?: boolean; // requires an association to create pastes
         auto_tag?: boolean;
         favicon?: string;

@@ -383,9 +383,9 @@ Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results
 
 ### Paste Comments
 
-Users can anonymously leave comments on pastes through paste comments. For comments to work, you must enable the `comment` [log event](#logs). When a comment is created, a new paste is created in the "comments" group. The content of this paste is the content of the comment. Users can associate an existing paste that they own to "login" to comments.
+Users can anonymously leave comments on pastes through paste comments. For comments to work, you must enable comments in config `app.enable_comments`. When a comment is created, a new paste is created in the "comments" group. The content of this paste is the content of the comment. Users can associate an existing paste that they own to "login" to comments.
 
-Paste comments are disabled by default. They can be enabled by enabling the `comment` log type.
+Paste comments are disabled by default. They can be enabled by changing config `app.enable_comments` to `true`.
 
 Paste comments can be disabled on individual pastes using the paste settings menu. The paste settings menu can be disabled by changing config `app.enable_paste_settings` to false.
 

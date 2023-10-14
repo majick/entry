@@ -315,6 +315,16 @@ export default class EntryDB {
             },
             1000 * 60 * 60 * 24
         );
+
+        // remove comment logs. since Entry v1.1.8, comments are not stored in LogDB!
+        await SQL.QueryOBJ({
+            db: EntryDB.Logs.db,
+            query: "DELETE FROM Logs WHERE Type = ?",
+            params: ["comment"],
+            all: true,
+            transaction: true,
+            use: "Prepare",
+        });
     }
 
     /**
@@ -521,15 +531,16 @@ export default class EntryDB {
 
                 // count comments
                 if (EntryDB.Logs) {
-                    const comments = await EntryDB.Logs.QueryLogs(
-                        `Type = "comment" AND Content LIKE "${record.CustomURL.replaceAll(
-                            "_",
-                            "\\_"
-                        )};%" ESCAPE "\\"`,
-                        "ROWID"
-                    );
+                    const comments = await SQL.QueryOBJ({
+                        db: this.db,
+                        query: "SELECT CustomURL FROM Pastes WHERE CustomURL LIKE ?",
+                        params: [`c.${record.CustomURL}-%`],
+                        all: true,
+                        transaction: true,
+                        use: "Prepare",
+                    });
 
-                    record.Comments = comments[2].length;
+                    record.Comments = comments.length;
                 } else record.Comments = 0;
 
                 // remove metadata
@@ -743,7 +754,6 @@ export default class EntryDB {
                 "new",
                 "paste",
                 "group",
-                "comments",
                 "reports",
                 "components",
             ];
@@ -835,45 +845,23 @@ export default class EntryDB {
 
             // make sure it exists
             if (CommentingOn) {
-                // set group
-                PasteInfo.GroupName = "comments";
-                PasteInfo.CustomURL = `comments/${PasteInfo.CustomURL}`;
+                // all comments have the custom url: "{commenting_on}-{num_of_comments_on_paste + 1}"
+                PasteInfo.CustomURL = `c.${CommentingOn.CustomURL}-${
+                    (CommentingOn.Comments || 0) + 1
+                }`;
 
                 if (PasteInfo.Associated)
                     PasteInfo.Associated = `;${PasteInfo.Associated}`;
 
-                // get parent comment on
-                let ParentCommentOn: string | undefined = undefined;
-
-                if (CommentingOn.Metadata && CommentingOn.Metadata.Comments) {
-                    if (CommentingOn.Metadata.Comments.ParentCommentOn)
-                        ParentCommentOn =
-                            CommentingOn.Metadata.Comments.ParentCommentOn;
-                    else if (
-                        CommentingOn.Metadata.Comments.IsCommentOn &&
-                        !CommentingOn.Metadata.Comments.IsCommentOn.startsWith(
-                            "comments"
-                        )
-                    )
-                        ParentCommentOn = CommentingOn.Metadata.Comments.IsCommentOn;
-                    else ParentCommentOn = CommentingOn.CustomURL; // use the paste we're commenting on (fixes weird bug with this)
-                }
-
                 // update metadata
                 metadata.Comments = {
                     IsCommentOn: PasteInfo.CommentOn,
-                    ParentCommentOn: ParentCommentOn,
+                    ParentCommentOn: (CommentingOn.CustomURL!.split("c.")[1]
+                        ? CommentingOn.CustomURL!.split("c.")[1]
+                        : CommentingOn.CustomURL)!.split("-")[0],
                     Enabled: true,
                     IsPrivateMessage: PasteInfo.IsPM === "true",
                 };
-
-                // create log
-                await EntryDB.Logs.CreateLog({
-                    Type: "comment",
-                    Content: `${PasteInfo.CommentOn};${PasteInfo.CustomURL}${
-                        PasteInfo.Associated || ""
-                    }`,
-                });
             }
         }
 
@@ -1120,7 +1108,7 @@ export default class EntryDB {
         // register event
         if (config.log && config.log.events.includes("edit_paste"))
             await EntryDB.Logs.CreateLog({
-                Content: `${PasteInfo.CustomURL}->${NewPasteInfo.CustomURL}`,
+                Content: `${PasteInfo.CustomURL}-c.${NewPasteInfo.CustomURL}`,
                 Type: "edit_paste",
             });
 
@@ -1633,7 +1621,7 @@ export default class EntryDB {
         associated?: string
     ): Promise<[boolean, string, Paste[]]> {
         // make sure comments are enabled globally
-        if (!EntryDB.config.log || !EntryDB.config.log.events.includes("comment"))
+        if (!EntryDB.config.app || EntryDB.config.app.enable_comments !== true)
             return [false, "Comments disabled globally", []];
 
         // make sure paste exists
@@ -1676,41 +1664,33 @@ export default class EntryDB {
             return [false, "Paste has comments disabled", []];
 
         // get comments
-        const comments = await EntryDB.Logs.QueryLogs(
-            `Type = "comment" AND Content LIKE "${result.CustomURL.replaceAll(
-                "_",
-                "\\_"
-            )};%" ESCAPE "\\" ORDER BY cast(Timestamp as float) DESC LIMIT 50 OFFSET ${offset}`
-        );
+        const comments: Paste[] = await SQL.QueryOBJ({
+            db: this.db,
+            query: "SELECT * FROM Pastes WHERE CustomURL LIKE ?",
+            params: [`c.${result.CustomURL}-%`],
+            all: true,
+            transaction: true,
+            use: "Prepare",
+        });
 
-        const CommentPastes: Paste[] = [];
+        const CommentPastes: Paste[] = []; // we're going to store fixed comments in here
 
-        for (const comment of comments[2]) {
-            // get paste
-            const paste = (await this.GetPasteFromURL(
-                comment.Content.split(";")[1],
-                true // SkipExtras is true so comments are fetched faster, not wasting time on extra stuff
-            )) as Paste | undefined;
+        for (const paste of comments) {
+            // get paste metadata
+            const [RealContent, _Metadata] = paste.Content.split("_metadata:");
 
-            // make sure comment paste exists
-            if (!paste) {
-                // deleted comment
-                CommentPastes.push({
-                    CustomURL: comment.Content.split(";")[1],
-                    PubDate: new Date().getTime(),
-                    EditDate: new Date().getTime(),
-                    Content: "[comment deleted]",
-                    Views: -1,
-                    Comments: 0,
-                    EditPassword: "",
-                });
+            paste.Content = RealContent;
 
-                continue;
-            }
+            if (_Metadata) paste.Metadata = BaseParser.parse(_Metadata) as any;
+            else
+                paste.Metadata = {
+                    Version: 1,
+                    Owner: "",
+                };
 
-            // add associated info
-            const Associated = comment.Content.split(";")[2];
-            if (Associated) paste.Associated = Associated;
+            // set comment owner
+            if (paste.Metadata && paste.Metadata.Owner)
+                paste.Associated = paste.Metadata.Owner;
 
             // set paste.IsPM
             if (
@@ -1729,6 +1709,18 @@ export default class EntryDB {
                 paste.Metadata.Owner !== associated
             )
                 continue;
+
+            // count sub comments (replies) (once)
+            paste.Comments = (
+                await SQL.QueryOBJ({
+                    db: this.db,
+                    query: "SELECT CustomURL FROM Pastes WHERE CustomURL LIKE ?",
+                    params: [`c.${paste.CustomURL}-%`],
+                    all: true,
+                    transaction: true,
+                    use: "Prepare",
+                })
+            ).length;
 
             // remove paste edit passwords
             const cleaned = this.CleanPaste(paste);

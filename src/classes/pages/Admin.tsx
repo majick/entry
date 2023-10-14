@@ -1225,15 +1225,8 @@ export class ManageReports implements Endpoint {
         );
 
         // get report logs
-        const ReportPastes: Array<[boolean, Paste, any]> = []; // [archived, report paste, report log]
+        const ReportPastes: Array<[boolean, any]> = []; // [archived, report paste, report log]
         for (const report of reports[2]) {
-            const paste = await db.GetPasteFromURL(report.Content.split(";")[2]);
-            if (!paste) {
-                // delete log if paste doesn't exist
-                await EntryDB.Logs.DeleteLog(report.ID);
-                continue;
-            }
-
             // check if report is archived
             const ArchivalLog = await EntryDB.Logs.QueryLogs(
                 `Type = "report" AND Content = "archive;${
@@ -1242,11 +1235,7 @@ export class ManageReports implements Endpoint {
             );
 
             // add to reportpastes
-            ReportPastes.push([
-                ArchivalLog[2].length === 1,
-                paste as any as Paste,
-                report,
-            ]);
+            ReportPastes.push([ArchivalLog[2].length === 1, report]);
         }
 
         // return
@@ -1395,14 +1384,14 @@ export class ManageReports implements Endpoint {
                                         {/* https://sentrytwo.com/paste/doc/what#logs */}
                                         <td
                                             style={{ maxWidth: "10rem" }}
-                                            title={report[2].Content.split(";")[1]}
+                                            title={report[1].Content.split(";")[1]}
                                         >
-                                            {report[2].Content.split(";")[1]}
+                                            {report[1].Content.split(";")[1]}
                                         </td>
 
                                         <td class={"utc-date-to-localize"}>
                                             {new Date(
-                                                report[2].Timestamp || 0
+                                                report[1].Timestamp || 0
                                             ).toUTCString()}
                                         </td>
 
@@ -1410,7 +1399,7 @@ export class ManageReports implements Endpoint {
 
                                         <td>
                                             <form
-                                                action={`/admin/logs/report/${report[2].ID}`}
+                                                action={`/admin/logs/report/${report[1].ID}`}
                                                 method={"POST"}
                                                 style={{
                                                     display: "flex",

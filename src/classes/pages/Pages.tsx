@@ -295,10 +295,9 @@ export class GetPasteFromURL implements Endpoint {
                                         </a>
                                     )}
 
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
-                                            "comment"
-                                        ) &&
+                                    {EntryDB.config.app &&
+                                        EntryDB.config.app.enable_comments ===
+                                            true &&
                                         (!result.Metadata ||
                                             !result.Metadata!.Comments ||
                                             result.Metadata!.Comments.Enabled !==
@@ -520,10 +519,9 @@ export class GetPasteFromURL implements Endpoint {
                                         </a>
                                     )}
 
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
-                                            "comment"
-                                        ) &&
+                                    {EntryDB.config.app &&
+                                        EntryDB.config.app.enable_comments ===
+                                            true &&
                                         result.Comments !== undefined &&
                                         !result.Content.includes(
                                             "<% disable comments %>"
@@ -614,7 +612,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                             <a
                                                 class={"button"}
-                                                href={`${HostnameURL}paste/doc/${result.CustomURL}`}
+                                                href={`${HostnameURL}paste/do>${result.CustomURL}`}
                                                 style={{
                                                     width: "80px",
                                                 }}
@@ -1322,7 +1320,7 @@ export class PasteCommentsPage implements Endpoint {
             "/";
 
         // return 404 if comments are disabled
-        if (!EntryDB.config.log || !EntryDB.config.log.events.includes("comment"))
+        if (!EntryDB.config.app || EntryDB.config.app.enable_comments !== true)
             return new _404Page().request(request);
 
         // get paste name
@@ -2023,8 +2021,8 @@ export async function ComponentView(
 
                             <li>Views: {paste.Views}</li>
 
-                            {EntryDB.config.log &&
-                                EntryDB.config.log.events.includes("comment") && (
+                            {EntryDB.config.app &&
+                                EntryDB.config.app.enable_comments === true && (
                                     <li>
                                         Comments:{" "}
                                         <a
@@ -2113,20 +2111,6 @@ export class UserSettings implements Endpoint {
             const _ip = server !== undefined ? server.requestIP(request) : null;
             const Association = await GetAssociation(request, _ip);
             if (Association[1].startsWith("associated=")) Association[0] = false;
-
-            // if user have an association, get all comments they have posted
-            let Comments: Log[] = [];
-
-            if (
-                Association[0] &&
-                EntryDB.config.log &&
-                EntryDB.config.log.events.includes("comment")
-            )
-                Comments = (
-                    await EntryDB.Logs.QueryLogs(
-                        `Type = "comment" AND Content LIKE "%;%;${Association[1]}" ORDER BY cast(Timestamp as float) DESC`
-                    )
-                )[2];
 
             // render
             return new Response(
@@ -2218,48 +2202,6 @@ export class UserSettings implements Endpoint {
                                             localStorage.
                                         </noscript>
                                     </div>
-
-                                    {Comments.length > 0 && (
-                                        <>
-                                            <hr />
-
-                                            <details class={"round secondary"}>
-                                                <summary>Comment History</summary>
-
-                                                <div
-                                                    style={{
-                                                        display: "block",
-                                                        padding: "0.75rem",
-                                                    }}
-                                                    class={
-                                                        "details-flex-content-list-box"
-                                                    }
-                                                >
-                                                    {Comments.map((Comment) => (
-                                                        <span>
-                                                            <a
-                                                                class={
-                                                                    "utc-date-to-localize"
-                                                                }
-                                                                href={`/${
-                                                                    Comment.Content.split(
-                                                                        ";"
-                                                                    )[1].split(
-                                                                        ";"
-                                                                    )[0]
-                                                                }`}
-                                                            >
-                                                                {new Date(
-                                                                    Comment.Timestamp
-                                                                ).toUTCString()}
-                                                            </a>
-                                                            ,{" "}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </details>
-                                        </>
-                                    )}
                                 </div>
                             </div>
 
@@ -2578,8 +2520,8 @@ export class UserSettings implements Endpoint {
                                     __html: `import _e from "/MetadataEditor.js";
 
                                     window.ENTRYDB_CONFIG_ENABLE_COMMENTS = ${
-                                        EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes("comment")
+                                        EntryDB.config.app &&
+                                        EntryDB.config.app.enable_comments === true
                                     }
 
                                     _e.ClientEditor(\`${JSON.stringify(

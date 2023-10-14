@@ -21,7 +21,6 @@ export type LogEvent =
     | "session"
     | "error"
     | "view_paste"
-    | "comment"
     | "report"
     | "custom_domain";
 

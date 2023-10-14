@@ -1015,26 +1015,12 @@ export class DeleteComment implements Endpoint {
                 "Cannot delete comments while your paste is locked."
             );
 
-        // get comment log
-        const CommentLog = (
-            await EntryDB.Logs.QueryLogs(
-                `Content = "${paste.CustomURL};${body.CommentURL}" OR Content LIKE "${paste.CustomURL};${body.CommentURL};%"`
-            )
-        )[2][0];
-
-        if (!CommentLog) return new _404Page().request(request);
-
-        // delete log and paste (this unlinks the comment)
-        const result = [];
-
-        result.push(await EntryDB.Logs.DeleteLog(CommentLog.ID));
-        result.push(
-            await db.DeletePaste(
-                {
-                    CustomURL: CommentLog.Content.split(";")[1],
-                },
-                EntryDB.config.admin // delete using admin password
-            )
+        // delete paste
+        const result = await db.DeletePaste(
+            {
+                CustomURL: body.CommentURL,
+            },
+            EntryDB.config.admin // delete using admin password
         );
 
         // return
