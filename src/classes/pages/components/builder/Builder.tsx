@@ -549,8 +549,15 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         return render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
     }
 
-    // ...edit mode stuff
+    // ...(not) edit mode stuff
     if (!_EditMode) {
+        // fix mistakes from server render (by removing whole page and redrawing)
+        for (const DragElement of document.querySelectorAll(
+            ".builder\\:drag-element"
+        ) as any as HTMLElement[])
+            DragElement.remove();
+
+        // ...
         const _page = document.getElementById("_doc")!;
 
         // handle pages

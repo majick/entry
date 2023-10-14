@@ -142,7 +142,7 @@ Entry provides an admin panel that is locked behind a set password that allows t
 
 #### Logs
 
-Through the admin panel, you can view certain logs that are automatically saved whenever an event occurs on the server. These logs are not sent from the client. Logs can be set to automatically be deleted when the server exists using the `log.clear_on_start` option in the server `config.json` file. No events are enabled by default. This will not delete `comment`, `session`, `report` or `view_paste` type logs, as these should be retained.
+Through the admin panel, you can view certain logs that are automatically saved whenever an event occurs on the server. These logs are not sent from the client. Logs can be set to automatically be deleted when the server exists using the `log.clear_on_start` option in the server `config.json` file. No events are enabled by default. This will not delete `session`, `report` or `view_paste` type logs, as these should be retained.
 
 The following options can be used as events:
 
@@ -153,7 +153,6 @@ The following options can be used as events:
 - `session`, fires when a new session is created (`Content` is the session `User-Agent` header)
 - `view_paste`, fires when a paste is viewed (`Content` is the paste CustomURL and the session ID of the viewer)
     - A "Views" counter is added to pastes when this event is enabled
-- `comment`, fires when somebody leaves a comment on the paste (`Content` is the paste the comment was left on, followed by the CustomURL of the comment)
 - `report`, fires when a paste is reported (`Content` dependent on the report log type, see below)
     - `create`, followed by the paste that is being reported and the CustomURL of the report
     - `archive`, followed by the CustomURL of the report that is being archived

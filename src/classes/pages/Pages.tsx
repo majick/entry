@@ -17,7 +17,6 @@ import Home from "./Home";
 
 // create database
 import EntryDB, { Paste } from "../db/EntryDB";
-import type { Log } from "../db/LogDB";
 export const db = new EntryDB();
 
 import API, {

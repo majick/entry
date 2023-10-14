@@ -67,7 +67,6 @@ export default class LogDB {
                     // make sure the event isn't something that we shouldn't clear
                     if (
                         // should match the things excluded in the admin log page
-                        event === "comment" ||
                         event === "report" ||
                         event === "session" ||
                         event === "view_paste" ||

@@ -803,7 +803,6 @@ export class LogsPage implements Endpoint {
                       // these log types should probably never be cleared
                       'Type IS NOT "view_paste"',
                       'Type IS NOT "session"',
-                      'Type IS NOT "comment"',
                       'Type IS NOT "report"',
                       'Type IS NOT "custom_domain"',
                   ].join(
@@ -916,7 +915,7 @@ export class LogsPage implements Endpoint {
                                 alignItems: "center",
                             }}
                         >
-                            {body.filter_type !== "comment" && (
+                            {body.filter_type !== "report" && (
                                 <form
                                     action="/admin/api/logs/mass-delete"
                                     method={"POST"}
