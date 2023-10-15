@@ -636,6 +636,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             // add star if it doesn't exist
             doc.Pages[CurrentPage].Children.push({
                 // default star
+                ID: "PageStar",
                 Type: "StarInfo",
                 NotRemovable: true,
                 Source: "",
@@ -657,7 +658,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         const _page = document.getElementById("_doc")!;
 
         // handle pages
-        function CheckHash() {
+        function CheckHash(FromChange: boolean = false) {
             if (window.location.hash && window.location.hash.startsWith("#/")) {
                 const PageID = window.location.hash.split("#/")[1];
 
@@ -672,7 +673,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             }
         }
 
-        window.addEventListener("hashchange", CheckHash); // every change
+        window.addEventListener("hashchange", () => CheckHash(true)); // every change
         CheckHash(); // initial run
 
         // initial page render

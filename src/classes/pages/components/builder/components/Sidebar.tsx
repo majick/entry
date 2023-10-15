@@ -850,11 +850,17 @@ export default function Sidebar(props: { Page?: string }): any {
                             {/* events (not supported on some elements!!) */}
                             {Selected.Type !== "Embed" &&
                                 Selected.Type !== "Source" &&
-                                Selected.Type !== "StarInfo" && (
+                                Selected.Type !== "StarInfo" &&
+                                Selected.Type !== "Card" && (
                                     <details class={"option round"}>
                                         <summary>Events</summary>
 
                                         <div class={"details-flex-content-list-box"}>
+                                            <div className="option">
+                                                Events will not preview in the
+                                                editor.
+                                            </div>
+
                                             <QuickInput
                                                 name="on:click"
                                                 property={"onClick"}
