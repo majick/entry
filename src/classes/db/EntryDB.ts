@@ -55,6 +55,7 @@ export type PasteMetadata = {
     Locked?: boolean; // locked pastes cannot be edited, and the paste cannot be used as an association
     ShowOwnerEnabled?: boolean;
     ShowViewCount?: boolean;
+    Favicon?: string; // favicon shown on paste
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;

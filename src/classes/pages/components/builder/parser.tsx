@@ -81,6 +81,12 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                             {children}
                         </schema.SourceNode>
                     );
+                else if (node.Type === "StarInfo")
+                    return (
+                        <schema.StarInfoNode node={node} document={nodes}>
+                            {children}
+                        </schema.StarInfoNode>
+                    );
             })}
         </>
     );

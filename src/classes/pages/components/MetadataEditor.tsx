@@ -205,6 +205,8 @@ export function ClientEditor(_metadata: string, id: string): any {
     if (metadata.root.ShowViewCount === undefined)
         metadata.root.ShowViewCount = true;
 
+    if (metadata.root.Favicon === undefined) metadata.root.Favicon = "";
+
     // ...
     function UpdateMetadata() {
         return ((document.getElementById("Metadata") as HTMLInputElement).value =
@@ -217,6 +219,8 @@ export function ClientEditor(_metadata: string, id: string): any {
             if (typeof data[1] === "object")
                 // contains nested values, ignore
                 continue;
+
+            const ValueType = typeof data[1];
 
             // push to inputs
             // these should all just be true or false inputs
@@ -235,38 +239,78 @@ export function ClientEditor(_metadata: string, id: string): any {
                         </b>
                     </label>
 
-                    <Checkbox
-                        name={data[0]}
-                        title={`${(nested || ["root"]).join(".")}.${data[0]}`}
-                        round={true}
-                        checked={data[1]}
-                        changed={(event: Event<HTMLInputElement>) => {
-                            // update value (handle json nesting too)
-                            let prev = metadata;
+                    {(ValueType === "boolean" && (
+                        <Checkbox
+                            name={data[0]}
+                            title={`${(nested || ["root"]).join(".")}.${data[0]}`}
+                            round={true}
+                            checked={data[1]}
+                            changed={(event: Event<HTMLInputElement>) => {
+                                // update value (handle json nesting too)
+                                let prev = metadata;
 
-                            // validate
-                            if (nested && !nested.includes("root"))
-                                nested = ["root", ...nested];
+                                // validate
+                                if (nested && !nested.includes("root"))
+                                    nested = ["root", ...nested];
 
-                            for (const _key of nested || ["root"]) {
-                                prev = prev[_key]; // set new previous
+                                for (const _key of nested || ["root"]) {
+                                    prev = prev[_key]; // set new previous
 
-                                if (
-                                    prev === undefined ||
-                                    prev[data[0]] === undefined
-                                )
-                                    continue;
+                                    if (
+                                        prev === undefined ||
+                                        prev[data[0]] === undefined
+                                    )
+                                        continue;
 
-                                // update value
-                                prev[data[0]] = (
-                                    event.target as HTMLInputElement
-                                ).checked;
-                            }
+                                    // update value
+                                    prev[data[0]] = (
+                                        event.target as HTMLInputElement
+                                    ).checked;
+                                }
 
-                            // regenerate metadata
-                            UpdateMetadata();
-                        }}
-                    />
+                                // regenerate metadata
+                                UpdateMetadata();
+                            }}
+                        />
+                    )) || (
+                        <input
+                            type={ValueType === "string" ? "text" : "number"}
+                            name={data[0]}
+                            id={data[0]}
+                            value={data[1]}
+                            onBlur={(event: Event<HTMLInputElement>) => {
+                                // update value (handle json nesting too)
+                                let prev = metadata;
+
+                                // validate
+                                if (nested && !nested.includes("root"))
+                                    nested = ["root", ...nested];
+
+                                for (const _key of nested || ["root"]) {
+                                    prev = prev[_key]; // set new previous
+
+                                    if (
+                                        prev === undefined ||
+                                        prev[data[0]] === undefined
+                                    )
+                                        continue;
+
+                                    // update value
+                                    prev[data[0]] = (
+                                        event.target as HTMLInputElement
+                                    ).value;
+                                }
+
+                                // regenerate metadata
+                                UpdateMetadata();
+                            }}
+                            class={"round"}
+                            style={{
+                                width: "20rem",
+                                maxWidth: "100%",
+                            }}
+                        />
+                    )}
                 </div>
             );
         }
@@ -279,6 +323,7 @@ export function ClientEditor(_metadata: string, id: string): any {
     GenerateInputFields({
         ShowOwnerEnabled: metadata.root.ShowOwnerEnabled,
         ShowViewCount: metadata.root.ShowViewCount,
+        Favicon: metadata.root.Favicon,
     });
 
     if (

@@ -23,6 +23,7 @@ export function SaveModal(): any {
             buttonid="entry:button.SaveToToolbox"
             modalid="entry:modal.SaveToToolbox"
             noIdMatch={true}
+            round={true}
         >
             <h4 style={{ textAlign: "center", width: "100%" }}>Publish Component</h4>
 
@@ -90,7 +91,7 @@ export function SaveModal(): any {
                     type="text"
                     name={"ComponentName"}
                     id={"ComponentName"}
-                    className="full"
+                    className="full round"
                     minLength={2}
                     maxLength={500}
                     placeholder={"New Component"}
@@ -105,20 +106,20 @@ export function SaveModal(): any {
                     type="text"
                     name={"EditCode"}
                     id={"EditCode"}
-                    className="full"
+                    className="full round"
                     minLength={5}
                     maxLength={256}
                     placeholder={"Edit code"}
                     required
                 />
 
-                <button className="full green">Publish</button>
+                <button className="full green round">Publish</button>
             </form>
 
             <hr />
 
             <form method={"dialog"} class={"full"}>
-                <button className="red full">Cancel</button>
+                <button className="red full round">Cancel</button>
             </form>
         </Modal>
     );

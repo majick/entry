@@ -554,6 +554,10 @@ export class EditPaste implements Endpoint {
             body.Content += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
         }
 
+        // check NewEditPassword length
+        if (body.NewEditPassword.length < EntryDB.MinPasswordLength)
+            body.NewEditPassword = body.EditPassword;
+
         // edit paste
         const result = await db.EditPaste(
             {
@@ -1244,8 +1248,10 @@ export class EditMetadata implements Endpoint {
 
         // if !admin, force some values to be kept the way they are
         if (!admin && paste.Metadata) {
+            // these are the only values that will actually be updated!
             paste.Metadata.ShowViewCount = Unpacked.ShowViewCount;
             paste.Metadata.ShowOwnerEnabled = Unpacked.ShowOwnerEnabled;
+            paste.Metadata.Favicon = Unpacked.Favicon;
 
             if (Unpacked.Comments)
                 if (!paste.Metadata.Comments)

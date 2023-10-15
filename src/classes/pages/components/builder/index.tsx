@@ -11,7 +11,7 @@ import { PageHeaders, db } from "../../api/API";
 import _404Page from "../404";
 
 import parser from "../../../db/helpers/BaseParser";
-import { BuilderDocument } from "./schema";
+import { BuilderDocument, StarInfoNode } from "./schema";
 
 /**
  * @export
@@ -51,6 +51,11 @@ export default class Builder implements Endpoint {
                                     Alignment: "center",
                                 },
                             ],
+                        },
+                        {
+                            Type: "StarInfo",
+                            NotRemovable: true,
+                            Source: "",
                         },
                     ],
                 },

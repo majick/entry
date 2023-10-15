@@ -768,6 +768,16 @@ export default function Sidebar(props: { Page?: string }): any {
                                         ]}
                                     />
                                 </>
+                            )) ||
+                            (Selected.Type === "StarInfo" && (
+                                <>
+                                    {/* starinfo element controls */}
+                                    <QuickInput
+                                        name="Source"
+                                        property="Source"
+                                        type="input"
+                                    />
+                                </>
                             ))}
 
                         {/* inputs everything supports!! */}
@@ -794,41 +804,43 @@ export default function Sidebar(props: { Page?: string }): any {
                         />
 
                         {/* events (not supported on some elements!!) */}
-                        {Selected.Type !== "Embed" && Selected.Type !== "Source" && (
-                            <details class={"option round"}>
-                                <summary>Events</summary>
+                        {Selected.Type !== "Embed" &&
+                            Selected.Type !== "Source" &&
+                            Selected.Type !== "StarInfo" && (
+                                <details class={"option round"}>
+                                    <summary>Events</summary>
 
-                                <div class={"details-flex-content-list-box"}>
-                                    <QuickInput
-                                        name="on:click"
-                                        property={"onClick"}
-                                        value={Selected.onClick || "\n"}
-                                        type="textarea"
-                                    />
+                                    <div class={"details-flex-content-list-box"}>
+                                        <QuickInput
+                                            name="on:click"
+                                            property={"onClick"}
+                                            value={Selected.onClick || "\n"}
+                                            type="textarea"
+                                        />
 
-                                    <QuickInput
-                                        name="on:mouseenter"
-                                        property={"onMouseEnter"}
-                                        value={Selected.onMouseEnter || "\n"}
-                                        type="textarea"
-                                    />
+                                        <QuickInput
+                                            name="on:mouseenter"
+                                            property={"onMouseEnter"}
+                                            value={Selected.onMouseEnter || "\n"}
+                                            type="textarea"
+                                        />
 
-                                    <QuickInput
-                                        name="on:mouseleave"
-                                        property={"onMouseLeave"}
-                                        value={Selected.onMouseLeave || "\n"}
-                                        type="textarea"
-                                    />
+                                        <QuickInput
+                                            name="on:mouseleave"
+                                            property={"onMouseLeave"}
+                                            value={Selected.onMouseLeave || "\n"}
+                                            type="textarea"
+                                        />
 
-                                    <QuickInput
-                                        name="on:keypress"
-                                        property={"onKeyPress"}
-                                        value={Selected.onKeyPress || "\n"}
-                                        type="textarea"
-                                    />
-                                </div>
-                            </details>
-                        )}
+                                        <QuickInput
+                                            name="on:keypress"
+                                            property={"onKeyPress"}
+                                            value={Selected.onKeyPress || "\n"}
+                                            type="textarea"
+                                        />
+                                    </div>
+                                </details>
+                            )}
 
                         {/* import/export */}
                         {!(search.get("edit") || "").startsWith("components/") && (

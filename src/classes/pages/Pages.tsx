@@ -30,6 +30,7 @@ import API, {
 } from "./api/API";
 
 // ...
+import { PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
@@ -195,12 +196,17 @@ export class GetPasteFromURL implements Endpoint {
             search.get("nobuilder") === null
         ) {
             // get parsed content
-            const TrueContent = JSON.parse(
-                decodeURIComponent(atob(result.Content.split("_builder:")[1]))
+            const TrueContent = BaseParser.parse(
+                result.Content.split("_builder:")[1]
             );
 
             // get current page
-            let Page = TrueContent.Pages[0];
+            let Page: PageNode = TrueContent.Pages[0];
+
+            // get star for favicon
+            const Star: StarInfoNode | undefined = Page.Children.find(
+                (n) => n.Type === "StarInfo"
+            ) as StarInfoNode | undefined;
 
             // return
             return new Response(
@@ -226,33 +232,10 @@ export class GetPasteFromURL implements Endpoint {
                         <Curiosity Association={Association} />
 
                         {/* toolbar */}
-                        <div
-                            className="builder\:toolbar always-absolute"
-                            style={{
-                                padding: "0",
-                                top: "initial",
-                                bottom: "0.5rem",
-                            }}
-                        >
-                            <button
-                                id={"entry:button.PasteOptions"}
-                                title={"Paste Options"}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    height="16"
-                                    aria-label={"Sparkle Symbol"}
-                                >
-                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
-                                </svg>
-                            </button>
-                        </div>
-
                         <Modal
                             buttonid="entry:button.PasteOptions"
                             modalid="entry:modal.PasteOptions"
+                            noIdMatch={true} // use `window.modals["entry:modal.PasteOptions"](true)` instead
                             round={true}
                         >
                             <div
@@ -372,7 +355,7 @@ export class GetPasteFromURL implements Endpoint {
                     <>
                         <meta name="description" content={result.CustomURL} />
                         <title>{result.CustomURL}</title>
-                        <link rel="icon" href="/favicon" />
+                        <link rel="icon" href={Star ? Star.Source : "/favicon"} />
                     </>
                 ),
                 {
@@ -857,7 +840,14 @@ export class GetPasteFromURL implements Endpoint {
                     />
 
                     <title>{result.CustomURL}</title>
-                    <link rel="icon" href="/favicon" />
+                    <link
+                        rel="icon"
+                        href={
+                            result.Metadata && result.Metadata.Favicon
+                                ? result.Metadata.Favicon
+                                : "/favicon"
+                        }
+                    />
                 </>
             ),
             {

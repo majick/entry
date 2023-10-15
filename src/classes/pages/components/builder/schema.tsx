@@ -89,6 +89,12 @@ export interface SourceNode extends BaseNode {
     UseContentBox?: string; // use "display: contents;" if "true"
 }
 
+export interface StarInfoNode extends BaseNode {
+    Type: "StarInfo";
+    NotRemovable: true;
+    Source: string; // image background source
+}
+
 // ...base type
 export type Node =
     | PageNode
@@ -96,7 +102,8 @@ export type Node =
     | TextNode
     | ImageNode
     | EmbedNode
-    | SourceNode;
+    | SourceNode
+    | StarInfoNode;
 
 export type BuilderDocument = {
     Pages: PageNode[];
@@ -610,6 +617,64 @@ export function SourceNode(props: {
     );
 }
 
+/**
+ * @function StarInfoNode
+ *
+ * @export
+ * @param {{ node: StarInfoNode; document: Node[]; children: any }} props
+ * @return {*}
+ */
+export function StarInfoNode(props: {
+    node: StarInfoNode;
+    document: Node[];
+    children: any;
+}): any {
+    props.node.onClick = 'window.modals["entry:modal.PasteOptions"](true);';
+
+    return (
+        <EventZone node={props.node}>
+            <div
+                class={`component builder\:toolbar always-absolute builder:starinfo ${
+                    props.node.ClassString || ""
+                }`}
+                style={{
+                    padding: "0",
+                    top: "initial",
+                    bottom: "0.5rem",
+                    ...parser.ParseStyleString(props.node.StyleString || ""),
+                }}
+            >
+                <button
+                    title={"Paste Options"}
+                    style={{
+                        background:
+                            props.node.Source !== ""
+                                ? `url("${props.node.Source}")`
+                                : undefined,
+                        backgroundSize: "contain",
+                    }}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Sparkle Symbol"}
+                        style={{
+                            // hide when source is not empty
+                            // use visibility so it still takes up space!
+                            visibility:
+                                props.node.Source !== "" ? "hidden" : "shown",
+                        }}
+                    >
+                        <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
+                    </svg>
+                </button>
+            </div>
+        </EventZone>
+    );
+}
+
 // default export
 export default {
     SetDrag,
@@ -620,4 +685,5 @@ export default {
     ImageNode,
     EmbedNode,
     SourceNode,
+    StarInfoNode,
 };

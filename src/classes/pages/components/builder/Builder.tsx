@@ -42,6 +42,12 @@ export function AddComponent(Type: string) {
                         },
                     ],
                 },
+                {
+                    // default star
+                    Type: "StarInfo",
+                    NotRemovable: true,
+                    Source: "",
+                },
             ],
         });
 
@@ -507,7 +513,11 @@ function RenderPage() {
 
             <Toolbox.SaveModal />
 
-            <Modal buttonid="entry:button.Toolbox" modalid="entry:modal.Toolbox">
+            <Modal
+                buttonid="entry:button.Toolbox"
+                modalid="entry:modal.Toolbox"
+                round={true}
+            >
                 <div
                     style={{
                         width: "40rem",
@@ -526,7 +536,76 @@ function RenderPage() {
                             justifyContent: "flex-end",
                         }}
                     >
-                        <button className="green">Close</button>
+                        <button className="green round">Close</button>
+                    </form>
+                </div>
+            </Modal>
+
+            <Modal
+                buttonid="entry:button.PasteOptions"
+                modalid="entry:modal.PasteOptions"
+                noIdMatch={true} // use `window.modals["entry:modal.PasteOptions"](true)` instead
+                round={true}
+            >
+                <div
+                    style={{
+                        width: "25rem",
+                        maxWidth: "100%",
+                    }}
+                >
+                    <h4 style={{ textAlign: "center", width: "100%" }}>
+                        Paste Options
+                    </h4>
+
+                    <hr />
+
+                    <p>Information about your paste will be shown here!</p>
+                    <button
+                        class={"round"}
+                        style={{
+                            width: "100%",
+                        }}
+                        onClick={() => {
+                            // get node
+                            const AllNodes = parser.GetNodes();
+                            const node = AllNodes.find(
+                                (n) => n.ID === "PageStar"
+                            ) as Node;
+
+                            if (!node) return;
+
+                            // get parent
+                            const parent =
+                                (
+                                    AllNodes.find(
+                                        (n) =>
+                                            n.Children && n.Children.includes(node)
+                                    ) || Document.Pages[CurrentPage]
+                                ).Children || [];
+
+                            // select
+                            return Select(node, parent);
+                        }}
+                    >
+                        Configure Element
+                    </button>
+
+                    <hr />
+
+                    <form
+                        method={"dialog"}
+                        style={{
+                            width: "100%",
+                        }}
+                    >
+                        <button
+                            className="green round"
+                            style={{
+                                width: "100%",
+                            }}
+                        >
+                            Close
+                        </button>
                     </form>
                 </div>
             </Modal>
@@ -546,6 +625,21 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
     // ...
     function RenderCurrentPage(element: HTMLElement | ShadowRoot) {
+        // check for star
+        const Star = doc.Pages[CurrentPage].Children.find(
+            (n) => n.Type === "StarInfo"
+        );
+
+        if (!Star)
+            // add star if it doesn't exist
+            doc.Pages[CurrentPage].Children.push({
+                // default star
+                Type: "StarInfo",
+                NotRemovable: true,
+                Source: "",
+            });
+
+        // ...
         return render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
     }
 
