@@ -579,7 +579,11 @@ export class EditPaste implements Endpoint {
         );
 
         // remove association from all associated sessions if the password has changed
-        if (body.NewEditPassword && result[0]) {
+        if (
+            body.NewEditPassword &&
+            body.NewEditPassword !== body.EditPassword &&
+            result[0]
+        ) {
             const Sessions = await EntryDB.Logs.QueryLogs(
                 `Type = "session" AND Content LIKE "%;_with;${paste.CustomURL}"`
             );

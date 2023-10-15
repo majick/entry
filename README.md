@@ -392,9 +392,11 @@ Users are automatically tagged with an association with the first paste (not com
 
 ### Paste Builder
 
-Users can build multi-page "pastes" using the paste builder. These pages are built using drag-and-drop (desktop only, automatic move on mobile) components, allowing users to build with text, images, buttons and more. These pages are highly customizable, from the width of the containing box to the overall theme of the page. Users can also directly add CSS styles to components.
+Users can build multi-page "pastes" using the paste builder. These pages are built using drag-and-drop (desktop only, manual move on mobile) components, allowing users to build with text, images, buttons and more. These pages are highly customizable, from the width of the containing box to the overall theme of the page. Users can also directly add CSS styles to components. Users can also directly add custom HTML to builder pastes, as well as add events to different builder components.
 
 These pages can be published as normal pastes, and will open rendered when viewed.
+
+A basic introduction to the layout of the builder can be found [here](https://builder.sntry.cc)!
 
 #### Toolbox
 
@@ -445,7 +447,7 @@ Adding a new node is handled similarly:
 
 ### Media Storage
 
-Entry allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accessible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`.
+Entry allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accessible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`. Media can only be uploaded by users associated with a paste.
 
 Media can be enabled through the config key.
 
