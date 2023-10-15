@@ -53,6 +53,7 @@ export default class Builder implements Endpoint {
                             ],
                         },
                         {
+                            ID: "PageStar",
                             Type: "StarInfo",
                             NotRemovable: true,
                             Source: "",

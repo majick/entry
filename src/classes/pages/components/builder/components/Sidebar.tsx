@@ -115,10 +115,9 @@ export function QuickInput(props: {
                             target.style.height = "";
 
                             // expand
-                            target.style.height = `${Math.min(
-                                target.scrollHeight,
-                                500
-                            )}px`;
+                            target.style.height = `${
+                                Math.min(target.scrollHeight, 500) + 5
+                            }px`;
                         }}
                         style={{
                             minWidth: "100%",
@@ -182,672 +181,59 @@ export default function Sidebar(props: { Page?: string }): any {
                 display: SidebarOpen ? "flex" : "none",
             }}
         >
-            <button
+            <div
+                className="card flex justify-space-between align-center flex-wrap g-4"
                 style={{
                     position: "sticky",
                     top: 0,
+                    zIndex: 9999,
+                    borderBottom: "solid 1px var(--background-surface2a)",
+                    boxShadow: "0 0 2px var(--background-surface2a)",
                 }}
-                onClick={() => SetSidebar(false)}
             >
-                Close Sidebar
-            </button>
+                <b>{props.Page || "Edit Component"}</b>
 
-            {Selected && Selected.NotRemovable !== true && !props.Page && (
-                <button onClick={() => Delete(Selected)} class={"red"}>
-                    Delete
+                <button
+                    class={"normal round red"}
+                    onClick={() => SetSidebar(false)}
+                    title={"Close Sidebar"}
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Close Symbol"}
+                    >
+                        <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
+                    </svg>
                 </button>
-            )}
+            </div>
 
-            {Selected && Selected.Type !== "Page" && !props.Page && (
-                <button onClick={() => EditOrder(true, Selected, SelectedParent)}>
-                    Edit Order
-                </button>
-            )}
+            <div className="options">
+                {Selected && Selected.NotRemovable !== true && !props.Page && (
+                    <button onClick={() => Delete(Selected)} class={"red"}>
+                        Delete
+                    </button>
+                )}
 
-            {(props &&
-                ((props.Page === "PagesView" && (
-                    <>
-                        {/* pages list */}
-                        <button
-                            onClick={() => {
-                                RenderSidebar({
-                                    Page: "Tree",
-                                });
-                            }}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                height="16"
-                                aria-label={"Tree Symbol"}
-                                style={{
-                                    marginBottom: "1px",
-                                }}
-                            >
-                                <path d="M4.75 7a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5ZM5 4.75A.75.75 0 0 1 5.75 4h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 5 4.75ZM6.75 10a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z"></path>
-                                <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path>
-                            </svg>
-                            Component Tree
-                        </button>
+                {Selected && Selected.Type !== "Page" && !props.Page && (
+                    <button
+                        onClick={() => EditOrder(true, Selected, SelectedParent)}
+                    >
+                        Edit Order
+                    </button>
+                )}
 
-                        <button onClick={() => AddComponent("Page")}>
-                            Add Page
-                        </button>
-
-                        {Document.Pages.map((page) => {
-                            const index = Document.Pages.indexOf(page);
-
-                            // check if page was remove
-                            if (page.ID === "node:removed") {
-                                Document.Pages.splice(
-                                    Document.Pages.indexOf(page),
-                                    1
-                                );
-
-                                return <></>;
-                            }
-
-                            // return
-                            return (
-                                <button
-                                    onClick={() => SetPage(index)}
-                                    title={page.ID}
-                                >
-                                    Page {index + 1}
-                                </button>
-                            );
-                        })}
-                    </>
-                )) ||
-                    (props.Page === "Move" && (
+                {(props &&
+                    ((props.Page === "PagesView" && (
                         <>
-                            {/* move instructions */}
-                            <div className="option">
-                                <b>Editing Component Order</b>
-                            </div>
-
-                            <div className="option">
-                                <p>
-                                    Select the element you want to move this element
-                                    before/after. A dialog will ask you if you want
-                                    to move it before or after the selected element.
-                                </p>
-                            </div>
-
-                            <button
-                                className="green mobile-only"
-                                onClick={() => SetSidebar(false)}
-                            >
-                                Show Page
-                            </button>
-
-                            <button class={"red"} onClick={() => EditOrder(false)}>
-                                Cancel
-                            </button>
-                        </>
-                    )) ||
-                    (props.Page === "Tree" && (
-                        <>
-                            {/* component tree */}
-                            {parser.GetNodes().map((node) => {
-                                return (
-                                    <button
-                                        title={node.ID}
-                                        onClick={() => {
-                                            // get parent node
-                                            let parent = parser
-                                                .GetNodes()
-                                                .find(
-                                                    (n) =>
-                                                        n.Type === "Card" &&
-                                                        n.Children.includes(node)
-                                                );
-
-                                            if (!parent) {
-                                                // try to find in current page
-                                                if (
-                                                    Document.Pages[
-                                                        CurrentPage
-                                                    ].Children.includes(node)
-                                                )
-                                                    parent =
-                                                        Document.Pages[CurrentPage];
-                                                else return;
-                                            }
-
-                                            // select
-                                            Select(node, parent.Children!);
-                                        }}
-                                        onMouseEnter={() => {
-                                            // try to get rendered node
-                                            const rendered = document.getElementById(
-                                                node.ID!
-                                            );
-
-                                            if (!rendered) return;
-
-                                            // add hover
-                                            return rendered.classList.add("hover");
-                                        }}
-                                        onMouseLeave={() => {
-                                            // try to get rendered node
-                                            const rendered = document.getElementById(
-                                                node.ID!
-                                            );
-
-                                            if (!rendered) return;
-
-                                            // remove hover
-                                            return rendered.classList.remove(
-                                                "hover"
-                                            );
-                                        }}
-                                    >
-                                        {node.Type}
-                                    </button>
-                                );
-                            })}
-                        </>
-                    )))) ||
-                (Selected && (
-                    <>
-                        {(Selected.Type === "Page" && (
-                            <>
-                                {/* page element controls */}
-                                <QuickInput name="ID" property="ID" type="input" />
-
-                                <QuickInput
-                                    name="Theme"
-                                    property="Theme"
-                                    type="select"
-                                    options={[
-                                        {
-                                            label: "Light",
-                                            value: "light",
-                                        },
-                                        {
-                                            label: "Dark",
-                                            value: "dark",
-                                        },
-                                        {
-                                            label: "Purple",
-                                            value: "purple",
-                                        },
-                                        {
-                                            label: "Pink",
-                                            value: "pink",
-                                        },
-                                        {
-                                            label: "Green",
-                                            value: "green",
-                                        },
-                                        {
-                                            label: "Blue",
-                                            value: "blue",
-                                        },
-                                    ]}
-                                />
-
-                                <QuickInput
-                                    name="Automatic Positioning"
-                                    property="ManualPosition"
-                                    type="select"
-                                    options={[
-                                        {
-                                            label: "True",
-                                            value: "false",
-                                        },
-                                        {
-                                            label: "False",
-                                            value: "true",
-                                        },
-                                    ]}
-                                />
-
-                                <details className="option round">
-                                    <summary>Automatic Positioning Options</summary>
-
-                                    <div class={"details-flex-content-list-box"}>
-                                        <p className="option">
-                                            These options only apply if "Automatic
-                                            Positioning" is set to "True"
-                                        </p>
-
-                                        <QuickInput
-                                            name="Align X"
-                                            property="AlignX"
-                                            type="select"
-                                            options={[
-                                                {
-                                                    label: "Left",
-                                                    value: "flex-start",
-                                                },
-                                                {
-                                                    label: "Center",
-                                                    value: "center",
-                                                },
-                                                {
-                                                    label: "Right",
-                                                    value: "flex-end",
-                                                },
-                                            ]}
-                                        />
-
-                                        <QuickInput
-                                            name="Align Y"
-                                            property="AlignY"
-                                            type="select"
-                                            options={[
-                                                {
-                                                    label: "Top",
-                                                    value: "flex-start",
-                                                },
-                                                {
-                                                    label: "Center",
-                                                    value: "center",
-                                                },
-                                                {
-                                                    label: "Bottom",
-                                                    value: "flex-end",
-                                                },
-                                            ]}
-                                        />
-
-                                        <QuickInput
-                                            name="Spacing"
-                                            property="Spacing"
-                                            type="input"
-                                            inputType="number"
-                                            value={(
-                                                Selected.Spacing || 10
-                                            ).toString()}
-                                        />
-                                    </div>
-                                </details>
-                            </>
-                        )) ||
-                            (Selected.Type === "Card" && (
-                                <>
-                                    {/* card element controls */}
-
-                                    <QuickInput
-                                        name="Width"
-                                        property="Width"
-                                        type="input"
-                                        inputType="number"
-                                        default={-1}
-                                    />
-
-                                    <QuickInput
-                                        name="Background"
-                                        property="Background"
-                                        type="select"
-                                        options={[
-                                            {
-                                                label: "Shown",
-                                                value: "var(--background-surface1)",
-                                            },
-                                            {
-                                                label: "Hidden",
-                                                value: "transparent",
-                                            },
-                                        ]}
-                                    />
-
-                                    <QuickInput
-                                        name="Display"
-                                        property="Display"
-                                        type="select"
-                                        options={[
-                                            {
-                                                label: "Block",
-                                                value: "block",
-                                            },
-                                            {
-                                                label: "Container",
-                                                value: "flex",
-                                            },
-                                        ]}
-                                    />
-
-                                    <details class={"option round"}>
-                                        <summary>Container Display Options</summary>
-
-                                        <div class={"details-flex-content-list-box"}>
-                                            <QuickInput
-                                                name="Gap"
-                                                property="Gap"
-                                                type="input"
-                                                inputType="number"
-                                                step={1}
-                                                default={0}
-                                            />
-
-                                            <QuickInput
-                                                name="Justify Content"
-                                                property="JustifyContent"
-                                                type="select"
-                                                options={[
-                                                    {
-                                                        label: "Start",
-                                                        value: "flex-start",
-                                                    },
-                                                    {
-                                                        label: "Center",
-                                                        value: "center",
-                                                    },
-                                                    {
-                                                        label: "End",
-                                                        value: "flex-end",
-                                                    },
-                                                    {
-                                                        label: "Space Between",
-                                                        value: "space-between",
-                                                    },
-                                                ]}
-                                            />
-
-                                            <QuickInput
-                                                name="Align Items"
-                                                property="AlignItems"
-                                                type="select"
-                                                options={[
-                                                    {
-                                                        label: "Start",
-                                                        value: "flex-start",
-                                                    },
-                                                    {
-                                                        label: "Center",
-                                                        value: "center",
-                                                    },
-                                                    {
-                                                        label: "End",
-                                                        value: "flex-end",
-                                                    },
-                                                ]}
-                                            />
-
-                                            <QuickInput
-                                                name="Direction"
-                                                property="Direction"
-                                                type="select"
-                                                options={[
-                                                    {
-                                                        label: "Row",
-                                                        value: "row",
-                                                    },
-                                                    {
-                                                        label: "Column",
-                                                        value: "column",
-                                                    },
-                                                ]}
-                                            />
-                                        </div>
-                                    </details>
-                                </>
-                            )) ||
-                            (Selected.Type === "Text" && (
-                                <>
-                                    {/* text element controls */}
-
-                                    <QuickInput
-                                        name="Content"
-                                        property="Content"
-                                        type="textarea"
-                                    />
-
-                                    <QuickInput
-                                        name="Text Size"
-                                        property="Size"
-                                        type="input"
-                                        inputType="number"
-                                        default={16}
-                                    />
-
-                                    <QuickInput
-                                        name="Line Spacing"
-                                        property="LineSpacing"
-                                        type="input"
-                                        inputType="number"
-                                        default={1.5}
-                                    />
-
-                                    <QuickInput
-                                        name="Letter Spacing"
-                                        property="LetterSpacing"
-                                        type="input"
-                                        inputType="number"
-                                        default={1}
-                                    />
-
-                                    <QuickInput
-                                        name="Margin"
-                                        property="Margins"
-                                        type="input"
-                                        inputType="number"
-                                        default={0}
-                                        step={0.1}
-                                    />
-
-                                    <QuickInput
-                                        name="Padding"
-                                        property="Padding"
-                                        type="input"
-                                        inputType="number"
-                                        default={0.2}
-                                        step={0.1}
-                                    />
-
-                                    <QuickInput
-                                        name="Border Radius"
-                                        property="BorderRadius"
-                                        type="input"
-                                        inputType="number"
-                                        default={0}
-                                        step={1}
-                                    />
-
-                                    <QuickInput
-                                        name="Font Weight"
-                                        property="Weight"
-                                        type="input"
-                                        inputType="number"
-                                        default={400}
-                                        step={100}
-                                    />
-
-                                    <QuickInput
-                                        name="Background"
-                                        property="Background"
-                                        type="input"
-                                        default={"transparent"}
-                                    />
-
-                                    <QuickInput
-                                        name="Color"
-                                        property="Color"
-                                        type="input"
-                                        default={"var(--text-color)"}
-                                    />
-
-                                    <QuickInput
-                                        name="Alignment"
-                                        property="Alignment"
-                                        type="select"
-                                        options={[
-                                            {
-                                                label: "Left",
-                                                value: "left",
-                                            },
-                                            {
-                                                label: "Center",
-                                                value: "center",
-                                            },
-                                            {
-                                                label: "Right",
-                                                value: "right",
-                                            },
-                                        ]}
-                                    />
-
-                                    <QuickInput
-                                        name="Width"
-                                        property="Width"
-                                        type="select"
-                                        options={[
-                                            {
-                                                label: "Content",
-                                                value: "max-content",
-                                            },
-                                            {
-                                                label: "Full",
-                                                value: "100%",
-                                            },
-                                        ]}
-                                    />
-                                </>
-                            )) ||
-                            (Selected.Type === "Image" && (
-                                <>
-                                    {/* image element controls */}
-
-                                    <QuickInput
-                                        name="Source"
-                                        property="Source"
-                                        type="input"
-                                    />
-
-                                    <QuickInput
-                                        name="Alt Text"
-                                        property="Alt"
-                                        type="input"
-                                    />
-                                </>
-                            )) ||
-                            (Selected.Type === "Embed" && (
-                                <>
-                                    {/* embed element controls */}
-
-                                    <QuickInput
-                                        name="Source"
-                                        property="Source"
-                                        type="input"
-                                    />
-
-                                    <QuickInput
-                                        name="Alt Text"
-                                        property="Alt"
-                                        type="input"
-                                    />
-                                </>
-                            )) ||
-                            (Selected.Type === "Source" && (
-                                <>
-                                    {/* source element controls */}
-                                    <QuickInput
-                                        name="HTML Content"
-                                        property="Content"
-                                        type="textarea"
-                                    />
-
-                                    <QuickInput
-                                        name="Use Content Box"
-                                        property="UseContentBox"
-                                        type="select"
-                                        default={"false"}
-                                        options={[
-                                            {
-                                                label: "True",
-                                                value: "true",
-                                            },
-                                            {
-                                                label: "False",
-                                                value: "false",
-                                            },
-                                        ]}
-                                    />
-                                </>
-                            )) ||
-                            (Selected.Type === "StarInfo" && (
-                                <>
-                                    {/* starinfo element controls */}
-                                    <QuickInput
-                                        name="Source"
-                                        property="Source"
-                                        type="input"
-                                    />
-                                </>
-                            ))}
-
-                        {/* inputs everything supports!! */}
-
-                        {/* class string */}
-                        <QuickInput
-                            name="CSS Class"
-                            property="ClassString"
-                            type="input"
-                        />
-
-                        {/* style string */}
-                        <QuickInput
-                            name="CSS Style String"
-                            property="StyleString"
-                            type="textarea"
-                            value={(Selected.StyleString || "\n").replaceAll(
-                                Selected.Type !== "Page"
-                                    ? // don't preserve whitespace on components that aren't pages
-                                      /\;\s*(?!\n)/g
-                                    : /\;(?!\n)/g,
-                                ";\n"
-                            )}
-                        />
-
-                        {/* events (not supported on some elements!!) */}
-                        {Selected.Type !== "Embed" &&
-                            Selected.Type !== "Source" &&
-                            Selected.Type !== "StarInfo" && (
-                                <details class={"option round"}>
-                                    <summary>Events</summary>
-
-                                    <div class={"details-flex-content-list-box"}>
-                                        <QuickInput
-                                            name="on:click"
-                                            property={"onClick"}
-                                            value={Selected.onClick || "\n"}
-                                            type="textarea"
-                                        />
-
-                                        <QuickInput
-                                            name="on:mouseenter"
-                                            property={"onMouseEnter"}
-                                            value={Selected.onMouseEnter || "\n"}
-                                            type="textarea"
-                                        />
-
-                                        <QuickInput
-                                            name="on:mouseleave"
-                                            property={"onMouseLeave"}
-                                            value={Selected.onMouseLeave || "\n"}
-                                            type="textarea"
-                                        />
-
-                                        <QuickInput
-                                            name="on:keypress"
-                                            property={"onKeyPress"}
-                                            value={Selected.onKeyPress || "\n"}
-                                            type="textarea"
-                                        />
-                                    </div>
-                                </details>
-                            )}
-
-                        {/* import/export */}
-                        {!(search.get("edit") || "").startsWith("components/") && (
+                            {/* pages list */}
                             <button
                                 onClick={() => {
-                                    // @ts-ignore
-                                    window.modals["entry:modal.SaveToToolbox"](true);
+                                    RenderSidebar({
+                                        Page: "Tree",
+                                    });
                                 }}
                             >
                                 <svg
@@ -855,73 +241,738 @@ export default function Sidebar(props: { Page?: string }): any {
                                     viewBox="0 0 16 16"
                                     width="16"
                                     height="16"
+                                    aria-label={"Tree Symbol"}
+                                    style={{
+                                        marginBottom: "1px",
+                                    }}
                                 >
-                                    <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                    <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
+                                    <path d="M4.75 7a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5ZM5 4.75A.75.75 0 0 1 5.75 4h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 5 4.75ZM6.75 10a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z"></path>
+                                    <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path>
                                 </svg>
-                                Publish
+                                Component Tree
                             </button>
-                        )}
 
-                        <details className="option round">
-                            <summary>Advanced</summary>
+                            <button onClick={() => AddComponent("Page")}>
+                                Add Page
+                            </button>
 
-                            <div class={"details-flex-content-list-box"}>
+                            {Document.Pages.map((page) => {
+                                const index = Document.Pages.indexOf(page);
+
+                                // check if page was remove
+                                if (page.ID === "node:removed") {
+                                    Document.Pages.splice(
+                                        Document.Pages.indexOf(page),
+                                        1
+                                    );
+
+                                    return <></>;
+                                }
+
+                                // return
+                                return (
+                                    <button
+                                        onClick={() => SetPage(index)}
+                                        title={page.ID}
+                                    >
+                                        Page {index + 1}
+                                    </button>
+                                );
+                            })}
+                        </>
+                    )) ||
+                        (props.Page === "Move" && (
+                            <>
+                                {/* move instructions */}
+                                <div className="option">
+                                    <b>Editing Component Order</b>
+                                </div>
+
+                                <div className="option">
+                                    <p>
+                                        Select the element you want to move this
+                                        element before/after. A dialog will ask you
+                                        if you want to move it before or after the
+                                        selected element.
+                                    </p>
+                                </div>
+
                                 <button
-                                    onClick={() => {
-                                        // remove EditMode
-                                        Selected.EditMode = undefined;
+                                    className="green mobile-only"
+                                    onClick={() => SetSidebar(false)}
+                                >
+                                    Show Page
+                                </button>
 
-                                        // create blob
-                                        const blob = new Blob(
-                                            [JSON.stringify(Selected)],
+                                <button
+                                    class={"red"}
+                                    onClick={() => EditOrder(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </>
+                        )) ||
+                        (props.Page === "Tree" && (
+                            <>
+                                {/* component tree */}
+                                {parser.GetNodes().map((node) => {
+                                    return (
+                                        <button
+                                            title={node.ID}
+                                            onClick={() => {
+                                                // get parent node
+                                                let parent = parser
+                                                    .GetNodes()
+                                                    .find(
+                                                        (n) =>
+                                                            n.Type === "Card" &&
+                                                            n.Children.includes(node)
+                                                    );
+
+                                                if (!parent) {
+                                                    // try to find in current page
+                                                    if (
+                                                        Document.Pages[
+                                                            CurrentPage
+                                                        ].Children.includes(node)
+                                                    )
+                                                        parent =
+                                                            Document.Pages[
+                                                                CurrentPage
+                                                            ];
+                                                    else return;
+                                                }
+
+                                                // select
+                                                Select(node, parent.Children!);
+                                            }}
+                                            onMouseEnter={() => {
+                                                // try to get rendered node
+                                                const rendered =
+                                                    document.getElementById(
+                                                        node.ID!
+                                                    );
+
+                                                if (!rendered) return;
+
+                                                // add hover
+                                                return rendered.classList.add(
+                                                    "hover"
+                                                );
+                                            }}
+                                            onMouseLeave={() => {
+                                                // try to get rendered node
+                                                const rendered =
+                                                    document.getElementById(
+                                                        node.ID!
+                                                    );
+
+                                                if (!rendered) return;
+
+                                                // remove hover
+                                                return rendered.classList.remove(
+                                                    "hover"
+                                                );
+                                            }}
+                                        >
+                                            {node.Type}
+                                        </button>
+                                    );
+                                })}
+                            </>
+                        )))) ||
+                    (Selected && (
+                        <>
+                            {(Selected.Type === "Page" && (
+                                <>
+                                    {/* page element controls */}
+                                    <QuickInput
+                                        name="ID"
+                                        property="ID"
+                                        type="input"
+                                    />
+
+                                    <QuickInput
+                                        name="Theme"
+                                        property="Theme"
+                                        type="select"
+                                        options={[
                                             {
-                                                type: "application/json",
-                                            }
-                                        );
+                                                label: "Light",
+                                                value: "light",
+                                            },
+                                            {
+                                                label: "Dark",
+                                                value: "dark",
+                                            },
+                                            {
+                                                label: "Purple",
+                                                value: "purple",
+                                            },
+                                            {
+                                                label: "Pink",
+                                                value: "pink",
+                                            },
+                                            {
+                                                label: "Green",
+                                                value: "green",
+                                            },
+                                            {
+                                                label: "Blue",
+                                                value: "blue",
+                                            },
+                                        ]}
+                                    />
 
-                                        // get url and open
-                                        window.open(
-                                            URL.createObjectURL(blob),
-                                            "_blank"
-                                        );
-                                    }}
-                                >
-                                    Export
-                                </button>
+                                    <QuickInput
+                                        name="Automatic Positioning"
+                                        property="ManualPosition"
+                                        type="select"
+                                        options={[
+                                            {
+                                                label: "True",
+                                                value: "false",
+                                            },
+                                            {
+                                                label: "False",
+                                                value: "true",
+                                            },
+                                        ]}
+                                    />
 
+                                    <details className="option round">
+                                        <summary>
+                                            Automatic Positioning Options
+                                        </summary>
+
+                                        <div class={"details-flex-content-list-box"}>
+                                            <p className="option">
+                                                These options only apply if
+                                                "Automatic Positioning" is set to
+                                                "True"
+                                            </p>
+
+                                            <QuickInput
+                                                name="Align X"
+                                                property="AlignX"
+                                                type="select"
+                                                options={[
+                                                    {
+                                                        label: "Left",
+                                                        value: "flex-start",
+                                                    },
+                                                    {
+                                                        label: "Center",
+                                                        value: "center",
+                                                    },
+                                                    {
+                                                        label: "Right",
+                                                        value: "flex-end",
+                                                    },
+                                                ]}
+                                            />
+
+                                            <QuickInput
+                                                name="Align Y"
+                                                property="AlignY"
+                                                type="select"
+                                                options={[
+                                                    {
+                                                        label: "Top",
+                                                        value: "flex-start",
+                                                    },
+                                                    {
+                                                        label: "Center",
+                                                        value: "center",
+                                                    },
+                                                    {
+                                                        label: "Bottom",
+                                                        value: "flex-end",
+                                                    },
+                                                ]}
+                                            />
+
+                                            <QuickInput
+                                                name="Spacing"
+                                                property="Spacing"
+                                                type="input"
+                                                inputType="number"
+                                                value={(
+                                                    Selected.Spacing || 10
+                                                ).toString()}
+                                            />
+                                        </div>
+                                    </details>
+                                </>
+                            )) ||
+                                (Selected.Type === "Card" && (
+                                    <>
+                                        {/* card element controls */}
+
+                                        <QuickInput
+                                            name="Width"
+                                            property="Width"
+                                            type="input"
+                                            inputType="number"
+                                            default={-1}
+                                        />
+
+                                        <QuickInput
+                                            name="Background"
+                                            property="Background"
+                                            type="select"
+                                            options={[
+                                                {
+                                                    label: "Shown",
+                                                    value: "var(--background-surface1)",
+                                                },
+                                                {
+                                                    label: "Hidden",
+                                                    value: "transparent",
+                                                },
+                                            ]}
+                                        />
+
+                                        <QuickInput
+                                            name="Display"
+                                            property="Display"
+                                            type="select"
+                                            options={[
+                                                {
+                                                    label: "Block",
+                                                    value: "block",
+                                                },
+                                                {
+                                                    label: "Container",
+                                                    value: "flex",
+                                                },
+                                            ]}
+                                        />
+
+                                        <details class={"option round"}>
+                                            <summary>
+                                                Container Display Options
+                                            </summary>
+
+                                            <div
+                                                class={
+                                                    "details-flex-content-list-box"
+                                                }
+                                            >
+                                                <QuickInput
+                                                    name="Gap"
+                                                    property="Gap"
+                                                    type="input"
+                                                    inputType="number"
+                                                    step={1}
+                                                    default={0}
+                                                />
+
+                                                <QuickInput
+                                                    name="Justify Content"
+                                                    property="JustifyContent"
+                                                    type="select"
+                                                    options={[
+                                                        {
+                                                            label: "Start",
+                                                            value: "flex-start",
+                                                        },
+                                                        {
+                                                            label: "Center",
+                                                            value: "center",
+                                                        },
+                                                        {
+                                                            label: "End",
+                                                            value: "flex-end",
+                                                        },
+                                                        {
+                                                            label: "Space Between",
+                                                            value: "space-between",
+                                                        },
+                                                    ]}
+                                                />
+
+                                                <QuickInput
+                                                    name="Align Items"
+                                                    property="AlignItems"
+                                                    type="select"
+                                                    options={[
+                                                        {
+                                                            label: "Start",
+                                                            value: "flex-start",
+                                                        },
+                                                        {
+                                                            label: "Center",
+                                                            value: "center",
+                                                        },
+                                                        {
+                                                            label: "End",
+                                                            value: "flex-end",
+                                                        },
+                                                    ]}
+                                                />
+
+                                                <QuickInput
+                                                    name="Direction"
+                                                    property="Direction"
+                                                    type="select"
+                                                    options={[
+                                                        {
+                                                            label: "Row",
+                                                            value: "row",
+                                                        },
+                                                        {
+                                                            label: "Column",
+                                                            value: "column",
+                                                        },
+                                                    ]}
+                                                />
+                                            </div>
+                                        </details>
+                                    </>
+                                )) ||
+                                (Selected.Type === "Text" && (
+                                    <>
+                                        {/* text element controls */}
+
+                                        <QuickInput
+                                            name="Content"
+                                            property="Content"
+                                            type="textarea"
+                                        />
+
+                                        <QuickInput
+                                            name="Text Size"
+                                            property="Size"
+                                            type="input"
+                                            inputType="number"
+                                            default={16}
+                                        />
+
+                                        <QuickInput
+                                            name="Line Spacing"
+                                            property="LineSpacing"
+                                            type="input"
+                                            inputType="number"
+                                            default={1.5}
+                                        />
+
+                                        <QuickInput
+                                            name="Letter Spacing"
+                                            property="LetterSpacing"
+                                            type="input"
+                                            inputType="number"
+                                            default={1}
+                                        />
+
+                                        <QuickInput
+                                            name="Margin"
+                                            property="Margins"
+                                            type="input"
+                                            inputType="number"
+                                            default={0}
+                                            step={0.1}
+                                        />
+
+                                        <QuickInput
+                                            name="Padding"
+                                            property="Padding"
+                                            type="input"
+                                            inputType="number"
+                                            default={0.2}
+                                            step={0.1}
+                                        />
+
+                                        <QuickInput
+                                            name="Border Radius"
+                                            property="BorderRadius"
+                                            type="input"
+                                            inputType="number"
+                                            default={0}
+                                            step={1}
+                                        />
+
+                                        <QuickInput
+                                            name="Font Weight"
+                                            property="Weight"
+                                            type="input"
+                                            inputType="number"
+                                            default={400}
+                                            step={100}
+                                        />
+
+                                        <QuickInput
+                                            name="Background"
+                                            property="Background"
+                                            type="input"
+                                            default={"transparent"}
+                                        />
+
+                                        <QuickInput
+                                            name="Color"
+                                            property="Color"
+                                            type="input"
+                                            default={"var(--text-color)"}
+                                        />
+
+                                        <QuickInput
+                                            name="Alignment"
+                                            property="Alignment"
+                                            type="select"
+                                            options={[
+                                                {
+                                                    label: "Left",
+                                                    value: "left",
+                                                },
+                                                {
+                                                    label: "Center",
+                                                    value: "center",
+                                                },
+                                                {
+                                                    label: "Right",
+                                                    value: "right",
+                                                },
+                                            ]}
+                                        />
+
+                                        <QuickInput
+                                            name="Width"
+                                            property="Width"
+                                            type="select"
+                                            options={[
+                                                {
+                                                    label: "Content",
+                                                    value: "max-content",
+                                                },
+                                                {
+                                                    label: "Full",
+                                                    value: "100%",
+                                                },
+                                            ]}
+                                        />
+                                    </>
+                                )) ||
+                                (Selected.Type === "Image" && (
+                                    <>
+                                        {/* image element controls */}
+
+                                        <QuickInput
+                                            name="Source"
+                                            property="Source"
+                                            type="input"
+                                        />
+
+                                        <QuickInput
+                                            name="Alt Text"
+                                            property="Alt"
+                                            type="input"
+                                        />
+                                    </>
+                                )) ||
+                                (Selected.Type === "Embed" && (
+                                    <>
+                                        {/* embed element controls */}
+
+                                        <QuickInput
+                                            name="Source"
+                                            property="Source"
+                                            type="input"
+                                        />
+
+                                        <QuickInput
+                                            name="Alt Text"
+                                            property="Alt"
+                                            type="input"
+                                        />
+                                    </>
+                                )) ||
+                                (Selected.Type === "Source" && (
+                                    <>
+                                        {/* source element controls */}
+                                        <QuickInput
+                                            name="HTML Content"
+                                            property="Content"
+                                            type="textarea"
+                                        />
+
+                                        <QuickInput
+                                            name="Use Content Box"
+                                            property="UseContentBox"
+                                            type="select"
+                                            default={"false"}
+                                            options={[
+                                                {
+                                                    label: "True",
+                                                    value: "true",
+                                                },
+                                                {
+                                                    label: "False",
+                                                    value: "false",
+                                                },
+                                            ]}
+                                        />
+                                    </>
+                                )) ||
+                                (Selected.Type === "StarInfo" && (
+                                    <>
+                                        {/* starinfo element controls */}
+                                        <QuickInput
+                                            name="Source"
+                                            property="Source"
+                                            type="input"
+                                        />
+                                    </>
+                                ))}
+
+                            {/* inputs everything supports!! */}
+
+                            {/* class string */}
+                            <QuickInput
+                                name="CSS Class"
+                                property="ClassString"
+                                type="input"
+                            />
+
+                            {/* style string */}
+                            <QuickInput
+                                name="CSS Style String"
+                                property="StyleString"
+                                type="textarea"
+                                value={(Selected.StyleString || "\n").replaceAll(
+                                    Selected.Type !== "Page"
+                                        ? // don't preserve whitespace on components that aren't pages
+                                          /\;\s*(?!\n)/g
+                                        : /\;(?!\n)/g,
+                                    ";\n"
+                                )}
+                            />
+
+                            {/* events (not supported on some elements!!) */}
+                            {Selected.Type !== "Embed" &&
+                                Selected.Type !== "Source" &&
+                                Selected.Type !== "StarInfo" && (
+                                    <details class={"option round"}>
+                                        <summary>Events</summary>
+
+                                        <div class={"details-flex-content-list-box"}>
+                                            <QuickInput
+                                                name="on:click"
+                                                property={"onClick"}
+                                                value={Selected.onClick || "\n"}
+                                                type="textarea"
+                                            />
+
+                                            <QuickInput
+                                                name="on:mouseenter"
+                                                property={"onMouseEnter"}
+                                                value={Selected.onMouseEnter || "\n"}
+                                                type="textarea"
+                                            />
+
+                                            <QuickInput
+                                                name="on:mouseleave"
+                                                property={"onMouseLeave"}
+                                                value={Selected.onMouseLeave || "\n"}
+                                                type="textarea"
+                                            />
+
+                                            <QuickInput
+                                                name="on:keypress"
+                                                property={"onKeyPress"}
+                                                value={Selected.onKeyPress || "\n"}
+                                                type="textarea"
+                                            />
+                                        </div>
+                                    </details>
+                                )}
+
+                            {/* import/export */}
+                            {!(search.get("edit") || "").startsWith(
+                                "components/"
+                            ) && (
                                 <button
                                     onClick={() => {
-                                        // ask for element json
-                                        const element = prompt(
-                                            "Enter exported component JSON below:"
+                                        // @ts-ignore
+                                        window.modals["entry:modal.SaveToToolbox"](
+                                            true
                                         );
-                                        if (!element) return;
-
-                                        // parse
-                                        const parsed = JSON.parse(element) as Node;
-
-                                        // randomize ID (so we don't have any ID conflicts)
-                                        parsed.ID = crypto.randomUUID();
-
-                                        // set node
-                                        SelectedParent[
-                                            SelectedParent.indexOf(Selected)
-                                        ] = parsed;
-
-                                        // refresh all nodes
-                                        parser.ResetNodes();
-
-                                        // return and update
-                                        return Update();
                                     }}
                                 >
-                                    Import
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                    >
+                                        <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                        <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
+                                    </svg>
+                                    Publish
                                 </button>
-                            </div>
-                        </details>
-                    </>
-                ))}
+                            )}
+
+                            <details className="option round">
+                                <summary>Advanced</summary>
+
+                                <div class={"details-flex-content-list-box"}>
+                                    <button
+                                        onClick={() => {
+                                            // remove EditMode
+                                            Selected.EditMode = undefined;
+
+                                            // create blob
+                                            const blob = new Blob(
+                                                [JSON.stringify(Selected)],
+                                                {
+                                                    type: "application/json",
+                                                }
+                                            );
+
+                                            // get url and open
+                                            window.open(
+                                                URL.createObjectURL(blob),
+                                                "_blank"
+                                            );
+                                        }}
+                                    >
+                                        Export
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            // ask for element json
+                                            const element = prompt(
+                                                "Enter exported component JSON below:"
+                                            );
+                                            if (!element) return;
+
+                                            // parse
+                                            const parsed = JSON.parse(
+                                                element
+                                            ) as Node;
+
+                                            // randomize ID (so we don't have any ID conflicts)
+                                            parsed.ID = crypto.randomUUID();
+
+                                            // set node
+                                            SelectedParent[
+                                                SelectedParent.indexOf(Selected)
+                                            ] = parsed;
+
+                                            // refresh all nodes
+                                            parser.ResetNodes();
+
+                                            // return and update
+                                            return Update();
+                                        }}
+                                    >
+                                        Import
+                                    </button>
+                                </div>
+                            </details>
+                        </>
+                    ))}
+            </div>
         </div>
     );
 }

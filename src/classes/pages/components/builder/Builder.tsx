@@ -44,6 +44,7 @@ export function AddComponent(Type: string) {
                 },
                 {
                     // default star
+                    ID: "PageStar",
                     Type: "StarInfo",
                     NotRemovable: true,
                     Source: "",
@@ -414,6 +415,7 @@ function RenderPage() {
             <Modal
                 buttonid="entry:button.AddComponent"
                 modalid="entry:modal.AddComponent"
+                round={true}
             >
                 <div
                     style={{
@@ -436,7 +438,7 @@ function RenderPage() {
                         }}
                     >
                         <button
-                            className="border"
+                            className="border round"
                             onClick={() => {
                                 AddComponent("Text");
                             }}
@@ -445,7 +447,7 @@ function RenderPage() {
                         </button>
 
                         <button
-                            className="border"
+                            className="border round"
                             onClick={() => {
                                 AddComponent("Image");
                             }}
@@ -454,7 +456,7 @@ function RenderPage() {
                         </button>
 
                         <button
-                            className="border"
+                            className="border round"
                             onClick={() => {
                                 AddComponent("Card");
                             }}
@@ -463,7 +465,7 @@ function RenderPage() {
                         </button>
 
                         <button
-                            className="border"
+                            className="border round"
                             onClick={() => {
                                 AddComponent("Embed");
                             }}
@@ -472,7 +474,7 @@ function RenderPage() {
                         </button>
 
                         <button
-                            className="border"
+                            className="border round"
                             onClick={() => {
                                 AddComponent("Source");
                             }}
@@ -491,7 +493,7 @@ function RenderPage() {
                         }}
                     >
                         <button
-                            className="green"
+                            className="green round"
                             style={{
                                 width: "100%",
                             }}

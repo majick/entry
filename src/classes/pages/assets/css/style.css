@@ -54,6 +54,13 @@
         calc(var(--base-lit) var(--mod) 21% + var(--diff))
     );
 
+    --background-surface2a: hsla(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) var(--mod) 21% + var(--diff)),
+        0.4
+    );
+
     --background-surface3: hsl(
         var(--base-hue),
         var(--base-sat),
@@ -233,7 +240,7 @@ button,
 
 button.round,
 .button.round {
-    border-radius: 0.4rem;
+    border-radius: var(--u-04);
 }
 
 button.secondary,
@@ -348,7 +355,7 @@ button:focus,
 .mdnote {
     padding: 1rem;
     margin-bottom: 1rem;
-    border-radius: 0.4rem;
+    border-radius: var(--u-04);
 
     /* default: note-note */
     background: var(--green1);
@@ -643,7 +650,7 @@ select {
 input.round,
 textarea.round,
 select.round {
-    border-radius: 0.4rem !important;
+    border-radius: var(--u-04) !important;
 }
 
 input:invalid,
@@ -802,7 +809,7 @@ table.force-full td {
 }
 
 blockquote {
-    padding-left: 0.4rem;
+    padding-left: var(--u-04);
     border-left: solid 5px var(--background-surface);
     font-style: italic;
 }
@@ -858,7 +865,7 @@ dialog[open] {
 }
 
 .card.round {
-    border-radius: 0.4rem;
+    border-radius: var(--u-04);
 }
 
 .card.secondary {
@@ -969,7 +976,7 @@ details .details-flex-content-list-box {
 .editor\:sidebar details[open] .details-flex-content-list-box,
 details.secondary[open] .details-flex-content-list-box {
     outline: dashed 1px var(--background-surface2);
-    border-radius: 0.4rem;
+    border-radius: var(--u-04);
 }
 
 details details:nth-child(even) {
@@ -1022,7 +1029,7 @@ details[open].round.horizontal summary {
 
 details.round,
 details.round summary {
-    border-radius: 0.4rem;
+    border-radius: var(--u-04);
 }
 
 /* codemirror styles */
@@ -1045,18 +1052,18 @@ details.round summary {
 
 .cm-tooltip {
     background-color: var(--background-surface) !important;
-    padding: 0.4rem;
+    padding: var(--u-04);
     border-radius: 0.2rem;
     border-color: var(--background-surface2) !important;
     color: var(--text-color) !important;
 }
 
 .cm-tooltip.cm-completionInfo {
-    margin-left: 0.4rem;
+    margin-left: var(--u-04);
 }
 
 .cm-tooltip-autocomplete li {
-    padding: 0.4rem !important;
+    padding: var(--u-04) !important;
     border-radius: 0.2rem;
     transition: all 0.1s;
     color: var(--text-color) !important;
@@ -1410,7 +1417,7 @@ br:not(.cm-line br) {
     background: var(--background-surface1);
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: var(--u-04);
     padding: 0.5rem;
     border: solid 1px var(--background-surface2);
     justify-content: center;
@@ -1435,28 +1442,79 @@ br:not(.cm-line br) {
     top: 0;
     left: 0;
     width: 25rem;
-    border-right: solid 1px var(--background-surface2);
+    border-right: solid 1px var(--background-surface2a);
     background: var(--background-surface1);
     display: flex;
     flex-direction: column;
+    align-items: center;
     animation: SlideInFromLeft 0.15s 0s running;
     overflow: auto;
     z-index: 10000000;
 }
 
-.builder\:sidebar button,
-.option {
-    width: 100%;
-    padding: 0.5rem;
-    border-bottom: solid 1px var(--background-surface2);
-    display: flex;
-    gap: 0.4rem;
+.builder\:sidebar.full {
+    width: 100vw;
 }
 
-.builder\:sidebar input,
-.builder\:sidebar textarea,
-.builder\:sidebar select {
-    border-radius: 0.4rem !important;
+.builder\:sidebar .options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--u-04);
+    padding: var(--u-04);
+    max-width: 100%;
+    width: 100%;
+}
+
+.builder\:sidebar.full .options {
+    width: 50%;
+}
+
+.builder\:sidebar .options button:not(.normal),
+.option {
+    width: 100%;
+    padding: var(--u-06);
+    border: solid 1px var(--background-surface2a);
+    display: flex;
+    gap: var(--u-04);
+    border-radius: var(--u-04);
+    transition: box-shadow 0.15s;
+}
+
+.builder\:sidebar .options button:not(.normal):hover,
+.option:hover {
+    box-shadow: inset 0 0 2px var(--background-surface2a);
+}
+
+.builder\:sidebar .options button:not(.normal) {
+    border-color: var(--background-surface3);
+}
+
+.builder\:sidebar .options button:not(.normal).green {
+    border-color: var(--green2);
+}
+
+.builder\:sidebar .options button:not(.normal).red {
+    border-color: var(--red);
+}
+
+.builder\:sidebar .options input,
+.builder\:sidebar .options textarea,
+.builder\:sidebar .options select {
+    border-radius: var(--u-04) !important;
+    padding: var(--u-06) var(--u-08);
+    border: solid 1px var(--background-surface2a);
+    transition: border-color 0.15s;
+}
+
+.builder\:sidebar .options input,
+.builder\:sidebar .options select {
+    height: max-content !important;
+}
+
+.builder\:sidebar .options input:focus,
+.builder\:sidebar .options textarea:focus,
+.builder\:sidebar .options select:focus {
+    border-color: var(--blue);
 }
 
 .option {
@@ -1503,7 +1561,7 @@ br:not(.cm-line br) {
 
 .component.hover,
 .component.active {
-    outline: solid 2px var(--blue2);
+    box-shadow: 0 0 0 2px var(--blue2);
 }
 
 .component h1 {
@@ -1528,6 +1586,10 @@ br:not(.cm-line br) {
 }
 
 @media screen and (max-width: 900px) {
+    .builder\:sidebar.full .options {
+        width: 22rem;
+    }
+
     .component.builder\:page[data-edit="true"] {
         /* adjust for toolbar */
         padding-top: 3.5rem;
