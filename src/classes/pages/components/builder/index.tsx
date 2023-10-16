@@ -11,14 +11,14 @@ import { PageHeaders, db } from "../../api/API";
 import _404Page from "../404";
 
 import parser from "../../../db/helpers/BaseParser";
-import { BuilderDocument, StarInfoNode } from "./schema";
+import { BuilderDocument } from "./schema";
 
 /**
  * @export
  * @class Builder
  * @implements {Endpoint}
  */
-export default class Builder implements Endpoint {
+export class Builder implements Endpoint {
     public async request(request: Request): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
@@ -126,12 +126,13 @@ export default class Builder implements Endpoint {
                     </noscript>
 
                     <div id="builder" />
+                    <div id="debug" />
 
                     <script
                         type={"module"}
                         dangerouslySetInnerHTML={{
-                            __html: `import Builder from "/Builder.js";
-                            Builder(\`${stringified}\`, true);`,
+                            __html: `import Builder, { Debug } from "/Builder.js";
+                            Builder(\`${stringified}\`, true); window.Debug = Debug;`,
                         }}
                     />
                 </>,
@@ -152,3 +153,8 @@ export default class Builder implements Endpoint {
         );
     }
 }
+
+// default export
+export default {
+    Builder,
+};

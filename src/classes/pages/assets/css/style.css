@@ -1470,7 +1470,7 @@ br:not(.cm-line br) {
 }
 
 .builder\:sidebar .options button:not(.normal),
-.option {
+.builder\:sidebar .options .option {
     width: 100%;
     padding: var(--u-06);
     border: solid 1px var(--background-surface2a);
@@ -1481,7 +1481,7 @@ br:not(.cm-line br) {
 }
 
 .builder\:sidebar .options button:not(.normal):hover,
-.option:hover {
+.builder\:sidebar .options .option:hover {
     box-shadow: inset 0 0 2px var(--background-surface2a);
 }
 
@@ -1517,7 +1517,7 @@ br:not(.cm-line br) {
     border-color: var(--blue);
 }
 
-.option {
+.builder\:sidebar .options .option {
     flex-direction: column;
 }
 
@@ -1648,4 +1648,84 @@ nav.scroll {
     left: 0px;
     height: 24px;
     border-left: 1px solid var(--background-surface2);
+}
+
+/* block information pane */
+
+:root {
+    --block-background: hsl(0, 0%, 0%);
+    --block-background-lighter: hsl(0, 0%, 15%);
+    --block-accent: hsl(216, 74%, 38%);
+    --block-accent-muted: hsl(216, 74%, 32%);
+    --block-text: white;
+    --block-font: monospace;
+}
+
+.block-dialog {
+    font-family: monospace;
+    background: var(--block-background);
+    color: var(--block-text);
+    position: fixed;
+    z-index: 20000000;
+    width: 25rem;
+    max-width: 100%;
+    max-height: 50rem;
+    overflow-y: auto;
+}
+
+.block-dialog:hover {
+    box-shadow: 0 0 2px var(--block-text);
+}
+
+.block-dialog * {
+    font-family: monospace;
+}
+
+.block-dialog *:not(span) {
+    padding: var(--u-04);
+}
+
+.block-dialog .block-header {
+    background: var(--block-accent-muted);
+    transition: background 0.15s;
+    cursor: move;
+    padding: 0;
+    user-select: none;
+    position: sticky;
+    top: 0;
+}
+
+.block-dialog .block-header span:first-child {
+    /* header title */
+    padding: var(--u-02) var(--u-04);
+}
+
+.block-dialog:hover .block-header,
+.block-dialog:focus-within .block-header,
+.block-dialog:active .block-header {
+    background: var(--block-accent);
+}
+
+.block-dialog button,
+.block-dialog .button {
+    background: var(--block-accent);
+    padding: var(--u-02) var(--u-04) !important;
+    height: max-content !important;
+    min-width: max-content;
+    cursor: pointer;
+    user-select: none;
+}
+
+.block-dialog button:hover,
+.block-dialog .button:hover {
+    background: var(--block-accent-muted);
+}
+
+.block-dialog .block-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.block-dialog .block-list .option:not(:last-child) {
+    border-bottom: solid 1px var(--block-background-lighter);
 }

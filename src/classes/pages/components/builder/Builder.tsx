@@ -5,16 +5,16 @@
  */
 
 import schema, { BuilderDocument, Node } from "./schema";
-
 import BaseParser from "../../../db/helpers/BaseParser";
 import parser from "./parser";
 
-import { render } from "preact";
+import { render, hydrate } from "preact";
 
 import Modal from "../site/modals/Modal";
 import Sidebar from "./components/Sidebar";
 import Toolbox from "./components/Toolbox";
 import PublishModals from "../site/modals/PublishModals";
+import Window from "./components/Window";
 
 // render
 export let Document: BuilderDocument;
@@ -105,6 +105,7 @@ export let SelectedParent: Node[];
 
 let NeedsUpdate: boolean = false;
 export let EditMode: boolean = true;
+export let RenderCycles: number = 0;
 
 // state functions
 export function Select(node: Node, parent: Node[]) {
@@ -204,7 +205,21 @@ function RenderPage() {
 
                               Hovered = target;
                           }
-                        : undefined
+                        : (event) => {
+                              let target: HTMLElement = event.target as HTMLElement;
+
+                              if (!target.classList.contains("component"))
+                                  if (
+                                      target.parentElement &&
+                                      target.parentElement.classList.contains(
+                                          "component"
+                                      )
+                                  )
+                                      target = target.parentElement;
+                                  else return;
+
+                              Hovered = target;
+                          }
                 }
                 onClick={
                     EditMode
@@ -620,6 +635,17 @@ function RenderPage() {
 export function RenderDocument(_doc: string, _EditMode: boolean = true) {
     const doc = BaseParser.parse(_doc) as BuilderDocument;
 
+    // keybinds listener
+    document.addEventListener("keyup", (event) => {
+        if (event.ctrlKey && event.key === ":")
+            if (document.getElementById("debug_panel"))
+                // show old
+                document.getElementById("debug_panel")!.style.display = "block";
+            // create new
+            else return Debug(document.getElementById("debug")!);
+        else return;
+    });
+
     // update document
     Document = doc;
     CurrentPage = 0;
@@ -627,6 +653,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
     // ...
     function RenderCurrentPage(element: HTMLElement | ShadowRoot) {
+        RenderCycles++;
+
         // check for star
         const Star = doc.Pages[CurrentPage].Children.find(
             (n) => n.Type === "StarInfo"
@@ -656,6 +684,31 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
         // ...
         const _page = document.getElementById("_doc")!;
+
+        // ...handle view mode select (for debug)
+        _page.addEventListener("click", (event) => {
+            // get target
+            let target = event.target as HTMLElement;
+
+            if (!target.getAttribute("data-component"))
+                target = target.parentElement!;
+
+            // get node
+            const AllNodes = parser.GetNodes();
+            const node = AllNodes.find((n) => n.ID === target.id) as Node;
+
+            if (!node) return;
+
+            // get parent
+            const parent =
+                (
+                    AllNodes.find((n) => n.Children && n.Children.includes(node)) ||
+                    Document.Pages[CurrentPage]
+                ).Children || [];
+
+            // select
+            Select(node, parent);
+        });
 
         // handle pages
         function CheckHash(FromChange: boolean = false) {
@@ -697,11 +750,172 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             // check if we need to render
             if (NeedsUpdate !== true) return;
             NeedsUpdate = false;
+            RenderCycles++;
 
             // render
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
         }, 1000);
     }
+}
+
+// debug
+export function Debug(Element: HTMLElement) {
+    // render
+    render(
+        <>
+            <Window title="Debug" id="debug_panel">
+                <div className="block-list">
+                    <div
+                        className="option flex align-center justify-space-between"
+                        onClick={() => Debug(Element)}
+                    >
+                        <span>Debug Stats</span>
+                        <button>Refresh</button>
+                    </div>
+
+                    <div className="option">Pages: {Document.Pages.length}</div>
+                    <div className="option">CurrentPage: {CurrentPage + 1}</div>
+
+                    {Selected && (
+                        <div className="option flex align-center justify-space-between">
+                            <span>
+                                {Selected.Type}#{Selected.ID}
+                            </span>
+                            <button
+                                onClick={() => {
+                                    // remove old inspector
+                                    if (document.getElementById("debug_inspect"))
+                                        document
+                                            .getElementById("debug_inspect")!
+                                            .remove();
+
+                                    // create new inspector
+                                    DebugInspect(
+                                        Selected,
+                                        document.getElementById(
+                                            "debug_inspect_zone"
+                                        )!
+                                    );
+                                }}
+                            >
+                                Inspect
+                            </button>
+                        </div>
+                    )}
+
+                    {Hovered && <div className="option">Hovered: {Hovered.id}</div>}
+
+                    <div className="option">
+                        IsEditing: {EditMode === true ? "true" : "false"}
+                    </div>
+
+                    <div className="option">
+                        NeedsUpdate: {NeedsUpdate === true ? "true" : "false"}
+                    </div>
+
+                    <div className="option">RenderCycles: {RenderCycles}</div>
+                    <div className="option">Renderer: DOM</div>
+
+                    <div className="option">
+                        SidebarOpen: {SidebarOpen === true ? "true" : "false"}
+                    </div>
+
+                    <div className="option">
+                        Events: {(window.performance.eventCounts as any).size}
+                    </div>
+
+                    {navigator.hardwareConcurrency && (
+                        <div class="option">
+                            Logical Cores: {navigator.hardwareConcurrency}
+                        </div>
+                    )}
+
+                    <div class="option">UA: {navigator.userAgent}</div>
+                </div>
+            </Window>
+
+            {/* debug inspector */}
+            <div id={"debug_inspect_zone"} />
+            <div id={"debug_inspect_zone_1"} />
+        </>,
+        Element
+    );
+}
+
+export function DebugInspect(Node: Node, Element: HTMLElement) {
+    // render
+    hydrate(
+        <Window title="Debug Inspector" id="debug_inspect" fullClose={true}>
+            <div className="block-list">
+                <div className="option">{JSON.stringify(Node)}</div>
+                <div className="option flex justify-center">
+                    <button
+                        onClick={() => {
+                            if (document.getElementById("debug_node_list"))
+                                document.getElementById(
+                                    "debug_node_list"
+                                )!.style.display = "block";
+                            else
+                                DebugNodeList(
+                                    Selected,
+                                    document.getElementById("debug_inspect_zone_1")!
+                                );
+                        }}
+                    >
+                        Node List
+                    </button>
+                </div>
+            </div>
+        </Window>,
+        Element
+    );
+}
+
+export function DebugNodeList(Node: Node, Element: HTMLElement) {
+    const nodes = parser.GetNodes();
+
+    // build node list
+    const NodeList = [];
+
+    for (const node of nodes) {
+        NodeList.push(
+            <div class={"option flex justify-space-between align-center"}>
+                <span>
+                    {node.Type}#{node.ID}
+                </span>{" "}
+                <button
+                    onClick={() => {
+                        // remove old inspector
+                        if (document.getElementById("debug_inspect"))
+                            document.getElementById("debug_inspect")!.remove();
+
+                        // create new inspector
+                        DebugInspect(
+                            node,
+                            document.getElementById("debug_inspect_zone")!
+                        );
+                    }}
+                >
+                    Inspect
+                </button>
+            </div>
+        );
+
+        continue;
+    }
+
+    // render
+    hydrate(
+        <Window title="Debug Node List" id="debug_node_list" fullClose={true}>
+            <div className="block-list">
+                <div className="option">
+                    Listing Parser Nodes ({NodeList.length})
+                </div>
+                {NodeList}
+            </div>
+        </Window>,
+        Element
+    );
 }
 
 // default export

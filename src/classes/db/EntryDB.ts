@@ -1211,6 +1211,9 @@ export default class EntryDB {
             use: "Prepare",
         });
 
+        // delete media
+        await EntryDB.Media.DeleteOwner(PasteInfo.CustomURL);
+
         // register event
         if (EntryDB.config.log && EntryDB.config.log.events.includes("delete_paste"))
             await EntryDB.Logs.CreateLog({

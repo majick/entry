@@ -217,14 +217,16 @@ export class GetPasteFromURL implements Endpoint {
                             {BuilderParser.ParsePage(Page, false, true)}
                         </div>
 
+                        <div id="debug" />
+
                         {/* fix mistakes on client */}
                         <script
                             type={"module"}
                             dangerouslySetInnerHTML={{
-                                __html: `import Builder from "/Builder.js";
+                                __html: `import Builder, { Debug } from "/Builder.js";
                                 Builder(\`${BaseParser.stringify(
                                     TrueContent
-                                )}\`, false);`,
+                                )}\`, false); window.Debug = Debug;`,
                             }}
                         />
 

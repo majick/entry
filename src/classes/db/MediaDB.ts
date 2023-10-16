@@ -167,6 +167,39 @@ export default class Media {
     }
 
     /**
+     * @method DeleteOwner
+     *
+     * @param {string} owner
+     * @return {Promise<[boolean, string]>}
+     * @memberof Media
+     */
+    public async DeleteOwner(owner: string): Promise<[boolean, string]> {
+        // ideally, the owner value would be checked for the correct password prior to calling DeleteOwner
+
+        if (
+            !EntryDB.config.app ||
+            !EntryDB.config.app.media ||
+            EntryDB.config.app.media.enabled === false
+        )
+            return [false, "Media disabled"];
+
+        // ...
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
+
+        // return false if OwnerFolder doesn't exist
+        if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
+
+        // delete directory
+        fs.rmdirSync(OwnerFolder);
+
+        // return
+        return [true, "File deleted"];
+    }
+
+    /**
      * @method GetMediaByOwner
      *
      * @param {string} owner
