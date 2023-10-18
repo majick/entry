@@ -4,6 +4,8 @@
  * @license MIT
  */
 
+import { mat4 } from "gl-matrix";
+
 /**
  * @export
  * @class Renderer2D
@@ -47,7 +49,7 @@ export default class Renderer2D {
 
         if (this.ShaderProgram) {
             const attributeLocations = {
-                vertextPosition: this.gl.getAttribLocation(
+                vertexPosition: this.gl.getAttribLocation(
                     this.ShaderProgram,
                     "aVertextPosition"
                 ),
@@ -63,12 +65,87 @@ export default class Renderer2D {
                     "uModelViewMatrix"
                 ),
             };
+
+            // ...TEST
+            // create buffers
+            const posBuffer = this.CreatePositionBuffer([
+                1, 1, -1, 1, 1, -1, -1, -1, -1,
+            ]);
+
+            // pull positions
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, posBuffer);
+
+            this.gl.vertexAttribPointer(
+                attributeLocations.vertexPosition,
+                2,
+                this.gl.FLOAT,
+                false,
+                0,
+                0
+            );
+
+            this.gl.enableVertexAttribArray(attributeLocations.vertexPosition);
+
+            // set program
+            this.gl.useProgram(this.ShaderProgram);
         }
 
         // start drawing
         // this.Draw();
         // window.requestAnimationFrame(this.Draw);
     }
+
+    // positions
+
+    /**
+     * @method CreatePositionBuffer
+     *
+     * @private
+     * @param {[
+     *             number, // 1
+     *             number, // 2
+     *             number, // 3
+     *             number, // 1
+     *             number, // 2
+     *             number, // 3
+     *             number, // 1
+     *             number, // 2
+     *             number, // 3
+     *         ]} positions
+     * @return {WebGLBuffer}
+     * @memberof Renderer2D
+     */
+    private CreatePositionBuffer(
+        positions: [
+            number, // 1
+            number, // 2
+            number, // 3
+            number, // 1
+            number, // 2
+            number, // 3
+            number, // 1
+            number, // 2
+            number, // 3
+        ]
+    ): WebGLBuffer {
+        // create buffer
+        const buffer = this.gl.createBuffer();
+
+        // bind buffer
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+
+        // create data
+        this.gl.bufferData(
+            this.gl.ARRAY_BUFFER,
+            new Float32Array(positions),
+            this.gl.STATIC_DRAW
+        );
+
+        // return
+        return buffer as WebGLBuffer;
+    }
+
+    // shaders
 
     /**
      * @method CreateShaderProgram
@@ -153,6 +230,8 @@ export default class Renderer2D {
         // return
         return _shader;
     }
+
+    // draw function
 
     /**
      * @method Draw
