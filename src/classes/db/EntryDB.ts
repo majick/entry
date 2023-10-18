@@ -12,6 +12,7 @@ import fs from "node:fs";
 import { ComputeRandomObjectHash, CreateHash, Encrypt } from "./helpers/Hash";
 import SQL from "./helpers/SQL";
 
+import WorkshopDB from "./WorkshopDB";
 import Media from "./MediaDB";
 import Expiry from "./Expiry";
 import LogDB from "./LogDB";
@@ -82,6 +83,7 @@ export default class EntryDB {
     ).replace(":cwd", process.cwd());
 
     public readonly db: Database;
+    public static Workshop: WorkshopDB; // hold workshop db
     public static Expiry: Expiry; // hold expiry registry
     public static Logs: LogDB; // hold log db
     public static Media: Media; // hold media db
@@ -126,11 +128,16 @@ export default class EntryDB {
 
         (async () => {
             if (StaticInit) return;
+
             StaticInit = true;
 
+            await EntryDB.GetConfig(); // fill config
+
+            // ...inits
+            await EntryDB.InitWorkshop();
             await EntryDB.CreateExpiry();
-            await EntryDB.InitMedia();
             await EntryDB.InitLogs();
+            await EntryDB.InitMedia();
 
             // ...
             await SQL.QueryOBJ({
@@ -347,6 +354,29 @@ export default class EntryDB {
         // create db
         EntryDB.Media = new Media(new this());
         EntryDB.Media.Initialize();
+
+        // return
+        return EntryDB.Media;
+    }
+
+    /**
+     * @method InitWorkshop
+     *
+     * @static
+     * @return {Promise<any>}
+     * @memberof EntryDB
+     */
+    public static async InitWorkshop(): Promise<any> {
+        if (
+            !EntryDB.config ||
+            !EntryDB.config.app ||
+            EntryDB.config.app.enable_workshop !== true
+        )
+            return;
+
+        // create db
+        EntryDB.Workshop = new WorkshopDB(new this());
+        EntryDB.Workshop.Initialize();
 
         // return
         return EntryDB.Media;

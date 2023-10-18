@@ -223,6 +223,12 @@ function AdminNav(props: { active: string; pass: string }): any {
             />
 
             <hr />
+
+            <p>
+                Memory Usage: {Math.floor(process.memoryUsage().rss / 1000_000)} MB
+            </p>
+
+            <p>CPU Usage: {process.cpuUsage().system}</p>
         </>
     );
 }

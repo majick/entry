@@ -272,7 +272,7 @@ button.tertiary:hover,
 button.border,
 .button.border {
     background: transparent;
-    box-shadow: inset 0 0 0 1px var(--background-surface2);
+    box-shadow: inset 0 0 0 1px var(--background-surface2a);
 }
 
 button.border:hover,
@@ -284,13 +284,13 @@ button.border:hover,
 button.border.dashed,
 .button.border.dashed {
     box-shadow: none;
-    border: dashed 1px var(--background-surface2);
+    border: dashed 1px var(--background-surface2a);
 }
 
 button.border.dashed:hover,
 .button.border.dashed:hover {
     box-shadow: none;
-    border: dashed 1px var(--text-color-faded);
+    border: dashed 1px var(--background-surface2);
     background: transparent;
 }
 
@@ -857,7 +857,7 @@ dialog[open] {
 }
 
 .card.border {
-    border: solid 1px var(--background-surface2);
+    border: solid 1px var(--background-surface2a);
 }
 
 .card.border.dashed {

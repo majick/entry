@@ -80,6 +80,7 @@ export type Config = {
         enable_builder?: boolean; // true default
         enable_paste_settings?: boolean; // true default
         enable_comments?: boolean; // false default
+        enable_workshop?: boolean; // false default
         association_required?: boolean; // requires an association to create pastes
         auto_tag?: boolean;
         favicon?: string;
@@ -187,6 +188,7 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 
 // ...import endpoints
 import _404, { _404Page } from "./classes/pages/components/404";
+import Workshop from "./classes/pages/components/workshop";
 import Builder from "./classes/pages/components/builder";
 import AdminAPI from "./classes/pages/api/AdminAPI";
 import Admin from "./classes/pages/Admin";
@@ -281,13 +283,18 @@ const config: HoneybeeConfig = {
         "/search": { Page: Pages.PastesSearch },
         // (any) plugins
         ...plugins,
+        // GET paste settings
+        "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
+        "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
+        // GET builder
+        "/paste/builder": { Page: Builder.Builder },
+        // GET workshop
+        "/paste/workshop": { Page: Workshop.WorkshopProjects },
+        "/paste/workshop/gl": { Page: Workshop.WorkshopEditor },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
-        "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
-        "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
-        "/paste/builder": { Page: Builder.Builder },
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },
         "/": {
@@ -312,5 +319,5 @@ console.log("\x1b[92m[entry] Started server on port:\x1b[0m", config.Port);
 
 // gc interval
 setInterval(() => {
-    Bun.gc(true);
+    Bun.gc(false);
 }, 1000 * 60); // every minute

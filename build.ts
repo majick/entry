@@ -10,7 +10,7 @@ const output = await build({
         "./src/classes/pages/components/Editor.ts",
         "./src/classes/pages/assets/ClientFixMarkdown.ts",
         "./src/classes/pages/components/Markdown.ts",
-        "./src/classes/pages/components/builder/Builder.tsx",
+        "./src/classes/pages/components/workshop/WorkshopEditor.tsx",
         "./src/classes/pages/components/MetadataEditor.tsx",
         "./src/classes/pages/components/site/UserSettings.tsx",
     ],
