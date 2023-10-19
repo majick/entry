@@ -252,6 +252,24 @@ export default class Renderer2D {
     }
 
     /**
+     * @method RGBtoDecimal
+     *
+     * @static
+     * @param {number} r
+     * @param {number} g
+     * @param {number} b
+     * @return {[number, number, number]}
+     * @memberof Renderer2D
+     */
+    public static RGBtoDecimal(
+        r: number,
+        g: number,
+        b: number
+    ): [number, number, number] {
+        return [r / 255, g / 255, b / 255];
+    }
+
+    /**
      * @method ParseWorld
      *
      * @param {string} name
@@ -279,8 +297,11 @@ export default class Renderer2D {
             // get size
             const size = object.querySelector("Size");
 
+            // get color
+            const color = object.querySelector("Color");
+
             // ...
-            if (!position || !size) continue;
+            if (!position || !size || !color) continue;
 
             // add shape
 
@@ -293,13 +314,14 @@ export default class Renderer2D {
             );
 
             // ...set color
-            this.gl.uniform4f(
-                this.locations.color,
-                Math.random(),
-                Math.random(),
-                Math.random(),
-                1
+            const [r, g, b] = Renderer2D.RGBtoDecimal(
+                // convert rgb into values from 0 to 1
+                parseInt(color.getAttribute("r") || "0"),
+                parseInt(color.getAttribute("g") || "0"),
+                parseInt(color.getAttribute("b") || "0")
             );
+
+            this.gl.uniform4f(this.locations.color, r, g, b, 1);
 
             // draw
             this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);

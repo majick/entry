@@ -1,4 +1,5 @@
 import { EditorState } from "@codemirror/state";
+
 import {
     EditorView,
     keymap,
@@ -28,7 +29,7 @@ import { HandleCustomElements } from "../assets/ClientFixMarkdown";
 import { ParseMarkdown } from "./Markdown";
 
 // create theme
-const hightlight = HighlightStyle.define([
+const highlight = HighlightStyle.define([
     { tag: tags.heading1, fontWeight: "700" },
     {
         tag: tags.heading2,
@@ -344,79 +345,81 @@ export default function CreateEditor(ElementID: string, content: string) {
     const element = document.getElementById(ElementID)!;
 
     // create editor
-    const startState = EditorState.create({
-        doc:
-            // display the saved document or given content
-            window.sessionStorage.getItem("doc")! ||
-            decodeURIComponent(content) ||
-            "",
-        extensions: [
-            keymap.of(markdownKeymap),
-            highlightSpecialChars(),
-            drawSelection(),
-            rectangularSelection(),
-            EditorView.lineWrapping,
-            closeBrackets(),
-            history(),
-            EditorView.updateListener.of(async (update) => {
-                if (update.docChanged) {
-                    const content = update.state.doc.toString();
-                    if (content === "") return;
-
-                    // basic session save
-                    window.sessionStorage.setItem("doc", content);
-
-                    const html = await ParseMarkdown(content, false);
-                    window.sessionStorage.setItem("gen", html);
-
-                    // update the hidden contentInput element so we can save the paste
-                    (
-                        document.getElementById("contentInput") as HTMLInputElement
-                    ).value = encodeURIComponent(content); // encoded so we can send it through form
-                }
-            }),
-            keymap.of([
-                // we're creating this keymap because of a weird issue in firefox where
-                // (if there is no text before or after), a new line is not created
-                // ...we're basically just manually inserting the new line here
-                {
-                    key: "Enter",
-                    run: (): boolean => {
-                        const cursor = view.state.selection.main.head;
-                        const transaction = view.state.update({
-                            changes: {
-                                from: cursor,
-                                insert: "\n",
-                            },
-                            selection: { anchor: cursor + 1 },
-                            scrollIntoView: true,
-                        });
-
-                        if (transaction) {
-                            view.dispatch(transaction);
-                        }
-
-                        // return
-                        return true;
-                    },
-                },
-            ]),
-            // markdown
-            syntaxHighlighting(hightlight),
-            markdown({
-                base: markdownLanguage,
-            }),
-            autocompletion({
-                override: [BasicCompletion],
-                activateOnTyping:
-                    window.location.search.includes("hints=true") ||
-                    window.localStorage.getItem("entry:user.EditorHints") === "true",
-            }),
-        ],
-    });
-
     const view = new EditorView({
-        state: startState,
+        // @ts-ignore
+        state: EditorState.create({
+            doc:
+                // display the saved document or given content
+                window.sessionStorage.getItem("doc")! ||
+                decodeURIComponent(content) ||
+                "",
+            extensions: [
+                keymap.of(markdownKeymap),
+                highlightSpecialChars(),
+                drawSelection(),
+                rectangularSelection(),
+                EditorView.lineWrapping,
+                closeBrackets(),
+                history(),
+                EditorView.updateListener.of(async (update) => {
+                    if (update.docChanged) {
+                        const content = update.state.doc.toString();
+                        if (content === "") return;
+
+                        // basic session save
+                        window.sessionStorage.setItem("doc", content);
+
+                        const html = await ParseMarkdown(content, false);
+                        window.sessionStorage.setItem("gen", html);
+
+                        // update the hidden contentInput element so we can save the paste
+                        (
+                            document.getElementById(
+                                "contentInput"
+                            ) as HTMLInputElement
+                        ).value = encodeURIComponent(content); // encoded so we can send it through form
+                    }
+                }),
+                keymap.of([
+                    // we're creating this keymap because of a weird issue in firefox where
+                    // (if there is no text before or after), a new line is not created
+                    // ...we're basically just manually inserting the new line here
+                    {
+                        key: "Enter",
+                        run: (): boolean => {
+                            const cursor = view.state.selection.main.head;
+                            const transaction = view.state.update({
+                                changes: {
+                                    from: cursor,
+                                    insert: "\n",
+                                },
+                                selection: { anchor: cursor + 1 },
+                                scrollIntoView: true,
+                            });
+
+                            if (transaction) {
+                                view.dispatch(transaction);
+                            }
+
+                            // return
+                            return true;
+                        },
+                    },
+                ]),
+                // markdown
+                syntaxHighlighting(highlight),
+                markdown({
+                    base: markdownLanguage,
+                }),
+                autocompletion({
+                    override: [BasicCompletion],
+                    activateOnTyping:
+                        window.location.search.includes("hints=true") ||
+                        window.localStorage.getItem("entry:user.EditorHints") ===
+                            "true",
+                }),
+            ],
+        }),
         parent: element,
     });
 

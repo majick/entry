@@ -5,7 +5,51 @@ import PublishModals from "../site/modals/PublishModals";
 
 import Renderer2D from "./2d/2DRenderer";
 
+// codemirror
+import { EditorState } from "@codemirror/state";
+
+import {
+    EditorView,
+    keymap,
+    highlightSpecialChars,
+    drawSelection,
+    highlightActiveLine,
+    dropCursor,
+    rectangularSelection,
+    crosshairCursor,
+    lineNumbers,
+    highlightActiveLineGutter,
+} from "@codemirror/view";
+
+import {
+    defaultHighlightStyle,
+    syntaxHighlighting,
+    indentOnInput,
+    bracketMatching,
+    foldGutter,
+    foldKeymap,
+    HighlightStyle,
+} from "@codemirror/language";
+
+import {
+    autocompletion,
+    completionKeymap,
+    closeBrackets,
+    closeBracketsKeymap,
+} from "@codemirror/autocomplete";
+
+import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+
+import { javascript, typescriptLanguage } from "@codemirror/lang-javascript";
+import { tags } from "@lezer/highlight";
+
+// ...
 export default function Render(element: HTMLElement) {
+    function ToggleTab() {
+        document.getElementById("tab_game")!.classList.toggle("active");
+        document.getElementById("tab_code")!.classList.toggle("active");
+    }
+
     // render
     render(
         <div
@@ -23,7 +67,7 @@ export default function Render(element: HTMLElement) {
                 }}
             >
                 <div class={"tabbar"}>
-                    <button>
+                    <button onClick={ToggleTab}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -36,7 +80,7 @@ export default function Render(element: HTMLElement) {
                         Game
                     </button>
 
-                    <button class={"secondary"}>
+                    <button class={"secondary"} onClick={ToggleTab}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -71,23 +115,34 @@ export default function Render(element: HTMLElement) {
             {/* view panels */}
             <div
                 id="tab_game"
-                class={"editor-tab -editor active flex justify-center align-center"}
+                class={"editor-tab -editor active"}
                 style={{
                     height: "100%",
                 }}
             >
-                <canvas
-                    id={"game_canvas"}
-                    width={"1024"}
-                    height={"512"}
-                    style={{
-                        background: "white",
-                        maxWidth: "100%",
-                    }}
-                />
+                <div class={"flex justify-center align-center"}>
+                    <canvas
+                        id={"game_canvas"}
+                        width={"1024"}
+                        height={"512"}
+                        style={{
+                            background: "white",
+                            maxWidth: "100%",
+                        }}
+                    />
+                </div>
             </div>
 
-            <div id="tab_code" class={"editor-tab -editor"}></div>
+            <div id="tab_code" class={"editor-tab -editor"}>
+                <div
+                    id="editor"
+                    style={{
+                        overflowY: "auto",
+                        maxHeight: "100%",
+                        fontFamily: "monospace"
+                    }}
+                ></div>
+            </div>
         </div>,
         element
     );
@@ -96,22 +151,105 @@ export default function Render(element: HTMLElement) {
     const Renderer = new Renderer2D(
         `<Workshop version="1.0">
         <World name="World">
-            <Shape type="Rectangle" color="blue">
+            <Shape type="Rectangle">
                 <Position x="0" y="0"></Position>
                 <Size x="100" y="100"></Size>
-            </Shape>
-    
-            <Shape type="Rectangle" color="blue">
-                <Position x="100" y="0"></Position>
-                <Size x="100" y="100"></Size>
-            </Shape>
-    
-            <Shape type="Rectangle" color="blue">
-                <Position x="200" y="0"></Position>
-                <Size x="100" y="100"></Size>
+                <Color r="255" g="87" b="87"></Color>
             </Shape>
         </World>
     </Workshop>`,
         document.getElementById("game_canvas") as HTMLCanvasElement
     );
+
+    // create editor theme
+    const highlight = HighlightStyle.define([
+        {
+            tag: tags.tagName,
+            color: "var(--red)",
+            fontFamily: "monospace",
+        },
+        {
+            tag: tags.keyword,
+            fontFamily: "monospace",
+            color: "var(--red3)",
+        },
+        {
+            tag: tags.variableName,
+            fontFamily: "monospace",
+            color: "var(--blue2)",
+        },
+        {
+            tag: tags.comment,
+            fontFamily: "monospace",
+            color: "var(--text-color-faded)",
+        },
+        {
+            tag: tags.number,
+            color: "var(--yellow3)"
+        }
+    ]);
+
+    // create code editor
+    const view = new EditorView({
+        // @ts-ignore
+        state: EditorState.create({
+            doc:
+                // display the saved document or given content
+                "// Hello, world!",
+            extensions: [
+                lineNumbers(),
+                highlightActiveLineGutter(),
+                highlightSpecialChars(),
+                history(),
+                foldGutter(),
+                drawSelection(),
+                dropCursor(),
+                EditorState.allowMultipleSelections.of(true),
+                indentOnInput(),
+                syntaxHighlighting(highlight, { fallback: true }),
+                bracketMatching(),
+                closeBrackets(),
+                autocompletion(),
+                rectangularSelection(),
+                crosshairCursor(),
+                highlightActiveLine(),
+                // keymaps
+                keymap.of({
+                    ...closeBracketsKeymap,
+                    ...defaultKeymap,
+                    ...historyKeymap,
+                    ...foldKeymap,
+                    ...completionKeymap,
+                }),
+                // ...new line fix
+                keymap.of([
+                    {
+                        key: "Enter",
+                        run: (): boolean => {
+                            const cursor = view.state.selection.main.head;
+                            const transaction = view.state.update({
+                                changes: {
+                                    from: cursor,
+                                    insert: "\n",
+                                },
+                                selection: { anchor: cursor + 1 },
+                                scrollIntoView: true,
+                            });
+
+                            if (transaction) {
+                                view.dispatch(transaction);
+                            }
+
+                            // return
+                            return true;
+                        },
+                    },
+                ]),
+                // javascript
+                javascript(),
+                typescriptLanguage,
+            ],
+        }),
+        parent: document.getElementById("editor")!,
+    });
 }

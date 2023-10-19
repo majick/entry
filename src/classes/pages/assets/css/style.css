@@ -1074,6 +1074,15 @@ details.round summary {
     box-shadow: inset 0 0 0 2px var(--red);
 }
 
+.cm-gutters {
+    background-color: var(--background-surface1) !important;
+    border-color: var(--background-surface2a) !important;
+}
+
+.cm-activeLine, .cm-activeLineGutter {
+    background-color: var(--background-surface2a) !important;
+}
+
 /* highlight.js styles */
 .hljs-comment {
     color: var(--green);
