@@ -133,6 +133,13 @@ export function GetDropZoneFromElement(
 ): HTMLElement[] | undefined {
     if (!target.parentElement) return;
 
+    if (!target.classList.contains("component"))
+        if (
+            target.parentElement &&
+            target.parentElement.classList.contains("component")
+        )
+            target = target.parentElement as HTMLElement;
+
     // try to get previous and next siblings (drop elements)
     let PreviousDropElement = (
         target.previousElementSibling !== null

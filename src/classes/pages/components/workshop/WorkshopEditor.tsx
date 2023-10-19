@@ -82,6 +82,7 @@ export default function Render(element: HTMLElement) {
                     height={"512"}
                     style={{
                         background: "white",
+                        maxWidth: "100%",
                     }}
                 />
             </div>
@@ -97,6 +98,17 @@ export default function Render(element: HTMLElement) {
         <World name="World">
             <Shape type="Rectangle" color="blue">
                 <Position x="0" y="0"></Position>
+                <Size x="100" y="100"></Size>
+            </Shape>
+    
+            <Shape type="Rectangle" color="blue">
+                <Position x="100" y="0"></Position>
+                <Size x="100" y="100"></Size>
+            </Shape>
+    
+            <Shape type="Rectangle" color="blue">
+                <Position x="200" y="0"></Position>
+                <Size x="100" y="100"></Size>
             </Shape>
         </World>
     </Workshop>`,

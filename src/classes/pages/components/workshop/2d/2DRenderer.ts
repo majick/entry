@@ -4,18 +4,23 @@
  * @license MIT
  */
 
-import { mat4 } from "gl-matrix";
-
 /**
  * @export
  * @class Renderer2D
  */
 export default class Renderer2D {
-    scene: XMLDocument;
-    gl: WebGL2RenderingContext;
+    public readonly scene: XMLDocument;
+    public readonly gl: WebGL2RenderingContext;
 
     // ...
-    ShaderProgram: WebGLProgram | undefined;
+    private ShaderProgram: WebGLProgram | undefined;
+    private locations:
+        | {
+              position: number;
+              resolution: WebGLUniformLocation | null;
+              color: WebGLUniformLocation | null;
+          }
+        | undefined;
 
     /**
      * Creates an instance of Renderer2D.
@@ -42,107 +47,66 @@ export default class Renderer2D {
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
 
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.ClearCanvas();
 
         // create shader program
         this.CreateShaderProgram();
 
         if (this.ShaderProgram) {
-            const attributeLocations = {
-                vertexPosition: this.gl.getAttribLocation(
+            this.locations = {
+                position: this.gl.getAttribLocation(
                     this.ShaderProgram,
-                    "aVertextPosition"
+                    "a_position"
                 ),
+                // uniforms
+                resolution: this.gl.getUniformLocation(
+                    this.ShaderProgram,
+                    "u_resolution"
+                ),
+                color: this.gl.getUniformLocation(this.ShaderProgram, "u_color"),
             };
-
-            const uniformLocations = {
-                projectionMatrix: this.gl.getUniformLocation(
-                    this.ShaderProgram,
-                    "uProjectionMatrix"
-                ),
-                modelViewMatrix: this.gl.getUniformLocation(
-                    this.ShaderProgram,
-                    "uModelViewMatrix"
-                ),
-            };
-
-            // ...TEST
-            // create buffers
-            const posBuffer = this.CreatePositionBuffer([
-                1, 1, -1, 1, 1, -1, -1, -1, -1,
-            ]);
-
-            // pull positions
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, posBuffer);
-
-            this.gl.vertexAttribPointer(
-                attributeLocations.vertexPosition,
-                2,
-                this.gl.FLOAT,
-                false,
-                0,
-                0
-            );
-
-            this.gl.enableVertexAttribArray(attributeLocations.vertexPosition);
 
             // set program
             this.gl.useProgram(this.ShaderProgram);
+
+            // bind vertex array object
+            const VertexArray = this.gl.createVertexArray();
+            this.gl.bindVertexArray(VertexArray);
+
+            // set resolution
+            this.gl.uniform2f(
+                this.locations.resolution,
+                canvas.width,
+                canvas.height
+            );
+
+            // create buffers
+            const buffers = {
+                position: {
+                    buffer: this.gl.createBuffer(),
+                    size: 2,
+                    type: this.gl.FLOAT,
+                    normalize: false,
+                    stride: 0,
+                    offset: 0,
+                },
+            };
+
+            // pull positions
+            this.gl.enableVertexAttribArray(this.locations.position);
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.position.buffer); // bind buffer
+            this.gl.vertexAttribPointer(
+                this.locations.position,
+                buffers.position.size,
+                buffers.position.type,
+                buffers.position.normalize,
+                buffers.position.stride,
+                buffers.position.offset
+            );
+
+            // start parsing
+            this.ParseWorld("World");
         }
-
-        // start drawing
-        // this.Draw();
-        // window.requestAnimationFrame(this.Draw);
-    }
-
-    // positions
-
-    /**
-     * @method CreatePositionBuffer
-     *
-     * @private
-     * @param {[
-     *             number, // 1
-     *             number, // 2
-     *             number, // 3
-     *             number, // 1
-     *             number, // 2
-     *             number, // 3
-     *             number, // 1
-     *             number, // 2
-     *             number, // 3
-     *         ]} positions
-     * @return {WebGLBuffer}
-     * @memberof Renderer2D
-     */
-    private CreatePositionBuffer(
-        positions: [
-            number, // 1
-            number, // 2
-            number, // 3
-            number, // 1
-            number, // 2
-            number, // 3
-            number, // 1
-            number, // 2
-            number, // 3
-        ]
-    ): WebGLBuffer {
-        // create buffer
-        const buffer = this.gl.createBuffer();
-
-        // bind buffer
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-
-        // create data
-        this.gl.bufferData(
-            this.gl.ARRAY_BUFFER,
-            new Float32Array(positions),
-            this.gl.STATIC_DRAW
-        );
-
-        // return
-        return buffer as WebGLBuffer;
     }
 
     // shaders
@@ -158,19 +122,32 @@ export default class Renderer2D {
         // load shaders
         const vertexShader = this.LoadShader(
             this.gl.VERTEX_SHADER,
-            `attribute vec4 aVertexPosition;
-            uniform mat4 uModelViewMatrix;
-            uniform mat4 uProjectionMatrix;
+            `#version 300 es
 
+            in vec2 a_position;
+            
+            uniform vec2 u_resolution;
+            
             void main() {
-                gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+                vec2 zeroToOne = a_position / u_resolution;
+                vec2 zeroToTwo = zeroToOne * 2.0;
+                vec2 clipSpace = zeroToTwo - 1.0;
+                
+                gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
             }`
         );
 
         const fragmentShader = this.LoadShader(
             this.gl.FRAGMENT_SHADER,
-            `void main() {
-                gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            `#version 300 es
+            precision highp float;
+            
+            uniform vec4 u_color;
+
+            out vec4 outColor;
+            
+            void main() {
+                outColor = u_color;
             }`
         );
 
@@ -231,14 +208,104 @@ export default class Renderer2D {
         return _shader;
     }
 
-    // draw function
+    // shapes
 
     /**
-     * @method Draw
+     * @method CreateRectangle
      *
+     * @private
+     * @param {number} x
+     * @param {number} y
+     * @param {number} width
+     * @param {number} height
+     * @return {[number, number, number, number]}
      * @memberof Renderer2D
      */
-    public Draw() {
-        // request next frame
+    private CreateRectangle(
+        x: number,
+        y: number,
+        width: number,
+        height: number
+    ): [number, number, number, number] {
+        const x1 = x;
+        const x2 = x + width;
+        const y1 = y;
+        const y2 = y + height;
+
+        this.gl.bufferData(
+            this.gl.ARRAY_BUFFER,
+            new Float32Array([x1, y1, x2, y1, x1, y2, x1, y2, x2, y1, x2, y2]),
+            this.gl.STATIC_DRAW
+        );
+
+        return [x1, x2, y1, y2];
+    }
+
+    // ...
+
+    /**
+     * @method ClearCanvas
+     * @memberof Renderer2D
+     */
+    public ClearCanvas(): void {
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    }
+
+    /**
+     * @method ParseWorld
+     *
+     * @param {string} name
+     * @return {boolean}
+     * @memberof Renderer2D
+     */
+    public ParseWorld(name: string): boolean {
+        if (!this.locations) return false;
+        this.ClearCanvas();
+
+        // get world
+        const World = (this.scene.firstChild as HTMLElement).querySelector(
+            `World[name="${name}"]`
+        );
+
+        if (!World) return false;
+
+        // parse objects
+        for (const object of World.querySelectorAll(
+            "Shape"
+        ) as any as HTMLElement[]) {
+            // get position
+            const position = object.querySelector("Position");
+
+            // get size
+            const size = object.querySelector("Size");
+
+            // ...
+            if (!position || !size) continue;
+
+            // add shape
+
+            // create rectangle
+            this.CreateRectangle(
+                parseInt(position.getAttribute("x") || "0"),
+                parseInt(position.getAttribute("y") || "0"),
+                parseInt(size.getAttribute("x") || "5") || 5,
+                parseInt(size.getAttribute("y") || "5") || 5
+            );
+
+            // ...set color
+            this.gl.uniform4f(
+                this.locations.color,
+                Math.random(),
+                Math.random(),
+                Math.random(),
+                1
+            );
+
+            // draw
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+        }
+
+        // return
+        return true;
     }
 }
