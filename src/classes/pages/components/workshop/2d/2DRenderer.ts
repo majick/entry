@@ -9,7 +9,7 @@
  * @class Renderer2D
  */
 export default class Renderer2D {
-    public readonly scene: XMLDocument;
+    public scene: XMLDocument | undefined;
     public readonly gl: WebGL2RenderingContext;
 
     // ...
@@ -29,25 +29,8 @@ export default class Renderer2D {
      * @memberof Renderer2D
      */
     constructor(file: string, canvas: HTMLCanvasElement) {
-        // parse scene
-        const scene = new DOMParser().parseFromString(file, "text/xml");
-        this.scene = scene;
-
-        const Root = scene.querySelector("Workshop");
-
-        // get configuration from scene
-        const Version = Root ? Root.getAttribute("version") : "1.0";
-
         // get canvas
         this.gl = canvas.getContext("webgl2")!;
-
-        // ...
-        this.gl.clearColor(0, 0, 0, 1);
-        this.gl.clearDepth(1);
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.depthFunc(this.gl.LEQUAL);
-
-        this.ClearCanvas();
 
         // create shader program
         this.CreateShaderProgram();
@@ -92,7 +75,7 @@ export default class Renderer2D {
                 },
             };
 
-            // pull positions
+            // get position buffer
             this.gl.enableVertexAttribArray(this.locations.position);
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.position.buffer); // bind buffer
             this.gl.vertexAttribPointer(
@@ -103,10 +86,32 @@ export default class Renderer2D {
                 buffers.position.stride,
                 buffers.position.offset
             );
-
-            // start parsing
-            this.ParseWorld("World");
         }
+
+        // parse scene
+        this.UpdateScene(file);
+
+        // start parsing
+        this.ParseWorld("World");
+    }
+
+    /**
+     * @method UpdateScene
+     *
+     * @param {string} file
+     * @return {*}  {Document}
+     * @memberof Renderer2D
+     */
+    public UpdateScene(file: string): XMLDocument {
+        const scene = new DOMParser().parseFromString(file, "text/xml");
+        this.scene = scene;
+
+        // clear and draw
+        this.ClearCanvas();
+        this.Draw();
+
+        // return
+        return scene;
     }
 
     // shaders
@@ -248,7 +253,20 @@ export default class Renderer2D {
      * @memberof Renderer2D
      */
     public ClearCanvas(): void {
+        this.gl.clearColor(0, 0, 0, 1);
+        this.gl.clearDepth(1);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LEQUAL);
+        
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    }
+
+    /**
+     * @method Draw
+     * @memberof Renderer2D
+     */
+    public Draw(): void {
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
 
     /**
@@ -277,7 +295,7 @@ export default class Renderer2D {
      * @memberof Renderer2D
      */
     public ParseWorld(name: string): boolean {
-        if (!this.locations) return false;
+        if (!this.locations || !this.scene) return false;
         this.ClearCanvas();
 
         // get world
@@ -324,7 +342,7 @@ export default class Renderer2D {
             this.gl.uniform4f(this.locations.color, r, g, b, 1);
 
             // draw
-            this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+            this.Draw();
         }
 
         // return

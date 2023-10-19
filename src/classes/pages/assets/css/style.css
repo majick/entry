@@ -1052,8 +1052,6 @@ details.round summary {
 
 .cm-tooltip {
     background-color: var(--background-surface) !important;
-    padding: var(--u-04);
-    border-radius: 0.2rem;
     border-color: var(--background-surface2) !important;
     color: var(--text-color) !important;
 }
@@ -1063,15 +1061,16 @@ details.round summary {
 }
 
 .cm-tooltip-autocomplete li {
-    padding: var(--u-04) !important;
-    border-radius: 0.2rem;
+    padding: var(--u-02) var(--u-04) !important;
     transition: all 0.1s;
     color: var(--text-color) !important;
+    opacity: 75%;
 }
 
 .cm-tooltip-autocomplete li[aria-selected="true"] {
-    background: var(--background-surface1) !important;
-    box-shadow: inset 0 0 0 2px var(--red);
+    background: var(--background-surface2a) !important;
+    color: var(--red3) !important;
+    opacity: 100%;
 }
 
 .cm-gutters {
@@ -1079,8 +1078,23 @@ details.round summary {
     border-color: var(--background-surface2a) !important;
 }
 
-.cm-activeLine, .cm-activeLineGutter {
-    background-color: var(--background-surface2a) !important;
+.cm-line {
+    padding: 1px 2px 1px 6px !important;
+}
+
+.cm-activeLine {
+    box-shadow: inset 0 0 0 1px var(--background-surface2a) !important;
+    background: inherit !important;
+}
+
+.cm-gutterElement {
+    font-family: monospace;
+    opacity: 75%;
+}
+
+.cm-gutterElement.cm-activeLineGutter {
+    background-color: inherit !important;
+    opacity: 100%;
 }
 
 /* highlight.js styles */

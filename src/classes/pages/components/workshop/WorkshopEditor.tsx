@@ -4,6 +4,7 @@ import Modal from "../site/modals/Modal";
 import PublishModals from "../site/modals/PublishModals";
 
 import Renderer2D from "./2d/2DRenderer";
+import WorkshopLib from "./lib/WorkshopLib";
 
 // codemirror
 import { EditorState } from "@codemirror/state";
@@ -19,10 +20,10 @@ import {
     crosshairCursor,
     lineNumbers,
     highlightActiveLineGutter,
+    placeholder,
 } from "@codemirror/view";
 
 import {
-    defaultHighlightStyle,
     syntaxHighlighting,
     indentOnInput,
     bracketMatching,
@@ -36,11 +37,18 @@ import {
     completionKeymap,
     closeBrackets,
     closeBracketsKeymap,
+    CompletionContext,
+    CompletionResult,
 } from "@codemirror/autocomplete";
 
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 
-import { javascript, typescriptLanguage } from "@codemirror/lang-javascript";
+import {
+    javascript,
+    javascriptLanguage,
+    localCompletionSource,
+    typescriptLanguage,
+} from "@codemirror/lang-javascript";
 import { tags } from "@lezer/highlight";
 
 // ...
@@ -48,6 +56,9 @@ export default function Render(element: HTMLElement) {
     function ToggleTab() {
         document.getElementById("tab_game")!.classList.toggle("active");
         document.getElementById("tab_code")!.classList.toggle("active");
+
+        document.getElementById("tab_button_game")!.classList.toggle("secondary");
+        document.getElementById("tab_button_code")!.classList.toggle("secondary");
     }
 
     // render
@@ -56,6 +67,7 @@ export default function Render(element: HTMLElement) {
             class={"flex flex-column"}
             style={{
                 height: "100%",
+                overflowY: "hidden",
             }}
         >
             {/* topbar - tabs */}
@@ -67,7 +79,7 @@ export default function Render(element: HTMLElement) {
                 }}
             >
                 <div class={"tabbar"}>
-                    <button onClick={ToggleTab}>
+                    <button onClick={ToggleTab} id={"tab_button_game"}>
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -80,7 +92,11 @@ export default function Render(element: HTMLElement) {
                         Game
                     </button>
 
-                    <button class={"secondary"} onClick={ToggleTab}>
+                    <button
+                        class={"secondary"}
+                        onClick={ToggleTab}
+                        id={"tab_button_code"}
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
@@ -133,15 +149,29 @@ export default function Render(element: HTMLElement) {
                 </div>
             </div>
 
-            <div id="tab_code" class={"editor-tab -editor"}>
+            <div
+                id="tab_code"
+                class={"editor-tab -editor"}
+                style={{
+                    height: "92%",
+                }}
+            >
                 <div
                     id="editor"
                     style={{
                         overflowY: "auto",
                         maxHeight: "100%",
-                        fontFamily: "monospace"
+                        height: "100%",
+                        fontFamily: "monospace",
                     }}
-                ></div>
+                />
+
+                <style
+                    dangerouslySetInnerHTML={{
+                        __html: `.cm-editor { height: 100%; } 
+                        .cm-line, .cm-line span { font-family: monospace !important; }`,
+                    }}
+                />
             </div>
         </div>,
         element
@@ -150,43 +180,59 @@ export default function Render(element: HTMLElement) {
     // create game renderer
     const Renderer = new Renderer2D(
         `<Workshop version="1.0">
-        <World name="World">
-            <Shape type="Rectangle">
-                <Position x="0" y="0"></Position>
-                <Size x="100" y="100"></Size>
-                <Color r="255" g="87" b="87"></Color>
-            </Shape>
-        </World>
-    </Workshop>`,
+            <World name="World"></World>
+        </Workshop>`,
         document.getElementById("game_canvas") as HTMLCanvasElement
     );
+
+    // @ts-ignore set renderer global
+    (globalThis as any).renderer = Renderer;
+    // @ts-ignore
+    window.library = WorkshopLib;
 
     // create editor theme
     const highlight = HighlightStyle.define([
         {
-            tag: tags.tagName,
-            color: "var(--red)",
-            fontFamily: "monospace",
-        },
-        {
             tag: tags.keyword,
-            fontFamily: "monospace",
             color: "var(--red3)",
+            textShadow: "0 0 1px var(--red3)",
         },
         {
             tag: tags.variableName,
-            fontFamily: "monospace",
             color: "var(--blue2)",
         },
         {
+            tag: tags.propertyName,
+            color: "var(--red)",
+        },
+        {
             tag: tags.comment,
-            fontFamily: "monospace",
             color: "var(--text-color-faded)",
         },
         {
             tag: tags.number,
-            color: "var(--yellow3)"
-        }
+            color: "var(--yellow)",
+        },
+        {
+            tag: tags.string,
+            color: "var(--green)",
+        },
+        {
+            tag: tags.operator,
+            color: "var(--red3)",
+        },
+        {
+            tag: tags.bool,
+            color: "var(--blue2)",
+        },
+        {
+            tag: tags.attributeName,
+            color: "var(--blue2)",
+        },
+        {
+            tag: tags.attributeValue,
+            color: "var(--green)",
+        },
     ]);
 
     // create code editor
@@ -197,6 +243,7 @@ export default function Render(element: HTMLElement) {
                 // display the saved document or given content
                 "// Hello, world!",
             extensions: [
+                placeholder("New Script"),
                 lineNumbers(),
                 highlightActiveLineGutter(),
                 highlightSpecialChars(),
@@ -214,6 +261,7 @@ export default function Render(element: HTMLElement) {
                 crosshairCursor(),
                 highlightActiveLine(),
                 // keymaps
+                indentOnInput(),
                 keymap.of({
                     ...closeBracketsKeymap,
                     ...defaultKeymap,
@@ -221,8 +269,8 @@ export default function Render(element: HTMLElement) {
                     ...foldKeymap,
                     ...completionKeymap,
                 }),
-                // ...new line fix
                 keymap.of([
+                    // ...new line fix
                     {
                         key: "Enter",
                         run: (): boolean => {
@@ -244,10 +292,38 @@ export default function Render(element: HTMLElement) {
                             return true;
                         },
                     },
+                    // ...tab fix
+                    {
+                        key: "Tab",
+                        run: (): boolean => {
+                            const cursor = view.state.selection.main.head;
+                            const transaction = view.state.update({
+                                changes: {
+                                    from: cursor,
+                                    insert: " ".repeat(4),
+                                },
+                                selection: { anchor: cursor + 4 },
+                                scrollIntoView: true,
+                            });
+
+                            if (transaction) {
+                                view.dispatch(transaction);
+                            }
+
+                            // return
+                            return true;
+                        },
+                    },
                 ]),
                 // javascript
-                javascript(),
-                typescriptLanguage,
+                javascript({ typescript: true }),
+                javascriptLanguage.data.of({
+                    autocomplete: (
+                        context: CompletionContext
+                    ): CompletionResult | null => {
+                        return localCompletionSource(context);
+                    },
+                }),
             ],
         }),
         parent: document.getElementById("editor")!,
