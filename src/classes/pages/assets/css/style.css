@@ -1127,7 +1127,7 @@ details.round summary {
     width: 30%;
     min-width: 325px; /* just before the footer starts wrapping */
     overflow: auto;
-    border-right: solid 1px var(--background-surface2);
+    border-right: solid 1px var(--background-surface2a);
     display: flex;
     flex-direction: column;
     justify-content: space-between;

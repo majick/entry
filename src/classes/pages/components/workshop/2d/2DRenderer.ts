@@ -11,6 +11,9 @@
 export default class Renderer2D {
     public scene: XMLDocument | undefined;
     public readonly gl: WebGL2RenderingContext;
+    private readonly canvas: HTMLCanvasElement;
+
+    public AutoDraw: boolean = true;
 
     // ...
     private ShaderProgram: WebGLProgram | undefined;
@@ -22,6 +25,8 @@ export default class Renderer2D {
           }
         | undefined;
 
+    public CurrentWorldName: string = "World";
+
     /**
      * Creates an instance of Renderer2D.
      * @param {string} file
@@ -31,6 +36,7 @@ export default class Renderer2D {
     constructor(file: string, canvas: HTMLCanvasElement) {
         // get canvas
         this.gl = canvas.getContext("webgl2")!;
+        this.canvas = canvas;
 
         // create shader program
         this.CreateShaderProgram();
@@ -92,7 +98,19 @@ export default class Renderer2D {
         this.UpdateScene(file);
 
         // start parsing
-        this.ParseWorld("World");
+        this.ParseWorld(this.CurrentWorldName);
+
+        // autodraw
+        const StartDraw = () => {
+            if (!this.AutoDraw) return;
+
+            this.CheckCanvasSize(); // make sure canvas is the correct size
+            this.ParseWorld(this.CurrentWorldName); // parse world and load
+
+            return window.requestAnimationFrame(StartDraw);
+        };
+
+        StartDraw();
     }
 
     /**
@@ -112,6 +130,28 @@ export default class Renderer2D {
 
         // return
         return scene;
+    }
+
+    /**
+     * @method CheckCanvasSize
+     * @memberof Renderer2D
+     */
+    public CheckCanvasSize() {
+        const ShouldResize =
+            this.canvas.width !== this.canvas.clientWidth ||
+            this.canvas.height !== this.canvas.clientHeight;
+
+        if (ShouldResize) {
+            this.canvas.width = this.canvas.clientWidth;
+            this.canvas.height = this.canvas.clientHeight;
+
+            this.gl.viewport(
+                0,
+                0,
+                this.gl.drawingBufferWidth,
+                this.gl.drawingBufferHeight
+            );
+        }
     }
 
     // shaders
@@ -257,7 +297,7 @@ export default class Renderer2D {
         this.gl.clearDepth(1);
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.depthFunc(this.gl.LEQUAL);
-        
+
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     }
 
@@ -304,8 +344,11 @@ export default class Renderer2D {
         );
 
         if (!World) return false;
+        this.CurrentWorldName = name;
 
         // parse objects
+
+        // ...shapes
         for (const object of World.querySelectorAll(
             "Shape"
         ) as any as HTMLElement[]) {
@@ -343,6 +386,12 @@ export default class Renderer2D {
 
             // draw
             this.Draw();
+        }
+
+        // ...scripts
+        for (const object of World.querySelectorAll(
+            "Script"
+        ) as any as HTMLElement[]) {
         }
 
         // return

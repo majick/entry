@@ -11,4 +11,6 @@ import Instances from "./services/Instances";
 
 export default {
     Instances: Instances,
+    // controllers
+    AbortScripts: new AbortController(),
 };

@@ -44,7 +44,7 @@ export const DefaultHeaders = {
             "img-src *",
             "font-src *",
             "style-src 'unsafe-inline' 'self'",
-            "script-src 'self' 'unsafe-inline' *", // <- REMOVE ASTERISK!!
+            "script-src 'self' 'unsafe-inline' blob:",
             "upgrade-insecure-requests",
             "connect-src *",
         ].join("; "),

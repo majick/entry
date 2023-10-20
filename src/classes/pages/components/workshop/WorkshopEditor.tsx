@@ -6,6 +6,11 @@ import PublishModals from "../site/modals/PublishModals";
 import Renderer2D from "./2d/2DRenderer";
 import WorkshopLib from "./lib/WorkshopLib";
 
+// ...
+const ScriptDefault = `export default function main() {
+    console.log("New Script");
+}`;
+
 // codemirror
 import { EditorState } from "@codemirror/state";
 
@@ -30,6 +35,7 @@ import {
     foldGutter,
     foldKeymap,
     HighlightStyle,
+    indentUnit,
 } from "@codemirror/language";
 
 import {
@@ -41,7 +47,12 @@ import {
     CompletionResult,
 } from "@codemirror/autocomplete";
 
-import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
+import {
+    defaultKeymap,
+    history,
+    historyKeymap,
+    indentWithTab,
+} from "@codemirror/commands";
 
 import {
     javascript,
@@ -133,17 +144,23 @@ export default function Render(element: HTMLElement) {
                 id="tab_game"
                 class={"editor-tab -editor active"}
                 style={{
-                    height: "100%",
+                    height: "calc(100% - 76.2px)",
                 }}
             >
-                <div class={"flex justify-center align-center"}>
+                <div
+                    class={"flex justify-center align-center"}
+                    style={{
+                        height: "100%",
+                    }}
+                >
                     <canvas
                         id={"game_canvas"}
                         width={"1024"}
                         height={"512"}
                         style={{
                             background: "white",
-                            maxWidth: "100%",
+                            height: "100%",
+                            width: "100%",
                         }}
                     />
                 </div>
@@ -151,18 +168,29 @@ export default function Render(element: HTMLElement) {
 
             <div
                 id="tab_code"
-                class={"editor-tab -editor"}
+                class={"editor-tab -editor sidebar-layout-wrapper"}
                 style={{
                     height: "92%",
                 }}
             >
                 <div
+                    id="files"
+                    class={"sidebar"}
+                    style={{
+                        height: "100%",
+                        width: "20%",
+                    }}
+                />
+
+                <div
                     id="editor"
+                    class={"page-content"}
                     style={{
                         overflowY: "auto",
                         maxHeight: "100%",
                         height: "100%",
                         fontFamily: "monospace",
+                        paddingBottom: "0",
                     }}
                 />
 
@@ -236,6 +264,7 @@ export default function Render(element: HTMLElement) {
     ]);
 
     // create code editor
+    let CurrentContent = "";
     const view = new EditorView({
         // @ts-ignore
         state: EditorState.create({
@@ -252,7 +281,6 @@ export default function Render(element: HTMLElement) {
                 drawSelection(),
                 dropCursor(),
                 EditorState.allowMultipleSelections.of(true),
-                indentOnInput(),
                 syntaxHighlighting(highlight, { fallback: true }),
                 bracketMatching(),
                 closeBrackets(),
@@ -260,49 +288,60 @@ export default function Render(element: HTMLElement) {
                 rectangularSelection(),
                 crosshairCursor(),
                 highlightActiveLine(),
+                EditorView.updateListener.of(async (update) => {
+                    if (update.docChanged) {
+                        const content = update.state.doc.toString();
+                        if (content === "") return;
+                        CurrentContent = content;
+                    }
+                }),
                 // keymaps
                 indentOnInput(),
+                indentUnit.of("    "),
                 keymap.of({
                     ...closeBracketsKeymap,
                     ...defaultKeymap,
                     ...historyKeymap,
                     ...foldKeymap,
                     ...completionKeymap,
+                    ...indentWithTab,
                 }),
                 keymap.of([
                     // ...new line fix
                     {
                         key: "Enter",
                         run: (): boolean => {
-                            const cursor = view.state.selection.main.head;
-                            const transaction = view.state.update({
-                                changes: {
-                                    from: cursor,
-                                    insert: "\n",
-                                },
-                                selection: { anchor: cursor + 1 },
-                                scrollIntoView: true,
-                            });
+                            // get current line
+                            const CurrentLine = view.state.doc.lineAt(
+                                view.state.selection.main.head
+                            );
 
-                            if (transaction) {
-                                view.dispatch(transaction);
+                            // get indentation string (for automatic indent)
+                            let IndentationString =
+                                // gets everything before the first non-whitespace character
+                                CurrentLine.text.split(/[^\s]/)[0];
+
+                            let ExtraCharacters = "";
+
+                            // if last character of the line is }, add an indentation
+                            // } because it's automatically added after opened braces!
+                            if (
+                                CurrentLine.text[CurrentLine.text.length - 1] === "}"
+                            ) {
+                                IndentationString += "    ";
+                                ExtraCharacters = "\n"; // auto insert line break after
                             }
 
-                            // return
-                            return true;
-                        },
-                    },
-                    // ...tab fix
-                    {
-                        key: "Tab",
-                        run: (): boolean => {
+                            // start transaction
                             const cursor = view.state.selection.main.head;
                             const transaction = view.state.update({
                                 changes: {
                                     from: cursor,
-                                    insert: " ".repeat(4),
+                                    insert: `\n${IndentationString}${ExtraCharacters}`,
                                 },
-                                selection: { anchor: cursor + 4 },
+                                selection: {
+                                    anchor: cursor + 1 + IndentationString.length,
+                                },
                                 scrollIntoView: true,
                             });
 
@@ -328,4 +367,102 @@ export default function Render(element: HTMLElement) {
         }),
         parent: document.getElementById("editor")!,
     });
+
+    // render script browser
+    function RenderScripts() {
+        const scripts = Renderer.scene!.querySelectorAll(
+            "Script"
+        ) as any as Element[];
+
+        const ScriptButtons = [];
+
+        for (const script of scripts) {
+            const Node = new WorkshopLib.Instances.Script(
+                WorkshopLib.Instances.World.Get(Renderer.CurrentWorldName),
+                script.innerHTML,
+                script.getAttribute("name") || "New Script",
+                script
+            );
+
+            ScriptButtons.push(
+                <button
+                    class={"round"}
+                    style={{
+                        justifyContent: "space-between",
+                        width: "100%",
+                    }}
+                    onClick={() => {
+                        // change editor content
+                        view.dispatch(
+                            view.state.update({
+                                changes: {
+                                    from: 0,
+                                    to: view.state.doc.length,
+                                    insert: decodeURIComponent(Node.content),
+                                },
+                            })
+                        );
+                    }}
+                >
+                    <span>{Node.name}</span>
+
+                    <div className="flex g-4">
+                        <button
+                            className="round tertiary invisible"
+                            title={"Save editor contents to file"}
+                            onClick={() => {
+                                Node.content = encodeURIComponent(CurrentContent);
+                            }}
+                        >
+                            Save
+                        </button>
+
+                        <button
+                            className="round tertiary invisible"
+                            title={"Save editor contents to file"}
+                            onClick={() => Node.run()}
+                        >
+                            Run
+                        </button>
+                    </div>
+                </button>
+            );
+        }
+
+        // clear files
+        document.getElementById("files")!.innerHTML = "";
+
+        // render
+        hydrate(
+            <div class={"flex flex-column g-4"}>
+                <button
+                    class={"round"}
+                    style={{
+                        justifyContent: "flex-start",
+                        width: "100%",
+                    }}
+                    onClick={() => {
+                        new WorkshopLib.Instances.Script(
+                            WorkshopLib.Instances.World.Get(
+                                Renderer.CurrentWorldName
+                            ),
+                            encodeURIComponent(ScriptDefault),
+                            "New Script"
+                        );
+
+                        RenderScripts();
+                    }}
+                >
+                    Add Script
+                </button>
+
+                <hr />
+
+                {ScriptButtons}
+            </div>,
+            document.getElementById("files")!
+        );
+    }
+
+    RenderScripts();
 }

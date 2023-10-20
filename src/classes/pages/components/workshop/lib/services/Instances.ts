@@ -52,6 +52,8 @@ export class Instance {
     public Parent: Instance | World;
     public Element: Element;
 
+    public name: string = "New Instance";
+
     /**
      * Creates an instance of Instance.
      * @param {(Instance | World)} parent
@@ -59,17 +61,29 @@ export class Instance {
      * @param {Element} [element]
      * @memberof Instance
      */
-    constructor(parent: Instance | World, type?: string, element?: Element) {
+    constructor(
+        parent: Instance | World,
+        type?: string,
+        name?: string,
+        element?: Element
+    ) {
         // set parent
         this.Parent = parent;
+
+        // set name
+        this.name = name || "New Instance";
 
         // set element
         this.Element =
             // @ts-ignore
             element || globalThis.renderer.scene.createElement(type || "Instance");
 
+        this.Element.setAttribute("name", this.name);
+
+        const IsNew = element === undefined;
+
         // append to parent
-        this.Parent.Element.appendChild(this.Element);
+        if (IsNew) this.Parent.Element.append(this.Element);
     }
 }
 
@@ -94,10 +108,17 @@ export class Shape extends Instance {
      * Creates an instance of Shape.
      * @param {(Instance | World)} parent
      * @param {"rectangle"} type
+     * @param {string | undefined} name
+     * @param {Element | undefined} element
      * @memberof Shape
      */
-    constructor(parent: Instance | World, type: "rectangle") {
-        super(parent, "Shape"); // element will be created automatically
+    constructor(
+        parent: Instance | World,
+        type: "rectangle",
+        name?: string,
+        element?: Element
+    ) {
+        super(parent, "Shape", name, element); // element will be created automatically
         this.type = type;
 
         // get position element
@@ -109,8 +130,11 @@ export class Shape extends Instance {
 
         if (!Position) {
             // append if element is new
+            this._Position = { x: 0, y: 0 };
+
             this.x = 0; // add x attribute
             this.y = 0; // add y attribute
+
             this.Element.appendChild(this.PositionElement);
         }
 
@@ -128,8 +152,11 @@ export class Shape extends Instance {
 
         if (!Size) {
             // append if element is new
+            this._Size = { x: 0, y: 0 };
+
             this.width = 5; // add width attribute
             this.height = 5; // add height attribute
+
             this.Element.appendChild(this.SizeElement);
         }
 
@@ -164,11 +191,11 @@ export class Shape extends Instance {
 
     // get/set Position
     public get x(): number {
-        return this._Size.x;
+        return this._Position.x;
     }
 
     public get y(): number {
-        return this._Size.y;
+        return this._Position.y;
     }
 
     public set x(x: number) {
@@ -214,9 +241,88 @@ export class Shape extends Instance {
     }
 }
 
+/**
+ * @export
+ * @class Script
+ * @extends {Instance}
+ */
+export class Script extends Instance {
+    private _content: string;
+
+    /**
+     * Creates an instance of Script.
+     * @param {(Instance | World)} parent
+     * @param {string} content
+     * @param {string | undefined} name
+     * @param {Element | undefined} element
+     * @memberof Script
+     */
+    constructor(
+        parent: Instance | World,
+        content: string,
+        name?: string,
+        element?: Element
+    ) {
+        super(parent, "Script", name, element);
+
+        this._content = content;
+        this.Element.innerHTML = this._content;
+    }
+
+    /**
+     * @method run
+     * @memberof Script
+     */
+    public run() {
+        // get content
+        let content = decodeURIComponent(this._content);
+
+        // add main call
+        content += "main(library);";
+
+        // add stop observer
+        content += `library.AbortScripts.signal.addEventListener("abort", () => {
+            throw new Error("Script Aborted");
+        });`;
+
+        // create blob
+        const blob = new Blob([content], {
+            type: "application/javascript",
+        });
+
+        // get url
+        const url = URL.createObjectURL(blob);
+
+        // add script
+        const script = document.createElement("script");
+        script.type = "module";
+        script.src = url;
+
+        // add script
+        document.body.append(script);
+
+        // revoke url
+        URL.revokeObjectURL(url);
+
+        // remove script
+        script.remove();
+    }
+
+    // get/set code
+    public get content(): string {
+        return this._content;
+    }
+
+    public set content(content: string) {
+        this._content = content;
+        this.Element.innerHTML = content;
+    }
+}
+
 // default export
 export default {
     World,
     Instance,
     Shape,
+    Script,
 };
