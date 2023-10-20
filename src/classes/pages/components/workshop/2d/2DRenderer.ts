@@ -4,6 +4,8 @@
  * @license MIT
  */
 
+import { Script, World } from "../lib/services/Instances";
+
 /**
  * @export
  * @class Renderer2D
@@ -26,6 +28,7 @@ export default class Renderer2D {
         | undefined;
 
     public CurrentWorldName: string = "World";
+    public LastWorldName: string = ""; // blank by default so scripts are run on first load!
 
     /**
      * Creates an instance of Renderer2D.
@@ -37,6 +40,11 @@ export default class Renderer2D {
         // get canvas
         this.gl = canvas.getContext("webgl2")!;
         this.canvas = canvas;
+
+        this.gl.clearColor(0, 0, 0, 1);
+        this.gl.clearDepth(1);
+        this.gl.enable(this.gl.DEPTH_TEST);
+        this.gl.depthFunc(this.gl.LEQUAL);
 
         // create shader program
         this.CreateShaderProgram();
@@ -96,21 +104,6 @@ export default class Renderer2D {
 
         // parse scene
         this.UpdateScene(file);
-
-        // start parsing
-        this.ParseWorld(this.CurrentWorldName);
-
-        // autodraw
-        const StartDraw = () => {
-            if (!this.AutoDraw) return;
-
-            this.CheckCanvasSize(); // make sure canvas is the correct size
-            this.ParseWorld(this.CurrentWorldName); // parse world and load
-
-            return window.requestAnimationFrame(StartDraw);
-        };
-
-        StartDraw();
     }
 
     /**
@@ -293,12 +286,11 @@ export default class Renderer2D {
      * @memberof Renderer2D
      */
     public ClearCanvas(): void {
-        this.gl.clearColor(0, 0, 0, 1);
-        this.gl.clearDepth(1);
-        this.gl.enable(this.gl.DEPTH_TEST);
-        this.gl.depthFunc(this.gl.LEQUAL);
-
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.gl.clear(
+            this.gl.COLOR_BUFFER_BIT |
+                this.gl.DEPTH_BUFFER_BIT |
+                this.gl.STENCIL_BUFFER_BIT
+        );
     }
 
     /**
@@ -339,17 +331,36 @@ export default class Renderer2D {
         this.ClearCanvas();
 
         // get world
-        const World = (this.scene.firstChild as HTMLElement).querySelector(
-            `World[name="${name}"]`
-        );
+        const WorldNode = World.Get(name);
+        if (!WorldNode) return false;
 
-        if (!World) return false;
+        // ...
         this.CurrentWorldName = name;
+
+        // check if world changed
+        if (this.LastWorldName !== this.CurrentWorldName) {
+            this.LastWorldName = this.CurrentWorldName;
+
+            // run scripts
+            for (const script of WorldNode.Element.querySelectorAll(
+                "Script"
+            ) as any as HTMLElement[]) {
+                const Node = new Script(
+                    WorldNode,
+                    script.innerHTML,
+                    script.getAttribute("name") || "New Script",
+                    script
+                );
+
+                Node.run();
+                continue;
+            }
+        }
 
         // parse objects
 
         // ...shapes
-        for (const object of World.querySelectorAll(
+        for (const object of WorldNode.Element.querySelectorAll(
             "Shape"
         ) as any as HTMLElement[]) {
             // get position
@@ -388,13 +399,26 @@ export default class Renderer2D {
             this.Draw();
         }
 
-        // ...scripts
-        for (const object of World.querySelectorAll(
-            "Script"
-        ) as any as HTMLElement[]) {
-        }
-
         // return
         return true;
+    }
+
+    /**
+     * @method BeginDrawing
+     * @memberof Renderer2D
+     */
+    public BeginDrawing() {
+        // draw loop
+        const StartDraw = () => {
+            if (!this.AutoDraw) return window.requestAnimationFrame(StartDraw); // still request next frame!
+
+            this.CheckCanvasSize(); // make sure canvas is the correct size
+            this.ParseWorld(this.CurrentWorldName); // parse world and load
+
+            return window.requestAnimationFrame(StartDraw);
+        };
+
+        // initial draw
+        StartDraw();
     }
 }

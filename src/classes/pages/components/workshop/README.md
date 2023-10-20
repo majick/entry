@@ -1,3 +1,3 @@
 # Workshop
 
-[More Information](https://codeberg.org/hkau/entry/issues/48)
+[More Information](https://sntry.cc/workshop/index)

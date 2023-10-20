@@ -8,9 +8,11 @@ import Renderer2D from "../2d/2DRenderer";
 
 // links
 import Instances from "./services/Instances";
+import Events from "./services/Events";
 
 export default {
-    Instances: Instances,
+    Instances,
+    Events,
     // controllers
     AbortScripts: new AbortController(),
 };

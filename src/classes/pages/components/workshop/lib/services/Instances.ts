@@ -20,7 +20,12 @@ export class World {
      */
     constructor(name: string, element?: Element) {
         this.Name = name;
-        this.Element = element || document.createElement("World");
+
+        // @ts-ignore
+        this.Element = element || globalThis.renderer.scene.createElement("World");
+
+        // @ts-ignore
+        globalThis.renderer.scene.firstChild.appendChild(this.Element);
     }
 
     // ...
@@ -53,6 +58,7 @@ export class Instance {
     public Element: Element;
 
     public name: string = "New Instance";
+    public readonly id: string = crypto.randomUUID();
 
     /**
      * Creates an instance of Instance.
@@ -80,6 +86,12 @@ export class Instance {
 
         this.Element.setAttribute("name", this.name);
 
+        // set id
+        if (this.Element.getAttribute("id"))
+            this.id = this.Element.getAttribute("id")!;
+        else this.Element.setAttribute("id", this.id);
+
+        // ...
         const IsNew = element === undefined;
 
         // append to parent
@@ -276,6 +288,7 @@ export class Script extends Instance {
     public run() {
         // get content
         let content = decodeURIComponent(this._content);
+        content += "\n// RUNTIME CONTENT\n";
 
         // add main call
         content += "main(library);";
