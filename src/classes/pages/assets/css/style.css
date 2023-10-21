@@ -912,7 +912,6 @@ details * {
 }
 
 details summary {
-    background: var(--background-surface1);
     transition: all 0.15s;
     padding: 0.5rem 0.75rem;
     cursor: pointer;
@@ -943,7 +942,7 @@ details[open] summary::before {
     margin-bottom: 0; /* ugh */
 }
 
-details[open] summary:not(details details summary) {
+details[open] summary {
     margin-bottom: 0.5rem;
 }
 
@@ -959,6 +958,17 @@ details[open] summary {
 details.secondary[open] summary {
     background: var(--background-surface-1);
     box-shadow: inset 0 0 0 2px var(--background-surface1-5);
+}
+
+details:not([open]) summary {
+    /* fix for nested details elements */
+    background: var(--background-surface1);
+    margin-bottom: 0;
+}
+
+details:not([open]) summary::before {
+    /* fix for nested details elements */
+    transform: rotate(0deg);
 }
 
 details input {
@@ -1030,6 +1040,14 @@ details[open].round.horizontal summary {
 details.round,
 details.round summary {
     border-radius: var(--u-04);
+}
+
+details[open].file-list-entry {
+    background: transparent;
+}
+
+details.file-list-entry .details-flex-content-list-box {
+    padding: 0 0 0 0.75rem;
 }
 
 /* codemirror styles */
@@ -1132,6 +1150,11 @@ details.round summary {
     flex-direction: column;
     justify-content: space-between;
     padding: 0.5rem;
+}
+
+.sidebar.right {
+    border-left: solid 1px var(--background-surface2a);
+    border-right: none;
 }
 
 .sidebar ol {

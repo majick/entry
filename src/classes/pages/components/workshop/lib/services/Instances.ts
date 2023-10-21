@@ -65,13 +65,15 @@ export class Instance {
      * @param {(Instance | World)} parent
      * @param {string} type
      * @param {Element} [element]
+     * @param {boolean} figurative (not a real scene element)
      * @memberof Instance
      */
     constructor(
         parent: Instance | World,
         type?: string,
         name?: string,
-        element?: Element
+        element?: Element,
+        figurative?: boolean
     ) {
         // set parent
         this.Parent = parent;
@@ -84,18 +86,20 @@ export class Instance {
             // @ts-ignore
             element || globalThis.renderer.scene.createElement(type || "Instance");
 
-        this.Element.setAttribute("name", this.name);
+        if (!figurative) {
+            this.Element.setAttribute("name", this.name);
 
-        // set id
-        if (this.Element.getAttribute("id"))
-            this.id = this.Element.getAttribute("id")!;
-        else this.Element.setAttribute("id", this.id);
+            // set id
+            if (this.Element.getAttribute("id"))
+                this.id = this.Element.getAttribute("id")!;
+            else this.Element.setAttribute("id", this.id);
 
-        // ...
-        const IsNew = element === undefined;
+            // ...
+            const IsNew = element === undefined;
 
-        // append to parent
-        if (IsNew) this.Parent.Element.append(this.Element);
+            // append to parent
+            if (IsNew) this.Parent.Element.appendChild(this.Element);
+        }
     }
 }
 
@@ -332,10 +336,35 @@ export class Script extends Instance {
     }
 }
 
+/**
+ * @function CreateInstance
+ *
+ * @export
+ * @param {(World | Instance)} parent
+ * @param {("Shape" | "Script")} type
+ * @param {any} [value]
+ * @param {string} [name]
+ * @return {*}
+ */
+export function CreateInstance(
+    parent: World | Instance,
+    type: "Shape" | "Script" | "Instance",
+    value?: any,
+    name?: string
+): any {
+    const cl = type === "Shape" ? Shape : type === "Script" ? Script : Instance;
+    if (!cl) return;
+
+    // return
+    return new cl(parent, value, name);
+}
+
 // default export
 export default {
     World,
     Instance,
     Shape,
     Script,
+    // ...
+    CreateInstance,
 };

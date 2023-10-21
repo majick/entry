@@ -756,6 +756,9 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
         }, 1000);
     }
+
+    // expose baseparser
+    if (!globalThis.Bun) (globalThis as any).BaseParser = BaseParser;
 }
 
 // debug

@@ -608,6 +608,7 @@ export default class EntryDB {
                 // ...everything after this assumes paste IS from another server!
 
                 // just send a /api/get request to the other server
+                if (server.startsWith("%")) return resolve(undefined);
                 const request = fetch(
                     `https://${server}/api/raw/${PasteURL.split(":")[0]}`
                 );

@@ -142,6 +142,7 @@ export default function Render(element: HTMLElement) {
                             ).Element.outerHTML;
 
                             // enable autodraw (start scene)
+                            Renderer.ParseWorld(Renderer.CurrentWorldName);
                             Renderer.AutoDraw = true;
                             Renderer.LastWorldName = ""; // reset last world (so scripts run again)
                         }}
@@ -256,7 +257,7 @@ export default function Render(element: HTMLElement) {
                 }}
             >
                 <div
-                    id="files"
+                    id="explorer"
                     class={"sidebar"}
                     style={{
                         height: "100%",
@@ -283,6 +284,95 @@ export default function Render(element: HTMLElement) {
                     }}
                 />
             </div>
+
+            <div id="context-menu-zone" />
+
+            {/* modals */}
+            <Modal
+                modalid="entry:modal.AddElement"
+                buttonid="entry:button.AddElement"
+                noIdMatch={true}
+                round={true}
+            >
+                <div
+                    style={{
+                        width: "25rem",
+                        maxWidth: "100%",
+                    }}
+                >
+                    <b>Add Element</b>
+
+                    <hr />
+
+                    <form
+                        method={"dialog"}
+                        style={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: "0.4rem",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        {["Shape", "Script", "Folder"].map((type: any) => (
+                            <button
+                                className="border round"
+                                onClick={() => {
+                                    // get parent
+                                    const parent =
+                                        ExplorerFocus.nodeName === "World"
+                                            ? WorkshopLib.Instances.World.Get(
+                                                  ExplorerFocus.getAttribute("name")!
+                                              )
+                                            : new WorkshopLib.Instances.Instance(
+                                                  WorkshopLib.Instances.World.Get(
+                                                      Renderer.CurrentWorldName
+                                                  ),
+                                                  "actor",
+                                                  `New ${type}`,
+                                                  ExplorerFocus,
+                                                  true
+                                              );
+
+                                    // create new instance
+                                    WorkshopLib.Instances.CreateInstance(
+                                        parent,
+                                        type,
+                                        type === "Script"
+                                            ? ScriptDefault
+                                            : undefined,
+                                        `New ${type}`
+                                    );
+
+                                    // render explorer
+                                    RenderExplorer();
+                                }}
+                            >
+                                {type}
+                            </button>
+                        ))}
+                    </form>
+
+                    <hr />
+
+                    <form
+                        method="dialog"
+                        style={{
+                            width: "25rem",
+                            maxWidth: "100%",
+                        }}
+                    >
+                        <button
+                            className="green round"
+                            style={{
+                                width: "100%",
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+            </Modal>
         </div>,
         element
     );
@@ -469,154 +559,336 @@ export default function Render(element: HTMLElement) {
         parent: document.getElementById("editor")!,
     });
 
-    // render script browser
-    let ActiveScriptBuffers = []; // hold currently open scripts
-    let CurrentScriptNode: any;
-
-    function RenderScripts() {
-        const scripts = Renderer.scene!.querySelectorAll(
-            "Script"
-        ) as any as Element[];
-
-        const ScriptButtons = [];
-
-        for (const script of scripts) {
-            const Node = new WorkshopLib.Instances.Script(
-                WorkshopLib.Instances.World.Get(Renderer.CurrentWorldName),
-                script.innerHTML,
-                script.getAttribute("name") || "New Script",
-                script
-            );
-
-            ScriptButtons.push(
-                <button
-                    class={"round"}
-                    style={{
-                        justifyContent: "space-between",
-                        width: "100%",
-                    }}
-                    onClick={() => {
-                        // if we made changes and didn't save, confirm buffer change
-                        if (
-                            CurrentScriptNode &&
-                            document.getElementById(
-                                `${CurrentScriptNode.id}-changed`
-                            ) &&
-                            document.getElementById(
-                                `${CurrentScriptNode.id}-changed`
-                            )!.style.display === "flex"
-                        )
-                            if (
-                                !confirm(
-                                    "You have unsaved changes. Are you sure you would like to switch buffers?"
-                                )
-                            )
-                                return;
-
-                        // set current script
-                        CurrentScriptNode = Node;
-
-                        // change editor content
-                        view.dispatch(
-                            view.state.update({
-                                changes: {
-                                    from: 0,
-                                    to: view.state.doc.length,
-                                    insert: decodeURIComponent(Node.content),
-                                },
-                            })
-                        );
-
-                        // hide changed notifications
-                        for (const notification of document.querySelectorAll(
-                            ".changed-notify"
-                        ) as any as HTMLElement[])
-                            notification.style.display = "none";
-                    }}
-                >
-                    <span class={"flex g-4"}>
-                        {Node.name}
-                        <span
-                            id={`${Node.id}-changed`}
-                            class={"changed-notify align-center"}
-                            style={{ display: "none", color: "var(--green3)" }}
-                            title={"Modified - Press Ctrl+S to save!"}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                height="16"
-                                aria-label={"Modified Symbol"}
-                            >
-                                <path d="M13.25 1c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 15H2.75A1.75 1.75 0 0 1 1 13.25V2.75C1 1.784 1.784 1 2.75 1ZM2.75 2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM8 10a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 10Z"></path>
-                            </svg>
-                        </span>
-                    </span>
-
-                    <div className="flex g-4">
-                        <button
-                            className="round tertiary invisible"
-                            title={"execute file as blob"}
-                            onClick={() => Node.run()}
-                        >
-                            Run
-                        </button>
-                    </div>
-                </button>
-            );
-        }
-
-        // clear files
-        document.getElementById("files")!.innerHTML = "";
+    // context menu
+    function ContextMenu(
+        x: number,
+        y: number,
+        entries: { label: string; action: () => void }[]
+    ) {
+        // clear current menu
+        document.getElementById("context-menu-zone")!.innerHTML = "";
 
         // render
         hydrate(
-            <div class={"flex flex-column g-4"}>
-                <button
-                    class={"round"}
-                    style={{
-                        justifyContent: "flex-start",
-                        width: "100%",
-                    }}
-                    onClick={() => {
-                        new WorkshopLib.Instances.Script(
-                            WorkshopLib.Instances.World.Get(
-                                Renderer.CurrentWorldName
-                            ),
-                            encodeURIComponent(ScriptDefault),
-                            "New Script"
-                        );
-
-                        RenderScripts();
-                    }}
-                >
-                    Add Script
-                </button>
-
-                <hr />
-
-                {ScriptButtons}
+            <div
+                class={"card round border secondary flex flex-column g-4"}
+                style={{
+                    width: "max-content",
+                    position: "absolute",
+                    left: x,
+                    top: y,
+                    padding: "var(--u-04)",
+                }}
+            >
+                {entries.map((e) => (
+                    <button
+                        onClick={e.action}
+                        class={"full round flex justify-start"}
+                    >
+                        {e.label}
+                    </button>
+                ))}
             </div>,
-            document.getElementById("files")!
+            document.getElementById("context-menu-zone")!
         );
     }
 
-    RenderScripts();
+    document.addEventListener(
+        "click",
+        () => (document.getElementById("context-menu-zone")!.innerHTML = "")
+    );
+
+    window.addEventListener(
+        "keypress",
+        () => (document.getElementById("context-menu-zone")!.innerHTML = "")
+    );
+
+    // render node explorer
+    let ExplorerFocus: Element;
+    let CurrentScriptNode: any;
+
+    function RenderExplorer() {
+        // ...
+        function RenderExplorerEntry(input: Element) {
+            // show properties if we have a previous focus
+            if (ExplorerFocus) RenderProperties(ExplorerFocus);
+
+            // build context menu entires
+            const ContextMenuEntries: { label: string; action: () => void }[] = [
+                {
+                    label: "Inspect",
+                    action() {
+                        RenderProperties(ExplorerFocus);
+                    },
+                },
+                {
+                    label: "Add Child",
+                    action() {
+                        if (ExplorerFocus.nodeName === "Script")
+                            return alert(
+                                "Script elements cannot have child elements!"
+                            );
+
+                        (window as any).modals["entry:modal.AddElement"](true);
+                    },
+                },
+                {
+                    label: "Delete",
+                    action() {
+                        ExplorerFocus.remove();
+                        RenderExplorer();
+
+                        // clear CurrentScriptNode (if it matches)
+                        if (CurrentScriptNode.Element === ExplorerFocus)
+                            CurrentScriptNode = undefined;
+                    },
+                },
+            ];
+
+            // build child entries
+            const Entries: any[] = [];
+
+            for (const child of input.children as any as Element[]) {
+                if (child.children.length > 0)
+                    // render full entry (with child nodes includes)
+                    Entries.push(RenderExplorerEntry(child));
+                // render small entry (just button)
+                else if (child.nodeName !== "Script")
+                    // normal entry
+                    Entries.push(
+                        <button
+                            class={"round full flex justify-space-between"}
+                            onContextMenu={(event) => {
+                                event.preventDefault();
+                                ExplorerFocus = child; // so we manage the correct element!
+                                ContextMenu(
+                                    event.pageX,
+                                    event.pageY,
+                                    ContextMenuEntries
+                                );
+                            }}
+                        >
+                            <span>{child.getAttribute("name") || child.id}</span>
+                        </button>
+                    );
+                else {
+                    // script entry
+
+                    // get node
+                    const Node = new WorkshopLib.Instances.Script(
+                        WorkshopLib.Instances.World.Get(Renderer.CurrentWorldName),
+                        child.innerHTML,
+                        child.getAttribute("name") || "New Script",
+                        child
+                    );
+
+                    // add button
+                    Entries.push(
+                        <button
+                            class={"round full flex justify-space-between"}
+                            style={{
+                                justifyContent: "space-between",
+                                width: "100%",
+                                boxShadow:
+                                    // show current script highlight
+                                    CurrentScriptNode === Node
+                                        ? "inset 0 0 0 2px var(--blue)"
+                                        : "unset",
+                            }}
+                            onContextMenu={(event) => {
+                                event.preventDefault();
+                                ExplorerFocus = child; // so we manage the correct element!
+                                ContextMenu(
+                                    event.pageX,
+                                    event.pageY,
+                                    ContextMenuEntries
+                                );
+                            }}
+                            onClick={() => {
+                                // if we made changes and didn't save, confirm buffer change
+                                if (
+                                    CurrentScriptNode &&
+                                    document.getElementById(
+                                        `${CurrentScriptNode.id}-changed`
+                                    ) &&
+                                    document.getElementById(
+                                        `${CurrentScriptNode.id}-changed`
+                                    )!.style.display === "flex"
+                                )
+                                    if (
+                                        !confirm(
+                                            "You have unsaved changes. Are you sure you would like to switch buffers?"
+                                        )
+                                    )
+                                        return;
+
+                                // set current script
+                                CurrentScriptNode = Node;
+
+                                // change editor content
+                                view.dispatch(
+                                    view.state.update({
+                                        changes: {
+                                            from: 0,
+                                            to: view.state.doc.length,
+                                            insert: decodeURIComponent(Node.content),
+                                        },
+                                    })
+                                );
+
+                                // hide changed notifications
+                                for (const notification of document.querySelectorAll(
+                                    ".changed-notify"
+                                ) as any as HTMLElement[])
+                                    notification.style.display = "none";
+                            }}
+                        >
+                            {Node.name}
+                            <span
+                                id={`${Node.id}-changed`}
+                                class={"changed-notify align-center"}
+                                style={{
+                                    display: "none",
+                                    color: "var(--green3)",
+                                }}
+                                title={"Modified - Press Ctrl+S to save!"}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Modified Symbol"}
+                                >
+                                    <path d="M13.25 1c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 15H2.75A1.75 1.75 0 0 1 1 13.25V2.75C1 1.784 1.784 1 2.75 1ZM2.75 2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM8 10a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 10Z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    );
+                }
+            }
+
+            // return entry
+            return (
+                <details class={"round file-list-entry"}>
+                    <summary
+                        onContextMenu={(event) => {
+                            event.preventDefault();
+                            ExplorerFocus = input;
+                            ContextMenu(
+                                event.pageX,
+                                event.pageY,
+                                ContextMenuEntries
+                            );
+                        }}
+                    >
+                        {input.getAttribute("name") || input.id}
+                    </summary>
+
+                    <div class={"details-flex-content-list-box"}>{Entries}</div>
+                </details>
+            );
+        }
+
+        // render
+        hydrate(
+            <div
+                class={"flex flex-column justify-space-between"}
+                style={{
+                    height: "100%",
+                }}
+            >
+                {/* explorer */}
+                <div
+                    class={"flex flex-column g-4"}
+                    style={{
+                        minHeight: "25%",
+                        maxHeight: "50%",
+                        overflowY: "auto",
+                    }}
+                >
+                    {RenderExplorerEntry(
+                        WorkshopLib.Instances.World.Get(Renderer.CurrentWorldName)
+                            .Element
+                    )}
+                </div>
+
+                {/* properties window */}
+                <div
+                    id="properties_window"
+                    style={{
+                        minHeight: "25%",
+                        maxHeight: "50%",
+                        overflowY: "auto",
+                    }}
+                />
+            </div>,
+            document.getElementById("explorer")!
+        );
+    }
+
+    RenderExplorer();
+
+    // properties window
+    function RenderProperties(ExplorerFocus: Element) {
+        document.getElementById("properties_window")!.innerHTML = "";
+
+        hydrate(
+            <div className="flex flex-column g-4">
+                <hr />
+
+                <input
+                    class={"round"}
+                    type={"text"}
+                    name={"Name"}
+                    id={"Name"}
+                    placeholder={"Name"}
+                    value={ExplorerFocus.getAttribute("name") || ""}
+                    onBlur={(event) => {
+                        if ((event.target as HTMLInputElement).value === "\n")
+                            return;
+
+                        ExplorerFocus.setAttribute(
+                            "name",
+                            (event.target as HTMLInputElement).value
+                        );
+
+                        RenderExplorer();
+                        RenderProperties(ExplorerFocus);
+                    }}
+                    style={{
+                        minWidth: "100%",
+                    }}
+                    autocomplete={"off"}
+                />
+            </div>,
+            document.getElementById("properties_window")!
+        );
+    }
 
     // add script save keybind...
     document.addEventListener("keydown", (event) => {
         if (!CurrentScriptNode) return;
         if (event.ctrlKey && event.key === "s") {
+            if (!Renderer.scene) return;
             event.preventDefault();
 
             // save buffer
             CurrentScriptNode.content = encodeURIComponent(CurrentContent);
 
+            // update node from id
+            Renderer.scene.getElementById(CurrentScriptNode.id)!.innerHTML =
+                CurrentScriptNode.content;
+
             // hide unsaved changes notifier
             document.getElementById(
                 `${CurrentScriptNode.id}-changed`
             )!.style.display = "none";
+
+            // update CurrentWorldState
+            CurrentWorldStore = WorkshopLib.Instances.World.Get(
+                Renderer.CurrentWorldName
+            ).Element.outerHTML;
         }
     });
 }
