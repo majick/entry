@@ -652,7 +652,10 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
     EditMode = _EditMode;
 
     // ...
-    function RenderCurrentPage(element: HTMLElement | ShadowRoot) {
+    function RenderCurrentPage(
+        element: HTMLElement | ShadowRoot,
+        ToMoveOut: string = ""
+    ) {
         RenderCycles++;
 
         // check for star
@@ -671,7 +674,31 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             });
 
         // ...
-        return render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
+        render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
+
+        // check ToMoveOut
+        if (ToMoveOut) document.body.innerHTML += ToMoveOut;
+
+        // run scripts
+        const scripts = element.querySelectorAll("script");
+
+        for (const script of scripts as any as HTMLScriptElement[]) {
+            const _new = document.createElement("script");
+            const parent = script.parentElement!;
+            script.remove(); // remove all
+
+            // fill new
+            _new.src = script.src;
+            _new.innerHTML = script.innerHTML;
+            _new.type = script.type;
+
+            // append new
+            parent.appendChild(_new);
+            _new.remove();
+        }
+
+        // ...
+        return true;
     }
 
     // ...(not) edit mode stuff
@@ -686,6 +713,14 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             ".component"
         ) as any as HTMLElement[])
             Component.remove();
+
+        // save a copy of the rest of the page
+        const copy = document.body.querySelectorAll("body > *");
+
+        // by this stage, all stuff that is normally in the page (might) have been copied
+        // into copy[0], move it back out later
+        const ToMoveOut =
+            copy[0].querySelector("dialog") !== null ? copy[0].innerHTML : "";
 
         // ...
         let _page: HTMLElement | ShadowRoot = document.getElementById("_doc")!;
@@ -727,7 +762,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 // set CurrentPage
                 if (Page) {
                     CurrentPage = doc.Pages.indexOf(Page);
-                    RenderCurrentPage(_page); // render
+                    RenderCurrentPage(_page, ToMoveOut); // render
                 }
             }
         }
@@ -736,7 +771,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         CheckHash(); // initial run
 
         // initial page render
-        RenderCurrentPage(_page);
+        RenderCurrentPage(_page, ToMoveOut);
     }
 
     // edit mode stuff
