@@ -216,9 +216,18 @@ export class GetPasteFromURL implements Endpoint {
                     <>
                         <div id="_doc">
                             {/* initial render */}
-                            {renderToString(
-                                BuilderParser.ParsePage(Page, false, true)
-                            )}
+                            <div
+                                dangerouslySetInnerHTML={{
+                                    __html:
+                                        renderToString(
+                                            BuilderParser.ParsePage(
+                                                Page,
+                                                false,
+                                                true
+                                            )
+                                        ) + "</div>",
+                                }}
+                            />
                         </div>
 
                         <div id="debug" />
