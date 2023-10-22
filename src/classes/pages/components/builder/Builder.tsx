@@ -141,7 +141,7 @@ export function EditOrder(state: boolean = false, dragging?: Node, doc?: Node[])
 }
 
 export function Delete(node: Node) {
-    node.ID = "state:removed";
+    node.ID = "node:removed";
 
     SidebarOpen = false;
     RenderSidebar();

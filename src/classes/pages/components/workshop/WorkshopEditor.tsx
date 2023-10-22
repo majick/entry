@@ -670,8 +670,16 @@ export default function Render(element: HTMLElement) {
                                     ContextMenuEntries
                                 );
                             }}
+                            onClick={() => {
+                                ExplorerFocus = child;
+                                RenderProperties(child);
+                            }}
                         >
-                            <span>{child.getAttribute("name") || child.id}</span>
+                            <span>
+                                {child.getAttribute("name") ||
+                                    child.id ||
+                                    child.nodeName}
+                            </span>
                         </button>
                     );
                 else {
@@ -832,6 +840,35 @@ export default function Render(element: HTMLElement) {
 
     RenderExplorer();
 
+    // ...
+    function PropertiesInput(ExplorerFocus: Element, name: string, value: string) {
+        return (
+            <input
+                class={"round"}
+                type={"text"}
+                name={name}
+                id={name.replaceAll(" ", "_")}
+                placeholder={name}
+                value={value}
+                onBlur={(event) => {
+                    if ((event.target as HTMLInputElement).value === "\n") return;
+
+                    ExplorerFocus.setAttribute(
+                        name.toLowerCase(),
+                        (event.target as HTMLInputElement).value
+                    );
+
+                    RenderExplorer();
+                    RenderProperties(ExplorerFocus);
+                }}
+                style={{
+                    minWidth: "100%",
+                }}
+                autocomplete={"off"}
+            />
+        );
+    }
+
     // properties window
     function RenderProperties(ExplorerFocus: Element) {
         document.getElementById("properties_window")!.innerHTML = "";
@@ -840,30 +877,56 @@ export default function Render(element: HTMLElement) {
             <div className="flex flex-column g-4">
                 <hr />
 
-                <input
-                    class={"round"}
-                    type={"text"}
-                    name={"Name"}
-                    id={"Name"}
-                    placeholder={"Name"}
-                    value={ExplorerFocus.getAttribute("name") || ""}
-                    onBlur={(event) => {
-                        if ((event.target as HTMLInputElement).value === "\n")
-                            return;
+                {((ExplorerFocus.nodeName === "Script" ||
+                    ExplorerFocus.nodeName === "Shape") && (
+                    <>
+                        {/* normal options */}
+                        {PropertiesInput(
+                            ExplorerFocus,
+                            "Name",
+                            ExplorerFocus.getAttribute("name") || ""
+                        )}
+                    </>
+                )) ||
+                    ((ExplorerFocus.nodeName === "Position" ||
+                        ExplorerFocus.nodeName === "Size") && (
+                        <>
+                            {/* vector options */}
+                            {PropertiesInput(
+                                ExplorerFocus,
+                                "x",
+                                ExplorerFocus.getAttribute("x") || ""
+                            )}
 
-                        ExplorerFocus.setAttribute(
-                            "name",
-                            (event.target as HTMLInputElement).value
-                        );
+                            {PropertiesInput(
+                                ExplorerFocus,
+                                "y",
+                                ExplorerFocus.getAttribute("y") || ""
+                            )}
+                        </>
+                    )) ||
+                    (ExplorerFocus.nodeName === "Color" && (
+                        <>
+                            {/* color options */}
+                            {PropertiesInput(
+                                ExplorerFocus,
+                                "r",
+                                ExplorerFocus.getAttribute("r") || ""
+                            )}
 
-                        RenderExplorer();
-                        RenderProperties(ExplorerFocus);
-                    }}
-                    style={{
-                        minWidth: "100%",
-                    }}
-                    autocomplete={"off"}
-                />
+                            {PropertiesInput(
+                                ExplorerFocus,
+                                "g",
+                                ExplorerFocus.getAttribute("g") || ""
+                            )}
+
+                            {PropertiesInput(
+                                ExplorerFocus,
+                                "b",
+                                ExplorerFocus.getAttribute("b") || ""
+                            )}
+                        </>
+                    ))}
             </div>,
             document.getElementById("properties_window")!
         );
