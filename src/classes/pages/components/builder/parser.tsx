@@ -36,12 +36,6 @@ export function ParseNodes(nodes: Node[], edit: boolean = false): VNode {
                 // delete node if it was removed
                 if (node.ID === "state:removed") {
                     node.Children = [];
-                    nodes.splice(nodes.indexOf(node));
-                    return <></>;
-                } else if (node.ID === "node:removed") {
-                    // this is ONLY here because of compatibility for a previous bug that existed!
-                    // adding this here ensures that pastes created with that bug don't render wrong
-                    node.Children = [];
                     nodes.splice(nodes.indexOf(node), 0);
                     return <></>;
                 }
