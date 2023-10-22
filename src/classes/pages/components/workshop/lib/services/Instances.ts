@@ -175,16 +175,16 @@ export class Shape extends Instance {
             // append if element is new
             this._Size = { x: 0, y: 0 };
 
-            this.width = 5; // add width attribute
-            this.height = 5; // add height attribute
+            this.width = 1; // add width attribute
+            this.height = 1; // add height attribute
 
             this.Element.appendChild(this.SizeElement);
         }
 
         if (Size)
             this._Size = {
-                x: parseInt(Size.getAttribute("x") || "5"),
-                y: parseInt(Size.getAttribute("y") || "5"),
+                x: parseInt(Size.getAttribute("x") || "1"),
+                y: parseInt(Size.getAttribute("y") || "1"),
             };
         else this._Size = { x: 5, y: 5 };
 
@@ -208,6 +208,87 @@ export class Shape extends Instance {
                 b: parseInt(Color.getAttribute("b") || "255"),
             };
         else this._Color = { r: 255, g: 255, b: 255 };
+    }
+
+    /**
+     * @method CheckCollision
+     *
+     * @param {Shape} OtherShape
+     * @return {[boolean, string]}
+     * @memberof Shape
+     */
+    public CheckCollision(OtherShape: Shape): [boolean, string] {
+        if (this.x === OtherShape.x && this.y === OtherShape.y) return [true, "xy"];
+
+        if (this.x === OtherShape.x) return [true, "x"];
+        else if (this.y === OtherShape.y) return [true, "y"];
+
+        // default return
+        return [false, ""];
+    }
+
+    /**
+     * @method GetShapesByPosition
+     *
+     * @static
+     * @param {number} x
+     * @param {number} y
+     * @return {Shape[]}
+     * @memberof Shape
+     */
+    public static GetShapesByPosition(x: number, y: number): Shape[] {
+        // @ts-ignore get world
+        const world = World.Get(globalThis.renderer.CurrentWorldName);
+
+        // @ts-ignore query select
+        const Elements = world.Element.querySelectorAll(
+            `Position[x="${x}"][y="${y}"]`
+        );
+
+        // create nodes
+        const Nodes: Shape[] = [];
+
+        for (const element of Elements as any as Element[]) {
+            // make sure parent element is a shape! (we selected the position element)
+            if (!element.parentElement || element.parentElement.nodeName !== "Shape")
+                continue;
+
+            // create figurative node
+            Nodes.push(
+                new Shape(
+                    world,
+                    "rectangle",
+                    element.getAttribute("name")!,
+                    element.parentElement
+                )
+            );
+
+            // continue
+            continue;
+        }
+
+        // return
+        return Nodes;
+    }
+
+    /**
+     * @method GetShapeByID
+     *
+     * @static
+     * @param {string} id
+     * @return {(Shape | undefined)}
+     * @memberof Shape
+     */
+    public static GetShapeByID(id: string): Shape | undefined {
+        // @ts-ignore get world
+        const world = World.Get(globalThis.renderer.CurrentWorldName);
+
+        // @ts-ignore query select
+        const Element = world.Element.querySelector(`Shape#${id}`);
+        if (!Element) return;
+
+        // create figurative node and return
+        return new Shape(world, "rectangle", Element.getAttribute("name")!, Element);
     }
 
     // get/set Position

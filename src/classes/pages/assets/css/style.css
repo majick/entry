@@ -325,8 +325,10 @@ button.invisible:not(:hover),
 }
 
 button:focus,
-.button:focus {
-    box-shadow: inset 0 0 0 2px var(--blue);
+.button:focus,
+button.active,
+.button.active {
+    box-shadow: inset 0 0 0 2px var(--blue) !important;
 }
 
 .tabbar {

@@ -381,10 +381,12 @@ export default class Renderer2D {
 
             // create rectangle
             this.CreateRectangle(
-                parseInt(position.getAttribute("x") || "0"),
-                parseInt(position.getAttribute("y") || "0"),
-                parseInt(size.getAttribute("x") || "5") || 5,
-                parseInt(size.getAttribute("y") || "5") || 5
+                // 1 is too small on this canvas, so everything is going to be multiplied
+                // by 5, this will make 1 unit actually 0.2 units
+                parseInt(position.getAttribute("x") || "0") * 5,
+                parseInt(position.getAttribute("y") || "0") * 5,
+                (parseInt(size.getAttribute("x") || "1") || 1) * 5,
+                (parseInt(size.getAttribute("y") || "1") || 1) * 5
             );
 
             // ...set color

@@ -7,6 +7,8 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import renderToString from "preact-render-to-string";
+
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import BuilderParser from "./components/builder/parser";
@@ -214,7 +216,9 @@ export class GetPasteFromURL implements Endpoint {
                     <>
                         <div id="_doc">
                             {/* initial render */}
-                            {BuilderParser.ParsePage(Page, false, true)}
+                            {renderToString(
+                                BuilderParser.ParsePage(Page, false, true)
+                            )}
                         </div>
 
                         <div id="debug" />

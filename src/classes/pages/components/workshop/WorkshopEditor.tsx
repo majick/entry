@@ -609,6 +609,7 @@ export default function Render(element: HTMLElement) {
     // render node explorer
     let ExplorerFocus: Element;
     let CurrentScriptNode: any;
+    let MoveMode: boolean = false;
 
     function RenderExplorer() {
         // ...
@@ -636,13 +637,23 @@ export default function Render(element: HTMLElement) {
                     },
                 },
                 {
+                    label: "Move",
+                    action() {
+                        MoveMode = true;
+                        alert("Select element to move into!");
+                    },
+                },
+                {
                     label: "Delete",
                     action() {
                         ExplorerFocus.remove();
                         RenderExplorer();
 
                         // clear CurrentScriptNode (if it matches)
-                        if (CurrentScriptNode.Element === ExplorerFocus)
+                        if (
+                            CurrentScriptNode &&
+                            CurrentScriptNode.Element === ExplorerFocus
+                        )
                             CurrentScriptNode = undefined;
                     },
                 },
@@ -660,7 +671,9 @@ export default function Render(element: HTMLElement) {
                     // normal entry
                     Entries.push(
                         <button
-                            class={"round full flex justify-space-between"}
+                            class={
+                                "round full flex justify-space-between explorer:property"
+                            }
                             onContextMenu={(event) => {
                                 event.preventDefault();
                                 ExplorerFocus = child; // so we manage the correct element!
@@ -670,9 +683,37 @@ export default function Render(element: HTMLElement) {
                                     ContextMenuEntries
                                 );
                             }}
-                            onClick={() => {
+                            onClick={(event) => {
+                                // handle move
+                                if (MoveMode && ExplorerFocus) {
+                                    MoveMode = false;
+                                    ExplorerFocus.remove();
+                                    child.appendChild(ExplorerFocus);
+                                    RenderExplorer();
+                                }
+
+                                // ...
                                 ExplorerFocus = child;
                                 RenderProperties(child);
+
+                                view.dispatch(
+                                    view.state.update({
+                                        changes: {
+                                            from: 0,
+                                            to: view.state.doc.length,
+                                            insert: "",
+                                        },
+                                    })
+                                );
+
+                                // remove active state from other elements
+                                for (const element of document.querySelectorAll(
+                                    ".explorer\\:property"
+                                ) as any as HTMLElement[])
+                                    element.classList.remove("active");
+
+                                // add active state
+                                (event.target as any).classList.add("active");
                             }}
                         >
                             <span>
@@ -696,7 +737,9 @@ export default function Render(element: HTMLElement) {
                     // add button
                     Entries.push(
                         <button
-                            class={"round full flex justify-space-between"}
+                            class={
+                                "round full flex justify-space-between explorer:property"
+                            }
                             style={{
                                 justifyContent: "space-between",
                                 width: "100%",
@@ -715,7 +758,7 @@ export default function Render(element: HTMLElement) {
                                     ContextMenuEntries
                                 );
                             }}
-                            onClick={() => {
+                            onClick={(event) => {
                                 // if we made changes and didn't save, confirm buffer change
                                 if (
                                     CurrentScriptNode &&
@@ -735,6 +778,8 @@ export default function Render(element: HTMLElement) {
 
                                 // set current script
                                 CurrentScriptNode = Node;
+                                ExplorerFocus = child;
+                                RenderProperties(child);
 
                                 // change editor content
                                 view.dispatch(
@@ -752,6 +797,15 @@ export default function Render(element: HTMLElement) {
                                     ".changed-notify"
                                 ) as any as HTMLElement[])
                                     notification.style.display = "none";
+
+                                // remove active state from other elements
+                                for (const element of document.querySelectorAll(
+                                    ".explorer\\:property"
+                                ) as any as HTMLElement[])
+                                    element.classList.remove("active");
+
+                                // add active state
+                                (event.target as any).classList.add("active");
                             }}
                         >
                             {Node.name}
@@ -781,7 +835,20 @@ export default function Render(element: HTMLElement) {
 
             // return entry
             return (
-                <details class={"round file-list-entry"}>
+                <details
+                    class={"round file-list-entry"}
+                    onClick={(event) => {
+                        // handle move
+                        if (MoveMode && ExplorerFocus) {
+                            MoveMode = false;
+                            ExplorerFocus.remove();
+                            input.appendChild(ExplorerFocus);
+                            RenderExplorer();
+
+                            event.preventDefault();
+                        }
+                    }}
+                >
                     <summary
                         onContextMenu={(event) => {
                             event.preventDefault();
@@ -814,7 +881,7 @@ export default function Render(element: HTMLElement) {
                     class={"flex flex-column g-4"}
                     style={{
                         minHeight: "25%",
-                        maxHeight: "50%",
+                        maxHeight: "70%",
                         overflowY: "auto",
                     }}
                 >
@@ -829,7 +896,7 @@ export default function Render(element: HTMLElement) {
                     id="properties_window"
                     style={{
                         minHeight: "25%",
-                        maxHeight: "50%",
+                        maxHeight: "20%",
                         overflowY: "auto",
                     }}
                 />
@@ -878,7 +945,8 @@ export default function Render(element: HTMLElement) {
                 <hr />
 
                 {((ExplorerFocus.nodeName === "Script" ||
-                    ExplorerFocus.nodeName === "Shape") && (
+                    ExplorerFocus.nodeName === "Shape" ||
+                    ExplorerFocus.nodeName === "Instance") && (
                     <>
                         {/* normal options */}
                         {PropertiesInput(
@@ -943,8 +1011,8 @@ export default function Render(element: HTMLElement) {
             CurrentScriptNode.content = encodeURIComponent(CurrentContent);
 
             // update node from id
-            Renderer.scene.getElementById(CurrentScriptNode.id)!.innerHTML =
-                CurrentScriptNode.content;
+            if (ExplorerFocus !== CurrentScriptNode.Element) return;
+            ExplorerFocus!.innerHTML = CurrentScriptNode.content;
 
             // hide unsaved changes notifier
             document.getElementById(

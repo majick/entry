@@ -270,6 +270,12 @@ export function ParseMarkdownSync(
     // strikethrough
     content = content.replaceAll(/(\~{2})(.*?)(\~{2})/gs, "<del>$2</del>");
 
+    // underline
+    content = content.replaceAll(
+        /(\_{2})(.+)(\_{2})/gs,
+        '<span style="text-decoration: underline;">$2</del>'
+    );
+
     // named links
     // added because marked kept missing some when rendering as HTML
 

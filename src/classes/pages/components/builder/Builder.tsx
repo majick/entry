@@ -682,8 +682,13 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         ) as any as HTMLElement[])
             DragElement.remove();
 
+        for (const Component of document.querySelectorAll(
+            ".component"
+        ) as any as HTMLElement[])
+            Component.remove();
+
         // ...
-        const _page = document.getElementById("_doc")!;
+        let _page: HTMLElement | ShadowRoot = document.getElementById("_doc")!;
 
         // ...handle view mode select (for debug)
         _page.addEventListener("click", (event) => {
