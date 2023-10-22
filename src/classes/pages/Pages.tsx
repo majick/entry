@@ -216,18 +216,33 @@ export class GetPasteFromURL implements Endpoint {
                     <>
                         <div id="_doc">
                             {/* initial render */}
-                            <div
-                                dangerouslySetInnerHTML={{
-                                    __html:
-                                        renderToString(
-                                            BuilderParser.ParsePage(
-                                                Page,
-                                                false,
-                                                true
-                                            )
-                                        ) + "</div>",
-                                }}
-                            />
+                            <noscript>
+                                <p>
+                                    Builder pastes don't currently work without
+                                    JavaScript access. If you're worried about
+                                    privacy and security on this page, I suggest you
+                                    look into the NoScript extension and a competent
+                                    ad-blocker. Entry collects no
+                                    personally-identifiable information by default,
+                                    and actively works to ensure your privacy and
+                                    safety. Entry is entirely open-source, you can
+                                    view the source{" "}
+                                    <a href="https://codeberg.org/hkau/entry">
+                                        here
+                                    </a>
+                                    .
+                                </p>
+
+                                <p>
+                                    Builder pastes are rendered on the client using
+                                    Preact, a very small (&lt;3kb) React renderer.
+                                    Entry loads very few assets to display this page,
+                                    so there should not be a bandwidth concern when
+                                    viewing this page.
+                                </p>
+
+                                <p>Please try again after enabling JavaScript.</p>
+                            </noscript>
                         </div>
 
                         <div id="debug" />
