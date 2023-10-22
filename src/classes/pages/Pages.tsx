@@ -379,6 +379,42 @@ export class GetPasteFromURL implements Endpoint {
                     "Content-Type": "text/html",
                 },
             });
+        else if (result.Content.startsWith("_workshop:")) {
+            // get parsed content
+            const TrueContent = BaseParser.parse(
+                result.Content.split("_workshop:")[1]
+            );
+
+            // return
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <canvas id={"game_canvas"} />
+
+                        <script
+                            type={"module"}
+                            dangerouslySetInnerHTML={{
+                                __html: `import Renderer2D from "/Renderer2D.js";
+                                import WorkshopLib from "/WorkshopLib.js";
+
+                                // create renderer
+                                const Renderer = new Renderer2D(
+                                    \`${TrueContent}\`,
+                                    document.getElementById("game_canvas") as HTMLCanvasElement
+                                );
+
+                                window.renderer = Renderer;
+                                window.library = WorkshopLib;
+                                
+                                // start scene
+                                Renderer.AutoDraw = true;
+                                Renderer.BeginDrawing();`,
+                            }}
+                        />
+                    </>
+                )
+            );
+        }
 
         // ...otherwise
 

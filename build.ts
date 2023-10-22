@@ -12,6 +12,8 @@ const output = await build({
         "./src/classes/pages/components/Markdown.ts",
         "./src/classes/pages/components/builder/Builder.tsx",
         "./src/classes/pages/components/workshop/WorkshopEditor.tsx",
+        "./src/classes/pages/components/workshop/2d/2DRenderer.ts",
+        "./src/classes/pages/components/workshop/lib/WorkshopLib.ts",
         "./src/classes/pages/components/MetadataEditor.tsx",
         "./src/classes/pages/components/site/UserSettings.tsx",
     ],

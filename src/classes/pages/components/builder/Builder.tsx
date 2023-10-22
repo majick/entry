@@ -689,6 +689,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
         // ...
         let _page: HTMLElement | ShadowRoot = document.getElementById("_doc")!;
+        _page.innerHTML = "";
 
         // ...handle view mode select (for debug)
         _page.addEventListener("click", (event) => {

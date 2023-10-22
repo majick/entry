@@ -391,10 +391,8 @@ export default function Render(element: HTMLElement) {
     Renderer.AutoDraw = false; // scene is paused by default
     Renderer.BeginDrawing();
 
-    // @ts-ignore set renderer global
     (globalThis as any).renderer = Renderer;
-    // @ts-ignore
-    window.library = WorkshopLib;
+    (globalThis as any).library = WorkshopLib;
 
     // save current world so we can restore after game finishes
     let CurrentWorldStore: string = WorkshopLib.Instances.World.Get(
