@@ -142,9 +142,9 @@ export default function Render(element: HTMLElement) {
                             ).Element.outerHTML;
 
                             // enable autodraw (start scene)
-                            Renderer.ParseWorld(Renderer.CurrentWorldName);
-                            Renderer.AutoDraw = true;
+                            Renderer.ParseWorld(Renderer.CurrentWorldName, true);
                             Renderer.LastWorldName = ""; // reset last world (so scripts run again)
+                            Renderer.AutoDraw = true;
                         }}
                     >
                         <svg
@@ -188,6 +188,9 @@ export default function Render(element: HTMLElement) {
                             WorkshopLib.Instances.World.Get(
                                 Renderer.CurrentWorldName
                             ).Element.outerHTML = CurrentWorldStore;
+
+                            // ...
+                            RenderExplorer();
                         }}
                     >
                         <svg

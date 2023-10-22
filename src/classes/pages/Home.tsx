@@ -30,6 +30,23 @@ export default class Home implements Endpoint {
             EntryDB.config.app.wildcard &&
             EntryDB.config.app.hostname
         ) {
+            // check allow domains
+            if (EntryDB.config.allow_access_from) {
+                let AccessingFrom = "";
+
+                for (const host of EntryDB.config.allow_access_from)
+                    if (url.hostname.includes(host)) {
+                        AccessingFrom = host;
+                        break;
+                    } else continue;
+
+                if (!AccessingFrom)
+                    return new Response("You're not supposed to be here", {
+                        status: 410,
+                    });
+            }
+
+            // ...
             const subdomain = url.hostname.split(
                 `.${EntryDB.config.app.hostname}`
             )[0];

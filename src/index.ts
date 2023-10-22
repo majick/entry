@@ -68,6 +68,7 @@ export type Config = {
     data: string;
     config: string;
     plugin_file?: string;
+    allow_access_from?: string[];
     env?: "production" | "development";
     do_not_cache?: boolean;
     app?: {

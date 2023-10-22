@@ -99,6 +99,11 @@ export class Instance {
 
             // append to parent
             if (IsNew) this.Parent.Element.appendChild(this.Element);
+
+            // if id is the same thing as the name, remove element
+            // this is to fix some weird bug which causes new elements to create
+            // the correct named element, but also an id element
+            if (this.id === this.name) this.Element.remove();
         }
     }
 }
@@ -271,18 +276,72 @@ export class Script extends Instance {
      * @param {string} content
      * @param {string | undefined} name
      * @param {Element | undefined} element
+     * @param {boolean} figurative
      * @memberof Script
      */
     constructor(
         parent: Instance | World,
         content: string,
         name?: string,
-        element?: Element
+        element?: Element,
+        figurative?: boolean
     ) {
-        super(parent, "Script", name, element);
+        super(parent, "Script", name, element, figurative);
 
         this._content = content;
         this.Element.innerHTML = this._content;
+    }
+
+    /**
+     * @function FillModules
+     * @description Handle script imports
+     *
+     * @private
+     * @param {string} content
+     * @return {string}
+     * @memberof Script
+     */
+    private FillModules(content: string): string {
+        // get module imports
+        const moduleImports = content.matchAll(/(\#module)\(\"(?<URL>.*?)\"\)/g);
+
+        for (const mod of moduleImports) {
+            const { URL } = mod.groups!;
+            const ModuleName = URL.split("module://")[1];
+
+            // get script
+            const _Script = this.Parent.Element.parentElement!.querySelector(
+                `Script[name="${ModuleName}"]`
+            );
+
+            if (!_Script) {
+                console.error(
+                    "Module script cannot be found in scope: (self).Parent.Parent",
+                    ModuleName
+                );
+                continue;
+            }
+
+            // get node content
+            let ScriptContent = decodeURIComponent(_Script.innerHTML);
+            ScriptContent = this.FillModules(ScriptContent); // fill this script's modules!
+
+            // create blob
+            const blob = new Blob([ScriptContent], {
+                type: "application/javascript",
+            });
+
+            const url = globalThis.URL.createObjectURL(blob);
+
+            // replace content
+            content = content.replace(mod[0], `await import("${url}")/* ${URL} */`);
+
+            // continue...
+            continue;
+        }
+
+        // return
+        return content;
     }
 
     /**
@@ -294,6 +353,12 @@ export class Script extends Instance {
         let content = decodeURIComponent(this._content);
         content += "\n// RUNTIME CONTENT\n";
 
+        // if content starts with skip string, don't directly execute
+        if (content.startsWith("// @module")) return;
+
+        // include all module imports
+        content = this.FillModules(content);
+
         // add main call
         content += "main(library);";
 
@@ -301,6 +366,8 @@ export class Script extends Instance {
         content += `library.AbortScripts.signal.addEventListener("abort", () => {
             throw new Error("Script Aborted");
         });`;
+
+        // replace script references
 
         // create blob
         const blob = new Blob([content], {

@@ -323,10 +323,11 @@ export default class Renderer2D {
      * @method ParseWorld
      *
      * @param {string} name
+     * @param {booelan} [skipScripts=false]
      * @return {boolean}
      * @memberof Renderer2D
      */
-    public ParseWorld(name: string): boolean {
+    public ParseWorld(name: string, skipScripts: boolean = false): boolean {
         if (!this.locations || !this.scene) return false;
         this.ClearCanvas();
 
@@ -342,19 +343,20 @@ export default class Renderer2D {
             this.LastWorldName = this.CurrentWorldName;
 
             // run scripts
-            for (const script of WorldNode.Element.querySelectorAll(
-                "Script"
-            ) as any as HTMLElement[]) {
-                const Node = new Script(
-                    WorldNode,
-                    script.innerHTML,
-                    script.getAttribute("name") || "New Script",
-                    script
-                );
+            if (!skipScripts)
+                for (const script of WorldNode.Element.querySelectorAll(
+                    "Script"
+                ) as any as HTMLElement[]) {
+                    const Node = new Script(
+                        WorldNode,
+                        script.innerHTML,
+                        script.getAttribute("name") || "New Script",
+                        script
+                    );
 
-                Node.run();
-                continue;
-            }
+                    Node.run();
+                    continue;
+                }
         }
 
         // parse objects
