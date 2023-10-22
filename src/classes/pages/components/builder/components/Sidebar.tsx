@@ -260,7 +260,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                 const index = Document.Pages.indexOf(page);
 
                                 // check if page was remove
-                                if (page.ID === "node:removed") {
+                                if (page.ID === "state:removed") {
                                     Document.Pages.splice(
                                         Document.Pages.indexOf(page),
                                         1
