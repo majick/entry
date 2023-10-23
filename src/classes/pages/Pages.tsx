@@ -82,6 +82,27 @@ export function Curiosity(props: { Association: [boolean, string] }) {
     );
 }
 
+export function OpenGraph(props: {
+    url?: string;
+    description?: string;
+    title?: string;
+}) {
+    return (
+        <>
+            <meta name={"theme-color"} value={"#55a4e0"} />
+            <meta name={"og:type"} value={"website"} />
+            <meta name={"og:site_name"} value={EntryDB.config.name} />
+            {props.url && <meta name={"og:url"} value={props.url} />}
+
+            {props.description && (
+                <meta name={"og:description"} value={props.description} />
+            )}
+
+            {props.title && <meta name={"og:title"} value={props.title} />}
+        </>
+    );
+}
+
 /**
  * @export
  * @class GetPasteFromURL
@@ -192,6 +213,16 @@ export class GetPasteFromURL implements Endpoint {
         // get association
         const Association = await GetAssociation(request, null);
 
+        // check PrivateSource value
+        let HideSource: boolean = false;
+
+        if (
+            result.Metadata &&
+            result.Metadata.PrivateSource === true &&
+            result.Metadata.Owner !== Association[1]
+        )
+            HideSource = true;
+
         // check if paste was created in the builder (starts with _builder:)
         if (
             result.Content.startsWith("_builder:") &&
@@ -292,6 +323,7 @@ export class GetPasteFromURL implements Endpoint {
                                     <a
                                         href={`${HostnameURL}paste/builder?edit=${result.CustomURL}`}
                                         className="button round"
+                                        disabled={HideSource}
                                     >
                                         Edit
                                     </a>
@@ -405,15 +437,25 @@ export class GetPasteFromURL implements Endpoint {
             });
         else if (result.Content.startsWith("_workshop:")) {
             // get parsed content
-            const TrueContent = BaseParser.parse(
-                result.Content.split("_workshop:")[1]
+            const TrueContent = result.Content.split("_workshop:")[1].replaceAll(
+                "`",
+                "\\`"
             );
 
             // return
             return new Response(
                 Renderer.Render(
                     <>
-                        <canvas id={"game_canvas"} />
+                        <canvas
+                            id={"game_canvas"}
+                            width={"1024"}
+                            height={"512"}
+                            style={{
+                                background: "white",
+                                height: "100%",
+                                width: "100%",
+                            }}
+                        />
 
                         <script
                             type={"module"}
@@ -421,22 +463,29 @@ export class GetPasteFromURL implements Endpoint {
                                 __html: `import Renderer2D from "/Renderer2D.js";
                                 import WorkshopLib from "/WorkshopLib.js";
 
+                                document.body.style.overflowY = "hidden";
+
                                 // create renderer
                                 const Renderer = new Renderer2D(
                                     \`${TrueContent}\`,
-                                    document.getElementById("game_canvas") as HTMLCanvasElement
+                                    document.getElementById("game_canvas")
                                 );
 
                                 window.renderer = Renderer;
                                 window.library = WorkshopLib;
                                 
                                 // start scene
-                                Renderer.AutoDraw = true;
                                 Renderer.BeginDrawing();`,
                             }}
                         />
                     </>
-                )
+                ),
+                {
+                    headers: {
+                        ...PageHeaders,
+                        "Content-Type": "text/html",
+                    },
+                }
             );
         }
 
@@ -548,6 +597,7 @@ export class GetPasteFromURL implements Endpoint {
                                     {editable[2] === true && (
                                         <a
                                             class={"button round"}
+                                            disabled={HideSource}
                                             href={`${HostnameURL}?mode=edit&OldURL=${
                                                 result.CustomURL.split(":")[0]
                                             }${
@@ -660,7 +710,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                             <a
                                                 class={"button"}
-                                                href={`${HostnameURL}paste/do>${result.CustomURL}`}
+                                                href={`${HostnameURL}paste/doc/${result.CustomURL}`}
                                                 style={{
                                                     width: "80px",
                                                 }}
@@ -912,6 +962,17 @@ export class GetPasteFromURL implements Endpoint {
                             result.Metadata && result.Metadata.Favicon
                                 ? result.Metadata.Favicon
                                 : "/favicon"
+                        }
+                    />
+
+                    <OpenGraph
+                        title={result.CustomURL}
+                        description={
+                            // if length of content is greater than 150, cut it at 150 characters and add "..."
+                            // otherwise, we can just show the full content
+                            result.Content.length > 150
+                                ? `${result.Content.substring(0, 150)}...`
+                                : result.Content
                         }
                     />
                 </>

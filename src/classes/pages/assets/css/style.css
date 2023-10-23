@@ -315,8 +315,10 @@ button.red,
 }
 
 button:disabled,
-.button:disabled {
+.button:disabled,
+.button[disabled] {
     opacity: 50%;
+    cursor: not-allowed;
 }
 
 button.invisible:not(:hover),

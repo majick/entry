@@ -3,7 +3,7 @@ import { render, hydrate } from "preact";
 import Modal from "../site/modals/Modal";
 import PublishModals from "../site/modals/PublishModals";
 
-import Renderer2D from "./2d/2DRenderer";
+import Renderer2D from "./2d/Renderer2D";
 import WorkshopLib from "./lib/WorkshopLib";
 
 // ...
@@ -63,7 +63,7 @@ import {
 import { tags } from "@lezer/highlight";
 
 // ...
-export default function Render(element: HTMLElement) {
+export default function Render(element: HTMLElement, UseDoc: string) {
     function ToggleTab() {
         document.getElementById("tab_game")!.classList.toggle("active");
         document.getElementById("tab_code")!.classList.toggle("active");
@@ -382,7 +382,8 @@ export default function Render(element: HTMLElement) {
 
     // create game renderer
     const Renderer = new Renderer2D(
-        `<Workshop version="1.0">
+        UseDoc ||
+            `<Workshop version="1.0">
             <World name="World"></World>
         </Workshop>`,
         document.getElementById("game_canvas") as HTMLCanvasElement

@@ -57,6 +57,7 @@ export type PasteMetadata = {
     ShowOwnerEnabled?: boolean;
     ShowViewCount?: boolean;
     Favicon?: string; // favicon shown on paste
+    PrivateSource?: boolean;
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;

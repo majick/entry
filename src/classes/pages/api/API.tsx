@@ -798,6 +798,17 @@ export class GetRawPaste implements Endpoint {
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
+        // get association
+        const Association = await GetAssociation(request, null);
+
+        // check PrivateSource value
+        if (
+            result.Metadata &&
+            result.Metadata.PrivateSource === true &&
+            result.Metadata.Owner !== Association[1]
+        )
+            return new _404Page().request(request);
+
         // return
         return new Response(result!.Content, {
             status: 200,
@@ -904,6 +915,17 @@ export class GetPasteHTML implements Endpoint {
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
+
+        // get association
+        const Association = await GetAssociation(request, null);
+
+        // check PrivateSource value
+        if (
+            result.Metadata &&
+            result.Metadata.PrivateSource === true &&
+            result.Metadata.Owner !== Association[1]
+        )
+            return new _404Page().request(request);
 
         // render
         const rendered = Renderer.Render(
@@ -1256,6 +1278,7 @@ export class EditMetadata implements Endpoint {
             paste.Metadata.ShowViewCount = Unpacked.ShowViewCount;
             paste.Metadata.ShowOwnerEnabled = Unpacked.ShowOwnerEnabled;
             paste.Metadata.Favicon = Unpacked.Favicon;
+            paste.Metadata.PrivateSource = Unpacked.PrivateSource;
 
             if (Unpacked.Comments)
                 if (!paste.Metadata.Comments)

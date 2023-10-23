@@ -99,11 +99,6 @@ export class Instance {
 
             // append to parent
             if (IsNew) this.Parent.Element.appendChild(this.Element);
-
-            // if id is the same thing as the name, remove element
-            // this is to fix some weird bug which causes new elements to create
-            // the correct named element, but also an id element
-            if (this.id === this.name) this.Element.remove();
         }
     }
 }

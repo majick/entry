@@ -179,6 +179,37 @@ export class WorkshopEditor implements Endpoint {
 
         if (!Association[0]) return new _404Page().request(request);
 
+        // load edit paste
+        let UseDoc: string = "";
+
+        if (search.get("edit")) {
+            // get paste
+            const result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
+
+            // make sure paste exists
+            if (!result) return new _404Page().request(request);
+
+            // get association
+            const Association = await GetAssociation(request, null);
+
+            // check PrivateSource value
+            if (
+                result.Metadata &&
+                result.Metadata.PrivateSource === true &&
+                result.Metadata.Owner !== Association[1]
+            )
+                return new _404Page().request(request);
+
+            // parse content
+            const TrueContent = result.Content.split("_workshop:")[1].replaceAll(
+                "`",
+                "\\`"
+            );
+
+            // set document
+            UseDoc = TrueContent;
+        }
+
         // return
         return new Response(
             Renderer.Render(
@@ -189,7 +220,7 @@ export class WorkshopEditor implements Endpoint {
                         type={"module"}
                         dangerouslySetInnerHTML={{
                             __html: `import Workshop from "/WorkshopEditor.js";
-                            Workshop(document.getElementById("_doc"));`,
+                            Workshop(document.getElementById("_doc"), \`${UseDoc}\`);`,
                         }}
                     />
 

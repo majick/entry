@@ -12,6 +12,7 @@ import Pages from "./Pages";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
 import Checkbox from "./components/form/Checkbox";
+import _404Page from "./components/404";
 
 /**
  * @export
@@ -135,6 +136,15 @@ export default class Home implements Endpoint {
 
         // get association
         const Association = await GetAssociation(request, null);
+
+        // check PrivateSource value
+        if (
+            paste &&
+            paste.Metadata &&
+            paste.Metadata.PrivateSource === true &&
+            paste.Metadata.Owner !== Association[1]
+        )
+            return new _404Page().request(request);
 
         // manage session
         const SessionCookie = await Session(request);

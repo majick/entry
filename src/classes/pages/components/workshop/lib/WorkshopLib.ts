@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import Renderer2D from "../2d/2DRenderer";
+import Renderer2D from "../2d/Renderer2D";
 
 // links
 import Instances from "./services/Instances";

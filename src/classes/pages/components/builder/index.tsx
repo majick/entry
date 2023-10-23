@@ -7,7 +7,7 @@
 import { Endpoint, Renderer } from "honeybee";
 
 import EntryDB, { Paste } from "../../../db/EntryDB";
-import { PageHeaders, db } from "../../api/API";
+import { PageHeaders, db, GetAssociation } from "../../api/API";
 import _404Page from "../404";
 
 import parser from "../../../db/helpers/BaseParser";
@@ -70,6 +70,17 @@ export class Builder implements Endpoint {
 
             // make sure paste exists
             if (!result) return new _404Page().request(request);
+
+            // get association
+            const Association = await GetAssociation(request, null);
+
+            // check PrivateSource value
+            if (
+                result.Metadata &&
+                result.Metadata.PrivateSource === true &&
+                result.Metadata.Owner !== Association[1]
+            )
+                return new _404Page().request(request);
 
             // if paste isn't a builder paste, convert it
             if (
