@@ -445,6 +445,16 @@ export default function CreateEditor(ElementID: string, content: string) {
     if (window.localStorage.getItem("entry:user.ShowLineNumbers") === "true")
         ExtensionsList.push(lineNumbers());
 
+    // bad system for testing if we're editing something else
+    // checks if first 10 characters are changed, clears doc if they are
+    if (
+        window.localStorage.getItem("doc") &&
+        !window.localStorage
+            .getItem("doc")!
+            .startsWith(decodeURIComponent(content).substring(0, 9))
+    )
+        window.localStorage.removeItem("doc");
+
     // create editor
     const view = new EditorView({
         // @ts-ignore
