@@ -392,6 +392,26 @@ export class GetPasteFromURL implements Endpoint {
                                     </span>
                                 </p>
 
+                                {result.Metadata && (
+                                    <>
+                                        {result.Metadata.Owner &&
+                                            result.Metadata.ShowOwnerEnabled !==
+                                                false && (
+                                                <p>
+                                                    Owner:{" "}
+                                                    <a
+                                                        href={`${HostnameURL}${result.Metadata.Owner}`}
+                                                    >
+                                                        {result.Metadata.Owner
+                                                            .length > 50
+                                                            ? `${result.Metadata.Owner}...`
+                                                            : result.Metadata.Owner}
+                                                    </a>
+                                                </p>
+                                            )}
+                                    </>
+                                )}
+
                                 <hr />
 
                                 <form
@@ -418,6 +438,7 @@ export class GetPasteFromURL implements Endpoint {
                         <meta name="description" content={result.CustomURL} />
                         <title>{result.CustomURL}</title>
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
+                        <OpenGraph title={result.CustomURL} />
                     </>
                 ),
                 {
@@ -478,6 +499,10 @@ export class GetPasteFromURL implements Endpoint {
                                 Renderer.BeginDrawing();`,
                             }}
                         />
+                    </>,
+                    <>
+                        <title>{result.CustomURL}</title>
+                        <OpenGraph title={result.CustomURL} />
                     </>
                 ),
                 {
@@ -869,7 +894,11 @@ export class GetPasteFromURL implements Endpoint {
                                                         <a
                                                             href={`${HostnameURL}${result.Metadata.Owner}`}
                                                         >
-                                                            {result.Metadata.Owner}
+                                                            {result.Metadata.Owner
+                                                                .length > 50
+                                                                ? `${result.Metadata.Owner}...`
+                                                                : result.Metadata
+                                                                      .Owner}
                                                         </a>
                                                     </span>
                                                 )}

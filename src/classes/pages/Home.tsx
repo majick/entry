@@ -360,6 +360,9 @@ export default class Home implements Endpoint {
                             <div
                                 id="editor-tab-text"
                                 class="editor-tab -editor active"
+                                style={{
+                                    height: "100%",
+                                }}
                             />
 
                             <div

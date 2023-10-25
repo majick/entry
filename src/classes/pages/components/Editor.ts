@@ -7,9 +7,15 @@ import {
     highlightSpecialChars,
     drawSelection,
     rectangularSelection,
+    lineNumbers,
 } from "@codemirror/view";
 
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language";
+import {
+    HighlightStyle,
+    indentOnInput,
+    indentUnit,
+    syntaxHighlighting,
+} from "@codemirror/language";
 
 import {
     CompletionContext,
@@ -22,13 +28,14 @@ import {
     markdownKeymap,
     markdownLanguage,
 } from "@codemirror/lang-markdown";
-import { history } from "@codemirror/commands";
+import { history, indentWithTab } from "@codemirror/commands";
 import { tags } from "@lezer/highlight";
 
 import { HandleCustomElements } from "../assets/ClientFixMarkdown";
 import { ParseMarkdown } from "./Markdown";
 
 // create theme
+import { WorkshopHighlight } from "./workshop/WorkshopEditor";
 const highlight = HighlightStyle.define([
     { tag: tags.heading1, fontWeight: "700" },
     {
@@ -344,96 +351,125 @@ function BasicCompletion(context: CompletionContext): any {
 export default function CreateEditor(ElementID: string, content: string) {
     const element = document.getElementById(ElementID)!;
 
+    // load extensions
+    const ExtensionsList = [
+        keymap.of(markdownKeymap),
+        highlightSpecialChars(),
+        drawSelection(),
+        rectangularSelection(),
+        EditorView.lineWrapping,
+        closeBrackets(),
+        history(),
+        EditorView.updateListener.of(async (update) => {
+            if (update.docChanged) {
+                const content = update.state.doc.toString();
+                if (content === "") return;
+
+                // basic session save
+                window.localStorage.setItem("doc", content);
+
+                const html = await ParseMarkdown(content, false);
+                window.localStorage.setItem("gen", html);
+
+                // update the hidden contentInput element so we can save the paste
+                (document.getElementById("contentInput") as HTMLInputElement).value =
+                    encodeURIComponent(content); // encoded so we can send it through form
+            }
+        }),
+        EditorState.allowMultipleSelections.of(true),
+        indentOnInput(),
+        indentUnit.of("    "),
+        keymap.of([
+            // we're creating this keymap because of a weird issue in firefox where
+            // (if there is no text before or after), a new line is not created
+            // ...we're basically just manually inserting the new line here
+            {
+                key: "Enter",
+                run: (): boolean => {
+                    // get current line
+                    const CurrentLine = view.state.doc.lineAt(
+                        view.state.selection.main.head
+                    );
+
+                    // get indentation string (for automatic indent)
+                    let IndentationString =
+                        // gets everything before the first non-whitespace character
+                        CurrentLine.text.split(/[^\s]/)[0];
+
+                    let ExtraCharacters = "";
+
+                    // if last character of the line is }, add an indentation
+                    // } because it's automatically added after opened braces!
+                    if (CurrentLine.text[CurrentLine.text.length - 1] === "}") {
+                        IndentationString += "    ";
+                        ExtraCharacters = "\n"; // auto insert line break after
+                    }
+
+                    // start transaction
+                    const cursor = view.state.selection.main.head;
+                    const transaction = view.state.update({
+                        changes: {
+                            from: cursor,
+                            insert: `\n${IndentationString}${ExtraCharacters}`,
+                        },
+                        selection: {
+                            anchor: cursor + 1 + IndentationString.length,
+                        },
+                        scrollIntoView: true,
+                    });
+
+                    if (transaction) {
+                        view.dispatch(transaction);
+                    }
+
+                    // return
+                    return true;
+                },
+            },
+            indentWithTab,
+        ]),
+        // markdown
+        syntaxHighlighting(highlight),
+        syntaxHighlighting(WorkshopHighlight),
+        markdown({
+            base: markdownLanguage,
+        }),
+        autocompletion({
+            override: [BasicCompletion],
+            activateOnTyping:
+                window.location.search.includes("hints=true") ||
+                window.localStorage.getItem("entry:user.EditorHints") === "true",
+        }),
+    ];
+
+    if (window.localStorage.getItem("entry:user.ShowLineNumbers") === "true")
+        ExtensionsList.push(lineNumbers());
+
     // create editor
     const view = new EditorView({
         // @ts-ignore
         state: EditorState.create({
             doc:
                 // display the saved document or given content
-                window.sessionStorage.getItem("doc")! ||
+                window.localStorage.getItem("doc")! ||
                 decodeURIComponent(content) ||
                 "",
-            extensions: [
-                keymap.of(markdownKeymap),
-                highlightSpecialChars(),
-                drawSelection(),
-                rectangularSelection(),
-                EditorView.lineWrapping,
-                closeBrackets(),
-                history(),
-                EditorView.updateListener.of(async (update) => {
-                    if (update.docChanged) {
-                        const content = update.state.doc.toString();
-                        if (content === "") return;
-
-                        // basic session save
-                        window.sessionStorage.setItem("doc", content);
-
-                        const html = await ParseMarkdown(content, false);
-                        window.sessionStorage.setItem("gen", html);
-
-                        // update the hidden contentInput element so we can save the paste
-                        (
-                            document.getElementById(
-                                "contentInput"
-                            ) as HTMLInputElement
-                        ).value = encodeURIComponent(content); // encoded so we can send it through form
-                    }
-                }),
-                keymap.of([
-                    // we're creating this keymap because of a weird issue in firefox where
-                    // (if there is no text before or after), a new line is not created
-                    // ...we're basically just manually inserting the new line here
-                    {
-                        key: "Enter",
-                        run: (): boolean => {
-                            const cursor = view.state.selection.main.head;
-                            const transaction = view.state.update({
-                                changes: {
-                                    from: cursor,
-                                    insert: "\n",
-                                },
-                                selection: { anchor: cursor + 1 },
-                                scrollIntoView: true,
-                            });
-
-                            if (transaction) {
-                                view.dispatch(transaction);
-                            }
-
-                            // return
-                            return true;
-                        },
-                    },
-                ]),
-                // markdown
-                syntaxHighlighting(highlight),
-                markdown({
-                    base: markdownLanguage,
-                }),
-                autocompletion({
-                    override: [BasicCompletion],
-                    activateOnTyping:
-                        window.location.search.includes("hints=true") ||
-                        window.localStorage.getItem("entry:user.EditorHints") ===
-                            "true",
-                }),
-            ],
+            extensions: ExtensionsList,
         }),
         parent: element,
     });
 
     // prerender
     (async () => {
-        window.sessionStorage.setItem(
-            "gen",
-            await ParseMarkdown(
-                window.sessionStorage.getItem("doc")! ||
-                    decodeURIComponent(content) ||
-                    "",
-                false
-            )
-        );
+        // window.localStorage.setItem(
+        //     "gen",
+        //     await ParseMarkdown(
+        //         window.localStorage.getItem("doc")! ||
+        //             decodeURIComponent(content) ||
+        //             "",
+        //         false
+        //     )
+        // );
 
         // update contentInput with initial content
         (document.getElementById("contentInput") as HTMLInputElement).value =
@@ -449,7 +485,7 @@ export default function CreateEditor(ElementID: string, content: string) {
     contentField.setAttribute("aria-label", "Content Editor");
 
     // set value of contentInput if we have window.sessionStorage.doc
-    const doc = window.sessionStorage.getItem("doc");
+    const doc = window.localStorage.getItem("doc");
     if (doc)
         (document.getElementById("contentInput") as HTMLInputElement).value =
             encodeURIComponent(doc);
@@ -481,7 +517,7 @@ document.getElementById("editor-open-tab-preview")!.addEventListener("click", ()
     CloseAllTabs();
     const tab = document.getElementById("editor-tab-preview")!;
 
-    tab.innerHTML = window.sessionStorage.getItem("gen") || "";
+    tab.innerHTML = window.localStorage.getItem("gen") || "";
     tab.classList.add("active");
 
     document

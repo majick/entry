@@ -1064,6 +1064,10 @@ details.file-list-entry .details-flex-content-list-box {
     background: var(--red1) !important;
 }
 
+.cm-editor {
+    height: 100%;
+}
+
 .cm-editor.cm-focused {
     outline: none;
 }

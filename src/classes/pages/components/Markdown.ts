@@ -35,7 +35,16 @@ export function ParseMarkdownSync(
     content = content.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
     // allowed elements
-    for (let element of ["hue", "sat", "lit", "theme", "comment", "p", "span"])
+    for (let element of [
+        "hue",
+        "sat",
+        "lit",
+        "theme",
+        "comment",
+        "p",
+        "span",
+        "style",
+    ])
         content = content
             .replaceAll(`&lt;${element}&gt;`, `<${element}>`)
             .replaceAll(`&lt;/${element}&gt;`, `</${element}>`)
@@ -366,9 +375,6 @@ export function ParseMarkdownSync(
 
     content = content.replaceAll(/(<link.*>)/gs, "");
     content = content.replaceAll(/(<meta.*>)/gs, "");
-
-    content = content.replaceAll(/(<style.*>)(.*?)(<\/style>)/gs, "");
-    content = content.replaceAll(/(<style.*>)/gs, "");
 
     // return
     return content;

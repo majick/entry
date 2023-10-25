@@ -31,6 +31,9 @@ export function HandleCustomElements() {
         const hue = document.querySelector("#editor-tab-preview hue") as HTMLElement;
         const sat = document.querySelector("#editor-tab-preview sat") as HTMLElement;
         const lit = document.querySelector("#editor-tab-preview lit") as HTMLElement;
+        const styleElement = document.querySelector(
+            "#editor-tab-preview style"
+        ) as HTMLStyleElement;
 
         if (hue) style += `--base-hue: ${hue.innerText};`;
         if (sat) style += `--base-sat: ${sat.innerText};`;

@@ -131,6 +131,7 @@ export default function UserSettings(id: string): any {
     AddOption("Disable Images", "entry:user.DisableImages");
     AddOption("Disable Animations", "entry:user.DisableAnimations");
     AddOption("Editor Hints", "entry:user.EditorHints");
+    AddOption("Show Line Numbers", "entry:user.ShowLineNumbers");
 
     // render
     return render(<>{options}</>, document.getElementById(id)!);

@@ -62,6 +62,51 @@ import {
 } from "@codemirror/lang-javascript";
 import { tags } from "@lezer/highlight";
 
+// create editor theme
+export const WorkshopHighlight = HighlightStyle.define([
+    {
+        tag: tags.keyword,
+        color: "var(--red3)",
+        textShadow: "0 0 1px var(--red3)",
+    },
+    {
+        tag: tags.variableName,
+        color: "var(--blue2)",
+    },
+    {
+        tag: tags.propertyName,
+        color: "var(--red)",
+    },
+    {
+        tag: tags.comment,
+        color: "var(--text-color-faded)",
+    },
+    {
+        tag: tags.number,
+        color: "var(--yellow)",
+    },
+    {
+        tag: tags.string,
+        color: "var(--green)",
+    },
+    {
+        tag: tags.operator,
+        color: "var(--red3)",
+    },
+    {
+        tag: tags.bool,
+        color: "var(--blue2)",
+    },
+    {
+        tag: tags.attributeName,
+        color: "var(--blue2)",
+    },
+    {
+        tag: tags.attributeValue,
+        color: "var(--green)",
+    },
+]);
+
 // ...
 export default function Render(element: HTMLElement, UseDoc: string) {
     function ToggleTab() {
@@ -282,8 +327,7 @@ export default function Render(element: HTMLElement, UseDoc: string) {
 
                 <style
                     dangerouslySetInnerHTML={{
-                        __html: `.cm-editor { height: 100%; } 
-                        .cm-line, .cm-line span { font-family: monospace !important; }`,
+                        __html: `.cm-line, .cm-line span { font-family: monospace !important; }`,
                     }}
                 />
             </div>
@@ -400,51 +444,6 @@ export default function Render(element: HTMLElement, UseDoc: string) {
         Renderer.CurrentWorldName
     ).Element.outerHTML;
 
-    // create editor theme
-    const highlight = HighlightStyle.define([
-        {
-            tag: tags.keyword,
-            color: "var(--red3)",
-            textShadow: "0 0 1px var(--red3)",
-        },
-        {
-            tag: tags.variableName,
-            color: "var(--blue2)",
-        },
-        {
-            tag: tags.propertyName,
-            color: "var(--red)",
-        },
-        {
-            tag: tags.comment,
-            color: "var(--text-color-faded)",
-        },
-        {
-            tag: tags.number,
-            color: "var(--yellow)",
-        },
-        {
-            tag: tags.string,
-            color: "var(--green)",
-        },
-        {
-            tag: tags.operator,
-            color: "var(--red3)",
-        },
-        {
-            tag: tags.bool,
-            color: "var(--blue2)",
-        },
-        {
-            tag: tags.attributeName,
-            color: "var(--blue2)",
-        },
-        {
-            tag: tags.attributeValue,
-            color: "var(--green)",
-        },
-    ]);
-
     // create code editor
     let CurrentContent: string = "";
 
@@ -464,7 +463,7 @@ export default function Render(element: HTMLElement, UseDoc: string) {
                 drawSelection(),
                 dropCursor(),
                 EditorState.allowMultipleSelections.of(true),
-                syntaxHighlighting(highlight, { fallback: true }),
+                syntaxHighlighting(WorkshopHighlight, { fallback: true }),
                 bracketMatching(),
                 closeBrackets(),
                 autocompletion(),
