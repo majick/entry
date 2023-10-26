@@ -1609,8 +1609,10 @@ export class UpdateCustomDomain implements Endpoint {
 
 // default export
 export default {
+    db,
     DefaultHeaders,
     PageHeaders,
+    GetAssociation,
     VerifyContentType,
     Session,
     WellKnown,

@@ -8,6 +8,8 @@
 import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
 
+import API from "./classes/pages/api/API";
+
 // create global (for plugins)
 import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer";
 import PublishModals from "./classes/pages/components/site/modals/PublishModals";
@@ -16,7 +18,8 @@ import Modal from "./classes/pages/components/site/modals/Modal";
 import TopNav from "./classes/pages/components/site/TopNav";
 
 export type EntryGlobalType = {
-    EntryDB: EntryDB;
+    DistDirectory: string;
+    EntryDB: typeof EntryDB;
     Config: Config;
     Footer: typeof Footer; // needed for client theme
     TopNav: typeof TopNav;
@@ -33,28 +36,32 @@ export type EntryGlobalType = {
     Modals: {
         PublishModals: typeof PublishModals;
     };
+    API: typeof API;
 };
 
-(global as any).EntryDB = EntryDB;
-(global as any).Config = EntryDB.config;
-(global as any).Footer = Footer;
-(global as any).TopNav = TopNav;
-(global as any).Modal = Modal;
-(global as any)._404Page = _404;
-(global as any).ParseMarkdown = ParseMarkdown;
+(globalThis as any).DistDirectory = import.meta.dir;
+(globalThis as any).Config = EntryDB.config;
+(globalThis as any).Footer = Footer;
+(globalThis as any).TopNav = TopNav;
+(globalThis as any).Modal = Modal;
+(globalThis as any)._404Page = _404;
+(globalThis as any).ParseMarkdown = ParseMarkdown;
 
-(global as any).Headers = {
+(globalThis as any).Headers = {
     Default: API.DefaultHeaders,
     Page: API.PageHeaders,
 };
 
-(global as any).Helpers = {
+(globalThis as any).Helpers = {
     VerifyContentType: API.VerifyContentType,
 };
 
-(global as any).Modals = {
+(globalThis as any).Modals = {
     PublishModals: PublishModals,
 };
+
+(globalThis as any).EntryDB = EntryDB;
+(globalThis as any).API = API;
 
 // includes
 import "./classes/pages/assets/css/style.css";
@@ -73,6 +80,7 @@ export type Config = {
     do_not_cache?: boolean;
     app?: {
         info?: string;
+        how?: string;
         enable_search?: boolean; // true default
         enable_private_pastes?: boolean; // true default
         enable_groups?: boolean; // true default
@@ -81,7 +89,6 @@ export type Config = {
         enable_builder?: boolean; // true default
         enable_paste_settings?: boolean; // true default
         enable_comments?: boolean; // false default
-        enable_workshop?: boolean; // false default
         association_required?: boolean; // requires an association to create pastes
         auto_tag?: boolean;
         favicon?: string;
@@ -189,12 +196,10 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 
 // ...import endpoints
 import _404, { _404Page } from "./classes/pages/components/404";
-import Workshop from "./classes/pages/components/workshop";
 import Builder from "./classes/pages/components/builder";
 import AdminAPI from "./classes/pages/api/AdminAPI";
 import Admin from "./classes/pages/Admin";
 import Pages from "./classes/pages/Pages";
-import API from "./classes/pages/api/API";
 
 // get plugins
 export let plugins: HoneybeeConfig["Pages"] = {};
@@ -205,12 +210,24 @@ if (EntryDB.config.plugin_file) {
 
     // if file exists, import file and get default return value
     if (await Bun.file(Path).exists()) {
-        const PluginsList: { default: Array<HoneybeeConfig["Pages"]> } =
+        const PluginsList: { default: Array<[string, HoneybeeConfig["Pages"]]> } =
             await import(Path);
 
         // load plugin pages
-        for (const Plugin of PluginsList.default)
-            plugins = { ...plugins, ...Plugin };
+        for (const Plugin of PluginsList.default) {
+            // if plugin[1] has a page named "._set_plugin_dir", call it with Plugin[0]
+            if (Plugin[1]["._set_plugin_dir"])
+                new Plugin[1]["._set_plugin_dir"].Page().request(
+                    new Request("about:blank", {
+                        headers: {
+                            "X-Plugin-Dir": Plugin[0],
+                        },
+                    })
+                );
+
+            // add to plugins global
+            plugins = { ...plugins, ...Plugin[1] };
+        }
     }
 }
 
@@ -289,9 +306,6 @@ const config: HoneybeeConfig = {
         "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
         // GET builder
         "/paste/builder": { Page: Builder.Builder },
-        // GET workshop
-        "/paste/workshop": { Page: Workshop.WorkshopProjects },
-        "/paste/workshop/gl": { Page: Workshop.WorkshopEditor },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },

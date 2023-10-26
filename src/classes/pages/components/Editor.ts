@@ -35,7 +35,6 @@ import { HandleCustomElements } from "../assets/ClientFixMarkdown";
 import { ParseMarkdown } from "./Markdown";
 
 // create theme
-import { WorkshopHighlight } from "./workshop/WorkshopEditor";
 const highlight = HighlightStyle.define([
     { tag: tags.heading1, fontWeight: "700" },
     {
@@ -430,7 +429,6 @@ export default function CreateEditor(ElementID: string, content: string) {
         ]),
         // markdown
         syntaxHighlighting(highlight),
-        syntaxHighlighting(WorkshopHighlight),
         markdown({
             base: markdownLanguage,
         }),

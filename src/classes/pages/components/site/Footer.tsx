@@ -11,7 +11,7 @@ let version: Partial<Paste> | undefined;
 
 if (!EntryDB.config) {
     const _r = await EntryDB.GetConfig();
-    if (_r) version = await db.GetPasteFromURL("v");
+    if (_r && db) version = await db.GetPasteFromURL("v");
 }
 
 // plugin footer load

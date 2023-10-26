@@ -281,8 +281,8 @@ export function ParseMarkdownSync(
 
     // underline
     content = content.replaceAll(
-        /(\_{2})(.+)(\_{2})/gs,
-        '<span style="text-decoration: underline;">$2</del>'
+        /(\_{2})(.*?)(\_{2})/gs,
+        '<span style="text-decoration: underline;">$2</span>'
     );
 
     // named links

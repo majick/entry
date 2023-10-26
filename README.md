@@ -211,6 +211,8 @@ The [admin panel](#admin-panel) plugin tab shows the found and loaded plugin pag
 
 Plugins can load HTML content into the site footer by adding an endpoint beginning with `._footer`, these work the same as normal endpoints (implementing the `Endpoint` class), but their request URL will always be from `entry:footer-load`. The HTML they return is added to the bottom of the footer on all pages the footer is present. This allows plugins to modify existing pages and include their own scripts in the site.
 
+If a plugin has an endpoint named `._set_plugin_dir` and the pluginfile supplies it, the endpoint will be called with a request that has the header value of "X-Plugin-Dir" set to the directory of the plugin source.
+
 I recommend placing your plugin file and the build file in `data_directory/plugins`
 
 #### Paste Reports

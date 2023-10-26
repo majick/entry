@@ -3,8 +3,10 @@
  * @name .pluginfile.example.ts
  */
 
+import path from "node:path";
+
 // import plugins
 import pluginExample from "./plugin-example";
 
 // export plugins
-export default [pluginExample];
+export default [[path.resolve(import.meta.dir, "./plugin-example"), pluginExample]];

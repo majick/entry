@@ -11,7 +11,7 @@ import type _404Page from "entry/src/classes/pages/components/404";
 import { Renderer, Endpoint, HoneybeeConfig } from "honeybee";
 
 // create global
-const EntryGlobal = global as unknown as EntryGlobalType;
+const EntryGlobal = globalThis as unknown as EntryGlobalType;
 
 // create page...
 const _Footer = EntryGlobal.Footer;

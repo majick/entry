@@ -7,8 +7,6 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
-import renderToString from "preact-render-to-string";
-
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import BuilderParser from "./components/builder/parser";
