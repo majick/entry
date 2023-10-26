@@ -403,7 +403,7 @@ export class GetPasteFromURL implements Endpoint {
                                                         href={`${HostnameURL}${result.Metadata.Owner}`}
                                                     >
                                                         {result.Metadata.Owner
-                                                            .length > 50
+                                                            .length > 25
                                                             ? `${result.Metadata.Owner}...`
                                                             : result.Metadata.Owner}
                                                     </a>
@@ -895,7 +895,7 @@ export class GetPasteFromURL implements Endpoint {
                                                             href={`${HostnameURL}${result.Metadata.Owner}`}
                                                         >
                                                             {result.Metadata.Owner
-                                                                .length > 50
+                                                                .length > 25
                                                                 ? `${result.Metadata.Owner}...`
                                                                 : result.Metadata
                                                                       .Owner}
@@ -1101,22 +1101,7 @@ export class PasteDocView implements Endpoint {
                                     />
                                 </div>
 
-                                <Footer
-                                    ShowBottomRow={
-                                        (
-                                            (
-                                                EntryDB.config.app || {
-                                                    footer: {
-                                                        show_name_on_all_pages:
-                                                            false,
-                                                    },
-                                                }
-                                            ).footer || {
-                                                show_name_on_all_pages: false,
-                                            }
-                                        ).show_name_on_all_pages === true
-                                    }
-                                />
+                                <Footer />
                             </div>
 
                             <details className="sidebar-mobile">
@@ -1377,8 +1362,6 @@ export class PastesSearch implements Endpoint {
                                     }`,
                                 }}
                             />
-
-                            <Footer />
                         </main>
                     </>,
                     <>
@@ -1641,372 +1624,391 @@ export class PasteCommentsPage implements Endpoint {
                             marginBottom: "0",
                         }}
                     >
-                        <div
-                            class={
-                                "flex flex-wrap justify-space-between align-center g-4"
-                            }
+                        <main
+                            style={{
+                                maxWidth: "100%",
+                            }}
                         >
-                            <span>
-                                <b>{result.Comments}</b> comment
-                                {(result.Comments || 0) > 1
-                                    ? "s"
-                                    : (result.Comments || 0) === 1
-                                    ? ""
-                                    : "s"}
-                                , posting as{" "}
-                                {(PostingAs && (
-                                    <>
-                                        <b>{PostingAs}</b> (
-                                        <a
-                                            href="#entry:logout"
-                                            class={"modal:entry:button.logout"}
-                                        >
-                                            logout
-                                        </a>
-                                        )
-                                    </>
-                                )) || (
-                                    <>
-                                        <b>anonymous</b> (
-                                        <a
-                                            href="#entry:login"
-                                            class={"modal:entry:button.login"}
-                                        >
-                                            login
-                                        </a>
-                                        )
-                                    </>
-                                )}
-                            </span>
-
-                            <div class={"mobile-flex-center flex flex-wrap g-4"}>
-                                <a
-                                    href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
-                                    className="button secondary round"
-                                >
-                                    Add Comment
-                                </a>
-
-                                {
-                                    // private comments cannot be privately commented on
-                                    // ...because then the original paste owner wouldn't
-                                    // be able to see the comments deeper in the thread!
-                                    // cannot post private comments if you're not associated with a paste!
-                                    (!result.Metadata ||
-                                        !result.Metadata.Comments ||
-                                        !result.Metadata.Comments
-                                            .IsPrivateMessage) &&
-                                        PostingAs !== undefined && (
-                                            <a
-                                                href={`${HostnameURL}?CommentOn=${result.CustomURL}&pm=true`}
-                                                className="button secondary round"
-                                            >
-                                                Private Comment
-                                            </a>
-                                        )
+                            <div
+                                class={
+                                    "flex flex-wrap justify-space-between align-center g-4"
                                 }
+                            >
+                                <span>
+                                    <b>{result.Comments}</b> comment
+                                    {(result.Comments || 0) > 1
+                                        ? "s"
+                                        : (result.Comments || 0) === 1
+                                        ? ""
+                                        : "s"}
+                                    , posting as{" "}
+                                    {(PostingAs && (
+                                        <>
+                                            <b>{PostingAs}</b> (
+                                            <a
+                                                href="#entry:logout"
+                                                class={"modal:entry:button.logout"}
+                                            >
+                                                logout
+                                            </a>
+                                            )
+                                        </>
+                                    )) || (
+                                        <>
+                                            <b>anonymous</b> (
+                                            <a
+                                                href="#entry:login"
+                                                class={"modal:entry:button.login"}
+                                            >
+                                                login
+                                            </a>
+                                            )
+                                        </>
+                                    )}
+                                </span>
 
-                                {(search.get("edit") !== "true" && (
-                                    <>
-                                        {PostingAs !== undefined ? (
-                                            (result.Metadata &&
-                                                result.Metadata.Comments &&
-                                                PostingAs !==
-                                                    result.Metadata.Owner &&
-                                                PostingAs !==
-                                                    // if we're posting as the paste that
-                                                    // this comment (or its parent) is in reply to,
-                                                    // allow manage access
-                                                    result.Metadata.Comments
-                                                        .ParentCommentOn && (
-                                                    <button
-                                                        // show logout button if we're already associated with a paste
-                                                        class={
-                                                            "tertiary round modal:entry:button.logout"
-                                                        }
-                                                    >
-                                                        Manage
-                                                    </button>
-                                                )) || (
+                                <div class={"mobile-flex-center flex flex-wrap g-4"}>
+                                    <a
+                                        href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
+                                        className="button secondary round"
+                                    >
+                                        Add Comment
+                                    </a>
+
+                                    {
+                                        // private comments cannot be privately commented on
+                                        // ...because then the original paste owner wouldn't
+                                        // be able to see the comments deeper in the thread!
+                                        // cannot post private comments if you're not associated with a paste!
+                                        (!result.Metadata ||
+                                            !result.Metadata.Comments ||
+                                            !result.Metadata.Comments
+                                                .IsPrivateMessage) &&
+                                            PostingAs !== undefined && (
                                                 <a
-                                                    // show edit button if we're associated with this paste
-                                                    class={"button round tertiary"}
-                                                    href={"?edit=true"}
+                                                    href={`${HostnameURL}?CommentOn=${result.CustomURL}&pm=true`}
+                                                    className="button secondary round"
                                                 >
-                                                    Manage
+                                                    Private Comment
                                                 </a>
                                             )
-                                        ) : (
-                                            <button
-                                                // show login button if we're not already associated with a paste
-                                                class={
-                                                    "tertiary round modal:entry:button.login"
-                                                }
-                                            >
-                                                Manage
-                                            </button>
-                                        )}
-                                    </>
-                                )) || (
-                                    <a
-                                        href={"?edit=false"}
-                                        className="button round tertiary"
-                                    >
-                                        Stop Editing
-                                    </a>
-                                )}
-                            </div>
-                        </div>
+                                    }
 
-                        <hr />
-
-                        {PreviousInThread && (
-                            <>
-                                <a
-                                    href={`/paste/comments/${PreviousInThread}`}
-                                    class={"button secondary round"}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        aria-label={"Undo Symbol"}
-                                    >
-                                        <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
-                                    </svg>
-                                    up thread
-                                </a>
-
-                                <hr />
-                            </>
-                        )}
-
-                        <div class={"flex flex-column g-4"}>
-                            {(search.get("err") && (
-                                <div
-                                    class={"mdnote note-error"}
-                                    style={{
-                                        marginBottom: "0.5rem",
-                                    }}
-                                >
-                                    <b class={"mdnote-title"}>Application Error</b>
-                                    <p>{decodeURIComponent(search.get("err")!)}</p>
+                                    {(search.get("edit") !== "true" && (
+                                        <>
+                                            {PostingAs !== undefined ? (
+                                                (result.Metadata &&
+                                                    result.Metadata.Comments &&
+                                                    PostingAs !==
+                                                        result.Metadata.Owner &&
+                                                    PostingAs !==
+                                                        // if we're posting as the paste that
+                                                        // this comment (or its parent) is in reply to,
+                                                        // allow manage access
+                                                        result.Metadata.Comments
+                                                            .ParentCommentOn && (
+                                                        <button
+                                                            // show logout button if we're already associated with a paste
+                                                            class={
+                                                                "tertiary round modal:entry:button.logout"
+                                                            }
+                                                        >
+                                                            Manage
+                                                        </button>
+                                                    )) || (
+                                                    <a
+                                                        // show edit button if we're associated with this paste
+                                                        class={
+                                                            "button round tertiary"
+                                                        }
+                                                        href={"?edit=true"}
+                                                    >
+                                                        Manage
+                                                    </a>
+                                                )
+                                            ) : (
+                                                <button
+                                                    // show login button if we're not already associated with a paste
+                                                    class={
+                                                        "tertiary round modal:entry:button.login"
+                                                    }
+                                                >
+                                                    Manage
+                                                </button>
+                                            )}
+                                        </>
+                                    )) || (
+                                        <a
+                                            href={"?edit=false"}
+                                            className="button round tertiary"
+                                        >
+                                            Stop Editing
+                                        </a>
+                                    )}
                                 </div>
-                            )) ||
-                                (search.get("msg") && (
+                            </div>
+
+                            <hr />
+
+                            {PreviousInThread && (
+                                <>
+                                    <a
+                                        href={`/paste/comments/${PreviousInThread}`}
+                                        class={"button secondary round"}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Undo Symbol"}
+                                        >
+                                            <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                        </svg>
+                                        up thread
+                                    </a>
+
+                                    <hr />
+                                </>
+                            )}
+
+                            <div class={"flex flex-column g-4"}>
+                                {(search.get("err") && (
                                     <div
-                                        class={"mdnote note-note"}
+                                        class={"mdnote note-error"}
                                         style={{
                                             marginBottom: "0.5rem",
                                         }}
                                     >
                                         <b class={"mdnote-title"}>
-                                            Application Message
+                                            Application Error
                                         </b>
                                         <p>
-                                            {decodeURIComponent(search.get("msg")!)}
+                                            {decodeURIComponent(search.get("err")!)}
                                         </p>
                                     </div>
-                                ))}
-
-                            {result.Comments === 0 && (
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    <span>
-                                        No comments yet!{" "}
-                                        <a
-                                            href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
+                                )) ||
+                                    (search.get("msg") && (
+                                        <div
+                                            class={"mdnote note-note"}
+                                            style={{
+                                                marginBottom: "0.5rem",
+                                            }}
                                         >
-                                            Add Comment
-                                        </a>
-                                    </span>
-                                </div>
-                            )}
+                                            <b class={"mdnote-title"}>
+                                                Application Message
+                                            </b>
+                                            <p>
+                                                {decodeURIComponent(
+                                                    search.get("msg")!
+                                                )}
+                                            </p>
+                                        </div>
+                                    ))}
 
-                            {CommentPastes.map((comment) => (
-                                <div
-                                    class={"card"}
-                                    style={{
-                                        borderRadius: "0.4rem",
-                                    }}
-                                >
-                                    <ul
-                                        className="__footernav"
+                                {result.Comments === 0 && (
+                                    <div
                                         style={{
-                                            paddingLeft: 0,
-                                            flexWrap: "wrap",
+                                            display: "flex",
+                                            justifyContent: "center",
                                         }}
                                     >
-                                        <li>
-                                            <b class={"utc-date-to-localize"}>
-                                                {new Date(
-                                                    comment.PubDate || 0
-                                                ).toUTCString()}
-                                            </b>
-                                        </li>
-
-                                        {comment.Associated && (
-                                            <li
-                                                style={{
-                                                    color: "var(--text-color-faded)",
-                                                }}
+                                        <span>
+                                            No comments yet!{" "}
+                                            <a
+                                                href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
                                             >
-                                                posted by{" "}
-                                                <a
-                                                    class={"chip solid"}
-                                                    href={`/${comment.Associated}`}
-                                                    style={{
-                                                        color:
-                                                            // if comment poster is the paste owner, make color yellow
-                                                            // otherwise if comment poster is current user, make color green
-                                                            comment.Metadata!
-                                                                .Owner ===
-                                                            result.CustomURL
-                                                                ? "var(--yellow)"
-                                                                : PostingAs ===
-                                                                  comment.Associated
-                                                                ? "var(--green)"
-                                                                : "inherit",
-                                                    }}
-                                                    title={
-                                                        PostingAs ===
-                                                        comment.Associated
-                                                            ? "You"
-                                                            : ""
-                                                    }
-                                                >
-                                                    {comment.Associated}
-                                                </a>
+                                                Add Comment
+                                            </a>
+                                        </span>
+                                    </div>
+                                )}
+
+                                {CommentPastes.map((comment) => (
+                                    <div
+                                        class={"card"}
+                                        style={{
+                                            borderRadius: "0.4rem",
+                                        }}
+                                    >
+                                        <ul
+                                            className="__footernav"
+                                            style={{
+                                                paddingLeft: 0,
+                                                flexWrap: "wrap",
+                                            }}
+                                        >
+                                            <li>
+                                                <b class={"utc-date-to-localize"}>
+                                                    {new Date(
+                                                        comment.PubDate || 0
+                                                    ).toUTCString()}
+                                                </b>
                                             </li>
-                                        )}
 
-                                        {comment.IsPM === "true" && (
-                                            <li
-                                                title={
-                                                    "This is a private comment, but it can still be seen by people with a direct link."
-                                                }
-                                            >
-                                                <span
-                                                    class={"chip"}
+                                            {comment.Associated && (
+                                                <li
                                                     style={{
                                                         color: "var(--text-color-faded)",
                                                     }}
                                                 >
-                                                    🔒 private
-                                                </span>
-                                            </li>
-                                        )}
-                                    </ul>
+                                                    posted by{" "}
+                                                    <a
+                                                        class={"chip solid"}
+                                                        href={`/${comment.Associated}`}
+                                                        style={{
+                                                            color:
+                                                                // if comment poster is the paste owner, make color yellow
+                                                                // otherwise if comment poster is current user, make color green
+                                                                comment.Metadata!
+                                                                    .Owner ===
+                                                                result.CustomURL
+                                                                    ? "var(--yellow)"
+                                                                    : PostingAs ===
+                                                                      comment.Associated
+                                                                    ? "var(--green)"
+                                                                    : "inherit",
+                                                        }}
+                                                        title={
+                                                            PostingAs ===
+                                                            comment.Associated
+                                                                ? "You"
+                                                                : ""
+                                                        }
+                                                    >
+                                                        {comment.Associated}
+                                                    </a>
+                                                </li>
+                                            )}
 
-                                    <div
-                                        style={{
-                                            maxHeight: "50rem",
-                                            overflow: "auto",
-                                        }}
-                                        dangerouslySetInnerHTML={{
-                                            __html: comment.Content!,
-                                        }}
-                                    />
-
-                                    {comment.Comments !== 0 && (
-                                        <div>
-                                            <hr />
-
-                                            <a
-                                                href={`/paste/comments/${comment.CustomURL}`}
-                                            >
-                                                View <b>{comment.Comments}</b> repl
-                                                {comment.Comments! > 1
-                                                    ? "ies"
-                                                    : comment.Comments === 1
-                                                    ? "y"
-                                                    : "ies"}
-                                            </a>
-                                        </div>
-                                    )}
-
-                                    <hr />
-
-                                    <div class={"flex g-4"}>
-                                        <a
-                                            class={"chip button secondary"}
-                                            href={`${HostnameURL}?CommentOn=${comment.CustomURL}`}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Reply Symbol"}
-                                            >
-                                                <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
-                                            </svg>
-                                            reply
-                                        </a>
-
-                                        <a
-                                            class={"chip button secondary"}
-                                            href={`/${comment.CustomURL}`}
-                                            target={"_blank"}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"External Link Symbol"}
-                                            >
-                                                <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
-                                            </svg>
-                                            open
-                                        </a>
-
-                                        {search.get("edit") === "true" && (
-                                            <form
-                                                action="/api/comments/delete"
-                                                method={"POST"}
-                                            >
-                                                <input
-                                                    type="hidden"
-                                                    name="CustomURL"
-                                                    value={result.CustomURL}
-                                                    required
-                                                />
-
-                                                <input
-                                                    type="hidden"
-                                                    name="CommentURL"
-                                                    value={comment.CustomURL}
-                                                    required
-                                                />
-
-                                                <button
-                                                    class={
-                                                        "chip solid button secondary"
+                                            {comment.IsPM === "true" && (
+                                                <li
+                                                    title={
+                                                        "This is a private comment, but it can still be seen by people with a direct link."
                                                     }
                                                 >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        height="16"
-                                                        aria-label={"Trash Symbol"}
+                                                    <span
+                                                        class={"chip"}
+                                                        style={{
+                                                            color: "var(--text-color-faded)",
+                                                        }}
                                                     >
-                                                        <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
-                                                    </svg>
-                                                    delete
-                                                </button>
-                                            </form>
+                                                        🔒 private
+                                                    </span>
+                                                </li>
+                                            )}
+                                        </ul>
+
+                                        <div
+                                            style={{
+                                                maxHeight: "50rem",
+                                                overflow: "auto",
+                                            }}
+                                            dangerouslySetInnerHTML={{
+                                                __html: comment.Content!,
+                                            }}
+                                        />
+
+                                        {comment.Comments !== 0 && (
+                                            <div>
+                                                <hr />
+
+                                                <a
+                                                    href={`/paste/comments/${comment.CustomURL}`}
+                                                >
+                                                    View <b>{comment.Comments}</b>{" "}
+                                                    repl
+                                                    {comment.Comments! > 1
+                                                        ? "ies"
+                                                        : comment.Comments === 1
+                                                        ? "y"
+                                                        : "ies"}
+                                                </a>
+                                            </div>
                                         )}
+
+                                        <hr />
+
+                                        <div class={"flex g-4"}>
+                                            <a
+                                                class={"chip button secondary"}
+                                                href={`${HostnameURL}?CommentOn=${comment.CustomURL}`}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Reply Symbol"}
+                                                >
+                                                    <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+                                                </svg>
+                                                reply
+                                            </a>
+
+                                            <a
+                                                class={"chip button secondary"}
+                                                href={`/${comment.CustomURL}`}
+                                                target={"_blank"}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={
+                                                        "External Link Symbol"
+                                                    }
+                                                >
+                                                    <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
+                                                </svg>
+                                                open
+                                            </a>
+
+                                            {search.get("edit") === "true" && (
+                                                <form
+                                                    action="/api/comments/delete"
+                                                    method={"POST"}
+                                                >
+                                                    <input
+                                                        type="hidden"
+                                                        name="CustomURL"
+                                                        value={result.CustomURL}
+                                                        required
+                                                    />
+
+                                                    <input
+                                                        type="hidden"
+                                                        name="CommentURL"
+                                                        value={comment.CustomURL}
+                                                        required
+                                                    />
+
+                                                    <button
+                                                        class={
+                                                            "chip solid button secondary"
+                                                        }
+                                                    >
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Trash Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                                                        </svg>
+                                                        delete
+                                                    </button>
+                                                </form>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        </main>
                     </div>
 
                     {/* auth flow modals */}
@@ -2350,8 +2352,6 @@ export class UserSettings implements Endpoint {
                                 </div>
                             </div>
 
-                            <Footer />
-
                             <script
                                 type={"module"}
                                 dangerouslySetInnerHTML={{
@@ -2656,8 +2656,6 @@ export class UserSettings implements Endpoint {
                                         )}
                                 </div>
                             </div>
-
-                            <Footer />
 
                             <script
                                 type={"module"}
@@ -3027,8 +3025,6 @@ export class ViewPasteMedia implements Endpoint {
                                 </button>
                             </form>
                         </Modal>
-
-                        <Footer />
                     </main>
 
                     {/* curiosity */}

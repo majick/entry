@@ -44,9 +44,11 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
     return (
         <div class={"flex justify-center align-center flex-column"}>
             <hr
+                class={"small"}
                 style={{
                     width: "425px",
                     maxWidth: "100%",
+                    marginTop: "1rem",
                 }}
             />
 
@@ -66,7 +68,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                             >
                                 new
                             </a>
-                        )) || <a href={homepageLink}>new</a>}
+                        )) || <a href={`${homepageLink}?new-paste`}>new</a>}
                 </li>
 
                 <li>
@@ -80,9 +82,11 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                         </li>
                     )}
 
-                <li>
-                    <ToggleTheme />
-                </li>
+                {EntryDB.config.app && EntryDB.config.app.info && (
+                    <li>
+                        <a href={`/${EntryDB.config.app.info}`}>info</a>
+                    </li>
+                )}
             </ul>
 
             {EntryDB.config.app &&
@@ -133,6 +137,23 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     </span>
                 </p>
             )}
+
+            <div
+                style={{
+                    position: "relative",
+                    width: "100%",
+                }}
+            >
+                <div
+                    style={{
+                        position: "absolute",
+                        bottom: "10px",
+                        right: "0",
+                    }}
+                >
+                    <ToggleTheme />
+                </div>
+            </div>
 
             <style
                 dangerouslySetInnerHTML={{
@@ -195,7 +216,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
 
                 <div class={"flex flex-wrap justify-center align-center g-4"}>
                     <a
-                        href={homepageLink}
+                        href={`${homepageLink}?new-paste`}
                         class={"button border dashed __footer_cardbtn"}
                     >
                         <svg

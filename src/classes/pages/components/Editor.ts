@@ -448,10 +448,11 @@ export default function CreateEditor(ElementID: string, content: string) {
     // bad system for testing if we're editing something else
     // checks if first 10 characters are changed, clears doc if they are
     if (
-        window.localStorage.getItem("doc") &&
-        !window.localStorage
-            .getItem("doc")!
-            .startsWith(decodeURIComponent(content).substring(0, 9))
+        (window.localStorage.getItem("doc") &&
+            !window.localStorage
+                .getItem("doc")!
+                .startsWith(decodeURIComponent(content).substring(0, 9))) ||
+        window.location.search.includes("new-paste")
     )
         window.localStorage.removeItem("doc");
 
@@ -521,6 +522,8 @@ document.getElementById("editor-open-tab-text")!.addEventListener("click", () =>
 
     document.getElementById("editor-open-tab-text")!.classList.remove("secondary");
     document.getElementById("editor-tab-text")!.classList.add("active");
+
+    document.getElementById("-editor")!.style.borderTopLeftRadius = "0";
 });
 
 document.getElementById("editor-open-tab-preview")!.addEventListener("click", () => {
@@ -529,6 +532,8 @@ document.getElementById("editor-open-tab-preview")!.addEventListener("click", ()
 
     tab.innerHTML = window.localStorage.getItem("gen") || "";
     tab.classList.add("active");
+
+    document.getElementById("-editor")!.style.borderTopLeftRadius = "var(--u-04)";
 
     document
         .getElementById("editor-open-tab-preview")!
