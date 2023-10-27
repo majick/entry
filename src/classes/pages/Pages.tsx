@@ -217,6 +217,7 @@ export class GetPasteFromURL implements Endpoint {
         if (
             result.Metadata &&
             result.Metadata.PrivateSource === true &&
+            result.Metadata.Owner &&
             result.Metadata.Owner !== Association[1]
         )
             HideSource = true;
@@ -1230,17 +1231,17 @@ export class PastesSearch implements Endpoint {
         const SessionCookie = await Session(request);
 
         // ...
-        if (search.get("q")) {
+        if (search.get("q") || search.get("owner")) {
             // build query
-            let query = `CustomURL LIKE "%${search
-                .get("q")!
+            let query = `CustomURL LIKE "%${(search.get("q") || "")
                 .toLowerCase()
                 .replaceAll('"', "'")}%" LIMIT 100`;
 
-            // if q === "explore", explore recent pastes
+            // if q does not exist (or is "explore"), set explore mode
             let ExploreMode = false;
-            if (search.get("q") === "explore") {
+            if (!search.get("q") || search.get("q") === "explore") {
                 query = `CustomURL IS NOT NULL ORDER BY cast(EditDate as float) DESC LIMIT 100`;
+                search.set("q", "explore");
                 ExploreMode = true;
             }
 
@@ -1251,6 +1252,15 @@ export class PastesSearch implements Endpoint {
                       await db.GetAllPastes(false, true, query)
                     : // search within group
                       await db.GetAllPastesInGroup(search.get("group") as string);
+
+            // if "owner" is set, filter out pastes not owned by value
+            if (search.get("owner"))
+                for (const paste of pastes)
+                    if (
+                        paste.Metadata &&
+                        paste.Metadata!.Owner !== search.get("owner")
+                    )
+                        pastes.splice(pastes.indexOf(paste), 1);
 
             // if search is disabled, a value for "group" is required
             // ...if we don't have one, 404!
@@ -1295,7 +1305,12 @@ export class PastesSearch implements Endpoint {
                                                 query={search.get("q") || ""}
                                             />
                                         )))) || (
-                                    <div>Explore pastes, sorted by edit date</div>
+                                    <div>
+                                        Explore pastes{" "}
+                                        {search.get("owner") &&
+                                            `by ${search.get("owner")}`}
+                                        , sorted by edit date
+                                    </div>
                                 )}
 
                                 <span class={"mobile-center"}>

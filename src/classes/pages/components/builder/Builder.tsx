@@ -149,6 +149,34 @@ export function Delete(node: Node) {
     return Update();
 }
 
+// history functions
+const History: string[] = [];
+let HistoryCurrent = 0;
+
+export function SaveStateToHistory(): void {
+    // push state
+    History.push(JSON.stringify(Document));
+
+    // if history length > 10 items, delete the first element
+    if (History.length > 10) History.shift();
+
+    // return
+    return undefined;
+}
+
+export function RestoreState(i: number): void {
+    // get state
+    const state = History[i];
+    if (!state) return;
+
+    // restore state
+    HistoryCurrent = i;
+    Document = JSON.parse(state);
+
+    // return
+    return undefined;
+}
+
 // sidebar
 export function RenderSidebar(props?: { Page: string }) {
     // make sure we're in edit mode
@@ -792,6 +820,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             if (NeedsUpdate !== true) return;
             NeedsUpdate = false;
             RenderCycles++;
+            SaveStateToHistory(); // push new state on update
 
             // render
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);

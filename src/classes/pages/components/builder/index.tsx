@@ -78,6 +78,7 @@ export class Builder implements Endpoint {
             if (
                 result.Metadata &&
                 result.Metadata.PrivateSource === true &&
+                result.Metadata.Owner &&
                 result.Metadata.Owner !== Association[1]
             )
                 return new _404Page().request(request);

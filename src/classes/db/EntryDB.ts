@@ -1218,7 +1218,7 @@ export default class EntryDB {
         });
 
         // delete media
-        await EntryDB.Media.DeleteOwner(PasteInfo.CustomURL);
+        if (EntryDB.Media) await EntryDB.Media.DeleteOwner(PasteInfo.CustomURL);
 
         // register event
         if (EntryDB.config.log && EntryDB.config.log.events.includes("delete_paste"))
@@ -1419,7 +1419,22 @@ export default class EntryDB {
         // remove passwords from pastes
         if (removeInfo)
             for (let paste of pastes as Paste[]) {
+                // clean paste
                 paste = this.CleanPaste(paste);
+
+                // get paste metadata
+                const [RealContent, _Metadata] = paste.Content.split("_metadata:");
+
+                paste.Content = RealContent;
+
+                if (_Metadata) paste.Metadata = BaseParser.parse(_Metadata) as any;
+                else
+                    paste.Metadata = {
+                        Version: 1,
+                        Owner: "",
+                    };
+
+                // replace paste
                 pastes[pastes.indexOf(paste)] = paste;
             }
 
