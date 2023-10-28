@@ -1280,6 +1280,7 @@ export class EditMetadata implements Endpoint {
             paste.Metadata.ShowViewCount = Unpacked.ShowViewCount;
             paste.Metadata.ShowOwnerEnabled = Unpacked.ShowOwnerEnabled;
             paste.Metadata.Favicon = Unpacked.Favicon;
+            paste.Metadata.Title = Unpacked.Title;
             paste.Metadata.PrivateSource = Unpacked.PrivateSource;
 
             if (Unpacked.Comments)

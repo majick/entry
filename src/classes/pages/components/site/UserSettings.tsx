@@ -88,6 +88,22 @@ export default function UserSettings(id: string): any {
                                 </option>
                             ))}
                         </select>
+                    )) ||
+                    (type === "textarea" && (
+                        <textarea
+                            name={key}
+                            id={key}
+                            class={"round"}
+                            value={window.localStorage.getItem(key) || ""}
+                            onBlur={(event: Event<HTMLInputElement>) => {
+                                const target = event.target as HTMLInputElement;
+                                window.localStorage.setItem(key, target.value);
+                            }}
+                            style={{
+                                width: "20rem",
+                                maxWidth: "100%",
+                            }}
+                        />
                     ))}
             </div>
         );
@@ -132,6 +148,7 @@ export default function UserSettings(id: string): any {
     AddOption("Disable Animations", "entry:user.DisableAnimations");
     AddOption("Editor Hints", "entry:user.EditorHints");
     AddOption("Show Line Numbers", "entry:user.ShowLineNumbers");
+    AddOption("Global CSS String", "entry:user.GlobalCSSString", "textarea");
 
     // render
     return render(<>{options}</>, document.getElementById(id)!);

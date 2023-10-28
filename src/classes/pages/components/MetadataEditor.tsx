@@ -206,6 +206,8 @@ export function ClientEditor(_metadata: string, id: string): any {
         metadata.root.ShowViewCount = true;
 
     if (metadata.root.Favicon === undefined) metadata.root.Favicon = "";
+    if (metadata.root.Title === undefined) metadata.root.Title = "";
+
     if (metadata.root.PrivateSource === undefined)
         metadata.root.PrivateSource = false;
 
@@ -326,6 +328,7 @@ export function ClientEditor(_metadata: string, id: string): any {
         ShowOwnerEnabled: metadata.root.ShowOwnerEnabled,
         ShowViewCount: metadata.root.ShowViewCount,
         Favicon: metadata.root.Favicon,
+        Title: metadata.root.Title,
         PrivateSource: metadata.root.PrivateSource,
     });
 

@@ -96,6 +96,16 @@ export default function ToggleTheme() {
                             window.SunIcon.style.display = "block";
                             window.MoonIcon.style.display = "none";
                         }
+                    }
+                    
+                    /* global css string */
+                    if (
+                        !window.PASTE_USES_CUSTOM_THEME || 
+                        window.localStorage.getItem("entry:user.ForceClientTheme") === "true"
+                    ) {
+                        const style = document.createElement("style");
+                        style.innerHTML = window.localStorage.getItem("entry:user.GlobalCSSString");
+                        document.body.appendChild(style);
                     }`
                         .replaceAll("\n", "")
                         .replaceAll("    ", ""),

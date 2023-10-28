@@ -435,9 +435,22 @@ export class GetPasteFromURL implements Endpoint {
                     </>,
                     <>
                         <meta name="description" content={result.CustomURL} />
-                        <title>{result.CustomURL}</title>
+
+                        <title>
+                            {result.Metadata && result.Metadata.Title
+                                ? result.Metadata.Title
+                                : result.CustomURL}
+                        </title>
+
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
-                        <OpenGraph title={result.CustomURL} />
+
+                        <OpenGraph
+                            title={
+                                result.Metadata && result.Metadata.Title
+                                    ? result.Metadata.Title
+                                    : result.CustomURL
+                            }
+                        />
                     </>
                 ),
                 {
@@ -500,8 +513,19 @@ export class GetPasteFromURL implements Endpoint {
                         />
                     </>,
                     <>
-                        <title>{result.CustomURL}</title>
-                        <OpenGraph title={result.CustomURL} />
+                        <title>
+                            {result.Metadata && result.Metadata.Title
+                                ? result.Metadata.Title
+                                : result.CustomURL}
+                        </title>
+
+                        <OpenGraph
+                            title={
+                                result.Metadata && result.Metadata.Title
+                                    ? result.Metadata.Title
+                                    : result.CustomURL
+                            }
+                        />
                     </>
                 ),
                 {
@@ -983,7 +1007,12 @@ export class GetPasteFromURL implements Endpoint {
                         }
                     />
 
-                    <title>{result.CustomURL}</title>
+                    <title>
+                        {result.Metadata && result.Metadata.Title
+                            ? result.Metadata.Title
+                            : result.CustomURL}
+                    </title>
+
                     <link
                         rel="icon"
                         href={
@@ -994,7 +1023,11 @@ export class GetPasteFromURL implements Endpoint {
                     />
 
                     <OpenGraph
-                        title={result.CustomURL}
+                        title={
+                            result.Metadata && result.Metadata.Title
+                                ? result.Metadata.Title
+                                : result.CustomURL
+                        }
                         description={
                             // if length of content is greater than 150, cut it at 150 characters and add "..."
                             // otherwise, we can just show the full content
