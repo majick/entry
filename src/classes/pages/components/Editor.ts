@@ -454,6 +454,12 @@ export default function CreateEditor(ElementID: string, content: string) {
     )
         window.localStorage.removeItem("doc");
 
+    // save/check LastEditURL
+    if (window.localStorage.getItem("LastEditURL") !== window.location.href)
+        window.localStorage.removeItem("doc");
+
+    window.localStorage.setItem("LastEditURL", window.location.href);
+
     // create editor
     const view = new EditorView({
         // @ts-ignore

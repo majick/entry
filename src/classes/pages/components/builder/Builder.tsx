@@ -151,11 +151,12 @@ export function Delete(node: Node) {
 
 // history functions
 const History: string[] = [];
-let HistoryCurrent = 0;
+export let HistoryCurrent = 0;
 
 export function SaveStateToHistory(): void {
     // push state
     History.push(JSON.stringify(Document));
+    HistoryCurrent++;
 
     // if history length > 10 items, delete the first element
     if (History.length > 10) History.shift();
@@ -172,10 +173,13 @@ export function RestoreState(i: number): void {
     // restore state
     HistoryCurrent = i;
     Document = JSON.parse(state);
+    Update();
 
     // return
     return undefined;
 }
+
+(globalThis as any).History = { SaveStateToHistory, RestoreState, History };
 
 // sidebar
 export function RenderSidebar(props?: { Page: string }) {
@@ -661,7 +665,7 @@ function RenderPage() {
 
 // ...
 export function RenderDocument(_doc: string, _EditMode: boolean = true) {
-    const doc = BaseParser.parse(_doc) as BuilderDocument;
+    let doc = BaseParser.parse(_doc) as BuilderDocument;
 
     // keybinds listener
     document.addEventListener("keyup", (event) => {
@@ -820,11 +824,30 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             if (NeedsUpdate !== true) return;
             NeedsUpdate = false;
             RenderCycles++;
-            SaveStateToHistory(); // push new state on update
+
+            // if doc !== Document, update doc
+            if (JSON.stringify(doc) !== JSON.stringify(Document)) doc = Document;
+
+            // push new state on update (if state doesn't exist)
+            if (!History[HistoryCurrent]) SaveStateToHistory();
 
             // render
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
         }, 1000);
+
+        // save initial state
+        SaveStateToHistory();
+
+        // add history keybinds
+        document.addEventListener("keydown", (event) => {
+            if (!event.ctrlKey) return;
+            if (event.key === "z")
+                // undo
+                RestoreState(HistoryCurrent - 1);
+            else if (event.key === "y")
+                // redo
+                RestoreState(HistoryCurrent + 1);
+        });
     }
 
     // expose baseparser
