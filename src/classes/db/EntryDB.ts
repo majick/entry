@@ -58,6 +58,7 @@ export type PasteMetadata = {
     Favicon?: string; // favicon shown on paste
     Title?: string; // title shown on paste
     PrivateSource?: boolean;
+    SocialIcon?: string; // shown as a "profile" picture in some places
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;

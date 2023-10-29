@@ -142,6 +142,7 @@ export default class Home implements Endpoint {
             paste &&
             paste.Metadata &&
             paste.Metadata.PrivateSource === true &&
+            paste.Metadata.Owner &&
             paste.Metadata.Owner !== Association[1]
         )
             return new _404Page().request(request);

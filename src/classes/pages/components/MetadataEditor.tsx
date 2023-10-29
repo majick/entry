@@ -198,19 +198,6 @@ export function ClientEditor(_metadata: string, id: string): any {
     if (metadata.root.Comments.Enabled === undefined)
         metadata.root.Comments.Enabled = true;
 
-    // ...extras
-    if (metadata.root.ShowOwnerEnabled === undefined)
-        metadata.root.ShowOwnerEnabled = true;
-
-    if (metadata.root.ShowViewCount === undefined)
-        metadata.root.ShowViewCount = true;
-
-    if (metadata.root.Favicon === undefined) metadata.root.Favicon = "";
-    if (metadata.root.Title === undefined) metadata.root.Title = "";
-
-    if (metadata.root.PrivateSource === undefined)
-        metadata.root.PrivateSource = false;
-
     // ...
     function UpdateMetadata() {
         return ((document.getElementById("Metadata") as HTMLInputElement).value =
@@ -218,13 +205,27 @@ export function ClientEditor(_metadata: string, id: string): any {
     }
 
     const Inputs: any[] = [];
-    function GenerateInputFields(object: { [key: string]: any }, nested?: string[]) {
+    function GenerateInputFields(
+        object: { [key: string]: [any, string] },
+        nested?: string[]
+    ) {
         for (const data of Object.entries(object)) {
-            if (typeof data[1] === "object")
+            if (typeof data[1][0] === "object")
                 // contains nested values, ignore
                 continue;
 
-            const ValueType = typeof data[1];
+            const ValueType = typeof data[1][0];
+
+            // add divider
+            if (data[1][0] === "div") {
+                Inputs.push(
+                    <div>
+                        <hr id={data[0]} />
+                        <h4>{data[1][1]}</h4>
+                    </div>
+                );
+                continue;
+            }
 
             // push to inputs
             // these should all just be true or false inputs
@@ -235,20 +236,28 @@ export function ClientEditor(_metadata: string, id: string): any {
                         background: "var(--background-surface)",
                     }}
                 >
-                    <label htmlFor={data[0]}>
-                        <b>
-                            {(nested || []).join(".")}
-                            {(nested || []).length > 0 ? "." : ""}
-                            {data[0]}
-                        </b>
-                    </label>
+                    <div
+                        className="flex flex-column g-4 mobile-max"
+                        style={{ width: "45%" }}
+                    >
+                        <label
+                            htmlFor={data[0]}
+                            title={`${(nested || ["root"]).join(".")}.${data[0]}`}
+                        >
+                            <b>
+                                {(nested || []).join(".")}
+                                {(nested || []).length > 0 ? "." : ""}
+                                {data[0]}
+                            </b>
+                        </label>
+                        {data[1][1] && <p>{data[1][1]}</p>}
+                    </div>
 
                     {(ValueType === "boolean" && (
                         <Checkbox
                             name={data[0]}
-                            title={`${(nested || ["root"]).join(".")}.${data[0]}`}
                             round={true}
-                            checked={data[1]}
+                            checked={data[1][0]}
                             changed={(event: Event<HTMLInputElement>) => {
                                 // update value (handle json nesting too)
                                 let prev = metadata;
@@ -281,7 +290,7 @@ export function ClientEditor(_metadata: string, id: string): any {
                             type={ValueType === "string" ? "text" : "number"}
                             name={data[0]}
                             id={data[0]}
-                            value={data[1]}
+                            value={data[1][0]}
                             onBlur={(event: Event<HTMLInputElement>) => {
                                 // update value (handle json nesting too)
                                 let prev = metadata;
@@ -292,12 +301,7 @@ export function ClientEditor(_metadata: string, id: string): any {
 
                                 for (const _key of nested || ["root"]) {
                                     prev = prev[_key]; // set new previous
-
-                                    if (
-                                        prev === undefined ||
-                                        prev[data[0]] === undefined
-                                    )
-                                        continue;
+                                    if (prev === undefined) continue;
 
                                     // update value
                                     prev[data[0]] = (
@@ -325,11 +329,36 @@ export function ClientEditor(_metadata: string, id: string): any {
 
     // generate only the fields we want
     GenerateInputFields({
-        ShowOwnerEnabled: metadata.root.ShowOwnerEnabled,
-        ShowViewCount: metadata.root.ShowViewCount,
-        Favicon: metadata.root.Favicon,
-        Title: metadata.root.Title,
-        PrivateSource: metadata.root.PrivateSource,
+        ShowOwnerEnabled: [
+            metadata.root.ShowOwnerEnabled || true,
+            "Toggle the owner label on this paste",
+        ],
+        ShowViewCount: [
+            metadata.root.ShowViewCount || true,
+            "Toggle the views counter on this paste",
+        ],
+        // tab display section
+        TabDisplay: ["div", "Tab Display"],
+        Favicon: [
+            metadata.root.Favicon || "",
+            "Change the tab favicon when viewing this paste",
+        ],
+        Title: [
+            metadata.root.Title || "",
+            "Change the tab title when viewing this paste",
+        ],
+        // privacy section
+        Privacy: ["div", "Privacy and Security"],
+        PrivateSource: [
+            metadata.root.PrivateSource || false,
+            "Make the source of this paste private unless associated with this paste or its owner",
+        ],
+        // social section
+        Social: ["div", "Social Options"],
+        SocialIcon: [
+            metadata.root.SocialIcon || "",
+            "Social icon shown in some places (like comments)",
+        ],
     });
 
     if (
@@ -338,7 +367,8 @@ export function ClientEditor(_metadata: string, id: string): any {
     ) {
         GenerateInputFields(
             {
-                Enabled: metadata.root.Comments.Enabled,
+                Comments: ["div", "Comments"],
+                Enabled: [metadata.root.Comments.Enabled, ""],
             },
             ["Comments"]
         );

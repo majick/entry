@@ -123,3 +123,21 @@
 .bg-3 {
     background: var(--background-surface3);
 }
+
+/* auto scale */
+
+.autoscale {
+    transform: scale(1);
+    transform-origin: 0 0;
+}
+
+@media screen and (max-width: 800px) {
+    .autoscale {
+        transform: scale(0.8);
+    }
+
+    .autoscale.builder\:page {
+        width: 125dvw;
+        height: 125dvh;
+    }
+}

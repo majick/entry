@@ -25,7 +25,9 @@ export function SaveModal(): any {
             noIdMatch={true}
             round={true}
         >
-            <h4 style={{ textAlign: "center", width: "100%" }}>Publish Component</h4>
+            <h4 style={{ textAlign: "center", width: "25rem", maxWidth: "100%" }}>
+                Publish Component
+            </h4>
 
             <hr />
 

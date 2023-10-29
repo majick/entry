@@ -1546,10 +1546,19 @@ export class PasteCommentsPage implements Endpoint {
 
         // ...
         const CommentPastes: Partial<Paste>[] = _result[2];
+        const CommentOwners: { [key: string]: Paste } = {};
 
         // render all comment pastes
-        for (const paste of CommentPastes)
+        for (const paste of CommentPastes) {
+            // get owner
+            if (paste.Metadata && paste.Metadata.Owner)
+                CommentOwners[paste.CustomURL as any] = (await db.GetPasteFromURL(
+                    paste.Metadata.Owner
+                )) as Paste;
+
+            // parse content
             paste.Content = await ParseMarkdown(paste.Content || "");
+        }
 
         // check if paste is a comment on another paste
         const PreviousInThread = (
@@ -1870,189 +1879,269 @@ export class PasteCommentsPage implements Endpoint {
                                     </div>
                                 )}
 
-                                {CommentPastes.map((comment) => (
-                                    <div
-                                        class={"card"}
-                                        style={{
-                                            borderRadius: "0.4rem",
-                                        }}
-                                    >
-                                        <ul
-                                            className="__footernav"
+                                {/* actual comment display! */}
+                                {CommentPastes.map((comment) => {
+                                    // get comment owner
+                                    const CommentOwner =
+                                        CommentOwners[comment.CustomURL as any];
+
+                                    // return
+                                    return (
+                                        <div
+                                            class={"card flex justify-center g-10"}
                                             style={{
-                                                paddingLeft: 0,
-                                                flexWrap: "wrap",
+                                                borderRadius: "0.4rem",
                                             }}
                                         >
-                                            <li>
-                                                <b class={"utc-date-to-localize"}>
-                                                    {new Date(
-                                                        comment.PubDate || 0
-                                                    ).toUTCString()}
-                                                </b>
-                                            </li>
-
-                                            {comment.Associated && (
-                                                <li
-                                                    style={{
-                                                        color: "var(--text-color-faded)",
-                                                    }}
-                                                >
-                                                    posted by{" "}
-                                                    <a
-                                                        class={"chip solid"}
-                                                        href={`/${comment.Associated}`}
+                                            {/* social */}
+                                            {CommentOwner &&
+                                                CommentOwner.Metadata &&
+                                                CommentOwner.Metadata.SocialIcon && (
+                                                    <div
                                                         style={{
-                                                            color:
-                                                                // if comment poster is the paste owner, make color yellow
-                                                                // otherwise if comment poster is current user, make color green
-                                                                comment.Metadata!
-                                                                    .Owner ===
-                                                                result.CustomURL
-                                                                    ? "var(--yellow)"
-                                                                    : PostingAs ===
-                                                                      comment.Associated
-                                                                    ? "var(--green)"
-                                                                    : "inherit",
-                                                        }}
-                                                        title={
-                                                            PostingAs ===
-                                                            comment.Associated
-                                                                ? "You"
-                                                                : ""
-                                                        }
-                                                    >
-                                                        {comment.Associated}
-                                                    </a>
-                                                </li>
-                                            )}
-
-                                            {comment.IsPM === "true" && (
-                                                <li
-                                                    title={
-                                                        "This is a private comment, but it can still be seen by people with a direct link."
-                                                    }
-                                                >
-                                                    <span
-                                                        class={"chip"}
-                                                        style={{
-                                                            color: "var(--text-color-faded)",
+                                                            width: "20%",
                                                         }}
                                                     >
-                                                        🔒 private
-                                                    </span>
-                                                </li>
-                                            )}
-                                        </ul>
-
-                                        <div
-                                            style={{
-                                                maxHeight: "50rem",
-                                                overflow: "auto",
-                                            }}
-                                            dangerouslySetInnerHTML={{
-                                                __html: comment.Content!,
-                                            }}
-                                        />
-
-                                        {comment.Comments !== 0 && (
-                                            <div>
-                                                <hr />
-
-                                                <a
-                                                    href={`/paste/comments/${comment.CustomURL}`}
-                                                >
-                                                    View <b>{comment.Comments}</b>{" "}
-                                                    repl
-                                                    {comment.Comments! > 1
-                                                        ? "ies"
-                                                        : comment.Comments === 1
-                                                        ? "y"
-                                                        : "ies"}
-                                                </a>
-                                            </div>
-                                        )}
-
-                                        <hr />
-
-                                        <div class={"flex g-4"}>
-                                            <a
-                                                class={"chip button secondary"}
-                                                href={`${HostnameURL}?CommentOn=${comment.CustomURL}`}
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 16 16"
-                                                    width="16"
-                                                    height="16"
-                                                    aria-label={"Reply Symbol"}
-                                                >
-                                                    <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
-                                                </svg>
-                                                reply
-                                            </a>
-
-                                            <a
-                                                class={"chip button secondary"}
-                                                href={`/${comment.CustomURL}`}
-                                                target={"_blank"}
-                                            >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 16 16"
-                                                    width="16"
-                                                    height="16"
-                                                    aria-label={
-                                                        "External Link Symbol"
-                                                    }
-                                                >
-                                                    <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
-                                                </svg>
-                                                open
-                                            </a>
-
-                                            {search.get("edit") === "true" && (
-                                                <form
-                                                    action="/api/comments/delete"
-                                                    method={"POST"}
-                                                >
-                                                    <input
-                                                        type="hidden"
-                                                        name="CustomURL"
-                                                        value={result.CustomURL}
-                                                        required
-                                                    />
-
-                                                    <input
-                                                        type="hidden"
-                                                        name="CommentURL"
-                                                        value={comment.CustomURL}
-                                                        required
-                                                    />
-
-                                                    <button
-                                                        class={
-                                                            "chip solid button secondary"
-                                                        }
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                            aria-label={
-                                                                "Trash Symbol"
+                                                        <img
+                                                            title={
+                                                                CommentOwner.Metadata
+                                                                    .Owner
                                                             }
+                                                            class={
+                                                                "card border round NoPadding"
+                                                            }
+                                                            src={
+                                                                CommentOwner.Metadata
+                                                                    .SocialIcon
+                                                            }
+                                                            alt={
+                                                                CommentOwner.Metadata
+                                                                    .Owner
+                                                            }
+                                                        />
+                                                    </div>
+                                                )}
+
+                                            {/* main stuff */}
+                                            <div
+                                                class={
+                                                    "flex flex-column justify-space-between"
+                                                }
+                                                style={{
+                                                    width: "100%",
+                                                }}
+                                            >
+                                                {/* stuff */}
+                                                <div>
+                                                    <ul
+                                                        className="__footernav"
+                                                        style={{
+                                                            paddingLeft: 0,
+                                                            flexWrap: "wrap",
+                                                        }}
+                                                    >
+                                                        <li>
+                                                            <b
+                                                                class={
+                                                                    "utc-date-to-localize"
+                                                                }
+                                                            >
+                                                                {new Date(
+                                                                    comment.PubDate ||
+                                                                        0
+                                                                ).toUTCString()}
+                                                            </b>
+                                                        </li>
+
+                                                        {comment.Associated && (
+                                                            <li
+                                                                style={{
+                                                                    color: "var(--text-color-faded)",
+                                                                }}
+                                                            >
+                                                                posted by{" "}
+                                                                <a
+                                                                    class={
+                                                                        "chip solid"
+                                                                    }
+                                                                    href={`/${comment.Associated}`}
+                                                                    style={{
+                                                                        color:
+                                                                            // if comment poster is the paste owner, make color yellow
+                                                                            // otherwise if comment poster is current user, make color green
+                                                                            comment.Metadata!
+                                                                                .Owner ===
+                                                                            result.CustomURL
+                                                                                ? "var(--yellow)"
+                                                                                : PostingAs ===
+                                                                                  comment.Associated
+                                                                                ? "var(--green)"
+                                                                                : "inherit",
+                                                                    }}
+                                                                    title={
+                                                                        PostingAs ===
+                                                                        comment.Associated
+                                                                            ? "You"
+                                                                            : ""
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        comment.Associated
+                                                                    }
+                                                                </a>
+                                                            </li>
+                                                        )}
+
+                                                        {comment.IsPM === "true" && (
+                                                            <li
+                                                                title={
+                                                                    "This is a private comment, but it can still be seen by people with a direct link."
+                                                                }
+                                                            >
+                                                                <span
+                                                                    class={"chip"}
+                                                                    style={{
+                                                                        color: "var(--text-color-faded)",
+                                                                    }}
+                                                                >
+                                                                    🔒 private
+                                                                </span>
+                                                            </li>
+                                                        )}
+                                                    </ul>
+
+                                                    <div
+                                                        style={{
+                                                            maxHeight: "50rem",
+                                                            overflow: "auto",
+                                                        }}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: comment.Content!,
+                                                        }}
+                                                    />
+
+                                                    {comment.Comments !== 0 && (
+                                                        <div>
+                                                            <hr />
+
+                                                            <a
+                                                                href={`/paste/comments/${comment.CustomURL}`}
+                                                            >
+                                                                View{" "}
+                                                                <b>
+                                                                    {
+                                                                        comment.Comments
+                                                                    }
+                                                                </b>{" "}
+                                                                repl
+                                                                {comment.Comments! >
+                                                                1
+                                                                    ? "ies"
+                                                                    : comment.Comments ===
+                                                                      1
+                                                                    ? "y"
+                                                                    : "ies"}
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* actions bar */}
+                                                <div>
+                                                    <hr />
+
+                                                    <div class={"flex g-4"}>
+                                                        <a
+                                                            class={
+                                                                "chip button secondary"
+                                                            }
+                                                            href={`${HostnameURL}?CommentOn=${comment.CustomURL}`}
                                                         >
-                                                            <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
-                                                        </svg>
-                                                        delete
-                                                    </button>
-                                                </form>
-                                            )}
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 16 16"
+                                                                width="16"
+                                                                height="16"
+                                                                aria-label={
+                                                                    "Reply Symbol"
+                                                                }
+                                                            >
+                                                                <path d="M6.78 1.97a.75.75 0 0 1 0 1.06L3.81 6h6.44A4.75 4.75 0 0 1 15 10.75v2.5a.75.75 0 0 1-1.5 0v-2.5a3.25 3.25 0 0 0-3.25-3.25H3.81l2.97 2.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L1.47 7.28a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"></path>
+                                                            </svg>
+                                                            reply
+                                                        </a>
+
+                                                        <a
+                                                            class={
+                                                                "chip button secondary"
+                                                            }
+                                                            href={`/${comment.CustomURL}`}
+                                                            target={"_blank"}
+                                                        >
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 16 16"
+                                                                width="16"
+                                                                height="16"
+                                                                aria-label={
+                                                                    "External Link Symbol"
+                                                                }
+                                                            >
+                                                                <path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>
+                                                            </svg>
+                                                            open
+                                                        </a>
+
+                                                        {search.get("edit") ===
+                                                            "true" && (
+                                                            <form
+                                                                action="/api/comments/delete"
+                                                                method={"POST"}
+                                                            >
+                                                                <input
+                                                                    type="hidden"
+                                                                    name="CustomURL"
+                                                                    value={
+                                                                        result.CustomURL
+                                                                    }
+                                                                    required
+                                                                />
+
+                                                                <input
+                                                                    type="hidden"
+                                                                    name="CommentURL"
+                                                                    value={
+                                                                        comment.CustomURL
+                                                                    }
+                                                                    required
+                                                                />
+
+                                                                <button
+                                                                    class={
+                                                                        "chip solid button secondary"
+                                                                    }
+                                                                >
+                                                                    <svg
+                                                                        xmlns="http://www.w3.org/2000/svg"
+                                                                        viewBox="0 0 16 16"
+                                                                        width="16"
+                                                                        height="16"
+                                                                        aria-label={
+                                                                            "Trash Symbol"
+                                                                        }
+                                                                    >
+                                                                        <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                                                                    </svg>
+                                                                    delete
+                                                                </button>
+                                                            </form>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </main>
                     </div>
@@ -2584,7 +2673,8 @@ export class UserSettings implements Endpoint {
                                         EntryDB.config.app.media.enabled ===
                                             true && (
                                             <>
-                                                <hr />
+                                                <hr id={"PasteMedia"} />
+                                                <h4>Paste Media</h4>
 
                                                 <div class="card round flex justify-space-between align-center flex-wrap g-4">
                                                     <b>Paste Media Uploads</b>
@@ -2615,7 +2705,8 @@ export class UserSettings implements Endpoint {
                                             "custom_domain"
                                         ) && (
                                             <>
-                                                <hr />
+                                                <hr id={"CustomDomain"} />
+                                                <h4>Custom Domain</h4>
 
                                                 <div class="card round flex justify-space-between flex-wrap g-4">
                                                     <div
@@ -2837,23 +2928,36 @@ export class ViewPasteMedia implements Endpoint {
                                     {(DeleteMode === false &&
                                         Files[2] &&
                                         Files[2].map((file) => (
-                                            <a
-                                                className="button round border dashed"
-                                                href={`/api/media/file/${paste.CustomURL}/${file}`}
+                                            <div
+                                                className="card flex flex-column g-4 round border GrowHover"
                                                 title={file}
+                                                style={{
+                                                    width: "10rem",
+                                                }}
                                             >
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 24 24"
-                                                    width="16"
-                                                    height="16"
-                                                    aria-label={"Binary File Symbol"}
+                                                <img
+                                                    class={
+                                                        "card border round NoPadding"
+                                                    }
+                                                    src={`/api/media/file/${paste.CustomURL}/${file}`}
+                                                    alt={file}
+                                                    style={{
+                                                        width: "100%",
+                                                    }}
+                                                />
+
+                                                <a
+                                                    className="button round full"
+                                                    href={`/api/media/file/${paste.CustomURL}/${file}`}
                                                 >
-                                                    <path d="M3 3a2 2 0 0 1 2-2h9.982a2 2 0 0 1 1.414.586l4.018 4.018A2 2 0 0 1 21 7.018V21a2 2 0 0 1-2 2H4.75a.75.75 0 0 1 0-1.5H19a.5.5 0 0 0 .5-.5V8.5h-4a2 2 0 0 1-2-2v-4H5a.5.5 0 0 0-.5.5v6.25a.75.75 0 0 1-1.5 0Zm12-.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0-.146-.336l-4.018-4.018A.5.5 0 0 0 15 2.5Z"></path>
-                                                    <path d="M0 13.75C0 12.784.784 12 1.75 12h3c.966 0 1.75.784 1.75 1.75v4a1.75 1.75 0 0 1-1.75 1.75h-3A1.75 1.75 0 0 1 0 17.75Zm1.75-.25a.25.25 0 0 0-.25.25v4c0 .138.112.25.25.25h3a.25.25 0 0 0 .25-.25v-4a.25.25 0 0 0-.25-.25ZM9 12a.75.75 0 0 0 0 1.5h1.5V18H9a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5H12v-5.25a.75.75 0 0 0-.75-.75H9Z"></path>
-                                                </svg>
-                                                {file}
-                                            </a>
+                                                    {file.length > 8
+                                                        ? `${file.substring(
+                                                              0,
+                                                              7
+                                                          )}...`
+                                                        : file}
+                                                </a>
+                                            </div>
                                         ))) ||
                                         (Files[2] &&
                                             ((url.searchParams.get(
