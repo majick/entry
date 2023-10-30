@@ -1629,6 +1629,22 @@ export class UpdateCustomDomain implements Endpoint {
                 { status: 401 }
             );
 
+        // make sure a log with that domain doesn't already exist
+        const DomainLog = (
+            await EntryDB.Logs.QueryLogs(
+                `Type = "custom_domain" AND Content LIKE "%;${body.Domain}"`
+            )
+        )[2][0];
+
+        if (DomainLog)
+            return new Response(body.Domain, {
+                status: 302,
+                headers: {
+                    Location: "/?err=This domain is already in use",
+                    "X-Entry-Error": "This domain is already in use",
+                },
+            });
+
         // get log
         const CustomDomainLog = (
             await EntryDB.Logs.QueryLogs(

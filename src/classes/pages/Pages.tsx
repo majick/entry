@@ -131,6 +131,34 @@ export async function CheckInstance(
             server
         );
 
+    // ...check against custom domain
+    const CustomDomainLog = (
+        await EntryDB.Logs.QueryLogs(
+            `Type = "custom_domain" AND Content LIKE "%;${url.hostname}"`
+        )
+    )[2][0];
+
+    if (CustomDomainLog) {
+        // ...create new request
+        const req = new Request(
+            `${url.protocol}//ins-${CustomDomainLog.Content.split(";")[0].replaceAll(
+                "/",
+                "."
+            )}.${EntryDB.config.app.hostname}${url.pathname}`,
+            {
+                method: request.method,
+                headers: request.headers,
+                body: request.body,
+            }
+        );
+
+        // ...return
+        return new ServerConfig.Pages["._serve_cloud_instance"].Page().request(
+            req,
+            server
+        );
+    }
+
     // default return
     return undefined;
 }
