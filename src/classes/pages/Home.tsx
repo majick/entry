@@ -13,6 +13,7 @@ import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
 import Checkbox from "./components/form/Checkbox";
 import _404Page from "./components/404";
+import { ServerConfig } from "../..";
 
 /**
  * @export
@@ -35,6 +36,11 @@ export default class Home implements Endpoint {
                 `.${EntryDB.config.app.hostname}`
             )[0];
 
+            // handle cloud pages
+            const IncorrectInstance = await Pages.CheckInstance(request, server);
+            if (IncorrectInstance) return IncorrectInstance;
+
+            // ...
             if (
                 subdomain &&
                 subdomain !== EntryDB.config.app.hostname &&

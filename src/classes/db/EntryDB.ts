@@ -233,7 +233,7 @@ export default class EntryDB {
         }
 
         // get config
-        const config = JSON.parse(await Bun.file(EntryDB.ConfigLocation).text());
+        const config = await Bun.file(EntryDB.ConfigLocation).json();
 
         // store config
         EntryDB.config = config;

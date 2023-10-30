@@ -11,6 +11,7 @@ import { contentType } from "mime-types";
 
 // import components
 import _404Page from "../components/404";
+import Pages from "../Pages";
 
 // create database
 import { CreateHash, Decrypt } from "../../db/helpers/Hash";
@@ -379,6 +380,10 @@ export class CreatePaste implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
         body.Content = decodeURIComponent(body.Content);
@@ -486,8 +491,12 @@ export class CreatePaste implements Endpoint {
  * @implements {Endpoint}
  */
 export class GetPasteRecord implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get paste
         let paste = (await db.GetPasteFromURL(
@@ -521,6 +530,10 @@ export class EditPaste implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
@@ -623,7 +636,7 @@ export class EditPaste implements Endpoint {
  * @implements {Endpoint}
  */
 export class DeletePaste implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -631,6 +644,10 @@ export class DeletePaste implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
@@ -707,7 +724,7 @@ export class DecryptPaste implements Endpoint {
         return Decrypt(paste.Content, enc[1].key, enc[1].iv, enc[1].auth);
     }
 
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -715,6 +732,10 @@ export class DecryptPaste implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as Paste;
@@ -736,32 +757,16 @@ export class DecryptPaste implements Endpoint {
 
 /**
  * @export
- * @class GetAllPastes
- * @implements {Endpoint}
- */
-export class GetAllPastes implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        // get pastes
-        const pastes = await db.GetAllPastes();
-
-        // return
-        return new Response(JSON.stringify(pastes), {
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json; charset=utf-8",
-            },
-        });
-    }
-}
-
-/**
- * @export
  * @class GetAllPastesInGroup
  * @implements {Endpoint}
  */
 export class GetAllPastesInGroup implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get pastes
         const pastes = await db.GetAllPastesInGroup(
@@ -785,8 +790,12 @@ export class GetAllPastesInGroup implements Endpoint {
  * @implements {Endpoint}
  */
 export class GetRawPaste implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
         const name = url.pathname.slice("/api/raw/".length, url.pathname.length);
@@ -830,8 +839,12 @@ export class GetRawPaste implements Endpoint {
  * @implements {Endpoint}
  */
 export class PasteExists implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
         const name = url.pathname.slice("/api/exists/".length, url.pathname.length);
@@ -904,8 +917,12 @@ export class RenderMarkdown implements Endpoint {
  * @implements {Endpoint}
  */
 export class GetPasteHTML implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
         const name = url.pathname.slice("/api/html/".length, url.pathname.length);
@@ -971,10 +988,14 @@ export class GetPasteHTML implements Endpoint {
  * @implements {Endpoint}
  */
 export class JSONAPI implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(request, "application/json");
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get url
         const url = new URL(request.url);
@@ -1014,6 +1035,10 @@ export class DeleteComment implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
@@ -1086,6 +1111,10 @@ export class PasteLogin implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
@@ -1148,6 +1177,10 @@ export class PasteLogin implements Endpoint {
  */
 export class PasteLogout implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get customurl
         const CustomURL = GetCookie(
             request.headers.get("Cookie")! || "",
@@ -1232,7 +1265,7 @@ export class PasteLogout implements Endpoint {
  * @implements {Endpoint}
  */
 export class EditMetadata implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -1240,6 +1273,10 @@ export class EditMetadata implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
@@ -1320,9 +1357,13 @@ export class EditMetadata implements Endpoint {
  * @implements {Endpoint}
  */
 export class GetPasteComments implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
         let name = url.pathname.slice("/api/comments/".length, url.pathname.length);
@@ -1349,8 +1390,12 @@ export class GetPasteComments implements Endpoint {
  * @implements {Endpoint}
  */
 export class GetFile implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // don't check if media is disabled, as files should still be viewable even with media disabled!
 
@@ -1386,7 +1431,11 @@ export class GetFile implements Endpoint {
  * @implements {Endpoint}
  */
 export class UploadFile implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // make sure media is enabled (and exists)
         if (!EntryDB.Media) return new _404Page().request(request);
 
@@ -1445,7 +1494,11 @@ export class UploadFile implements Endpoint {
  * @implements {Endpoint}
  */
 export class DeleteFile implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // make sure media is enabled (and exists)
         if (!EntryDB.Media) return new _404Page().request(request);
 
@@ -1506,7 +1559,11 @@ export class DeleteFile implements Endpoint {
  * @implements {Endpoint}
  */
 export class UpdateCustomDomain implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         if (
             !EntryDB.config.log ||
             !EntryDB.config.log.events.includes("custom_domain")
@@ -1627,7 +1684,6 @@ export default {
     EditPaste,
     DeletePaste,
     DecryptPaste,
-    GetAllPastes,
     GetAllPastesInGroup,
     GetRawPaste,
     PasteExists,

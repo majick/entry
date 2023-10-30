@@ -5,6 +5,7 @@
  */
 
 import Honeybee, { Endpoint } from "honeybee";
+import { Server } from "bun";
 
 import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../../db/helpers/Hash";
@@ -13,6 +14,7 @@ import _404Page from "../components/404";
 import EntryDB from "../../db/EntryDB";
 
 import { Login } from "../Admin";
+import Pages from "../Pages";
 
 /**
  * @export
@@ -20,7 +22,7 @@ import { Login } from "../Admin";
  * @implements {Endpoint}
  */
 export class APIDeletePaste implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // this is the same code as API.DeletePaste, but it requires body.AdminPassword
         // NOTE: API.DeletePaste CAN take the admin password in the normal "password" field,
         //       and it will still work the same!!!
@@ -33,6 +35,10 @@ export class APIDeletePaste implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
@@ -70,7 +76,7 @@ export class APIDeletePaste implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIExport implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -79,12 +85,16 @@ export class APIExport implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get pastes
         const _export = await db.GetAllPastes(true, false, "CustomURL IS NOT NULL");
@@ -126,7 +136,7 @@ export class APIExport implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIImport implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(request, "multipart/form-data");
 
@@ -138,13 +148,17 @@ export class APIImport implements Endpoint {
         )
             return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
         body.pastes = await (body.pastes as Blob).text();
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get pastes
         const output = await db.ImportPastes(JSON.parse(body.pastes) || []);
@@ -165,7 +179,7 @@ export class APIImport implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIMassDelete implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -174,12 +188,16 @@ export class APIMassDelete implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get pastes
         const output = await db.DeletePastes(
@@ -203,7 +221,7 @@ export class APIMassDelete implements Endpoint {
  * @implements {Endpoint}
  */
 export class APISQL implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -212,12 +230,16 @@ export class APISQL implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // run query
         const output = await db.DirectSQL(
@@ -243,7 +265,7 @@ export class APISQL implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIExportLogs implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -252,12 +274,16 @@ export class APIExportLogs implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get logs
         const _export = await EntryDB.Logs.QueryLogs("ID IS NOT NULL");
@@ -279,7 +305,7 @@ export class APIExportLogs implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIMassDeleteLogs implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -288,12 +314,16 @@ export class APIMassDeleteLogs implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // delete logs
         const outputs: any[] = [];
@@ -318,7 +348,7 @@ export class APIMassDeleteLogs implements Endpoint {
  * @implements {Endpoint}
  */
 export class APIExportConfig implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -327,12 +357,16 @@ export class APIExportConfig implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // return
         return new Response(JSON.stringify(EntryDB.config), {

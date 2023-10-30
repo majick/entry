@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.1.8-rev-2",
+  "version": "1.1.9",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -17,7 +17,6 @@
   "dependencies": {
     "@codemirror/autocomplete": "latest",
     "@codemirror/commands": "latest",
-    "@codemirror/lang-javascript": "latest",
     "@codemirror/lang-markdown": "latest",
     "@codemirror/language": "latest",
     "@codemirror/state": "latest",

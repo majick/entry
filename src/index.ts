@@ -210,31 +210,19 @@ if (EntryDB.config.plugin_file) {
 
     // if file exists, import file and get default return value
     if (await Bun.file(Path).exists()) {
-        const PluginsList: { default: Array<[string, HoneybeeConfig["Pages"]]> } =
+        const PluginsList: { default: Array<HoneybeeConfig["Pages"]> } =
             await import(Path);
 
         // load plugin pages
-        for (const Plugin of PluginsList.default) {
-            // if plugin[1] has a page named "._set_plugin_dir", call it with Plugin[0]
-            if (Plugin[1]["._set_plugin_dir"])
-                new Plugin[1]["._set_plugin_dir"].Page().request(
-                    new Request("about:blank", {
-                        headers: {
-                            "X-Plugin-Dir": Plugin[0],
-                        },
-                    })
-                );
-
-            // add to plugins global
-            plugins = { ...plugins, ...Plugin[1] };
-        }
+        for (const Plugin of PluginsList.default)
+            plugins = { ...plugins, ...Plugin };
     }
 }
 
 await InitFooterExtras(plugins); // load footer pages to the footer
 
 // ...create config
-const config: HoneybeeConfig = {
+export const ServerConfig: HoneybeeConfig = {
     Port: EntryDB.config.port || 8080,
     AssetsDir: import.meta.dir,
     NotFoundPage: _404Page(),
@@ -245,7 +233,6 @@ const config: HoneybeeConfig = {
         "/admin/login": { Page: Admin.Login },
         "/admin/login/": { Page: Admin.Login },
         // GET api
-        "/api/all": { Page: API.GetAllPastes },
         "/api/get": { Type: "begins", Page: API.GetPasteRecord },
         "/api/group": { Type: "begins", Page: API.GetAllPastesInGroup },
         "/api/raw": { Type: "begins", Page: API.GetRawPaste },
@@ -329,8 +316,8 @@ const config: HoneybeeConfig = {
 };
 
 // ...start server
-new Honeybee(config);
-console.log("\x1b[92m[entry] Started server on port:\x1b[0m", config.Port);
+new Honeybee(ServerConfig);
+console.log("\x1b[92m[entry] Started server on port:\x1b[0m", ServerConfig.Port);
 
 // gc interval
 setInterval(() => {

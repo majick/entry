@@ -32,12 +32,7 @@ export function SaveModal(): any {
             <hr />
 
             <form
-                class={"full"}
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                }}
+                class={"full flex flex-column g-8"}
                 onSubmit={async (event: Event<HTMLFormElement>) => {
                     event.preventDefault();
 

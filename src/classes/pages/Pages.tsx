@@ -36,6 +36,7 @@ import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 import BaseParser from "../db/helpers/BaseParser";
 import Modal from "./components/site/modals/Modal";
+import { ServerConfig } from "../..";
 
 // ...
 
@@ -102,6 +103,39 @@ export function OpenGraph(props: {
 }
 
 /**
+ * @function CheckInstance
+ *
+ * @export
+ * @param {Request} request
+ * @param {Server} server
+ * @return {(Promise<Response | undefined>)}
+ */
+export async function CheckInstance(
+    request: Request,
+    server: Server
+): Promise<Response | undefined> {
+    if (!EntryDB.config.app || !EntryDB.config.app.hostname) return undefined;
+
+    // get url and check if it's an instance
+    const url = new URL(request.url);
+    if (!url.host.startsWith("ins-")) return undefined;
+
+    // get subdomain
+    const subdomain = url.hostname.split(`.${EntryDB.config.app.hostname}`)[0];
+
+    // handle cloud pages
+    if (subdomain.startsWith("ins-") && ServerConfig.Pages["._serve_cloud_instance"])
+        // forward to correct page
+        return new ServerConfig.Pages["._serve_cloud_instance"].Page().request(
+            request,
+            server
+        );
+
+    // default return
+    return undefined;
+}
+
+/**
  * @export
  * @class GetPasteFromURL
  * @implements {Endpoint}
@@ -110,6 +144,10 @@ export class GetPasteFromURL implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // check if this is from a wildcard match
         const IsFromWildcard = search.get("_priv_isFromWildcard") === "true";
@@ -1059,6 +1097,10 @@ export class PasteDocView implements Endpoint {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
 
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
         if (name.startsWith("paste/doc/")) name = name.split("paste/doc/")[1];
@@ -1256,9 +1298,13 @@ export class PasteDocView implements Endpoint {
  * @implements {Endpoint}
  */
 export class PastesSearch implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.searchParams);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // manage session
         const SessionCookie = await Session(request);
@@ -1486,6 +1532,11 @@ export class PasteCommentsPage implements Endpoint {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.searchParams);
 
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // ...
         const HostnameURL =
             (EntryDB.config &&
                 EntryDB.config.app &&
@@ -2382,6 +2433,10 @@ export class UserSettings implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
 
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
         if (name.startsWith("paste/settings/"))
@@ -2833,8 +2888,12 @@ export class UserSettings implements Endpoint {
  * @implements {Endpoint}
  */
 export class ViewPasteMedia implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
@@ -3198,6 +3257,7 @@ export class ViewPasteMedia implements Endpoint {
 // default export
 export default {
     Curiosity,
+    CheckInstance,
     // pages
     GetPasteFromURL,
     PasteDocView,

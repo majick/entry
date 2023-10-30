@@ -5,12 +5,14 @@
  */
 
 import Honeybee, { Endpoint, Renderer } from "honeybee";
+import { Server } from "bun";
 
 import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import PasteList from "./components/site/PasteList";
 import Footer from "./components/site/Footer";
+import Pages from "./Pages";
 
 import { plugins } from "../..";
 import TopNav from "./components/site/TopNav";
@@ -224,11 +226,20 @@ function AdminNav(props: { active: string; pass: string }): any {
 
             <hr />
 
+            {/* performance display */}
             <p>
                 Memory Usage: {Math.floor(process.memoryUsage().rss / 1000_000)} MB
             </p>
 
             <p>CPU Usage: {process.cpuUsage().system}</p>
+
+            {/* cloud display */}
+            {process.env.ENTRY_CLOUD_NAME && (
+                <p>
+                    <b>☁️ Cloud Instance</b> •{" "}
+                    <a href={process.env.ENTRY_CLOUD_LOCATION}>Manage</a>
+                </p>
+            )}
         </>
     );
 }
@@ -262,10 +273,15 @@ function AdminLayout(props: { children: any; body: any; page: string }) {
  * @implements {Endpoint}
  */
 export class Login implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // we aren't actually using a login system, it's just a form for the configured
         // server admin password
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // return
         return new Response(
             Renderer.Render(
                 <>
@@ -330,7 +346,7 @@ export class Login implements Endpoint {
  * @implements {Endpoint}
  */
 export class ManagePastes implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -339,12 +355,16 @@ export class ManagePastes implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // log event (only on first access)
         if (request.headers.get("Referer")! && EntryDB.Logs) {
@@ -538,7 +558,7 @@ export class ManagePastes implements Endpoint {
  * @implements {Endpoint}
  */
 export class QueryPastesPage implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -546,6 +566,10 @@ export class QueryPastesPage implements Endpoint {
         );
 
         if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
@@ -556,7 +580,7 @@ export class QueryPastesPage implements Endpoint {
             body.AdminPassword !== EntryDB.config.admin ||
             !body.sql
         )
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get pastes
         const pastes = await db.GetAllPastes(true, false, body.sql);
@@ -612,7 +636,7 @@ export class QueryPastesPage implements Endpoint {
  * @implements {Endpoint}
  */
 export class ExportPastesPage implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -621,12 +645,16 @@ export class ExportPastesPage implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // return
         return new Response(
@@ -782,7 +810,7 @@ export class ExportPastesPage implements Endpoint {
  * @implements {Endpoint}
  */
 export class LogsPage implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -791,12 +819,16 @@ export class LogsPage implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get limit
         const LIMIT = parseInt(body.limit || "500");
@@ -1102,7 +1134,7 @@ export class LogsPage implements Endpoint {
  * @implements {Endpoint}
  */
 export class PluginsPage implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -1116,7 +1148,7 @@ export class PluginsPage implements Endpoint {
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // return
         return new Response(
@@ -1201,7 +1233,7 @@ export class PluginsPage implements Endpoint {
  * @implements {Endpoint}
  */
 export class ManageReports implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -1210,12 +1242,16 @@ export class ManageReports implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get limit
         const LIMIT = parseInt(body.limit || "500");
@@ -1450,7 +1486,7 @@ export class ManageReports implements Endpoint {
  * @implements {Endpoint}
  */
 export class ViewReport implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
 
         // verify content type
@@ -1461,12 +1497,16 @@ export class ViewReport implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get log id
         let LogID = url.pathname.slice(1, url.pathname.length).toLowerCase();
@@ -1691,7 +1731,7 @@ export class ViewReport implements Endpoint {
  * @implements {Endpoint}
  */
 export class MetadataEditor implements Endpoint {
-    public async request(request: Request): Promise<Response> {
+    public async request(request: Request, server: Server): Promise<Response> {
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -1700,12 +1740,16 @@ export class MetadataEditor implements Endpoint {
 
         if (WrongType) return WrongType;
 
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
         if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
-            return new Login().request(request);
+            return new Login().request(request, server);
 
         // get paste
         const result = await db.GetPasteFromURL(
