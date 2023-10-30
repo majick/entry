@@ -118,7 +118,6 @@ export async function CheckInstance(
 
     // get url and check if it's an instance
     const url = new URL(request.url);
-    if (!url.host.startsWith("ins-")) return undefined;
 
     // get subdomain
     const subdomain = url.hostname.split(`.${EntryDB.config.app.hostname}`)[0];
@@ -144,7 +143,7 @@ export async function CheckInstance(
             `${url.protocol}//ins-${CustomDomainLog.Content.split(";")[0].replaceAll(
                 "/",
                 "."
-            )}.${EntryDB.config.app.hostname}${url.pathname}`,
+            )}.${EntryDB.config.app.hostname}${url.pathname}${url.search}${url.hash}`,
             {
                 method: request.method,
                 headers: request.headers,
