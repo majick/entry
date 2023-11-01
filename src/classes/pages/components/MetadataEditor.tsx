@@ -370,6 +370,10 @@ export function ClientEditor(_metadata: string, id: string): any {
             {
                 Comments: ["div", "Comments"],
                 Enabled: [metadata.root.Comments.Enabled, ""],
+                Filter: [
+                    metadata.root.Comments.Filter || "",
+                    'Comma separated list of banned words, comments containing these words will not be posted (ex: "bad,words")',
+                ],
             },
             ["Comments"]
         );

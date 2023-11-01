@@ -1326,6 +1326,7 @@ export class EditMetadata implements Endpoint {
                     paste.Metadata.Comments = Unpacked.Comments;
                 else {
                     paste.Metadata.Comments.Enabled = Unpacked.Comments!.Enabled;
+                    paste.Metadata.Comments.Filter = Unpacked.Comments!.Filter;
                 }
         } else paste.Metadata = Unpacked;
 

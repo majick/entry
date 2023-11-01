@@ -67,6 +67,7 @@ export type PasteMetadata = {
         ParentCommentOn?: string; // (if paste is a reply) stores the IsCommentOn of the comment it is replying to
         IsPrivateMessage?: boolean;
         Enabled: boolean;
+        Filter?: string;
         ReportsEnabled?: boolean;
     };
 };
@@ -864,6 +865,22 @@ export default class EntryDB {
                     Enabled: true,
                     IsPrivateMessage: PasteInfo.IsPM === "true",
                 };
+
+                // check comments filter
+                if (
+                    CommentingOn.Metadata &&
+                    CommentingOn.Metadata.Comments &&
+                    CommentingOn.Metadata.Comments.Filter
+                )
+                    for (const BadWord of CommentingOn.Metadata.Comments.Filter.split(
+                        ","
+                    ))
+                        if (PasteInfo.Content.includes(BadWord))
+                            return [
+                                false,
+                                "Comment violates paste's comment filter!",
+                                PasteInfo,
+                            ];
             }
         }
 
