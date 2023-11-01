@@ -60,6 +60,7 @@ export type PasteMetadata = {
     PrivateSource?: boolean;
     SocialIcon?: string; // shown as a "profile" picture in some places
     Badges?: string; // comma separated array of badges, shown under paste
+    PasteType?: "normal" | "builder" | "workshop" | "package";
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;
@@ -877,12 +878,6 @@ export default class EntryDB {
                 Type: "report",
                 Content: `create;${PasteInfo.ReportOn};${PasteInfo.CustomURL}`,
             });
-        }
-
-        // if paste is a builder component, set the groupname
-        if (PasteInfo.Content.startsWith("_builder.component:")) {
-            PasteInfo.GroupName = "components";
-            PasteInfo.CustomURL = `components/${PasteInfo.CustomURL}`;
         }
 
         // create notifications for mentioned users

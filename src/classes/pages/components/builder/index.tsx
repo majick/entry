@@ -98,21 +98,6 @@ export class Builder implements Endpoint {
                 result.Content = `_builder:${parser.stringify(Document)}`;
             }
 
-            // convert component to page
-            if (result.GroupName === "components") {
-                // get content
-                const ComponentMeta = JSON.parse(
-                    result.Content.split("_builder.component:")[1]
-                );
-
-                // get component node
-                const Node = parser.parse(ComponentMeta.Component);
-
-                // add to page and regenerate content
-                Document.Pages[0].Children[0] = Node as any;
-                result.Content = `_builder:${parser.stringify(Document)}`;
-            }
-
             // parse content
             const TrueContent = parser.parse(result.Content.split("_builder:")[1]);
 

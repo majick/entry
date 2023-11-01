@@ -12,7 +12,6 @@ import { render, hydrate } from "preact";
 
 import Modal from "../site/modals/Modal";
 import Sidebar from "./components/Sidebar";
-import Toolbox from "./components/Toolbox";
 import PublishModals from "../site/modals/PublishModals";
 import Window from "./components/Window";
 
@@ -559,36 +558,6 @@ function RenderPage() {
                     delete: "/api/delete",
                 }}
             />
-
-            <Toolbox.SaveModal />
-
-            <Modal
-                buttonid="entry:button.Toolbox"
-                modalid="entry:modal.Toolbox"
-                round={true}
-            >
-                <div
-                    style={{
-                        width: "40rem",
-                        maxWidth: "100%",
-                    }}
-                >
-                    <Toolbox.Browser />
-
-                    <hr />
-
-                    <form
-                        method={"dialog"}
-                        className="full mobile-flex-center"
-                        style={{
-                            display: "flex",
-                            justifyContent: "flex-end",
-                        }}
-                    >
-                        <button className="green round">Close</button>
-                    </form>
-                </div>
-            </Modal>
 
             <Modal
                 buttonid="entry:button.PasteOptions"
