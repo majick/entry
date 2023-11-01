@@ -157,6 +157,7 @@ The following options can be used as events:
     - `create`, followed by the paste that is being reported and the CustomURL of the report
     - `archive`, followed by the CustomURL of the report that is being archived
 - `custom_domain`, stores data about a custom domain link (`Content` is the paste that the domain is linked to, followed by the domain)
+- `notification`, stores data about notifications (`Content` is the paste that the notification is on, followed by the paste that the notification is for)
 - `generic`, random events (most likely never used)
 
 An example that doesn't clear logs on restart and has all events enabled looks like this:

@@ -953,12 +953,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 {result.Metadata.Badges.split(
                                                     ","
                                                 ).map((badge) => (
-                                                    <span
-                                                        class={"chip badge"}
-                                                        style={{
-                                                            userSelect: "none",
-                                                        }}
-                                                    >
+                                                    <span class={"chip badge"}>
                                                         {badge}
                                                     </span>
                                                 ))}
@@ -3303,6 +3298,129 @@ export class ViewPasteMedia implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class Notifications
+ * @implements {Endpoint}
+ */
+export class Notifications implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        if (
+            !EntryDB.config.log ||
+            !EntryDB.config.log.events.includes("notification")
+        )
+            return new _404Page().request(request);
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        if (!Association[0]) return new _404Page().request(request);
+
+        // get notifications
+        const Notifications = (
+            await EntryDB.Logs.QueryLogs(
+                `Type = "notification" AND Content LIKE "%${Association[1]}"`
+            )
+        )[2];
+
+        // clear notifications
+        for (const Notification of Notifications)
+            await EntryDB.Logs.DeleteLog(Notification.ID);
+
+        // render
+        return new Response(
+            Renderer.Render(
+                <>
+                    <TopNav
+                        breadcrumbs={["paste", "notifications"]}
+                        border={false}
+                    />
+
+                    <main class={"small flex flex-column g-4"}>
+                        <div className="card round border flex justify-space-between g-4 flex-wrap">
+                            <span>
+                                {Notifications.length} notification
+                                {Notifications.length > 1 ||
+                                Notifications.length === 0
+                                    ? "s"
+                                    : ""}
+                            </span>
+                        </div>
+
+                        {Notifications.map((Notification) => (
+                            <div
+                                class={
+                                    "card round border secondary flex justify-space-between align-center flex-wrap g-4 mobile-flex-center"
+                                }
+                            >
+                                <ul
+                                    class="__footernav flex-wrap mobile-flex-center"
+                                    style={{ margin: 0, padding: 0 }}
+                                >
+                                    <li style={{ marginTop: 0 }}>
+                                        <a
+                                            href={`/${
+                                                Notification.Content.split(";")[0]
+                                            }`}
+                                            class={"chip solid"}
+                                        >
+                                            {Notification.Content.split(";")[0]}
+                                        </a>
+                                    </li>
+
+                                    <li style={{ marginTop: 0 }}>
+                                        <span class={"utc-date-to-localize"}>
+                                            {new Date(
+                                                Notification.Timestamp
+                                            ).toUTCString()}
+                                        </span>
+                                    </li>
+
+                                    <li
+                                        style={{
+                                            color: "var(--text-color-faded)",
+                                            marginTop: 0,
+                                        }}
+                                    >
+                                        Read Now
+                                    </li>
+                                </ul>
+
+                                <a
+                                    class={"button round secondary"}
+                                    href={`/${Notification.Content.split(";")[0]}`}
+                                >
+                                    View Notification
+                                </a>
+                            </div>
+                        ))}
+                    </main>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
+                </>,
+                <>
+                    <title>Notifications - {EntryDB.config.name}</title>
+                    <link rel="icon" href="/favicon" />
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     Curiosity,
@@ -3315,4 +3433,5 @@ export default {
     ComponentView,
     UserSettings,
     ViewPasteMedia,
+    Notifications,
 };

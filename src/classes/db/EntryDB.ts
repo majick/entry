@@ -294,8 +294,7 @@ export default class EntryDB {
                 'Content LIKE "%bot%" OR Content LIKE "%compatible%"'
             );
 
-            for (const session of BotSessions[2])
-                EntryDB.Logs.DeleteLog(session.ID);
+            for (const session of BotSessions[2]) EntryDB.Logs.DeleteLog(session.ID);
 
             // log (only if there were multiple bot sessions)
             if (BotSessions[2].length > 1)
@@ -326,16 +325,6 @@ export default class EntryDB {
 
         setInterval(CheckSessions, 1000 * 60 * 60 * 24); // run every day
         CheckSessions(); // initial run
-
-        // remove comment logs. since Entry v1.1.8, comments are not stored in LogDB!
-        await SQL.QueryOBJ({
-            db: EntryDB.Logs.db,
-            query: "DELETE FROM Logs WHERE Type = ?",
-            params: ["comment"],
-            all: true,
-            transaction: true,
-            use: "Prepare",
-        });
     }
 
     /**
@@ -895,6 +884,33 @@ export default class EntryDB {
             PasteInfo.GroupName = "components";
             PasteInfo.CustomURL = `components/${PasteInfo.CustomURL}`;
         }
+
+        // create notifications for mentioned users
+        const Mentioned: string[] = []; // list of mentioned pastes
+        if (EntryDB.config.log && EntryDB.config.log.events.includes("notification"))
+            for (const match of PasteInfo.Content.matchAll(
+                /(.\/)(?<NAME>.*?)(?<END>\s|\n)/gm
+            )) {
+                if (!match.groups) continue;
+                if (Mentioned.includes(match.groups.NAME)) continue; // don't double mention
+                Mentioned.push(match.groups.NAME);
+
+                // get mentioning paste session
+                // (only create a notification for pastes that somebody is associated with!)
+                const MentionSession = (
+                    await EntryDB.Logs.QueryLogs(
+                        `Type = "session" AND Content LIKE "%;_with;${match.groups.NAME}"`
+                    )
+                )[2][0];
+
+                if (!MentionSession) continue;
+
+                // create notification
+                await EntryDB.Logs.CreateLog({
+                    Type: "notification",
+                    Content: `${PasteInfo.CustomURL};${match.groups.NAME}`,
+                });
+            }
 
         // add metadata
         PasteInfo.Content += `_metadata:${BaseParser.stringify(metadata)}`;

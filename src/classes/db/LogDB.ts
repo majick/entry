@@ -9,7 +9,6 @@ import { Database } from "bun:sqlite";
 import SQL from "./helpers/SQL";
 
 import EntryDB from "./EntryDB";
-import type { Config } from "../..";
 
 // types
 export type LogEvent =
@@ -22,7 +21,8 @@ export type LogEvent =
     | "error"
     | "view_paste"
     | "report"
-    | "custom_domain";
+    | "custom_domain"
+    | "notification";
 
 export type Log = {
     Content: string;
@@ -70,7 +70,8 @@ export default class LogDB {
                         event === "report" ||
                         event === "session" ||
                         event === "view_paste" ||
-                        event === "custom_domain"
+                        event === "custom_domain" ||
+                        event === "notification"
                     )
                         continue;
 

@@ -843,6 +843,7 @@ export class LogsPage implements Endpoint {
                       'Type IS NOT "session"',
                       'Type IS NOT "report"',
                       'Type IS NOT "custom_domain"',
+                      'Type IS NOT "notification"',
                   ].join(
                       " AND "
                   )} ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`

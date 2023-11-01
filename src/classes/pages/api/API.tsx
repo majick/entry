@@ -137,7 +137,7 @@ export async function Session(request: Request): Promise<string> {
         session = `session-id=${
             ses_log[2].ID // add newest token
         }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
-            60 * 60 * 24 * 365
+            60 * 60 * 24 * 64
         }`;
     } else {
         // validate session
@@ -556,7 +556,7 @@ export class EditPaste implements Endpoint {
 
         if (
             Association[0] === true &&
-            !Association[1].startsWith("association") &&
+            !Association[1].startsWith("associated") &&
             paste.Metadata &&
             !paste.ViewPassword
         ) {

@@ -288,9 +288,10 @@ export const ServerConfig: HoneybeeConfig = {
         "/search": { Page: Pages.PastesSearch },
         // (any) plugins
         ...plugins,
-        // GET paste settings
+        // GET user
         "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
         "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
+        "/paste/notifications": { Page: Pages.Notifications },
         // GET builder
         "/paste/builder": { Page: Builder.Builder },
         // GET root

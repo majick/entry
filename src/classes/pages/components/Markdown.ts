@@ -285,6 +285,12 @@ export function ParseMarkdownSync(
         '<span style="text-decoration: underline;">$2</span>'
     );
 
+    // paste mentions (autolink)
+    content = content.replaceAll(
+        /(.\/)(?<NAME>.*?)(?<END>\s|\n)/gm,
+        '<a href="/$<NAME>" class="chip badge mention">./$<NAME></a>$<END>'
+    );
+
     // named links
     // added because marked kept missing some when rendering as HTML
 

@@ -351,8 +351,8 @@ button.active,
     color: var(--text-color-faded);
 }
 
-.tabbar button.secondary:hover,
-.tabbar .button.secondary:hover {
+.tabbar button.secondary:not(.normal):hover,
+.tabbar .button.secondary:not(.normal):hover {
     color: var(--blue) !important;
     background: transparent;
 }
@@ -534,6 +534,11 @@ h6:focus .htag {
     border-radius: var(--u-02);
     border-style: solid;
     color: var(--blue2);
+    user-select: none;
+}
+
+.chip.badge.mention {
+    color: var(--yellow);
 }
 
 .mobile-only {
