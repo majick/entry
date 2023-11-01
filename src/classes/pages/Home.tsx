@@ -13,7 +13,6 @@ import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
 import Checkbox from "./components/form/Checkbox";
 import _404Page from "./components/404";
-import { ServerConfig } from "../..";
 
 /**
  * @export

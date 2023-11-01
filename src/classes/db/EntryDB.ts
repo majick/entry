@@ -90,7 +90,7 @@ export default class EntryDB {
     public static Logs: LogDB; // hold log db
     public static Media: Media; // hold media db
 
-    public static readonly MaxContentLength = 200000;
+    public static readonly MaxContentLength = 400_000;
     public static readonly MaxPasswordLength = 256;
     public static readonly MaxCustomURLLength = 500;
 
@@ -295,7 +295,7 @@ export default class EntryDB {
             );
 
             for (const session of BotSessions[2])
-                await EntryDB.Logs.DeleteLog(session.ID);
+                EntryDB.Logs.DeleteLog(session.ID);
 
             // log (only if there were multiple bot sessions)
             if (BotSessions[2].length > 1)
@@ -318,8 +318,8 @@ export default class EntryDB {
 
                 // if difference is more than two months, delete log (invalidating the session)
                 if (Difference > 1000 * 60 * 60 * 24 * 64) {
-                    await EntryDB.Logs.DeleteLog(log.ID);
-                    console.log(`Deleted session "${log.ID}" (maximum age)`);
+                    console.log(`Removing session "${log.ID}" (maximum age)`);
+                    EntryDB.Logs.DeleteLog(log.ID);
                 }
             }
         };
