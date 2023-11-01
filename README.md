@@ -86,6 +86,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /admin/api/mass-delete`, Delete pastes by sql query: `AdminPassword, pastes`
 - `POST /admin/api/sql`, Directly run sql on the server: `AdminPassword, sql, get, all` (`get` and `all` represent the type of operation, `get` returns one result while `all` returns... all results)
 - `POST /admin/api/logs/export`, Get all server logs: `AdminPassword`
+- `POST /admin/api/logs/users`, Get all users (Returns pastes associated with a session log)
 - `POST /admin/api/logs/mass-delete`, Delete logs by sql query: `AdminPassword, logs`
 - `POST /admin/api/config.json`, Get server config file contents: `AdminPassword`
 - `POST /admin/api/metadata`, Update the metadata of a paste: `AdminPassword, CustomURL, Metadata`

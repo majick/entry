@@ -379,6 +379,54 @@ export class APIExportConfig implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class APIGetUsers
+ * @implements {Endpoint}
+ */
+export class APIGetUsers implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+            return new Login().request(request, server);
+
+        // get logs
+        const _export = (
+            await EntryDB.Logs.QueryLogs(
+                'Type = "session" AND Content LIKE "%;_with;%"'
+            )
+        )[2];
+
+        // build userslist
+        const UsersList: string[] = [];
+
+        for (const log of _export) UsersList.push(log.Content.split(";_with;")[1]);
+
+        // return
+        return new Response(JSON.stringify([true, UsersList.length, UsersList]), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // default export
 export default {
     APIDeletePaste,
@@ -389,4 +437,5 @@ export default {
     APIExportLogs,
     APIMassDeleteLogs,
     APIExportConfig,
+    APIGetUsers,
 };

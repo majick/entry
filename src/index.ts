@@ -258,6 +258,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/admin/api/mass-delete": { Method: "POST", Page: AdminAPI.APIMassDelete },
         "/admin/api/sql": { Method: "POST", Page: AdminAPI.APISQL },
         "/admin/api/logs/export": { Method: "POST", Page: AdminAPI.APIExportLogs },
+        "/admin/api/logs/users": { Method: "POST", Page: AdminAPI.APIGetUsers },
         "/admin/api/logs/mass-delete": {
             Method: "POST",
             Page: AdminAPI.APIMassDeleteLogs,
