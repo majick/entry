@@ -889,7 +889,7 @@ export default class EntryDB {
         const Mentioned: string[] = []; // list of mentioned pastes
         if (EntryDB.config.log && EntryDB.config.log.events.includes("notification"))
             for (const match of PasteInfo.Content.matchAll(
-                /(.\/)(?<NAME>.*?)(?<END>\s|\n)/gm
+                /(\.\/)(?<NAME>.*?)(?<END>\s|\n)/gm
             )) {
                 if (!match.groups) continue;
                 if (Mentioned.includes(match.groups.NAME)) continue; // don't double mention

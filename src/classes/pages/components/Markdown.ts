@@ -287,7 +287,7 @@ export function ParseMarkdownSync(
 
     // paste mentions (autolink)
     content = content.replaceAll(
-        /(.\/)(?<NAME>.*?)(?<END>\s|\n)/gm,
+        /(\.\/)(?<NAME>.*?)(?<END>\s|\n)/gm,
         '<a href="/$<NAME>" class="chip badge mention">./$<NAME></a>$<END>'
     );
 
