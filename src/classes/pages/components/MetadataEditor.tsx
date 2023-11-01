@@ -39,6 +39,7 @@ export function Editor(_metadata: string, id: string): any {
         metadata.root.ShowViewCount = true;
 
     if (metadata.root.Locked === undefined) metadata.root.Locked = false;
+    if (metadata.root.Badges === undefined) metadata.root.Badges = "";
 
     // ...
     function UpdateMetadata() {

@@ -143,7 +143,9 @@ export async function CheckInstance(
             `${url.protocol}//ins-${CustomDomainLog.Content.split(";")[0].replaceAll(
                 "/",
                 "."
-            )}.${EntryDB.config.app.hostname}${url.pathname}${url.search}${url.hash}`,
+            )}.${EntryDB.config.app.hostname}${url.pathname}${url.search}${
+                url.hash
+            }`,
             {
                 method: request.method,
                 headers: request.headers,
@@ -943,6 +945,26 @@ export class GetPasteFromURL implements Endpoint {
                                         textAlign: "right",
                                     }}
                                 >
+                                    {result.Metadata &&
+                                        result.Metadata.Badges &&
+                                        result.Metadata.Badges.split(",").length >
+                                            0 && (
+                                            <div class={"flex flex-wrap g-4"}>
+                                                {result.Metadata.Badges.split(
+                                                    ","
+                                                ).map((badge) => (
+                                                    <span
+                                                        class={"chip badge"}
+                                                        style={{
+                                                            userSelect: "none",
+                                                        }}
+                                                    >
+                                                        {badge}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+
                                     {result.ExpireOn !== undefined && (
                                         <span>Expires: {result.ExpireOn}</span>
                                     )}

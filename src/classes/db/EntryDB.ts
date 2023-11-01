@@ -59,6 +59,7 @@ export type PasteMetadata = {
     Title?: string; // title shown on paste
     PrivateSource?: boolean;
     SocialIcon?: string; // shown as a "profile" picture in some places
+    Badges?: string; // comma separated array of badges, shown under paste
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;
@@ -302,27 +303,29 @@ export default class EntryDB {
         }
 
         // start logs interval
-        // runs every day, checks sessions to see if it has been more than a year
+        // runs every day, checks sessions to see if it has been more than two months
         // since they were created. deletes session if it's expired
-        setInterval(
-            async () => {
-                for (const log of (
-                    await EntryDB.Logs.QueryLogs('Type = "session"')
-                )[2]) {
-                    // get dates
-                    const Created = new Date(log.Timestamp);
-                    const Now = new Date();
+        const CheckSessions = async () => {
+            for (const log of (
+                await EntryDB.Logs.QueryLogs('Type = "session"')
+            )[2]) {
+                // get dates
+                const Created = new Date(log.Timestamp);
+                const Now = new Date();
 
-                    // subtract milliseconds
-                    const Difference = Now.getTime() - Created.getTime();
+                // subtract milliseconds
+                const Difference = Now.getTime() - Created.getTime();
 
-                    // if difference is more than a year, delete log (invalidating the session)
-                    if (Difference > 1000 * 60 * 60 * 24 * 365)
-                        await EntryDB.Logs.DeleteLog(log.ID);
+                // if difference is more than two months, delete log (invalidating the session)
+                if (Difference > 1000 * 60 * 60 * 24 * 64) {
+                    await EntryDB.Logs.DeleteLog(log.ID);
+                    console.log(`Deleted session "${log.ID}" (maximum age)`);
                 }
-            },
-            1000 * 60 * 60 * 24
-        );
+            }
+        };
+
+        setInterval(CheckSessions, 1000 * 60 * 60 * 24); // run every day
+        CheckSessions(); // initial run
 
         // remove comment logs. since Entry v1.1.8, comments are not stored in LogDB!
         await SQL.QueryOBJ({

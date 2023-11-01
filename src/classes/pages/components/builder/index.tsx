@@ -8,6 +8,7 @@ import { Endpoint, Renderer } from "honeybee";
 
 import EntryDB, { Paste } from "../../../db/EntryDB";
 import { PageHeaders, db, GetAssociation } from "../../api/API";
+import { OpenGraph } from "../../Pages";
 import _404Page from "../404";
 
 import parser from "../../../db/helpers/BaseParser";
@@ -64,9 +65,10 @@ export class Builder implements Endpoint {
         };
 
         // get editing paste (if it exists)
+        let result: Paste | undefined;
         if (search.get("edit")) {
             // get paste
-            const result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
+            result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
 
             // make sure paste exists
             if (!result) return new _404Page().request(request);
@@ -151,6 +153,14 @@ export class Builder implements Endpoint {
                 <>
                     <title>Builder</title>
                     <link rel="icon" href="/favicon" />
+
+                    <OpenGraph
+                        title={
+                            result === undefined
+                                ? "Create a new builder paste..."
+                                : `Edit ${result.CustomURL}...`
+                        }
+                    />
                 </>
             ),
             {

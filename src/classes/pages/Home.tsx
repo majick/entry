@@ -7,7 +7,7 @@ import Modal from "./components/site/modals/Modal";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import EntryDB, { Paste } from "../db/EntryDB";
-import Pages from "./Pages";
+import Pages, { OpenGraph } from "./Pages";
 
 import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
@@ -1177,6 +1177,14 @@ export default class Home implements Endpoint {
 
                     <title>{EntryDB.config.name} - A Markdown Pastebin</title>
                     <link rel="icon" href="/favicon" />
+
+                    <OpenGraph
+                        title={
+                            paste === undefined
+                                ? "Create a new paste..."
+                                : `Edit ${paste.CustomURL}...`
+                        }
+                    />
                 </>
             ),
             {

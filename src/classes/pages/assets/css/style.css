@@ -335,7 +335,6 @@ button.active,
 
 .tabbar {
     display: flex;
-    gap: var(--u-04);
     /* margin-bottom: var(--u-02); */
 }
 
@@ -514,7 +513,7 @@ h6:focus .htag {
 }
 
 .chip {
-    border-radius: 1rem;
+    border-radius: var(--u-10);
     padding: 0 0.5rem;
     border: dashed 1px currentColor;
     transition: all 0.15s;
@@ -529,6 +528,12 @@ h6:focus .htag {
     border-color: var(--background-surface2);
     padding: 0.25rem 0.75rem !important;
     height: max-content !important;
+}
+
+.chip.badge {
+    border-radius: var(--u-02);
+    border-style: solid;
+    color: var(--blue2);
 }
 
 .mobile-only {
