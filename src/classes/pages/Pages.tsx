@@ -84,6 +84,7 @@ export function OpenGraph(props: {
     url?: string;
     description?: string;
     title?: string;
+    icon?: string;
 }) {
     return (
         <>
@@ -97,6 +98,7 @@ export function OpenGraph(props: {
             )}
 
             {props.title && <meta name={"og:title"} value={props.title} />}
+            {props.icon && <meta name={"og:image"} value={props.icon} />}
         </>
     );
 }
@@ -515,6 +517,11 @@ export class GetPasteFromURL implements Endpoint {
                                 result.Metadata && result.Metadata.Title
                                     ? result.Metadata.Title
                                     : result.CustomURL
+                            }
+                            icon={
+                                result.Metadata && result.Metadata.Favicon
+                                    ? result.Metadata.Favicon
+                                    : undefined
                             }
                         />
                     </>
@@ -1107,6 +1114,11 @@ export class GetPasteFromURL implements Endpoint {
                             result.Content.length > 150
                                 ? `${result.Content.substring(0, 150)}...`
                                 : result.Content
+                        }
+                        icon={
+                            result.Metadata && result.Metadata.Favicon
+                                ? result.Metadata.Favicon
+                                : undefined
                         }
                     />
                 </>
@@ -2245,6 +2257,20 @@ export class PasteCommentsPage implements Endpoint {
                     <meta
                         name="description"
                         content={`View comments on ${result.CustomURL}, on ${EntryDB.config.name}`}
+                    />
+
+                    <OpenGraph
+                        title={`Comments on ${result.CustomURL}`}
+                        description={`View ${CommentPastes.length} comment${
+                            CommentPastes.length > 1 || CommentPastes.length === 0
+                                ? "s"
+                                : ""
+                        } on /${result.CustomURL}`}
+                        icon={
+                            result.Metadata && result.Metadata.Favicon
+                                ? result.Metadata.Favicon
+                                : undefined
+                        }
                     />
                 </>
             ),

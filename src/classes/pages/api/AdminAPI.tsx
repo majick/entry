@@ -415,7 +415,10 @@ export class APIGetUsers implements Endpoint {
         // build userslist
         const UsersList: string[] = [];
 
-        for (const log of _export) UsersList.push(log.Content.split(";_with;")[1]);
+        for (const log of _export) {
+            const split = log.Content.split(";_with;")[1];
+            if (split && !UsersList.includes(split)) UsersList.push(split);
+        }
 
         // return
         return new Response(JSON.stringify([true, UsersList.length, UsersList]), {

@@ -40,6 +40,8 @@ export function Editor(_metadata: string, id: string): any {
 
     if (metadata.root.Locked === undefined) metadata.root.Locked = false;
     if (metadata.root.Badges === undefined) metadata.root.Badges = "";
+    if (metadata.root.PrivateSource === undefined)
+        metadata.root.PrivateSource = false;
 
     // ...
     function UpdateMetadata() {
