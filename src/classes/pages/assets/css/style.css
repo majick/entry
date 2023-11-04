@@ -982,7 +982,7 @@ details[open] summary {
 }
 
 details summary:hover {
-    background: var(--background-surface1-5);
+    background: var(--background-surface1-5) !important;
 }
 
 details[open] summary {

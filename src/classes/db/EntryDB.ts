@@ -486,7 +486,7 @@ export default class EntryDB {
                     query: "SELECT * FROM Pastes WHERE CustomURL = ?",
                     params: [PasteURL.toLowerCase()],
                     get: true,
-                    use: "Prepare",
+                    use: "Query",
                 })) as Paste;
 
                 if (!record) return resolve(undefined); // don't reject because we want this to be treated like an async function
@@ -1728,7 +1728,7 @@ export default class EntryDB {
             params: [`c.${result.CustomURL.replaceAll("/", "_")}-%`],
             all: true,
             transaction: true,
-            use: "Prepare",
+            use: "Query",
         });
 
         const CommentPastes: Paste[] = []; // we're going to store fixed comments in here

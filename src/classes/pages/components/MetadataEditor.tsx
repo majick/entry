@@ -271,12 +271,7 @@ export function ClientEditor(_metadata: string, id: string): any {
 
                                 for (const _key of nested || ["root"]) {
                                     prev = prev[_key]; // set new previous
-
-                                    if (
-                                        prev === undefined ||
-                                        prev[data[0]] === undefined
-                                    )
-                                        continue;
+                                    if (prev === undefined) continue;
 
                                     // update value
                                     prev[data[0]] = (

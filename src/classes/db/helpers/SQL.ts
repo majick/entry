@@ -34,6 +34,8 @@ export default class SQL {
             create: true,
         });
 
+        db.exec("PRAGMA journal_mode = WAL;"); // enable Write Ahead Mode
+
         // return
         return [db, needToCreate]; // needToCreate tells us if we need to create tables
     }

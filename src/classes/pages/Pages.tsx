@@ -839,11 +839,12 @@ export class GetPasteFromURL implements Endpoint {
                                         round={true}
                                     >
                                         <div
+                                            class={
+                                                "flex justify-center flex-wrap g-4"
+                                            }
                                             style={{
-                                                display: "flex",
-                                                gap: "0.5rem",
-                                                justifyContent: "center",
-                                                flexWrap: "wrap",
+                                                width: "25rem",
+                                                maxWidth: "100%",
                                             }}
                                         >
                                             {result.Content.includes(
@@ -872,6 +873,29 @@ export class GetPasteFromURL implements Endpoint {
                                                     View Group
                                                 </a>
                                             )}
+
+                                            {/* {(!EntryDB.config.app ||
+                                                EntryDB.config.app.auto_tag !==
+                                                    false) &&
+                                                Association[0] &&
+                                                result.CustomURL !==
+                                                    Association[1] && (
+                                                    <form
+                                                        action={"/api/block"}
+                                                        method={"POST"}
+                                                    >
+                                                        <input
+                                                            type="hidden"
+                                                            name="CustomURL"
+                                                            value={result.CustomURL}
+                                                            required
+                                                        />
+
+                                                        <button className="round">
+                                                            Block
+                                                        </button>
+                                                    </form>
+                                                    )} */}
 
                                             {EntryDB.config.log &&
                                                 EntryDB.config.log.events.includes(
