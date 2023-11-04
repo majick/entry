@@ -146,7 +146,7 @@ export default class LogDB {
             params: [id],
             get: true,
             transaction: true,
-            use: "Prepare",
+            use: "Query",
         });
 
         if (!log) return [false, "Log does not exist"];
@@ -195,8 +195,9 @@ export default class LogDB {
         const logs = await SQL.QueryOBJ({
             db: this.db,
             query: `SELECT ${select} FROM Logs WHERE ${sql}`,
-            use: "Prepare",
+            use: "Query",
             all: true,
+            transaction: true,
         });
 
         // return

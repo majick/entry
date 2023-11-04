@@ -161,7 +161,7 @@ The following options can be used as events:
 - `notification`, stores data about notifications (`Content` is the paste that the notification is on, followed by the paste that the notification is for)
 - `generic`, random events (most likely never used)
 
-An example that doesn't clear logs on restart and has all events enabled looks like this:
+An example that doesn't clear logs on server restart could look like this:
 
 ```json
 {

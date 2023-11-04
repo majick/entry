@@ -36,6 +36,7 @@ export interface PageNode extends BaseNode {
     Children: Node[];
     Theme?: "dark" | "light" | "purple" | "blue" | "green" | "pink";
     ManualPosition?: string; // boolean string
+    Content?: string; // plain HTML content of the page (basically a source element)
 }
 
 export interface CardNode extends BaseNode {
@@ -377,6 +378,13 @@ export function PageNode(props: {
             data-component={props.node.Type}
             data-edit={props.node.EditMode}
         >
+            <div
+                dangerouslySetInnerHTML={{ __html: props.node.Content || "" }}
+                style={{
+                    display: "contents",
+                }}
+            />
+
             {props.children}
 
             <style

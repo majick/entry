@@ -25,6 +25,9 @@ import {
 import { Node } from "../schema";
 import parser from "../parser";
 
+import HTMLEditor from "./HTMLEditor";
+let CurrentEditor: any;
+
 /**
  * @function QuickInput
  *
@@ -178,6 +181,7 @@ export default function Sidebar(props: { Page?: string }): any {
     // return
     return (
         <div
+            id={"main-sidebar"}
             className="builder:sidebar"
             style={{
                 display: SidebarOpen ? "flex" : "none",
@@ -197,7 +201,18 @@ export default function Sidebar(props: { Page?: string }): any {
 
                 <button
                     class={"normal round red"}
-                    onClick={() => SetSidebar(false)}
+                    onClick={() => {
+                        // make sidebar not fill screen
+                        document
+                            .getElementById("main-sidebar")!
+                            .classList.remove("full");
+
+                        // close sidebar
+                        SetSidebar(false);
+
+                        // render
+                        Update();
+                    }}
                     title={"Close Sidebar"}
                 >
                     <svg
@@ -212,6 +227,27 @@ export default function Sidebar(props: { Page?: string }): any {
                 </button>
             </div>
 
+            {/* code editor */}
+            {props.Page && props.Page === "HTML" && (
+                <>
+                    <div
+                        id="_editor"
+                        style={{
+                            width: "100%",
+                            height: "95dvh",
+                            maxHeight: "90dvh",
+                        }}
+                    ></div>
+
+                    <style
+                        dangerouslySetInnerHTML={{
+                            __html: `.cm-line, .cm-line span { font-family: monospace !important; }`,
+                        }}
+                    />
+                </>
+            )}
+
+            {/* main options */}
             <div className="options">
                 {Selected && Selected.NotRemovable !== true && !props.Page && (
                     <button onClick={() => Delete(Selected)} class={"red"}>
@@ -226,6 +262,64 @@ export default function Sidebar(props: { Page?: string }): any {
                         Edit Order
                     </button>
                 )}
+
+                {Selected &&
+                    (Selected.Type === "Source" || Selected.Type === "Page") &&
+                    !props.Page && (
+                        <button
+                            onClick={() => {
+                                if (
+                                    Selected.Type !== "Source" &&
+                                    Selected.Type !== "Page"
+                                )
+                                    return;
+
+                                // make sidebar fill screen
+                                document
+                                    .getElementById("main-sidebar")!
+                                    .classList.add("full");
+
+                                // render sidebar
+                                RenderSidebar({ Page: "HTML" });
+
+                                // create editor
+                                CurrentEditor = HTMLEditor.CreateEditor(
+                                    document.getElementById("_editor")!,
+                                    (NewContent) => {
+                                        if (
+                                            Selected.Type !== "Source" &&
+                                            Selected.Type !== "Page"
+                                        )
+                                            return;
+
+                                        Selected.Content = NewContent;
+                                    }
+                                );
+
+                                // set editor content
+                                CurrentEditor.dispatch(
+                                    CurrentEditor.state.update({
+                                        changes: {
+                                            from: 0,
+                                            to: CurrentEditor.state.doc.length,
+                                            insert: Selected.Content,
+                                        },
+                                    })
+                                );
+                            }}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 16 16"
+                                width="16"
+                                height="16"
+                                aria-label={"Code Icon"}
+                            >
+                                <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Zm7.47 3.97a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L10.69 8 9.22 6.53a.75.75 0 0 1 0-1.06ZM6.78 6.53 5.31 8l1.47 1.47a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215l-2-2a.75.75 0 0 1 0-1.06l2-2a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Z"></path>
+                            </svg>
+                            Edit HTML
+                        </button>
+                    )}
 
                 {(props &&
                     ((props.Page === "PagesView" && (
@@ -417,7 +511,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                 </button>
                             </>
                         )))) ||
-                    (Selected && (
+                    (Selected && !props.Page && (
                         <>
                             {(Selected.Type === "Page" && (
                                 <>
@@ -825,12 +919,6 @@ export default function Sidebar(props: { Page?: string }): any {
                                 (Selected.Type === "Source" && (
                                     <>
                                         {/* source element controls */}
-                                        <QuickInput
-                                            name="HTML Content"
-                                            property="Content"
-                                            type="textarea"
-                                        />
-
                                         <QuickInput
                                             name="Use Content Box"
                                             property="UseContentBox"

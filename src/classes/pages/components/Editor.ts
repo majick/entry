@@ -399,7 +399,10 @@ export default function CreateEditor(ElementID: string, content: string) {
 
                     // if last character of the line is }, add an indentation
                     // } because it's automatically added after opened braces!
-                    if (CurrentLine.text[CurrentLine.text.length - 1] === "}") {
+                    if (
+                        CurrentLine.text[CurrentLine.text.length - 1] === "{" ||
+                        CurrentLine.text[CurrentLine.text.length - 1] === "}"
+                    ) {
                         IndentationString += "    ";
                         ExtraCharacters = "\n"; // auto insert line break after
                     }
