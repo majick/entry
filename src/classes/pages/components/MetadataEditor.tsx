@@ -18,7 +18,7 @@ import Checkbox from "./form/Checkbox";
  */
 export function Editor(_metadata: string, id: string): any {
     const metadata: { [key: string]: any } = {
-        root: JSON.parse(_metadata),
+        root: BaseParser.parse(_metadata),
     };
 
     // fill missing values from schema
@@ -191,7 +191,7 @@ export function Editor(_metadata: string, id: string): any {
  */
 export function ClientEditor(_metadata: string, id: string): any {
     const metadata: { [key: string]: any } = {
-        root: JSON.parse(_metadata),
+        root: BaseParser.parse(_metadata),
     };
 
     // fill missing values from schema
@@ -322,17 +322,18 @@ export function ClientEditor(_metadata: string, id: string): any {
         }
     }
 
-    // initial metadata update
-    UpdateMetadata();
-
     // generate only the fields we want
     GenerateInputFields({
         ShowOwnerEnabled: [
-            metadata.root.ShowOwnerEnabled || true,
+            metadata.root.ShowOwnerEnabled === undefined
+                ? true
+                : metadata.root.ShowOwnerEnabled,
             "Toggle the owner label on this paste",
         ],
         ShowViewCount: [
-            metadata.root.ShowViewCount || true,
+            metadata.root.ShowViewCount === undefined
+                ? true
+                : metadata.root.ShowViewCount,
             "Toggle the views counter on this paste",
         ],
         // tab display section
@@ -348,7 +349,9 @@ export function ClientEditor(_metadata: string, id: string): any {
         // privacy section
         Privacy: ["div", "Privacy and Security"],
         PrivateSource: [
-            metadata.root.PrivateSource || false,
+            metadata.root.PrivateSource === undefined
+                ? false
+                : metadata.root.PrivateSource,
             "Make the source of this paste private unless associated with this paste or its owner",
         ],
         // social section

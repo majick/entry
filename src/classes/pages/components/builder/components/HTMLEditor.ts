@@ -36,8 +36,6 @@ import {
     completionKeymap,
     closeBrackets,
     closeBracketsKeymap,
-    CompletionContext,
-    CompletionResult,
 } from "@codemirror/autocomplete";
 
 import {
@@ -47,12 +45,6 @@ import {
     indentWithTab,
 } from "@codemirror/commands";
 
-import {
-    javascript,
-    javascriptLanguage,
-    localCompletionSource,
-    typescriptLanguage,
-} from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { tags } from "@lezer/highlight";
 
@@ -133,6 +125,7 @@ export function CreateEditor(
                 rectangularSelection(),
                 crosshairCursor(),
                 highlightActiveLine(),
+                EditorView.lineWrapping,
                 EditorView.updateListener.of(async (update) => {
                     if (update.docChanged) {
                         const content = update.state.doc.toString();

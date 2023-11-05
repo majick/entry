@@ -775,7 +775,7 @@ html:not(.dark-theme) hr {
 .builder\:card hr {
     /* editor-tab really just means markdown preview, it has a lighter background that matches
        the normal color of hr, so we need to make hr brighter when it is inside of that */
-    border-color: rgba(120, 125, 125, 0.25);
+    border-color: var(--background-surface2a);
 }
 
 span.highlight {
@@ -1535,6 +1535,7 @@ br:not(.cm-line br) {
     animation: SlideInFromLeft 0.15s 0s running;
     overflow: auto;
     z-index: 10000000;
+    transition: all 0.15s;
 }
 
 .builder\:sidebar.full {

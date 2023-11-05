@@ -2340,7 +2340,7 @@ export class UserSettings implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <TopNav breadcrumbs={["paste", "settings"]} />
+                        <TopNav breadcrumbs={["paste", "settings"]} border={false} />
 
                         <main>
                             <div
@@ -2481,7 +2481,10 @@ export class UserSettings implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <TopNav breadcrumbs={["paste", "settings", name]} />
+                        <TopNav
+                            breadcrumbs={["paste", "settings", name]}
+                            border={false}
+                        />
 
                         <main>
                             <div
@@ -2746,8 +2749,8 @@ export class UserSettings implements Endpoint {
                                         EntryDB.config.app.enable_comments === true
                                     }
 
-                                    _e.ClientEditor(\`${JSON.stringify(
-                                        result.Metadata
+                                    _e.ClientEditor(\`${BaseParser.stringify(
+                                        result.Metadata as any
                                     )}\`, "_doc");`,
                                 }}
                             />
@@ -3215,7 +3218,11 @@ export class Notifications implements Endpoint {
                                             class={"chip solid"}
                                             target={"_blank"}
                                         >
-                                            {Notification.Content.split(";")[0]}
+                                            {Notification.Content.split(
+                                                ";"
+                                            )[0].startsWith("paste/comments/")
+                                                ? "New Comment"
+                                                : Notification.Content.split(";")[0]}
                                         </a>
                                     </li>
 

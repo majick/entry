@@ -881,6 +881,35 @@ export default class EntryDB {
                                 "Comment violates paste's comment filter!",
                                 PasteInfo,
                             ];
+
+                // create notification for CommentingOn.Metadata.Owner
+                if (PasteInfo.Associated && PasteInfo.Associated.startsWith(";"))
+                    PasteInfo.Associated = PasteInfo.Associated.slice(1);
+
+                if (
+                    // make sure we're commenting on a paste with an owner
+                    CommentingOn.Metadata &&
+                    CommentingOn.Metadata.Owner &&
+                    // make sure we're not commenting on our own paste
+                    PasteInfo.Associated !== CommentingOn.Metadata.Owner
+                ) {
+                    // get commenting on paste session
+                    // (only create a notification for pastes that somebody is associated with!)
+                    const MentionSession = (
+                        await EntryDB.Logs.QueryLogs(
+                            `Type = "session" AND Content LIKE "%;_with;${CommentingOn.Metadata.Owner}"`
+                        )
+                    )[2][0];
+
+                    if (MentionSession)
+                        // create notification
+                        await EntryDB.Logs.CreateLog({
+                            Type: "notification",
+                            // notification paste must start with "paste/comments/"
+                            // so that the notif dashboard understands this is a new comment!
+                            Content: `paste/comments/${CommentingOn.CustomURL};${CommentingOn.Metadata.Owner}`,
+                        });
+                }
             }
         }
 

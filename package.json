@@ -18,7 +18,6 @@
     "@codemirror/autocomplete": "latest",
     "@codemirror/commands": "latest",
     "@codemirror/lang-html": "^6.4.6",
-    "@codemirror/lang-javascript": "^6.2.1",
     "@codemirror/lang-markdown": "latest",
     "@codemirror/language": "latest",
     "@codemirror/state": "latest",

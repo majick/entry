@@ -479,15 +479,15 @@ export default function CreateEditor(ElementID: string, content: string) {
 
     // prerender
     (async () => {
-        // window.localStorage.setItem(
-        //     "gen",
-        //     await ParseMarkdown(
-        //         window.localStorage.getItem("doc")! ||
-        //             decodeURIComponent(content) ||
-        //             "",
-        //         false
-        //     )
-        // );
+        window.localStorage.setItem(
+            "gen",
+            await ParseMarkdown(
+                window.localStorage.getItem("doc")! ||
+                    decodeURIComponent(content) ||
+                    "",
+                false
+            )
+        );
 
         // update contentInput with initial content
         (document.getElementById("contentInput") as HTMLInputElement).value =

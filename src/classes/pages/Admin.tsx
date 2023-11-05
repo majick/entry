@@ -8,6 +8,7 @@ import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
 import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./api/API";
+import BaseParser from "../db/helpers/BaseParser";
 import EntryDB, { Paste } from "../db/EntryDB";
 
 import PasteList from "./components/site/PasteList";
@@ -1918,8 +1919,8 @@ export class MetadataEditor implements Endpoint {
                             type={"module"}
                             dangerouslySetInnerHTML={{
                                 __html: `import _e from "/MetadataEditor.js";
-                                _e.Editor(\`${JSON.stringify(
-                                    result.Metadata
+                                _e.Editor(\`${BaseParser.stringify(
+                                    result.Metadata as any
                                 )}\`, "_editor");`,
                             }}
                         />

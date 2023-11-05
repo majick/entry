@@ -182,9 +182,10 @@ export default function Sidebar(props: { Page?: string }): any {
     return (
         <div
             id={"main-sidebar"}
-            className="builder:sidebar"
+            className="builder:sidebar editor-tab"
             style={{
-                display: SidebarOpen ? "flex" : "none",
+                left: SidebarOpen ? "0" : "-100%",
+                display: "flex",
             }}
         >
             <div
@@ -194,18 +195,29 @@ export default function Sidebar(props: { Page?: string }): any {
                     top: 0,
                     zIndex: 9999,
                     borderBottom: "solid 1px var(--background-surface2a)",
-                    boxShadow: "0 0 2px var(--background-surface2a)",
                 }}
             >
                 <b>{props.Page || "Edit Component"}</b>
 
                 <button
-                    class={"normal round red"}
+                    class={"normal border round"}
                     onClick={() => {
-                        // make sidebar not fill screen
-                        document
-                            .getElementById("main-sidebar")!
-                            .classList.remove("full");
+                        const SidebarElement =
+                            document.getElementById("main-sidebar")!;
+
+                        // if sidebar class contains full, remove it
+                        if (SidebarElement.classList.contains("full")) {
+                            document
+                                .getElementById("main-sidebar")!
+                                .classList.remove("full");
+
+                            // this means we were probably in a secondary menu
+                            // rerender sidebar with Selected
+                            RenderSidebar();
+
+                            // return and render
+                            return Update();
+                        }
 
                         // close sidebar
                         SetSidebar(false);
@@ -213,16 +225,17 @@ export default function Sidebar(props: { Page?: string }): any {
                         // render
                         Update();
                     }}
-                    title={"Close Sidebar"}
+                    title={"Collapse Sidebar"}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 16 16"
                         width="16"
                         height="16"
-                        aria-label={"Close Symbol"}
+                        title={"Sidebar Collapse Symbol"}
                     >
-                        <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
+                        <path d="M6.823 7.823a.25.25 0 0 1 0 .354l-2.396 2.396A.25.25 0 0 1 4 10.396V5.604a.25.25 0 0 1 .427-.177Z"></path>
+                        <path d="M1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25V1.75C0 .784.784 0 1.75 0ZM1.5 1.75v12.5c0 .138.112.25.25.25H9.5v-13H1.75a.25.25 0 0 0-.25.25ZM11 14.5h3.25a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25H11Z"></path>
                     </svg>
                 </button>
             </div>
@@ -251,6 +264,15 @@ export default function Sidebar(props: { Page?: string }): any {
             <div className="options">
                 {Selected && Selected.NotRemovable !== true && !props.Page && (
                     <button onClick={() => Delete(Selected)} class={"red"}>
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            height="16"
+                            aria-label={"Trash Symbol"}
+                        >
+                            <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                        </svg>
                         Delete
                     </button>
                 )}
@@ -259,6 +281,15 @@ export default function Sidebar(props: { Page?: string }): any {
                     <button
                         onClick={() => EditOrder(true, Selected, SelectedParent)}
                     >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            width="16"
+                            height="16"
+                            aria-label={"Movement Grabber Symbol"}
+                        >
+                            <path d="M10 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm0-4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-4 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm5-9a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM7 8a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                        </svg>
                         Edit Order
                     </button>
                 )}
@@ -325,48 +356,6 @@ export default function Sidebar(props: { Page?: string }): any {
                     ((props.Page === "PagesView" && (
                         <>
                             {/* pages list */}
-                            <button
-                                onClick={() => {
-                                    RenderSidebar({
-                                        Page: "Tree",
-                                    });
-                                }}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    height="16"
-                                    aria-label={"Tree Symbol"}
-                                    style={{
-                                        marginBottom: "1px",
-                                    }}
-                                >
-                                    <path d="M4.75 7a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5ZM5 4.75A.75.75 0 0 1 5.75 4h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 5 4.75ZM6.75 10a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z"></path>
-                                    <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path>
-                                </svg>
-                                Component Tree
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    RenderSidebar({
-                                        Page: "History",
-                                    });
-                                }}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    height="16"
-                                    aria-label={"History Symbol"}
-                                >
-                                    <path d="m.427 1.927 1.215 1.215a8.002 8.002 0 1 1-1.6 5.685.75.75 0 1 1 1.493-.154 6.5 6.5 0 1 0 1.18-4.458l1.358 1.358A.25.25 0 0 1 3.896 6H.25A.25.25 0 0 1 0 5.75V2.104a.25.25 0 0 1 .427-.177ZM7.75 4a.75.75 0 0 1 .75.75v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5A.75.75 0 0 1 7.75 4Z"></path>
-                                </svg>
-                                Document History
-                            </button>
-
                             <button onClick={() => AddComponent("Page")}>
                                 Add Page
                             </button>
@@ -424,6 +413,52 @@ export default function Sidebar(props: { Page?: string }): any {
                                     onClick={() => EditOrder(false)}
                                 >
                                     Cancel
+                                </button>
+                            </>
+                        )) ||
+                        (props.Page === "More" && (
+                            <>
+                                {/* more options */}
+                                <button
+                                    onClick={() => {
+                                        RenderSidebar({
+                                            Page: "Tree",
+                                        });
+                                    }}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Tree Symbol"}
+                                        style={{
+                                            marginBottom: "1px",
+                                        }}
+                                    >
+                                        <path d="M4.75 7a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5ZM5 4.75A.75.75 0 0 1 5.75 4h5.5a.75.75 0 0 1 0 1.5h-5.5A.75.75 0 0 1 5 4.75ZM6.75 10a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z"></path>
+                                        <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v12.5A1.75 1.75 0 0 1 14.25 16H1.75A1.75 1.75 0 0 1 0 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V1.75a.25.25 0 0 0-.25-.25Z"></path>
+                                    </svg>
+                                    Component Tree
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        RenderSidebar({
+                                            Page: "History",
+                                        });
+                                    }}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"History Symbol"}
+                                    >
+                                        <path d="m.427 1.927 1.215 1.215a8.002 8.002 0 1 1-1.6 5.685.75.75 0 1 1 1.493-.154 6.5 6.5 0 1 0 1.18-4.458l1.358 1.358A.25.25 0 0 1 3.896 6H.25A.25.25 0 0 1 0 5.75V2.104a.25.25 0 0 1 .427-.177ZM7.75 4a.75.75 0 0 1 .75.75v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5A.75.75 0 0 1 7.75 4Z"></path>
+                                    </svg>
+                                    Document History
                                 </button>
                             </>
                         )) ||
@@ -796,6 +831,15 @@ export default function Sidebar(props: { Page?: string }): any {
                                         />
 
                                         <QuickInput
+                                            name="Font Weight"
+                                            property="Weight"
+                                            type="input"
+                                            inputType="number"
+                                            default={400}
+                                            step={100}
+                                        />
+
+                                        <QuickInput
                                             name="Margin"
                                             property="Margins"
                                             type="input"
@@ -820,15 +864,6 @@ export default function Sidebar(props: { Page?: string }): any {
                                             inputType="number"
                                             default={0}
                                             step={1}
-                                        />
-
-                                        <QuickInput
-                                            name="Font Weight"
-                                            property="Weight"
-                                            type="input"
-                                            inputType="number"
-                                            default={400}
-                                            step={100}
                                         />
 
                                         <QuickInput
