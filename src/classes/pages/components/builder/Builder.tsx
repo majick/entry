@@ -668,18 +668,27 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         const scripts = element.querySelectorAll("script");
 
         for (const script of scripts as any as HTMLScriptElement[]) {
-            const _new = document.createElement("script");
-            const parent = script.parentElement!;
-            script.remove(); // remove all
+            const NewScript = document.createElement("script");
 
-            // fill new
-            _new.src = script.src;
-            _new.innerHTML = script.innerHTML;
-            _new.type = script.type;
+            // create blob
+            const blob = new Blob([script.innerHTML], {
+                type: "application/javascript",
+            });
 
-            // append new
-            parent.appendChild(_new);
-            _new.remove();
+            // get url
+            const url = URL.createObjectURL(blob);
+
+            // add src attribute
+            NewScript.type = "module";
+            NewScript.src = url;
+
+            // append
+            document.body.appendChild(NewScript);
+
+            // revoke url
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 1000);
         }
 
         // ...

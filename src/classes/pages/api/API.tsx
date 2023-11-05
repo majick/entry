@@ -41,11 +41,12 @@ export const DefaultHeaders = {
     "Content-Security-Policy":
         process.env.CONTENT_SECURITY_POLICY ||
         [
-            "default-src 'self'",
+            "default-src 'self' blob:",
             "img-src *",
             "font-src *",
             "style-src 'unsafe-inline' 'self'",
             "script-src 'self' 'unsafe-inline' blob:",
+            "object-src 'self' blob:",
             "upgrade-insecure-requests",
             "connect-src *",
         ].join("; "),
