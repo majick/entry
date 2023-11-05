@@ -78,6 +78,7 @@ export type Config = {
     allow_access_from?: string[];
     env?: "production" | "development";
     do_not_cache?: boolean;
+    zones?: string[]; // special database "zones", each of these zones has its own sqlite db file!
     app?: {
         info?: string;
         how?: string;
@@ -85,7 +86,6 @@ export type Config = {
         enable_private_pastes?: boolean; // true default
         enable_groups?: boolean; // true default
         enable_expiry?: boolean; // true default
-        enable_not_editable_pastes?: boolean; // true default
         enable_builder?: boolean; // true default
         enable_paste_settings?: boolean; // true default
         enable_comments?: boolean; // false default
@@ -117,7 +117,7 @@ export type Config = {
 };
 
 // check if database is new or config file does not exist
-if (EntryDB.isNew || !(await EntryDB.GetConfig())) {
+if (!(await EntryDB.GetConfig())) {
     // run setup
     function div() {
         // create divider

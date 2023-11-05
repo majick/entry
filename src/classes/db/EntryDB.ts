@@ -72,8 +72,6 @@ export type PasteMetadata = {
     };
 };
 
-let StaticInit = false;
-
 /**
  * @export
  * @class EntryDB
@@ -88,6 +86,9 @@ export default class EntryDB {
     ).replace(":cwd", process.cwd());
 
     public readonly db: Database;
+    public readonly isNew: boolean = true;
+    public static Zones: { [key: string]: EntryDB } = {};
+
     public static Expiry: Expiry; // hold expiry registry
     public static Logs: LogDB; // hold log db
     public static Media: Media; // hold media db
@@ -101,16 +102,18 @@ export default class EntryDB {
     public static readonly MinCustomURLLength = 2;
 
     public static config: Config;
-
     private static readonly URLRegex = /^[\w\_\-\.\!\@]+$/gm; // custom urls must match this to be accepted
 
-    public static isNew: boolean = true;
+    public static StaticInit: boolean = false;
 
     /**
      * Creates an instance of EntryDB.
+     * @param {string} [dbname="entry"] Set the name of the database file
+     * @param {string} [dbdir] Set the parent directory of the database file
+     * @param {boolean} [ZoneStaticInit] Force new database functions to run
      * @memberof EntryDB
      */
-    constructor() {
+    constructor(dbname: string = "entry", dbdir?: string, ZoneStaticInit?: boolean) {
         // set datadirectory based on config file
         if (fs.existsSync(EntryDB.ConfigLocation))
             EntryDB.DataDirectory =
@@ -124,25 +127,17 @@ export default class EntryDB {
                     ).data || EntryDB.DataDirectory
                 ).replace(":cwd", process.cwd());
 
-        // create db link
-        const [db, isNew] = SQL.CreateDB("entry", EntryDB.DataDirectory);
+        // set dbdir to EntryDB.DataDirectory if it is undefined
+        if (!dbdir) dbdir = EntryDB.DataDirectory;
 
-        EntryDB.isNew = isNew;
+        // create db link
+        const [db, isNew] = SQL.CreateDB(dbname, dbdir);
+
+        this.isNew = isNew;
         this.db = db;
 
         (async () => {
-            if (StaticInit) return;
-
-            StaticInit = true;
-
-            await EntryDB.GetConfig(); // fill config
-
-            // ...inits
-            await EntryDB.CreateExpiry();
-            await EntryDB.InitLogs();
-            await EntryDB.InitMedia();
-
-            // ...
+            // create tables
             await SQL.QueryOBJ({
                 db,
                 query: `CREATE TABLE IF NOT EXISTS Pastes (
@@ -168,54 +163,67 @@ export default class EntryDB {
                 )`,
             });
 
-            // ...
-            if (!(await EntryDB.GetConfig())) return;
+            // static init
+            if (!EntryDB.StaticInit || ZoneStaticInit === true) {
+                EntryDB.StaticInit = true;
 
-            // check version
-            let storedVersion = await this.GetPasteFromURL("v");
+                await EntryDB.GetConfig(); // fill config
 
-            if (!storedVersion) {
-                // create version paste
-                // this is used to check if the server is outdated
-                await SQL.QueryOBJ({
-                    db: db,
-                    query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                    params: [
-                        pack.version,
-                        "", // an empty EditPassword essentially makes this paste uneditable without server access
-                        //     this is because, by default, both the server and the client prevent paste passwords
-                        //     that are less than 5 characters, so this isn't possible unless the server created it
-                        "v", // a custom URL is required to be more than 2 characters by client and server, this is
-                        //      basically just the same thing we did above with the EditPassword
-                        "",
-                        new Date().toUTCString(), // PubDate
-                        new Date().toUTCString(), // EditDate
-                        "server",
-                        "", // same deal as EditPassword
-                    ],
-                    transaction: true,
-                    use: "Prepare",
-                });
+                // ...inits
+                await EntryDB.CreateExpiry();
+                await EntryDB.InitLogs();
+                await EntryDB.InitMedia();
+                await EntryDB.InitZones();
 
-                storedVersion = await this.GetPasteFromURL("v");
-            }
+                // version paste check
+                if (!(await EntryDB.GetConfig())) return;
 
-            if (storedVersion!.Content !== pack.version) {
-                // update version, this means that we are running a different version
-                // than the version file contains
-                storedVersion!.Content = pack.version;
+                // check version
+                let storedVersion = await this.GetPasteFromURL("v");
 
-                await SQL.QueryOBJ({
-                    db: db,
-                    query: "UPDATE Pastes SET (Content, EditDate) = (?, ?) WHERE CustomURL = ?",
-                    params: [
-                        storedVersion!.Content,
-                        new Date().toUTCString(), // new edit date
-                        storedVersion!.CustomURL,
-                    ],
-                    transaction: true,
-                    use: "Prepare",
-                });
+                if (!storedVersion) {
+                    // create version paste
+                    // this is used to check if the server is outdated
+                    await SQL.QueryOBJ({
+                        db: db,
+                        query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        params: [
+                            pack.version,
+                            "", // an empty EditPassword essentially makes this paste uneditable without server access
+                            //     this is because, by default, both the server and the client prevent paste passwords
+                            //     that are less than 5 characters, so this isn't possible unless the server created it
+                            "v", // a custom URL is required to be more than 2 characters by client and server, this is
+                            //      basically just the same thing we did above with the EditPassword
+                            "",
+                            new Date().toUTCString(), // PubDate
+                            new Date().toUTCString(), // EditDate
+                            "server",
+                            "", // same deal as EditPassword
+                        ],
+                        transaction: true,
+                        use: "Prepare",
+                    });
+
+                    storedVersion = await this.GetPasteFromURL("v");
+                }
+
+                if (storedVersion!.Content !== pack.version) {
+                    // update version, this means that we are running a different version
+                    // than the version file contains
+                    storedVersion!.Content = pack.version;
+
+                    await SQL.QueryOBJ({
+                        db: db,
+                        query: "UPDATE Pastes SET (Content, EditDate) = (?, ?) WHERE CustomURL = ?",
+                        params: [
+                            storedVersion!.Content,
+                            new Date().toUTCString(), // new edit date
+                            storedVersion!.CustomURL,
+                        ],
+                        transaction: true,
+                        use: "Prepare",
+                    });
+                }
             }
         })();
     }
@@ -244,6 +252,8 @@ export default class EntryDB {
         // return config
         return config;
     }
+
+    // inits
 
     /**
      * @method CreateExpiry
@@ -352,6 +362,8 @@ export default class EntryDB {
         // return
         return EntryDB.Media;
     }
+
+    // pastes
 
     /**
      * @method ValidatePasteLengths
@@ -507,7 +519,7 @@ export default class EntryDB {
                 }
 
                 // update expiry information
-                if (EntryDB.Expiry && StaticInit && !SkipExtras) {
+                if (EntryDB.Expiry && EntryDB.StaticInit && !SkipExtras) {
                     const expires = await EntryDB.Expiry.GetExpiryDate(
                         record.CustomURL
                     );
@@ -649,14 +661,6 @@ export default class EntryDB {
                     .toString("hex");
 
                 PasteInfo.EditPassword = `${PasteInfo.UnhashedEditPassword}`;
-
-                // check for PasteInfo.IsEditable, if it does not exist set UnhashedEditPassword to "paste is not editable!"
-                if (
-                    !PasteInfo.IsEditable &&
-                    (!EntryDB.config.app ||
-                        EntryDB.config.app.enable_not_editable_pastes !== false)
-                )
-                    PasteInfo.UnhashedEditPassword = "paste is not editable!";
             } else PasteInfo.UnhashedEditPassword = `${PasteInfo.EditPassword}`;
         // if we don't need to hash the editpassword, just set unhashed to hashed
         else PasteInfo.UnhashedEditPassword = PasteInfo.EditPassword;
@@ -676,16 +680,6 @@ export default class EntryDB {
                 `Group name does not pass test: ${EntryDB.URLRegex}`,
                 PasteInfo,
             ];
-
-        // check for IsEditable, if it does not exist set EditPassword to "" so the paste
-        // cannot be changed
-        if (
-            !PasteInfo.IsEditable &&
-            !SkipHash &&
-            (!EntryDB.config.app ||
-                EntryDB.config.app.enable_not_editable_pastes !== false)
-        )
-            PasteInfo.EditPassword = "";
 
         // hash passwords
         if (!SkipHash) {
@@ -1604,28 +1598,6 @@ export default class EntryDB {
     }
 
     /**
-     * @method CheckPasteEditable
-     *
-     * @param {string} PasteURL
-     * @return {Promise<[boolean, string, boolean]>} success, message, editable
-     * @memberof EntryDB
-     */
-    public async CheckPasteEditable(
-        PasteURL: string
-    ): Promise<[boolean, string, boolean]> {
-        // get paste
-        const paste = await this.GetPasteFromURL(PasteURL);
-        if (!paste) return [false, "Paste does not exist", false];
-
-        // check if paste is editable
-        // non-editable pastes just have their edit password set to the hash of ""
-        const editable =
-            paste.EditPassword !== CreateHash("") && paste.EditPassword !== "";
-
-        return [true, "Editable status:", editable];
-    }
-
-    /**
      * @method DeletePastes
      *
      * @param {string[]} Pastes array of customurls to delete
@@ -1792,8 +1764,8 @@ export default class EntryDB {
             if (
                 paste.IsPM === "true" &&
                 associated !== result.CustomURL &&
-                paste.Metadata &&
-                paste.Metadata.Owner !== associated
+                result.Metadata &&
+                result.Metadata.Owner !== associated
             )
                 continue;
 
@@ -1824,5 +1796,64 @@ export default class EntryDB {
             }`,
             CommentPastes,
         ];
+    }
+
+    // zones
+
+    /**
+     * @method InitZones
+     *
+     * @return {Promise<boolean>}
+     * @memberof EntryDB
+     */
+    public static async InitZones(): Promise<boolean> {
+        const ZonesDir = path.resolve(EntryDB.DataDirectory, "zones");
+
+        // make sure zones are enabled
+        if (!EntryDB.config.zones) return false;
+
+        // create zones directory (if needed)
+        if (!fs.existsSync(ZonesDir)) fs.mkdirSync(ZonesDir);
+
+        // remove all invalid zone files (zones that don't exist in the array)
+        for (const zone of fs.readdirSync(ZonesDir)) {
+            // make sure zone is a .sqlite file
+            if (!zone.endsWith(".sqlite")) continue;
+            const ZoneName = zone.split(".sqlite")[0];
+
+            // make sure zone is valid
+            const IsValid = EntryDB.GetZone(ZoneName);
+            if (IsValid) continue;
+
+            // delete zone (and zone files)
+            fs.rmSync(path.resolve(ZonesDir, zone));
+
+            // ...WAL files
+            if (fs.existsSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-shm`)))
+                fs.rmSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-shm`));
+
+            if (fs.existsSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-wal`)))
+                fs.rmSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-wal`));
+        }
+
+        // create zones
+        for (const zone of EntryDB.config.zones)
+            if (!EntryDB.Zones[zone])
+                EntryDB.Zones[zone] = new EntryDB(zone, ZonesDir, true);
+
+        // return
+        return true;
+    }
+
+    /**
+     * @method GetZone
+     *
+     * @param {string} zone
+     * @return {boolean}
+     * @memberof EntryDB
+     */
+    public static GetZone(zone: string): boolean {
+        if (!EntryDB.config.zones) return false;
+        return EntryDB.config.zones.includes(zone);
     }
 }

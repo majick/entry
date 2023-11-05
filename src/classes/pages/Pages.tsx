@@ -203,9 +203,6 @@ export class GetPasteFromURL implements Endpoint {
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
-        // check if paste is editable
-        const editable = await db.CheckPasteEditable(name);
-
         // decrypt (if we can)
         let ViewPassword = "";
         if (request.method === "POST" && result) {
@@ -612,48 +609,46 @@ export class GetPasteFromURL implements Endpoint {
             Renderer.Render(
                 <>
                     <main>
-                        {search.get("UnhashedEditPassword") &&
-                            search.get("UnhashedEditPassword") !==
-                                "paste is not editable!" && (
-                                <>
-                                    <div
-                                        class="mdnote"
-                                        style={{
-                                            marginBottom: "0.5rem",
-                                        }}
-                                    >
-                                        <b className="mdnote-title">
-                                            Don't forget your edit password!
-                                        </b>
-                                        <p>
-                                            You cannot edit or delete your paste if
-                                            you don't have your edit password. Please
-                                            save it somewhere safe:{" "}
-                                            <code>
-                                                {search.get("UnhashedEditPassword")}
-                                            </code>
-                                        </p>
-                                    </div>
+                        {search.get("UnhashedEditPassword") && (
+                            <>
+                                <div
+                                    class="mdnote"
+                                    style={{
+                                        marginBottom: "0.5rem",
+                                    }}
+                                >
+                                    <b className="mdnote-title">
+                                        Don't forget your edit password!
+                                    </b>
+                                    <p>
+                                        You cannot edit or delete your paste if you
+                                        don't have your edit password. Please save it
+                                        somewhere safe:{" "}
+                                        <code>
+                                            {search.get("UnhashedEditPassword")}
+                                        </code>
+                                    </p>
+                                </div>
 
-                                    <div
-                                        class="mdnote note-warn"
-                                        style={{
-                                            marginBottom: "0.5rem",
-                                        }}
-                                    >
-                                        <b className="mdnote-title">
-                                            The web address you are currently on
-                                            contains the edit password for your
-                                            paste! Please remove it before sharing
-                                            this current web address with anyone.
-                                        </b>
-                                        <p>
-                                            You can click <a href="?">here</a> to
-                                            remove it.
-                                        </p>
-                                    </div>
-                                </>
-                            )}
+                                <div
+                                    class="mdnote note-warn"
+                                    style={{
+                                        marginBottom: "0.5rem",
+                                    }}
+                                >
+                                    <b className="mdnote-title">
+                                        The web address you are currently on contains
+                                        the edit password for your paste! Please
+                                        remove it before sharing this current web
+                                        address with anyone.
+                                    </b>
+                                    <p>
+                                        You can click <a href="?">here</a> to remove
+                                        it.
+                                    </p>
+                                </div>
+                            </>
+                        )}
 
                         {result.ViewPassword && <DecryptionForm paste={result} />}
 
@@ -707,28 +702,26 @@ export class GetPasteFromURL implements Endpoint {
                                         justifyContent: "center",
                                     }}
                                 >
-                                    {editable[2] === true && (
-                                        <a
-                                            class={"button round"}
-                                            disabled={HideSource}
-                                            href={`${HostnameURL}?mode=edit&OldURL=${
-                                                result.CustomURL.split(":")[0]
-                                            }${
-                                                // add host server (if it exists)
-                                                result.HostServer
-                                                    ? `&server=${result.HostServer}`
-                                                    : ""
-                                            }${
-                                                // add view password (if it exists)
-                                                // this is so content is automatically decrypted!
-                                                ViewPassword !== ""
-                                                    ? `&ViewPassword=${ViewPassword}`
-                                                    : ""
-                                            }`}
-                                        >
-                                            Edit
-                                        </a>
-                                    )}
+                                    <a
+                                        class={"button round"}
+                                        disabled={HideSource}
+                                        href={`${HostnameURL}?mode=edit&OldURL=${
+                                            result.CustomURL.split(":")[0]
+                                        }${
+                                            // add host server (if it exists)
+                                            result.HostServer
+                                                ? `&server=${result.HostServer}`
+                                                : ""
+                                        }${
+                                            // add view password (if it exists)
+                                            // this is so content is automatically decrypted!
+                                            ViewPassword !== ""
+                                                ? `&ViewPassword=${ViewPassword}`
+                                                : ""
+                                        }`}
+                                    >
+                                        Edit
+                                    </a>
 
                                     {EntryDB.config.app &&
                                         EntryDB.config.app.enable_comments ===

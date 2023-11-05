@@ -596,17 +596,6 @@ export default class Home implements Endpoint {
                                                         alignItems: "center",
                                                     }}
                                                 >
-                                                    {!EntryDB.config.app ||
-                                                        (EntryDB.config.app
-                                                            .enable_not_editable_pastes !==
-                                                            false && (
-                                                            <Checkbox
-                                                                name="IsEditable"
-                                                                title="Toggle Editable"
-                                                                checked={true}
-                                                            />
-                                                        ))}
-
                                                     <input
                                                         class={"round"}
                                                         type="text"

@@ -59,8 +59,6 @@ export class Entry {
         GroupName?: string; // required if GroupSumbmitPassword is provided
         GroupSumbmitPassword?: string; // required if GroupName is provided
     }): Promise<[boolean, string]> {
-        if (props.IsEditable === undefined) props.IsEditable = true;
-
         // fetch
         const res = await fetch(`${this.server}/api/json/new`, {
             method: "POST",

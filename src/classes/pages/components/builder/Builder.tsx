@@ -632,6 +632,69 @@ function RenderPage() {
                     </form>
                 </div>
             </Modal>
+
+            <Modal
+                buttonid="entry:button.ConfirmNotRemovable"
+                modalid="entry:modal.ConfirmNotRemovable"
+                noIdMatch={true}
+                round={true}
+            >
+                <div
+                    style={{
+                        width: "25rem",
+                        maxWidth: "100%",
+                    }}
+                >
+                    <h4 style={{ textAlign: "center", width: "100%" }}>
+                        Confirm Removal
+                    </h4>
+
+                    <hr />
+
+                    <p>
+                        This component is marked as <b>not removable</b>. It is
+                        recommended that you do not remove this component, although
+                        you can still do so below.
+                    </p>
+
+                    <hr />
+
+                    <form
+                        method={"dialog"}
+                        style={{
+                            width: "100%",
+                        }}
+                    >
+                        <button
+                            className="red round"
+                            style={{
+                                width: "100%",
+                            }}
+                            onClick={() => Delete(Selected)}
+                        >
+                            Confirm
+                        </button>
+                    </form>
+
+                    <hr />
+
+                    <form
+                        method={"dialog"}
+                        style={{
+                            width: "100%",
+                        }}
+                    >
+                        <button
+                            className="green round"
+                            style={{
+                                width: "100%",
+                            }}
+                        >
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+            </Modal>
         </>,
         document.getElementById("builder") as HTMLElement
     );

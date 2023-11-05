@@ -262,8 +262,17 @@ export default function Sidebar(props: { Page?: string }): any {
 
             {/* main options */}
             <div className="options">
-                {Selected && Selected.NotRemovable !== true && !props.Page && (
-                    <button onClick={() => Delete(Selected)} class={"red"}>
+                {Selected && !props.Page && (
+                    <button
+                        onClick={() => {
+                            if (!Selected.NotRemovable) return Delete(Selected);
+                            else
+                                (window as any).modals[
+                                    "entry:modal.ConfirmNotRemovable"
+                                ](true);
+                        }}
+                        class={"red"}
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 16 16"
