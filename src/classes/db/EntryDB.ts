@@ -1765,7 +1765,11 @@ export default class EntryDB {
                 paste.IsPM === "true" &&
                 associated !== result.CustomURL &&
                 result.Metadata &&
-                result.Metadata.Owner !== associated
+                paste.Metadata &&
+                // make sure we're either the owner of the paste the comment was posted on,
+                // or the owner of the comment
+                (result.Metadata.Owner !== associated ||
+                    associated === paste.Metadata?.Owner)
             )
                 continue;
 

@@ -17,7 +17,9 @@ import Pages from "../Pages";
 import { CreateHash, Decrypt } from "../../db/helpers/Hash";
 import BaseParser from "../../db/helpers/BaseParser";
 import EntryDB, { Paste, PasteMetadata } from "../../db/EntryDB";
+
 export const db = new EntryDB();
+const GlobalEntryDB = db; // alias of db
 
 import pack from "../../../../package.json";
 import { Config } from "../../..";
@@ -451,6 +453,7 @@ export class CreatePaste implements Endpoint {
             });
 
         // create paste
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
         const result = await db.CreatePaste(body);
 
         // add CommentOn and ReportOn if content starts with _builder:
@@ -500,6 +503,9 @@ export class GetPasteRecord implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // get paste
+        const db =
+            EntryDB.Zones[url.searchParams.get("zone") || ""] || GlobalEntryDB; // support zones
+
         let paste = (await db.GetPasteFromURL(
             url.pathname.slice("/api/get/".length, url.pathname.length)
         )) as Paste;
@@ -538,6 +544,7 @@ export class EditPaste implements Endpoint {
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         if (body.OldContent) body.OldContent = decodeURIComponent(body.OldContent);
         else body.OldContent = decodeURIComponent(body.Content);
@@ -656,6 +663,7 @@ export class DeletePaste implements Endpoint {
         body.CustomURL = body.CustomURL.toLowerCase();
 
         // delete paste
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
         const result = await db.DeletePaste(
             {
                 CustomURL: body.CustomURL,
@@ -710,6 +718,7 @@ export class DecryptPaste implements Endpoint {
         if (!body.CustomURL) return undefined;
 
         // get paste
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
         const paste = (await db.GetPasteFromURL(body.CustomURL)) as Paste;
         if (!paste) return undefined;
 
@@ -805,6 +814,9 @@ export class GetRawPaste implements Endpoint {
         if (name === "") return new _404Page().request(request);
 
         // attempt to get paste
+        const db =
+            EntryDB.Zones[url.searchParams.get("zone") || ""] || GlobalEntryDB; // support zones
+
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
@@ -854,6 +866,9 @@ export class PasteExists implements Endpoint {
         if (name === "") return new _404Page().request(request);
 
         // attempt to get paste
+        const db =
+            EntryDB.Zones[url.searchParams.get("zone") || ""] || GlobalEntryDB; // support zones
+
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result)
             return new Response("false", {
@@ -1001,6 +1016,9 @@ export class JSONAPI implements Endpoint {
         // get url
         const url = new URL(request.url);
 
+        const db =
+            EntryDB.Zones[url.searchParams.get("zone") || ""] || GlobalEntryDB; // support zones
+
         // create formdata body
         let body: string[] = [];
 
@@ -1043,6 +1061,7 @@ export class DeleteComment implements Endpoint {
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
@@ -1118,6 +1137,7 @@ export class PasteLogin implements Endpoint {
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
@@ -1178,9 +1198,21 @@ export class PasteLogin implements Endpoint {
  */
 export class PasteLogout implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
         // handle cloud pages
         const IncorrectInstance = await Pages.CheckInstance(request, server);
         if (IncorrectInstance) return IncorrectInstance;
+
+        // get body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get customurl
         const CustomURL = GetCookie(
@@ -1281,6 +1313,7 @@ export class EditMetadata implements Endpoint {
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
@@ -1370,6 +1403,9 @@ export class GetPasteComments implements Endpoint {
         // get paste name
         let name = url.pathname.slice("/api/comments/".length, url.pathname.length);
 
+        const db =
+            EntryDB.Zones[url.searchParams.get("zone") || ""] || GlobalEntryDB; // support zones
+
         // get offset
         const OFFSET = parseInt(search.get("offset") || "0");
 
@@ -1412,6 +1448,9 @@ export class GetFile implements Endpoint {
 
         if (!Owner || !File) return new _404Page().request(request);
 
+        const db =
+            EntryDB.Zones[url.searchParams.get("zone") || ""] || GlobalEntryDB; // support zones
+
         // get file
         const file = await EntryDB.Media.GetFile(Owner, File);
         if (!file[0] && !file[2]) return new _404Page().request(request);
@@ -1452,12 +1491,15 @@ export class UploadFile implements Endpoint {
         const body = {
             CustomURL: FormData.get("CustomURL") as string | undefined,
             EditPassword: FormData.get("EditPassword") as string | undefined,
+            Zone: FormData.get("Zone") as string | undefined,
         };
 
         const _file = FormData.get("File") as File | undefined;
 
         if (!body.CustomURL || !body.EditPassword || !_file)
             return new _404Page().request(request);
+
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
@@ -1516,10 +1558,13 @@ export class DeleteFile implements Endpoint {
             CustomURL: FormData.get("CustomURL") as string | undefined,
             EditPassword: FormData.get("EditPassword") as string | undefined,
             File: FormData.get("File") as string | undefined,
+            Zone: FormData.get("Zone") as string | undefined,
         };
 
         if (!body.CustomURL || !body.EditPassword || !body.File)
             return new _404Page().request(request);
+
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
@@ -1582,6 +1627,7 @@ export class UpdateCustomDomain implements Endpoint {
 
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // verify body
         if (!body.CustomURL || !body.Domain || !body.EditPassword)
@@ -1697,24 +1743,24 @@ export default {
     WellKnown,
     RobotsTXT,
     Favicon,
-    CreatePaste,
-    GetPasteRecord,
-    EditPaste,
-    DeletePaste,
-    DecryptPaste,
-    GetAllPastesInGroup,
-    GetRawPaste,
-    PasteExists,
+    CreatePaste, // supports cloud routing AND zones
+    GetPasteRecord, // supports cloud routing AND zones (through searchParam)
+    EditPaste, // supports cloud routing AND zones
+    DeletePaste, // supports cloud routing AND zones
+    DecryptPaste, // supports cloud routing AND zones
+    GetAllPastesInGroup, // supports cloud routing AND zones (through searchParam)
+    GetRawPaste, // supports cloud routing AND zones (through searchParam)
+    PasteExists, // supports cloud routing AND zones (through searchParam)
     RenderMarkdown,
-    GetPasteHTML,
-    JSONAPI,
-    DeleteComment,
-    PasteLogin,
-    PasteLogout,
-    EditMetadata,
-    GetPasteComments,
-    GetFile,
-    UploadFile,
-    DeleteFile,
-    UpdateCustomDomain,
+    GetPasteHTML, // supports cloud routing AND zones (through searchParam)
+    JSONAPI, // supports cloud routing AND zones (through searchParam)
+    DeleteComment, // supports cloud routing AND zones
+    PasteLogin, // supports cloud routing AND zones
+    PasteLogout, // supports cloud routing AND zones
+    EditMetadata, // supports cloud routing AND zones
+    GetPasteComments, // supports cloud routing AND zones (through searchParam)
+    GetFile, // supports cloud routing AND zones (through searchParam)
+    UploadFile, // supports cloud routing AND zones
+    DeleteFile, // supports cloud routing AND zones
+    UpdateCustomDomain, // supports cloud routing AND zones
 };

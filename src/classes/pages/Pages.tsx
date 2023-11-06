@@ -1418,7 +1418,7 @@ export class PastesSearch implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <TopNav breadcrumbs={["search"]}>
+                        <TopNav breadcrumbs={["search"]} border={false}>
                             {(!ExploreMode && (
                                 <a href={"?q=explore"} class={"button round"}>
                                     Explore
