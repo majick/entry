@@ -19,10 +19,15 @@ export default class SQL {
      * @static
      * @param {string} name
      * @param {string} data
+     * @param {boolean} [wal=true]
      * @return {[Database, boolean]}
      * @memberof SQL
      */
-    public static CreateDB(name: string, data: string): [Database, boolean] {
+    public static CreateDB(
+        name: string,
+        data: string,
+        wal: boolean = true
+    ): [Database, boolean] {
         if (!fs.existsSync(data))
             // create data directory
             fs.mkdirSync(data, { recursive: true });
@@ -34,7 +39,7 @@ export default class SQL {
             create: true,
         });
 
-        db.exec("PRAGMA journal_mode = WAL;"); // enable Write Ahead Mode
+        if (wal) db.exec("PRAGMA journal_mode = WAL;"); // enable Write Ahead Mode
 
         // return
         return [db, needToCreate]; // needToCreate tells us if we need to create tables

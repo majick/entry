@@ -10,6 +10,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 import { ComputeRandomObjectHash, CreateHash, Encrypt } from "./helpers/Hash";
+import PasteConnection, { Paste, PasteMetadata } from "./objects/Paste";
 import SQL from "./helpers/SQL";
 
 import Media from "./MediaDB";
@@ -20,57 +21,6 @@ import pack from "../../../package.json";
 import type { Config } from "../..";
 
 import BaseParser from "./helpers/BaseParser";
-
-export type Paste = {
-    // * = value is not stored in database record
-    Content: string;
-    EditPassword: string;
-    CustomURL: string;
-    PubDate: number;
-    EditDate: number;
-    GroupName?: string;
-    GroupSubmitPassword?: string;
-    ENC_IV?: string;
-    ENC_KEY?: string;
-    ENC_CODE?: string;
-    ViewPassword?: string; // we're going to use this to check if the paste is private,
-    //                        if it is valid, the paste is private and should have a
-    //                        corresponding entry in the Encryption table
-    HostServer?: string; // *
-    IsEditable?: string; // *
-    ExpireOn?: string; //   *
-    UnhashedEditPassword?: string; // * only used on paste creation
-    Views?: number; // * amount of log records LIKE "%{CustomURL}%"
-    CommentOn?: string; // * the paste the that this paste is commenting on
-    IsPM?: string; // * details if the **comment** is a private message, boolean string
-    Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)
-    ReportOn?: string; // * the paste that this paste is reporting
-    Associated?: string; // * the paste that is associated with this new paste
-    Metadata?: PasteMetadata; // * (kinda), stored in paste content after "_metadata:" as base64 encoded JSON string
-};
-
-export type PasteMetadata = {
-    Version: 1;
-    Owner: string; // the owner of the paste
-    Locked?: boolean; // locked pastes cannot be edited, and the paste cannot be used as an association
-    ShowOwnerEnabled?: boolean;
-    ShowViewCount?: boolean;
-    Favicon?: string; // favicon shown on paste
-    Title?: string; // title shown on paste
-    PrivateSource?: boolean;
-    SocialIcon?: string; // shown as a "profile picture" in some places
-    Badges?: string; // comma separated array of badges, shown under paste
-    PasteType?: "normal" | "builder" | "workshop" | "package";
-    // comments/reports stuff
-    Comments?: {
-        IsCommentOn?: string;
-        ParentCommentOn?: string; // (if paste is a reply) stores the IsCommentOn of the comment it is replying to
-        IsPrivateMessage?: boolean;
-        Enabled: boolean;
-        Filter?: string;
-        ReportsEnabled?: boolean;
-    };
-};
 
 /**
  * @export
@@ -88,6 +38,7 @@ export default class EntryDB {
     public readonly db: Database;
     public readonly isNew: boolean = true;
     public static Zones: { [key: string]: EntryDB } = {};
+    public static PasteCache: { [key: string]: PasteConnection } = {};
 
     public static Expiry: Expiry; // hold expiry registry
     public static Logs: LogDB; // hold log db
@@ -110,10 +61,14 @@ export default class EntryDB {
      * Creates an instance of EntryDB.
      * @param {string} [dbname="entry"] Set the name of the database file
      * @param {string} [dbdir] Set the parent directory of the database file
-     * @param {boolean} [ZoneStaticInit] Force new database functions to run
+     * @param {boolean} [ZoneStaticInit=true] Force new database functions to run
      * @memberof EntryDB
      */
-    constructor(dbname: string = "entry", dbdir?: string, ZoneStaticInit?: boolean) {
+    constructor(
+        dbname: string = "entry",
+        dbdir?: string,
+        ZoneStaticInit: boolean = false
+    ) {
         // set datadirectory based on config file
         if (fs.existsSync(EntryDB.ConfigLocation))
             EntryDB.DataDirectory =
@@ -131,7 +86,8 @@ export default class EntryDB {
         if (!dbdir) dbdir = EntryDB.DataDirectory;
 
         // create db link
-        const [db, isNew] = SQL.CreateDB(dbname, dbdir);
+        // (zones don't get WAL mode)
+        const [db, isNew] = SQL.CreateDB(dbname, dbdir, !ZoneStaticInit);
 
         this.isNew = isNew;
         this.db = db;
@@ -476,13 +432,15 @@ export default class EntryDB {
      * @method GetPasteFromURL
      *
      * @param {string} PasteURL
-     * @param [SkipExtras=false]
+     * @param {boolean} [SkipExtras=false]
+     * @param {boolean} [isFromCon=false]
      * @return {(Promise<Paste | undefined>)}
      * @memberof EntryDB
      */
     public GetPasteFromURL(
         PasteURL: string,
-        SkipExtras: boolean = false
+        SkipExtras: boolean = false,
+        isFromCon: boolean = false
     ): Promise<Partial<Paste> | undefined> {
         return new Promise(async (resolve) => {
             // check if paste is from another server
@@ -491,6 +449,22 @@ export default class EntryDB {
             if (!server) {
                 // ...everything after this assumes paste is NOT from another server, as the
                 // logic for the paste being from another server SHOULD have been handled above!
+
+                // check PasteCache for paste!
+                if (isFromCon !== true) {
+                    if (EntryDB.PasteCache[PasteURL.toLowerCase()] === undefined)
+                        EntryDB.PasteCache[PasteURL.toLowerCase()] =
+                            new PasteConnection(
+                                this,
+                                PasteURL.toLowerCase(),
+                                true // don't fetch, we're doing that below! (prevent inf loop)
+                            );
+
+                    // fetch and return
+                    return resolve(
+                        await EntryDB.PasteCache[PasteURL.toLowerCase()].Fetch()
+                    );
+                }
 
                 // get paste from local db
                 const record = (await SQL.QueryOBJ({
@@ -1824,6 +1798,7 @@ export default class EntryDB {
             // make sure zone is a .sqlite file
             if (!zone.endsWith(".sqlite")) continue;
             const ZoneName = zone.split(".sqlite")[0];
+            if (ZoneName.startsWith("perm:")) continue; // don't delete permanent zones!
 
             // make sure zone is valid
             const IsValid = EntryDB.GetZone(ZoneName);
@@ -1844,6 +1819,31 @@ export default class EntryDB {
         for (const zone of EntryDB.config.zones)
             if (!EntryDB.Zones[zone])
                 EntryDB.Zones[zone] = new EntryDB(zone, ZonesDir, true);
+
+        // return
+        return true;
+    }
+
+    /**
+     * @name CreateNewZone
+     *
+     * @static
+     * @param {string} name Should start with "perm:" so that the zone isn't deleted on server restart!
+     * @return {boolean}
+     * @memberof EntryDB
+     */
+    public static CreateNewZone(name: string): boolean {
+        if (!EntryDB.config.zones) return false;
+        const ZonesDir = path.resolve(EntryDB.DataDirectory, "zones");
+
+        // make sure zone doesn't already exist
+        if (EntryDB.GetZone(name)) return false;
+
+        // add zone to config
+        EntryDB.config.zones.push(name);
+
+        // create EntryDB
+        EntryDB.Zones[name] = new EntryDB(name, ZonesDir, true);
 
         // return
         return true;

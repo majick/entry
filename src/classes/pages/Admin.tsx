@@ -9,13 +9,15 @@ import { Server } from "bun";
 
 import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./api/API";
 import BaseParser from "../db/helpers/BaseParser";
-import EntryDB, { Paste } from "../db/EntryDB";
+import type { Paste } from "../db/objects/Paste";
+import EntryDB from "../db/EntryDB";
 
 import PasteList from "./components/site/PasteList";
 import Footer from "./components/site/Footer";
 import Pages from "./Pages";
 
 import { plugins } from "../..";
+
 import TopNav from "./components/site/TopNav";
 import Checkbox from "./components/form/Checkbox";
 import { ParseMarkdownSync } from "./components/Markdown";
@@ -233,6 +235,7 @@ function AdminNav(props: { active: string; pass: string }): any {
             </p>
 
             <p>CPU Usage: {process.cpuUsage().system}</p>
+            <p>Cached Pastes: {Object.keys(EntryDB.PasteCache).length || 0}</p>
 
             {/* cloud display */}
             {process.env.ENTRY_CLOUD_NAME && (

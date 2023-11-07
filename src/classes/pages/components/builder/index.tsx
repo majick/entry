@@ -6,7 +6,9 @@
 
 import { Endpoint, Renderer } from "honeybee";
 
-import EntryDB, { Paste } from "../../../db/EntryDB";
+import type { Paste } from "../../../db/objects/Paste";
+import EntryDB from "../../../db/EntryDB";
+
 import { PageHeaders, db, GetAssociation } from "../../api/API";
 import { OpenGraph } from "../../Pages";
 import _404Page from "../404";

@@ -6,13 +6,14 @@ import Footer from "./components/site/Footer";
 import Modal from "./components/site/modals/Modal";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
-import EntryDB, { Paste } from "../db/EntryDB";
+import type { Paste } from "../db/objects/Paste";
+import EntryDB from "../db/EntryDB";
+
 import Pages, { OpenGraph } from "./Pages";
 import type { Log } from "../db/LogDB";
 
 import { AuthModals } from "./components/site/modals/AuthModals";
 import DateOptions from "./components/form/DateOptions";
-import Checkbox from "./components/form/Checkbox";
 import _404Page from "./components/404";
 
 /**
@@ -643,20 +644,6 @@ export default class Home implements Endpoint {
                                     />
 
                                     {/* ... */}
-
-                                    {(!EntryDB.config.app ||
-                                        EntryDB.config.app
-                                            .enable_not_editable_pastes !==
-                                            false) && (
-                                        <script
-                                            dangerouslySetInnerHTML={{
-                                                __html: `document.getElementById("IsEditable").addEventListener("change", (e) => {
-                                                    document.getElementById("EditPassword").toggleAttribute("disabled");
-                                                });`,
-                                            }}
-                                        />
-                                    )}
-
                                     <Modal
                                         buttonid="entry:button.PasteExtras"
                                         modalid="entry:modal.PasteExtras"

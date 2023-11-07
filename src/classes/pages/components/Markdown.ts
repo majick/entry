@@ -282,13 +282,13 @@ export function ParseMarkdownSync(
     // underline
     content = content.replaceAll(
         /(\_{2})(.*?)(\_{2})/gs,
-        '<span style="text-decoration: underline;">$2</span>'
+        '<span style="text-decoration: underline;" role="underline">$2</span>'
     );
 
     // paste mentions (autolink)
     content = content.replaceAll(
         /(\.\/)(?<NAME>.*?)(?<END>\s|\n)/gm,
-        '<a href="/$<NAME>" class="chip badge mention">./$<NAME></a>$<END>'
+        '<a href="/$<NAME>" class="chip badge mention" role="mention">./$<NAME></a>$<END>'
     );
 
     // named links

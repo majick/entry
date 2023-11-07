@@ -16,7 +16,9 @@ import Pages from "../Pages";
 // create database
 import { CreateHash, Decrypt } from "../../db/helpers/Hash";
 import BaseParser from "../../db/helpers/BaseParser";
-import EntryDB, { Paste, PasteMetadata } from "../../db/EntryDB";
+
+import type { Paste, PasteMetadata } from "../../db/objects/Paste";
+import EntryDB from "../../db/EntryDB";
 
 export const db = new EntryDB();
 const GlobalEntryDB = db; // alias of db

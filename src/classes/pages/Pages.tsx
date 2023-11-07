@@ -15,7 +15,9 @@ import _404Page from "./components/404";
 import Home from "./Home";
 
 // create database
-import EntryDB, { Paste } from "../db/EntryDB";
+import EntryDB from "../db/EntryDB";
+import type { Paste } from "../db/objects/Paste";
+
 export const db = new EntryDB();
 
 import API, {
@@ -200,8 +202,12 @@ export class GetPasteFromURL implements Endpoint {
         if (name === "") return new Home().request(request, server);
 
         // attempt to get paste
+        const _fetchStart = performance.now();
+
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
+
+        const _fetchEnd = performance.now();
 
         // decrypt (if we can)
         let ViewPassword = "";
@@ -1145,6 +1151,9 @@ export class GetPasteFromURL implements Endpoint {
                     ...PageHeaders,
                     "Content-Type": "text/html",
                     "Set-Cookie": SessionCookie,
+                    "X-Data-Response-Time": `${
+                        (_fetchEnd - _fetchStart) / 1000
+                    } seconds`,
                 },
             }
         );

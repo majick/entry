@@ -1,5 +1,6 @@
-import EntryDB, { Paste } from "../../../db/EntryDB";
+import EntryDB from "../../../db/EntryDB";
 import { CreateHash } from "../../../db/helpers/Hash";
+import type { Paste } from "../../../db/objects/Paste";
 
 import Modal from "./modals/Modal";
 
