@@ -1243,9 +1243,13 @@ export default class EntryDB {
         await SQL.QueryOBJ({
             db: this.db,
             query: "DELETE FROM Pastes WHERE CustomURL = ?",
-            params: [PasteInfo.CustomURL],
+            params: [PasteInfo.CustomURL.toLowerCase()],
             use: "Prepare",
         });
+
+        // delete from PasteCache
+        if (EntryDB.PasteCache[PasteInfo.CustomURL.toLowerCase()])
+            delete EntryDB.PasteCache[PasteInfo.CustomURL.toLowerCase()];
 
         // delete media
         if (EntryDB.Media) await EntryDB.Media.DeleteOwner(PasteInfo.CustomURL);

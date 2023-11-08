@@ -1318,7 +1318,7 @@ export class EditMetadata implements Endpoint {
         const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
 
         // get paste
-        const paste = await db.GetPasteFromURL(body.CustomURL);
+        const paste = await db.GetPasteFromURL(body.CustomURL, false, true); // do not fetch from cache!
         if (!paste) return new _404Page().request(request);
 
         // validate password
@@ -1367,6 +1367,7 @@ export class EditMetadata implements Endpoint {
         } else paste.Metadata = Unpacked;
 
         // update metadata
+        paste.Content = paste.Content!.split("_metadata:")[0];
         paste.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;
 
         // update paste
