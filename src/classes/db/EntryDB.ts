@@ -21,6 +21,7 @@ import pack from "../../../package.json";
 import type { Config } from "../..";
 
 import BaseParser from "./helpers/BaseParser";
+import punycode from "punycode/";
 
 /**
  * @export
@@ -450,6 +451,9 @@ export default class EntryDB {
                 // ...everything after this assumes paste is NOT from another server, as the
                 // logic for the paste being from another server SHOULD have been handled above!
 
+                // encode with punycode
+                PasteURL = punycode.toASCII(decodeURIComponent(PasteURL));
+
                 // check PasteCache for paste!
                 if (isFromCon !== true) {
                     if (EntryDB.PasteCache[PasteURL.toLowerCase()] === undefined)
@@ -626,6 +630,9 @@ export default class EntryDB {
         // if custom url was not provided, randomize it
         if (!PasteInfo.CustomURL)
             PasteInfo.CustomURL = ComputeRandomObjectHash().substring(0, 9);
+
+        // encode with punycode
+        PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
 
         // if edit password was not provided, randomize it
         if (!SkipHash)
@@ -982,6 +989,10 @@ export default class EntryDB {
             NewPasteInfo.CustomURL =
                 NewPasteInfo.CustomURL.split(":")[0].toLowerCase();
 
+            // encode with punycode
+            PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
+            NewPasteInfo.CustomURL = punycode.toASCII(NewPasteInfo.CustomURL);
+
             // send request
             const [isBad, record] = await this.ForwardRequest(
                 server,
@@ -1200,6 +1211,9 @@ export default class EntryDB {
 
         // ...everything after this assumes paste is NOT from another server, as the
         // logic for the paste being from another server SHOULD have been handled above!
+
+        // encode with punycode
+        PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
 
         // get paste
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
