@@ -1448,6 +1448,7 @@ br:not(.cm-line br) {
     font-size-adjust: none;
     width: var(--Width);
     max-width: 100%;
+    white-space: pre;
 }
 
 .builder\:card {

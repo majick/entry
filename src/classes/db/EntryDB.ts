@@ -989,10 +989,6 @@ export default class EntryDB {
             NewPasteInfo.CustomURL =
                 NewPasteInfo.CustomURL.split(":")[0].toLowerCase();
 
-            // encode with punycode
-            PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
-            NewPasteInfo.CustomURL = punycode.toASCII(NewPasteInfo.CustomURL);
-
             // send request
             const [isBad, record] = await this.ForwardRequest(
                 server,
@@ -1029,18 +1025,38 @@ export default class EntryDB {
         // ...everything after this assumes paste is NOT from another server, as the
         // logic for the paste being from another server SHOULD have been handled above!
 
+        // encode with punycode
+        PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
+        NewPasteInfo.CustomURL = punycode.toASCII(NewPasteInfo.CustomURL);
+
         // we're not allowing users to change ViewPasswords currently
 
         // make sure a paste exists
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
         if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
 
+        if (NewPasteInfo.EditPassword)
+            NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
+        else NewPasteInfo.EditPassword = paste.EditPassword!;
+
         // hash passwords
         PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
 
-        if (NewPasteInfo.EditPassword)
-            NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
-        else NewPasteInfo.EditPassword = CreateHash(paste.EditPassword as string);
+        // if PasteInfo doesn't include an EditPassword, set it to the current password
+        // ...ONLY IF we're the owner of the paste!
+        const UndefinedHash = CreateHash("undefined");
+
+        if (
+            PasteInfo.EditPassword === UndefinedHash &&
+            PasteInfo.Associated &&
+            PasteInfo.Associated === paste.Metadata!.Owner
+        ) {
+            PasteInfo.EditPassword = paste.EditPassword!;
+
+            // if we're not changing the edit password, set to the same
+            if (NewPasteInfo.EditPassword === UndefinedHash)
+                NewPasteInfo.EditPassword = paste.EditPassword!;
+        }
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
@@ -1074,9 +1090,12 @@ export default class EntryDB {
         // that means it is safe to compare with what we got from the client
         // ...comparing paste.EditPassword and PasteInfo.EditPassword because if we DID supply a new password,
         // PasteInfo will not have it, only NewPasteInfo will
+        // IF we're associated with a paste AND that paste is the owner of this paste,
+        // accept the edit anyways!
         if (
             paste.EditPassword !== PasteInfo.EditPassword &&
-            PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin)
+            PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin) &&
+            PasteInfo.Associated !== paste.Metadata!.Owner
         )
             return [false, "Invalid password!", NewPasteInfo];
 

@@ -929,6 +929,11 @@ export default class Home implements Endpoint {
                                                         EntryDB.MinPasswordLength
                                                     }
                                                     name={"EditPassword"}
+                                                    disabled={
+                                                        Association[0] &&
+                                                        Association[1] ===
+                                                            paste.Metadata!.Owner
+                                                    }
                                                     required
                                                 />
 

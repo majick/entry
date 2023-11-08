@@ -582,7 +582,12 @@ export class EditPaste implements Endpoint {
         }
 
         // check NewEditPassword length
-        if (body.NewEditPassword.length < EntryDB.MinPasswordLength)
+        if (
+            // if NewEditPassword is less than the expected length, set it to the old edit password
+            body.NewEditPassword.length < EntryDB.MinPasswordLength &&
+            // verify this supplied EditPassword
+            CreateHash(body.EditPassword) === paste.EditPassword
+        )
             body.NewEditPassword = body.EditPassword;
 
         // edit paste
@@ -594,6 +599,7 @@ export class EditPaste implements Endpoint {
                 PubDate: 0,
                 EditDate: 0,
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
+                Associated: Association[0] ? Association[1] : undefined,
             },
             {
                 Content: body.Content,
