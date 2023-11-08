@@ -6,6 +6,7 @@
 
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server, SocketAddress } from "bun";
+import punycode from "node:punycode";
 
 import { contentType } from "mime-types";
 
@@ -177,6 +178,9 @@ export async function GetAssociation(
     if (!config.log || !config.log.events.includes("session"))
         return [false, "Sessions are disabled"];
 
+    // encode SetAssociation with punycode
+    if (SetAssociation) SetAssociation = punycode.toASCII(SetAssociation);
+
     // get session
     const session = GetCookie(request.headers.get("Cookie") || "", "session-id");
     const association = GetCookie(request.headers.get("Cookie") || "", "associated");
@@ -219,14 +223,14 @@ export async function GetAssociation(
                 // if association exists, but does not match what is in the log... reset!!
                 return [
                     true,
-                    `associated=${
+                    `associated=${punycode.toASCII(
                         split[1]
-                    }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                    )}; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
                         60 * 60 * 24 * 365
                     }`,
                 ];
             // otherwise, return associated paste
-            else return [true, split[1]];
+            else return [true, punycode.toASCII(split[1])];
         else if (association)
             // remove association if session does not have an association
             return [

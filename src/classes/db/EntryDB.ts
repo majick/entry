@@ -21,7 +21,7 @@ import pack from "../../../package.json";
 import type { Config } from "../..";
 
 import BaseParser from "./helpers/BaseParser";
-import punycode from "punycode/";
+import punycode from "node:punycode";
 
 /**
  * @export
