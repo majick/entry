@@ -2,6 +2,7 @@ import Modal from "./Modal";
 
 export default function PublishModals(props: {
     EditingPaste?: string;
+    DisablePassword?: boolean;
     Endpoints: {
         new: string;
         edit: string;
@@ -141,6 +142,7 @@ export default function PublishModals(props: {
                             placeholder={"Edit password"}
                             class={"round"}
                             autocomplete={"off"}
+                            disabled={props.DisablePassword === true}
                             required
                         />
 
@@ -206,7 +208,7 @@ export default function PublishModals(props: {
                                     width: "100%",
                                 }}
                             >
-                                Delete Paste
+                                Delete
                             </button>
                         </div>
                     </form>

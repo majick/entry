@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import schema, { BuilderDocument, Node } from "./schema";
+import schema, { BuilderDocument, Node, PageNode } from "./schema";
 import BaseParser from "../../../db/helpers/BaseParser";
 import parser from "./parser";
 
@@ -29,6 +29,7 @@ export function AddComponent(Type: string) {
             ID: `page-${Document.Pages.length + 1}`,
             NotRemovable: false, // new pages can be removed
             StyleString: Document.Pages[0].StyleString || "",
+            Content: "<script>Builder.Main();</script>", // execute global main function
             AlignX: "center",
             AlignY: "center",
             Children: [
@@ -91,6 +92,9 @@ export function AddComponent(Type: string) {
     // update
     return (NeedsUpdate = true);
 }
+
+// events
+const BuilderNavigateEvent = new Event("navigate");
 
 // state
 export let SidebarOpen = false;
@@ -557,6 +561,7 @@ function RenderPage() {
 
             <PublishModals
                 EditingPaste={EditingPaste || undefined}
+                DisablePassword={(window as any).DisablePasswordField}
                 Endpoints={{
                     new: "/api/new",
                     edit: "/api/edit",
@@ -721,10 +726,31 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
     EditMode = _EditMode;
 
     // ...
-    function RenderCurrentPage(
-        element: HTMLElement | ShadowRoot,
-        ToMoveOut: string = ""
-    ) {
+    function CreateScript(content: string) {
+        const NewScript = document.createElement("script");
+
+        // create blob
+        const blob = new Blob([content], {
+            type: "application/javascript",
+        });
+
+        // get url
+        const url = URL.createObjectURL(blob);
+
+        // add src attribute
+        NewScript.type = "module";
+        NewScript.src = url;
+
+        // append
+        document.body.appendChild(NewScript);
+
+        // revoke url
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }
+
+    function RenderCurrentPage(element: HTMLElement | ShadowRoot) {
         RenderCycles++;
 
         // check for star
@@ -745,42 +771,24 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         // ...
         render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
 
-        // check ToMoveOut
-        if (ToMoveOut) document.body.innerHTML += ToMoveOut;
+        // set current page in client lib
+        if (!EditMode)
+            (window as any).Builder.Page.Element = document.getElementById(
+                doc.Pages[CurrentPage].ID!
+            );
 
         // run scripts
         const scripts = element.querySelectorAll("script");
 
-        for (const script of scripts as any as HTMLScriptElement[]) {
-            const NewScript = document.createElement("script");
-
-            // create blob
-            const blob = new Blob([script.innerHTML], {
-                type: "application/javascript",
-            });
-
-            // get url
-            const url = URL.createObjectURL(blob);
-
-            // add src attribute
-            NewScript.type = "module";
-            NewScript.src = url;
-
-            // append
-            document.body.appendChild(NewScript);
-
-            // revoke url
-            setTimeout(() => {
-                URL.revokeObjectURL(url);
-            }, 1000);
-        }
+        for (const script of scripts as any as HTMLScriptElement[])
+            CreateScript(script.innerHTML);
 
         // ...
         return true;
     }
 
     // ...(not) edit mode stuff
-    if (!_EditMode) {
+    if (!_EditMode && globalThis.Bun === undefined) {
         // fix mistakes from server render (by removing whole page and redrawing)
         for (const DragElement of document.querySelectorAll(
             ".builder\\:drag-element"
@@ -792,17 +800,51 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         ) as any as HTMLElement[])
             Component.remove();
 
-        // save a copy of the rest of the page
-        const copy = document.body.querySelectorAll("body > *");
-
-        // by this stage, all stuff that is normally in the page (might) have been copied
-        // into copy[0], move it back out later
-        const ToMoveOut =
-            copy[0].querySelector("dialog") !== null ? copy[0].innerHTML : "";
-
         // ...
         let _page: HTMLElement | ShadowRoot = document.getElementById("_doc")!;
         // _page.innerHTML = "";
+
+        // ...globally expose some builder variables for scripts
+        (window as any).Builder = {
+            Document, // page JSON
+            // main function
+            // the main function is expected to be redefined,
+            // it is run in all new pages!
+            Main() {
+                return;
+            },
+            // state
+            State: {
+                CanChangePage: true, // if we're allowed to change the page
+                RequestedPage: {},
+            },
+            // page
+            Page: {
+                Element: _page,
+                // functions
+                ChangePage(page: PageNode) {
+                    // set CurrentPage
+                    CurrentPage = doc.Pages.indexOf(page);
+
+                    // update hash
+                    window.location.hash = `#/${page.ID}`;
+
+                    // render
+                    RenderCurrentPage(_page);
+                },
+                CheckHash, // check the page hash
+                AddComponent,
+                CreateScript,
+                Delete,
+            },
+            // debug
+            Debug: {
+                // functions
+                Debug,
+                DebugInspect,
+                DebugNodeList,
+            },
+        };
 
         // ...handle view mode select (for debug)
         _page.addEventListener("click", (event) => {
@@ -829,18 +871,62 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             Select(node, parent);
         });
 
-        // handle pages
+        // automatically set window.Builder.Main IF the first page's HTML content has a match
+        // for the global-main script regex
+        const GlobalMainMatch = new RegExp(
+            /^\<(script) (role)\=\"(global\-main)\"\>\n(?<CONTENT>.*?)\n\<\/(script)\>/gms
+        ).exec(Document.Pages[0].Content || "");
+
+        if (GlobalMainMatch)
+            // create script to execute code
+            CreateScript(
+                `window.Builder.Main = () => {\n${
+                    GlobalMainMatch.groups!.CONTENT
+                }\n}`
+            );
+
+        // handle page changes
+        let CurrentHash = window.location.hash; // store current hash
         function CheckHash(FromChange: boolean = false) {
             if (window.location.hash && window.location.hash.startsWith("#/")) {
                 const PageID = window.location.hash.split("#/")[1];
 
                 // get page
                 const Page = doc.Pages.find((page) => page.ID === PageID);
+                const PageIndex = Page ? doc.Pages.indexOf(Page) : 0;
+
+                (window as any).Builder.State.RequestedPage = Page; // store requested page
+
+                // dispatch event
+                if (
+                    Page &&
+                    // make sure we're actually changing pages and not going to the same page
+                    PageIndex !== CurrentPage
+                )
+                    (window as any).Builder.Page.Element.dispatchEvent(
+                        BuilderNavigateEvent
+                    );
+
+                // make sure an event listener didn't disable page change
+                if (
+                    // make sure we can change page
+                    !(window as any).Builder.State.CanChangePage &&
+                    PageIndex !== CurrentPage
+                ) {
+                    // restore hash
+                    window.location.hash = CurrentHash;
+
+                    // return so page doesn't actually change
+                    return;
+                }
+
+                // update CurrentHash
+                CurrentHash = PageID;
 
                 // set CurrentPage
                 if (Page) {
-                    CurrentPage = doc.Pages.indexOf(Page);
-                    RenderCurrentPage(_page, ToMoveOut); // render
+                    CurrentPage = PageIndex;
+                    RenderCurrentPage(_page); // render
                 }
             }
         }
@@ -849,7 +935,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         CheckHash(); // initial run
 
         // initial page render
-        RenderCurrentPage(_page, ToMoveOut);
+        RenderCurrentPage(_page);
     }
 
     // edit mode stuff

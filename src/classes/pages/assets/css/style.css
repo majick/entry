@@ -1304,6 +1304,16 @@ br:not(.cm-line br) {
 }
 
 @keyframes FadeOut {
+    from {
+        opacity: 100% !important;
+    }
+
+    to {
+        opacity: 0% !important;
+    }
+}
+
+@keyframes FadeOut {
     0% {
         opacity: 100%;
     }

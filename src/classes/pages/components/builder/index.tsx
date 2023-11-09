@@ -68,6 +68,7 @@ export class Builder implements Endpoint {
 
         // get editing paste (if it exists)
         let result: Paste | undefined;
+        let DisablePasswordField = false;
         if (search.get("edit")) {
             // get paste
             result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
@@ -105,6 +106,10 @@ export class Builder implements Endpoint {
 
             // set document
             Document = TrueContent as BuilderDocument;
+
+            // set DisablePasswordField
+            DisablePasswordField =
+                Association[0] && Association[1] === result.Metadata!.Owner;
         }
 
         // stringify
@@ -133,6 +138,7 @@ export class Builder implements Endpoint {
                         type={"module"}
                         dangerouslySetInnerHTML={{
                             __html: `import Builder, { Debug } from "/Builder.js";
+                            window.DisablePasswordField = ${DisablePasswordField};
                             Builder(\`${stringified}\`, true); window.Debug = Debug;`,
                         }}
                     />
