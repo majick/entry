@@ -730,9 +730,17 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         const NewScript = document.createElement("script");
 
         // create blob
-        const blob = new Blob([content], {
-            type: "application/javascript",
-        });
+        const blob = new Blob(
+            [
+                `let ScriptAborted = false;
+                window.Builder.State._ScriptAbort.signal.addEventListener("abort", () => { 
+                    ScriptAborted = true;
+                });\n(async () => { ${content} })();`,
+            ],
+            {
+                type: "application/javascript",
+            }
+        );
 
         // get url
         const url = URL.createObjectURL(blob);
@@ -769,19 +777,27 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             });
 
         // ...
-        render(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
+        hydrate(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
 
         // set current page in client lib
-        if (!EditMode)
+        if (!EditMode) {
+            // change global Page.Element
             (window as any).Builder.Page.Element = document.getElementById(
                 doc.Pages[CurrentPage].ID!
             );
 
-        // run scripts
-        const scripts = element.querySelectorAll("script");
+            // run global script abort
+            (window as any).Builder.State._ScriptAbort.abort();
+            (window as any).Builder.State._ScriptAbort = new AbortController();
 
-        for (const script of scripts as any as HTMLScriptElement[])
-            CreateScript(script.innerHTML);
+            // ...
+
+            // run scripts
+            const scripts = element.querySelectorAll("script");
+
+            for (const script of scripts as any as HTMLScriptElement[])
+                CreateScript(script.innerHTML);
+        }
 
         // ...
         return true;
@@ -817,12 +833,16 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             State: {
                 CanChangePage: true, // if we're allowed to change the page
                 RequestedPage: {},
+                _ScriptAbort: new AbortController(),
             },
             // page
             Page: {
                 Element: _page,
                 // functions
                 ChangePage(page: PageNode) {
+                    _page.innerHTML = "";
+                    (window as any).Builder.Page.Element = _page;
+
                     // set CurrentPage
                     CurrentPage = doc.Pages.indexOf(page);
 
@@ -924,7 +944,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 CurrentHash = PageID;
 
                 // set CurrentPage
-                if (Page) {
+                if (Page && PageIndex !== CurrentPage) {
                     CurrentPage = PageIndex;
                     RenderCurrentPage(_page); // render
                 }
