@@ -221,7 +221,7 @@ function RenderPage() {
                     userSelect: "none",
                 }}
                 onMouseOver={
-                    EditMode
+                    !EditMode
                         ? (event) => {
                               let target: HTMLElement = event.target as HTMLElement;
 
@@ -235,147 +235,17 @@ function RenderPage() {
                                       target = target.parentElement;
                                   else return;
 
-                              if (Hovered) Hovered.classList.remove("hover");
-                              target.classList.add("hover");
-
                               Hovered = target;
-                          }
-                        : (event) => {
-                              let target: HTMLElement = event.target as HTMLElement;
-
-                              if (!target.classList.contains("component"))
-                                  if (
-                                      target.parentElement &&
-                                      target.parentElement.classList.contains(
-                                          "component"
-                                      )
-                                  )
-                                      target = target.parentElement;
-                                  else return;
-
-                              Hovered = target;
-                          }
-                }
-                onClick={
-                    EditMode
-                        ? (event) => {
-                              // get target
-                              let target = event.target as HTMLElement;
-
-                              // move mode
-                              if (EditOrderMode && EditMode) {
-                                  const OriginTarget = document.getElementById(
-                                      Selected.ID!
-                                  )!;
-
-                                  (OriginTarget.getAttribute("data-component")
-                                      ? OriginTarget
-                                      : OriginTarget.parentElement!
-                                  ).dispatchEvent(new Event("dragstart"));
-
-                                  // get zones
-                                  // get drop zones
-                                  const _zones =
-                                      schema.GetDropZoneFromElement(target);
-                                  if (!_zones) return;
-
-                                  const [PreviousDropElement, NextDropElement] =
-                                      _zones;
-
-                                  // get user input
-                                  const before = confirm(
-                                      "Move component before element? Cancel to move after element. Continue to move before element." +
-                                          "\n\nIf you're moving into an element with no children, the element you're dragging will go inside the element" +
-                                          " for both options."
-                                  );
-
-                                  // move
-                                  if (before)
-                                      PreviousDropElement.dispatchEvent(
-                                          new Event("drop")
-                                      );
-                                  else
-                                      NextDropElement.dispatchEvent(
-                                          new Event("drop")
-                                      );
-
-                                  // return
-                                  return EditOrder(false);
-                              }
-
-                              // ...
-
-                              if (!target.getAttribute("data-component"))
-                                  target = target.parentElement!;
-
-                              // get node
-                              const AllNodes = parser.GetNodes();
-                              const node = AllNodes.find(
-                                  (n) => n.ID === target.id
-                              ) as Node;
-
-                              if (!node) return;
-
-                              // get parent
-                              const parent =
-                                  (
-                                      AllNodes.find(
-                                          (n) =>
-                                              n.Children && n.Children.includes(node)
-                                      ) || Document.Pages[CurrentPage]
-                                  ).Children || [];
-
-                              // select
-                              Select(node, parent);
-                          }
-                        : undefined
-                }
-                onDragStart={
-                    EditMode
-                        ? (event) => {
-                              // get target
-                              let target = event.target as HTMLElement;
-
-                              if (!target) return;
-                              if (!target.getAttribute("data-component"))
-                                  target = target.parentElement!;
-
-                              // get node
-                              const AllNodes = parser.GetNodes();
-                              const node = AllNodes.find(
-                                  (node) => node.ID === target.id
-                              );
-
-                              if (!node) return;
-
-                              // get parent
-                              let parent = AllNodes.find((ParentNode) =>
-                                  (ParentNode.Children || []).includes(node)
-                              );
-
-                              if (!parent) {
-                                  // try to get parent from page root
-                                  parent = Document.Pages[
-                                      CurrentPage
-                                  ].Children.includes(node)
-                                      ? Document.Pages[CurrentPage]
-                                      : undefined;
-
-                                  if (!parent) return;
-                              }
-
-                              // set dragging
-                              return schema.SetDrag(node, parent.Children as Node[]);
                           }
                         : undefined
                 }
                 id={"_doc"}
             />
 
-            <div className="builder:toolbar">
+            <div className="builder:toolbar verticle">
                 <button
                     aria-label={"Add Element"}
-                    title={"Add Element"}
+                    class={"tooltip-wrapper visual-active"}
                     id={"entry:button.AddComponent"}
                 >
                     <svg
@@ -386,11 +256,15 @@ function RenderPage() {
                     >
                         <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path>
                     </svg>
+
+                    <div className="card secondary round border tooltip left">
+                        Add Element
+                    </div>
                 </button>
 
                 <button
                     aria-label={"Current Page"}
-                    title={"Current Page"}
+                    class={"tooltip-wrapper visual-active"}
                     onClick={() => {
                         Select(Document.Pages[CurrentPage], Document.Pages);
                     }}
@@ -404,11 +278,15 @@ function RenderPage() {
                     >
                         <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
                     </svg>
+
+                    <div className="card secondary round border tooltip left">
+                        Current Page
+                    </div>
                 </button>
 
                 <button
                     aria-label={"View Pages"}
-                    title={"View Pages"}
+                    class={"tooltip-wrapper visual-active"}
                     onClick={() => {
                         SidebarOpen = true;
                         RenderSidebar({
@@ -425,11 +303,15 @@ function RenderPage() {
                     >
                         <path d="M7.122.392a1.75 1.75 0 0 1 1.756 0l5.003 2.902c.83.481.83 1.68 0 2.162L8.878 8.358a1.75 1.75 0 0 1-1.756 0L2.119 5.456a1.251 1.251 0 0 1 0-2.162ZM8.125 1.69a.248.248 0 0 0-.25 0l-4.63 2.685 4.63 2.685a.248.248 0 0 0 .25 0l4.63-2.685ZM1.601 7.789a.75.75 0 0 1 1.025-.273l5.249 3.044a.248.248 0 0 0 .25 0l5.249-3.044a.75.75 0 0 1 .752 1.298l-5.248 3.044a1.75 1.75 0 0 1-1.756 0L1.874 8.814A.75.75 0 0 1 1.6 7.789Zm0 3.5a.75.75 0 0 1 1.025-.273l5.249 3.044a.248.248 0 0 0 .25 0l5.249-3.044a.75.75 0 0 1 .752 1.298l-5.248 3.044a1.75 1.75 0 0 1-1.756 0l-5.248-3.044a.75.75 0 0 1-.273-1.025Z"></path>
                     </svg>
+
+                    <div className="card secondary round border tooltip left">
+                        View Pages
+                    </div>
                 </button>
 
                 <button
                     aria-label={"More"}
-                    title={"More"}
+                    class={"tooltip-wrapper visual-active"}
                     onClick={() => {
                         SidebarOpen = true;
                         RenderSidebar({
@@ -446,10 +328,19 @@ function RenderPage() {
                     >
                         <path d="M0 5.75C0 4.784.784 4 1.75 4h12.5c.966 0 1.75.784 1.75 1.75v4.5A1.75 1.75 0 0 1 14.25 12H1.75A1.75 1.75 0 0 1 0 10.25ZM12 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0ZM4 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
                     </svg>
+
+                    <div className="card secondary round border tooltip left">
+                        More
+                    </div>
                 </button>
 
                 <button
                     id={"entry:button.PublishPaste"}
+                    aria-label={"Publish Paste"}
+                    class={"tooltip-wrapper visual-active"}
+                    style={{
+                        background: "var(--green1)",
+                    }}
                     onClick={() => {
                         (
                             document.getElementById(
@@ -460,7 +351,19 @@ function RenderPage() {
                         );
                     }}
                 >
-                    Publish
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Check Mark Symbol"}
+                    >
+                        <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"></path>
+                    </svg>
+
+                    <div className="card secondary round border tooltip left">
+                        Publish Paste
+                    </div>
                 </button>
             </div>
 
@@ -726,7 +629,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
     EditMode = _EditMode;
 
     // ...
-    function CreateScript(content: string) {
+    function CreateScript(content: string, element: HTMLElement | ShadowRoot) {
         const NewScript = document.createElement("script");
 
         // create blob
@@ -750,7 +653,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         NewScript.src = url;
 
         // append
-        document.body.appendChild(NewScript);
+        element.appendChild(NewScript);
 
         // revoke url
         setTimeout(() => {
@@ -782,8 +685,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         // set current page in client lib
         if (!EditMode) {
             // change global Page.Element
-            (window as any).Builder.Page.Element = document.getElementById(
-                doc.Pages[CurrentPage].ID!
+            (window as any).Builder.Page.Element = element.querySelector(
+                `#${doc.Pages[CurrentPage].ID!}`
             );
 
             if (!(window as any).Builder.Page.Element)
@@ -799,7 +702,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             const scripts = element.querySelectorAll("script");
 
             for (const script of scripts as any as HTMLScriptElement[])
-                CreateScript(script.innerHTML);
+                CreateScript(script.innerHTML, element);
         }
 
         // ...
@@ -821,7 +724,11 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
         // ...
         let _page: HTMLElement | ShadowRoot = document.getElementById("_doc")!;
-        // _page.innerHTML = "";
+
+        // attach shadow
+        _page.attachShadow({ mode: "open" });
+        _page = _page.shadowRoot!;
+        _page.innerHTML += `<style>@import url("/style.css");</style>`;
 
         // ...globally expose some builder variables for scripts
         (window as any).Builder = {
@@ -845,6 +752,9 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 ChangePage(page: PageNode) {
                     _page.innerHTML = "";
                     (window as any).Builder.Page.Element = _page;
+
+                    // import default stylesheet again
+                    _page.innerHTML = `<style>@import url("/style.css");</style>${_page.innerHTML}`;
 
                     // set CurrentPage
                     CurrentPage = doc.Pages.indexOf(page);
@@ -905,7 +815,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             CreateScript(
                 `window.Builder.Main = () => {\n${
                     GlobalMainMatch.groups!.CONTENT
-                }\n}`
+                }\n}`,
+                _page
             );
 
         // handle page changes
@@ -944,7 +855,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 }
 
                 // update CurrentHash
-                CurrentHash = PageID;
+                CurrentHash = `${PageID}`;
 
                 // set CurrentPage
                 if (Page && PageIndex !== CurrentPage)
@@ -957,12 +868,40 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
         // initial page render
         RenderCurrentPage(_page);
+
+        // events
+
+        // ...click
+        _page.addEventListener("click", (event) => {
+            // get target
+            let target = event.target as HTMLElement;
+            if (!target) return;
+
+            if (!target.getAttribute("data-component"))
+                target = target.parentElement!;
+
+            // if target.id === "PageStar", show star customization screen
+            if (
+                target.id === "PageStar" ||
+                (target.firstChild &&
+                    (target.firstChild as HTMLElement).id === "PageStar") ||
+                (target.parentElement && target.parentElement.id === "PageStar")
+            )
+                (window as any).modals["entry:modal.PasteOptions"](true);
+        });
     }
 
     // edit mode stuff
     if (_EditMode) {
         RenderPage(); // render full editor
-        const _page = document.getElementById("_doc")!;
+
+        // get page
+        let _page: HTMLElement | ShadowRoot = document.getElementById("_doc")!;
+
+        // attach shadow
+        _page.attachShadow({ mode: "open" });
+        _page = _page.shadowRoot!;
+        _page.innerHTML = `<style>@import url("/style.css");</style>${_page.innerHTML}`;
 
         // initial page render
         RenderCurrentPage(_page);
@@ -1000,6 +939,129 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             else if (event.key === "y")
                 // redo
                 RestoreState(HistoryCurrent + 1);
+        });
+
+        // editor events
+
+        // ...mouse over
+        _page.addEventListener("mouseover", (event) => {
+            let target: HTMLElement = event.target as HTMLElement;
+
+            if (!target.classList.contains("component"))
+                if (
+                    target.parentElement &&
+                    target.parentElement.classList.contains("component")
+                )
+                    target = target.parentElement;
+                else return;
+
+            if (Hovered) Hovered.classList.remove("hover");
+            target.classList.add("hover");
+
+            Hovered = target;
+        });
+
+        // ...click
+        _page.addEventListener("click", (event) => {
+            // stop default behaviour (make the browser not open anchor links)
+            event.preventDefault();
+            event.stopPropagation();
+
+            // get target
+            let target = event.target as HTMLElement;
+
+            // move mode
+            if (EditOrderMode && EditMode) {
+                const OriginTarget = document.getElementById(Selected.ID!)!;
+
+                (OriginTarget.getAttribute("data-component")
+                    ? OriginTarget
+                    : OriginTarget.parentElement!
+                ).dispatchEvent(new Event("dragstart"));
+
+                // get zones
+                // get drop zones
+                const _zones = schema.GetDropZoneFromElement(target);
+                if (!_zones) return;
+
+                const [PreviousDropElement, NextDropElement] = _zones;
+
+                // get user input
+                const before = confirm(
+                    "Move component before element? Cancel to move after element. Continue to move before element." +
+                        "\n\nIf you're moving into an element with no children, the element you're dragging will go inside the element" +
+                        " for both options."
+                );
+
+                // move
+                if (before) PreviousDropElement.dispatchEvent(new Event("drop"));
+                else NextDropElement.dispatchEvent(new Event("drop"));
+
+                // return
+                return EditOrder(false);
+            }
+
+            // ...
+
+            if (!target.getAttribute("data-component"))
+                target = target.parentElement!;
+
+            // if target.id === "PageStar", show star customization screen
+            if (
+                target.id === "PageStar" ||
+                (target.firstChild &&
+                    (target.firstChild as HTMLElement).id === "PageStar")
+            )
+                (window as any).modals["entry:modal.PasteOptions"](true);
+
+            // get node
+            const AllNodes = parser.GetNodes();
+            const node = AllNodes.find((n) => n.ID === target.id) as Node;
+
+            if (!node) return;
+
+            // get parent
+            const parent =
+                (
+                    AllNodes.find((n) => n.Children && n.Children.includes(node)) ||
+                    Document.Pages[CurrentPage]
+                ).Children || [];
+
+            // select
+            Select(node, parent);
+        });
+
+        // ...drag start
+        _page.addEventListener("dragstart", (event) => {
+            // get target
+            let target = event.target as HTMLElement;
+
+            if (!target) return;
+            if (!target.getAttribute("data-component"))
+                target = target.parentElement!;
+
+            // get node
+            const AllNodes = parser.GetNodes();
+            const node = AllNodes.find((node) => node.ID === target.id);
+
+            if (!node) return;
+
+            // get parent
+            let parent = AllNodes.find((ParentNode) =>
+                (ParentNode.Children || []).includes(node)
+            );
+
+            if (!parent) {
+                // try to get parent from page root
+                parent = Document.Pages[CurrentPage].Children.includes(node)
+                    ? Document.Pages[CurrentPage]
+                    : undefined;
+
+                if (!parent) return;
+            }
+
+            // set dragging
+            return schema.SetDrag(node, parent.Children as Node[]);
         });
     }
 
@@ -1063,7 +1125,7 @@ export function Debug(Element: HTMLElement) {
                     </div>
 
                     <div className="option">RenderCycles: {RenderCycles}</div>
-                    <div className="option">Renderer: DOM</div>
+                    <div className="option">Renderer: ShadowDOM</div>
 
                     <div className="option">
                         SidebarOpen: {SidebarOpen === true ? "true" : "false"}

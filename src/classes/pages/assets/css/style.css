@@ -193,6 +193,10 @@ svg {
     fill: currentColor;
 }
 
+.invert {
+    filter: invert() !important;
+}
+
 .tab-container {
     background: var(--background-surface1);
     transition: background 0.15s;
@@ -228,9 +232,7 @@ button,
     display: flex;
     justify-content: center;
     align-items: center;
-    transition:
-        color 0.1s,
-        background 0.1s;
+    transition: all 0.1s;
     height: max-content;
     width: max-content;
     font-weight: normal;
@@ -331,6 +333,16 @@ button:focus,
 button.active,
 .button.active {
     box-shadow: inset 0 0 0 2px var(--blue) !important;
+}
+
+button.glow:hover,
+.button.glow:hover {
+    box-shadow: 0 0 2px var(--background-surface1);
+}
+
+button.visual-active:active,
+.button.visual-active:active {
+    transform: scale(0.95);
 }
 
 .tabbar {
@@ -1428,8 +1440,6 @@ br:not(.cm-line br) {
     flex-direction: column;
     align-items: var(--AlignX);
     justify-content: var(--AlignY);
-
-    animation: FadeIn 0.5s 0s running;
 }
 
 .builder\:text {
@@ -1515,7 +1525,7 @@ br:not(.cm-line br) {
     flex-wrap: wrap;
     gap: var(--u-04);
     padding: 0.5rem;
-    border: solid 1px var(--background-surface2);
+    border: solid 1px var(--background-surface2a);
     justify-content: center;
     align-items: center;
     height: 3.5rem;
@@ -1523,13 +1533,24 @@ br:not(.cm-line br) {
     animation: FadeIn 0.75s 0s running;
 }
 
+.builder\:toolbar.verticle {
+    flex-direction: column-reverse;
+    height: max-content;
+}
+
 .builder\:toolbar button {
     border-radius: 0.25rem;
     background: var(--background-surface1);
+    border: solid 1px transparent;
 }
 
 .builder\:toolbar button:hover {
     background: var(--background-surface1-5a);
+    border-color: var(--background-surface2a);
+}
+
+.builder\:toolbar.always-absolute button {
+    border: none;
 }
 
 .builder\:sidebar {
@@ -1692,7 +1713,7 @@ br:not(.cm-line br) {
         padding-top: 3.5rem;
     }
 
-    .builder\:toolbar:not(.always-absolute) {
+    .builder\:toolbar:not(.always-absolute):not(.verticle) {
         width: 100vw;
         top: 0;
         left: 0;
@@ -1825,4 +1846,46 @@ nav.scroll {
 
 .block-dialog .block-list .option:not(:last-child) {
     border-bottom: solid 1px var(--block-background-lighter);
+}
+
+/* tooltip */
+
+.tooltip-wrapper {
+    position: relative;
+}
+
+.tooltip-wrapper .tooltip {
+    opacity: 0%;
+    transition:
+        opacity 0.25s,
+        transform 0.1s;
+    position: absolute;
+    width: max-content !important;
+    color: var(--text-color) !important;
+    height: max-content;
+    padding: var(--u-04) var(--u-10);
+    font-family: inherit;
+    transform: scale(0); /* so the element isn't interactable when not visible! */
+}
+
+.tooltip-wrapper:hover .tooltip {
+    opacity: 100%;
+    transform: scale(1);
+    z-index: 250;
+}
+
+.tooltip-wrapper .tooltip.top {
+    bottom: 110%;
+}
+
+.tooltip-wrapper .tooltip.left {
+    right: 150%;
+}
+
+.tooltip-wrapper .tooltip.bottom {
+    top: 110%;
+}
+
+.tooltip-wrapper .tooltip.right {
+    left: 150%;
 }

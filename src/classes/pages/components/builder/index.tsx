@@ -108,8 +108,9 @@ export class Builder implements Endpoint {
             Document = TrueContent as BuilderDocument;
 
             // set DisablePasswordField
-            DisablePasswordField =
-                Association[0] && Association[1] === result.Metadata!.Owner;
+            if (result.Metadata && result.Metadata.Owner)
+                DisablePasswordField =
+                    Association[0] && Association[1] === result.Metadata!.Owner;
         }
 
         // stringify

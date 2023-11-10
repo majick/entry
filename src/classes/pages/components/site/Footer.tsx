@@ -1,7 +1,8 @@
 import ToggleTheme from "./ToggleTheme";
 import Modal from "./modals/Modal";
 
-import EntryDB, { Paste } from "../../../db/EntryDB";
+import type { Paste } from "../../../db/objects/Paste";
+import EntryDB from "../../../db/EntryDB";
 import { HoneybeeConfig } from "honeybee";
 
 import { db } from "../../api/API";

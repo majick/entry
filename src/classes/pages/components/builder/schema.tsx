@@ -391,7 +391,10 @@ export function PageNode(props: {
                 // the StyleString on pages can change more than just the page element,
                 // so it's within its own style element... instead of just the attribute!
                 dangerouslySetInnerHTML={{
-                    __html: props.node.StyleString || "",
+                    __html: (props.node.StyleString || "").replaceAll(
+                        "body {",
+                        ".builder\\:page {"
+                    ),
                 }}
             />
 
@@ -643,7 +646,6 @@ export function StarInfoNode(props: {
     children: any;
 }): any {
     if (!props.node.ID) props.node.ID = "PageStar";
-    props.node.onClick = 'window.modals["entry:modal.PasteOptions"](true);';
 
     return (
         <div
@@ -659,7 +661,8 @@ export function StarInfoNode(props: {
         >
             <button
                 id={props.node.ID}
-                title={"Paste Options"}
+                aria-label={"Paste Options"}
+                class={"tooltip-wrapper visual-active"}
                 style={{
                     background:
                         props.node.Source !== ""
@@ -682,9 +685,11 @@ export function StarInfoNode(props: {
                 >
                     <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
                 </svg>
-            </button>
 
-            <EventScript node={props.node} />
+                <div className="card secondary round border tooltip left">
+                    Paste Options
+                </div>
+            </button>
         </div>
     );
 }

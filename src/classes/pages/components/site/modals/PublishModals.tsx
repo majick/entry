@@ -201,15 +201,16 @@ export default function PublishModals(props: {
                                 Publish
                             </button>
 
-                            <button
-                                className="red round"
+                            <a
+                                className="button red round"
                                 id={"entry:button.DeletePaste"}
                                 style={{
                                     width: "100%",
                                 }}
+                                href={"#"}
                             >
                                 Delete
-                            </button>
+                            </a>
                         </div>
                     </form>
 

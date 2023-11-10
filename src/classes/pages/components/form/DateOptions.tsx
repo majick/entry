@@ -10,14 +10,14 @@ export default function DateOptions() {
         <div class={"flex justify-center align-center flex-wrap g-4"}>
             <a
                 href={`javascript:SetExpire("${Date.now() + 60 * 10 * 1000}")`}
-                className="button secondary"
+                className="button border round"
             >
                 10 minutes
             </a>
 
             <a
                 href={`javascript:SetExpire("${Date.now() + 60 * 60 * 1000}")`}
-                className="button secondary"
+                className="button border round"
             >
                 1 hour
             </a>
@@ -30,7 +30,7 @@ export default function DateOptions() {
                         24 * // hours
                         1000 // convert from ms
                 }")`}
-                className="button secondary"
+                className="button border round"
             >
                 1 day
             </a>
@@ -44,7 +44,7 @@ export default function DateOptions() {
                         7 * // days
                         1000 // convert from ms
                 }")`}
-                className="button secondary"
+                className="button border round"
             >
                 1 week
             </a>
@@ -58,7 +58,7 @@ export default function DateOptions() {
                         14 * // days
                         1000 // convert from ms
                 }")`}
-                className="button secondary"
+                className="button border round"
             >
                 2 weeks
             </a>
@@ -72,21 +72,21 @@ export default function DateOptions() {
                         31 * // days
                         1000 // convert from ms
                 }")`}
-                className="button secondary"
+                className="button border round"
             >
                 1 month
             </a>
 
             <a
                 href={`javascript:SetExpire("${SetDateMonths(6)}")`}
-                className="button secondary"
+                className="button border round"
             >
                 6 months
             </a>
 
             <a
                 href={`javascript:SetExpire("${SetDateMonths(12)}")`}
-                className="button secondary"
+                className="button border round"
             >
                 1 year
             </a>
