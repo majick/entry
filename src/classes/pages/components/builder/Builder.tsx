@@ -786,6 +786,9 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 doc.Pages[CurrentPage].ID!
             );
 
+            if (!(window as any).Builder.Page.Element)
+                (window as any).Builder.Page.Element = element;
+
             // run global script abort
             (window as any).Builder.State._ScriptAbort.abort();
             (window as any).Builder.State._ScriptAbort = new AbortController();
@@ -944,10 +947,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 CurrentHash = PageID;
 
                 // set CurrentPage
-                if (Page && PageIndex !== CurrentPage) {
-                    CurrentPage = PageIndex;
-                    RenderCurrentPage(_page); // render
-                }
+                if (Page && PageIndex !== CurrentPage)
+                    (window as any).Builder.Page.ChangePage(Page);
             }
         }
 
