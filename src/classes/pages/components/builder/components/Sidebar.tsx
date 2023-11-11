@@ -367,36 +367,98 @@ export default function Sidebar(props: { Page?: string }): any {
                     )}
 
                 {(props &&
-                    ((props.Page === "PagesView" && (
+                    ((props.Page === "Pages" && (
                         <>
                             {/* pages list */}
-                            <button onClick={() => AddComponent("Page")}>
-                                Add Page
+                            <button
+                                class={
+                                    "green normal round full secondary justify-space-between"
+                                }
+                                onClick={() => AddComponent("Page")}
+                            >
+                                Create New
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="18"
+                                    height="18"
+                                    aria-label={"Plus Square Symbol"}
+                                >
+                                    <path d="M2.75 1h10.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 15H2.75A1.75 1.75 0 0 1 1 13.25V2.75C1 1.784 1.784 1 2.75 1Zm10.5 1.5H2.75a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM8 4a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5A.75.75 0 0 1 8 4Z"></path>
+                                </svg>
                             </button>
 
-                            {Document.Pages.map((page) => {
-                                const index = Document.Pages.indexOf(page);
+                            <div className="card secondary border round flex flex-column g-4">
+                                {Document.Pages.map((page) => {
+                                    const index = Document.Pages.indexOf(page);
 
-                                // check if page was remove
-                                if (page.ID === "node:removed") {
-                                    Document.Pages.splice(
-                                        Document.Pages.indexOf(page),
-                                        1
+                                    // check if page was remove
+                                    if (page.ID === "node:removed") {
+                                        Document.Pages.splice(
+                                            Document.Pages.indexOf(page),
+                                            0
+                                        );
+
+                                        return <></>;
+                                    }
+
+                                    // return
+                                    return (
+                                        <div
+                                            class={"flex justify-space-between g-4"}
+                                        >
+                                            <button
+                                                class={
+                                                    "normal secondary round full justify-start"
+                                                }
+                                                onClick={() => SetPage(index)}
+                                                title={page.ID}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Code File Symbol"}
+                                                >
+                                                    <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2.5a.75.75 0 0 1-1.5 0Zm1.72 4.97a.75.75 0 0 1 1.06 0l2 2a.75.75 0 0 1 0 1.06l-2 2a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.47-1.47-1.47-1.47a.75.75 0 0 1 0-1.06ZM3.28 7.78 1.81 9.25l1.47 1.47a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-2-2a.75.75 0 0 1 0-1.06l2-2a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042Zm8.22-6.218V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                </svg>
+                                                {page.ID}
+                                            </button>
+
+                                            <button
+                                                className="normal round secondary tooltip-wrapper"
+                                                onClick={() => {
+                                                    // delete
+                                                    Delete(page);
+
+                                                    // update sidebar
+                                                    SetSidebar(true);
+                                                    RenderSidebar({
+                                                        Page: "Pages",
+                                                    });
+                                                }}
+                                                style={{
+                                                    background: "var(--red1)",
+                                                }}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                >
+                                                    <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                                                </svg>
+
+                                                <div className="card secondary round border tooltip left">
+                                                    Delete Page
+                                                </div>
+                                            </button>
+                                        </div>
                                     );
-
-                                    return <></>;
-                                }
-
-                                // return
-                                return (
-                                    <button
-                                        onClick={() => SetPage(index)}
-                                        title={page.ID}
-                                    >
-                                        Page {index + 1}
-                                    </button>
-                                );
-                            })}
+                                })}
+                            </div>
                         </>
                     )) ||
                         (props.Page === "Move" && (

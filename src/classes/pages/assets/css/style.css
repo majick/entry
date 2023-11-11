@@ -1879,7 +1879,7 @@ nav.scroll {
 }
 
 .tooltip-wrapper .tooltip.left {
-    right: 150%;
+    right: 110%;
 }
 
 .tooltip-wrapper .tooltip.bottom {
@@ -1887,5 +1887,5 @@ nav.scroll {
 }
 
 .tooltip-wrapper .tooltip.right {
-    left: 150%;
+    left: 110%;
 }

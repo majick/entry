@@ -142,7 +142,7 @@ export async function Session(request: Request): Promise<string> {
 
         session = `session-id=${
             ses_log[2].ID // add newest token
-        }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+        }; SameSite=Strict; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
             60 * 60 * 24 * 64
         }`;
     } else {
@@ -151,7 +151,8 @@ export async function Session(request: Request): Promise<string> {
 
         // set token to expire if log no longer exists
         if (!ses_log[0])
-            session = "session-id=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0";
+            session =
+                "session-id=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0";
         // otherwise, return nothing (no need to set cookie, it already exists)
         else session = "";
     }
@@ -207,7 +208,7 @@ export async function GetAssociation(
 
             return [
                 true,
-                `associated=${SetAssociation}; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                `associated=${SetAssociation}; SameSite=Strict; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
                     60 * 60 * 24 * 365
                 }`,
             ];
@@ -225,7 +226,7 @@ export async function GetAssociation(
                     true,
                     `associated=${punycode.toASCII(
                         split[1]
-                    )}; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                    )}; SameSite=Strict; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
                         60 * 60 * 24 * 365
                     }`,
                 ];
@@ -536,6 +537,8 @@ export class GetPasteRecord implements Endpoint {
  */
 export class EditPaste implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
+        const _ip = server !== undefined ? server.requestIP(request) : null;
+
         // verify content type
         const WrongType = VerifyContentType(
             request,
@@ -567,6 +570,29 @@ export class EditPaste implements Endpoint {
 
         // get association
         const Association = await GetAssociation(request, null);
+
+        // load associated
+        if (!Association[1].startsWith("associated") && !Association[0]) {
+            // try to set association
+            if (
+                // can't (shouldn't) set association with a comment
+                !body.CommentOn &&
+                !body.ReportOn &&
+                // make sure auto_tag is enabled
+                (!EntryDB.config.app || EntryDB.config.app.auto_tag !== false)
+            ) {
+                // update association with this paste
+                const UpdateResult = await GetAssociation(
+                    request,
+                    _ip,
+                    true,
+                    body.OldURL
+                );
+
+                if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
+            }
+        } else if (!Association[1].startsWith("associated=refresh"))
+            body.Associated = Association[1];
 
         if (
             Association[0] === true &&
@@ -636,6 +662,7 @@ export class EditPaste implements Endpoint {
             headers: {
                 ...DefaultHeaders,
                 "Content-Type": "application/json; charset=utf-8",
+                "Set-Cookie": Association[1],
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste

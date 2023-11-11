@@ -57,7 +57,7 @@ You can define a custom [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/
 All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded` unless otherwise specified, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
 
 - `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
-- `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldURL, EditPassword, Content, OldURL, NewEditPassword`
+- `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldURL, EditPassword, Content, NewURL, NewEditPassword`
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))

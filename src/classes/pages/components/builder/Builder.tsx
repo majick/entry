@@ -52,7 +52,7 @@ export function AddComponent(Type: string) {
             ],
         });
 
-        RenderSidebar({ Page: "PagesView" }); // rerender sidebar with updated pages!
+        RenderSidebar({ Page: "Pages" }); // rerender sidebar with updated pages!
     } else if (Type === "Card")
         Document.Pages[CurrentPage].Children.push({
             Type: "Card",
@@ -290,7 +290,7 @@ function RenderPage() {
                     onClick={() => {
                         SidebarOpen = true;
                         RenderSidebar({
-                            Page: "PagesView",
+                            Page: "Pages",
                         });
                     }}
                 >
