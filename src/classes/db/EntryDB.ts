@@ -1099,6 +1099,17 @@ export default class EntryDB {
         )
             return [false, "Invalid password!", NewPasteInfo];
 
+        // if the admin password was used, log an "access_admin" log
+        if (
+            PasteInfo.EditPassword === CreateHash(EntryDB.config.admin) &&
+            EntryDB.config.log &&
+            EntryDB.config.log.events.includes("access_admin")
+        )
+            await EntryDB.Logs.CreateLog({
+                Type: "access_admin",
+                Content: `Paste edit: ${paste.CustomURL}`,
+            });
+
         // if custom url was changed, add the group back to it
         // ...users cannot add the group manually because of the custom url regex
         if (NewPasteInfo.CustomURL !== paste.CustomURL) {
@@ -1261,6 +1272,17 @@ export default class EntryDB {
             paste.CustomURL === "v"
         )
             return [false, "Invalid password!", PasteInfo];
+
+        // if the admin password was used, log an "access_admin" log
+        if (
+            PasteInfo.EditPassword === CreateHash(EntryDB.config.admin) &&
+            EntryDB.config.log &&
+            EntryDB.config.log.events.includes("access_admin")
+        )
+            await EntryDB.Logs.CreateLog({
+                Type: "access_admin",
+                Content: `Paste delete: ${paste.CustomURL}`,
+            });
 
         // if paste is encrypted, delete the encryption values too
         if (paste.ViewPassword) {

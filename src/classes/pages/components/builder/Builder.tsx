@@ -638,7 +638,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 `let ScriptAborted = false;
                 window.Builder.State._ScriptAbort.signal.addEventListener("abort", () => { 
                     ScriptAborted = true;
-                });\n(async () => { ${content} })();`,
+                });\nconst document = Builder.Page.Element;\n(async () => { ${content} })();`,
             ],
             {
                 type: "application/javascript",
