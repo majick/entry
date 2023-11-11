@@ -329,6 +329,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                 // create editor
                                 CurrentEditor = HTMLEditor.CreateEditor(
                                     document.getElementById("_editor")!,
+                                    "html",
                                     (NewContent) => {
                                         if (
                                             Selected.Type !== "Source" &&

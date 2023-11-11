@@ -8,8 +8,6 @@ import { ParseMarkdownSync } from "../Markdown";
 import { Update } from "./Builder";
 import parser from "./parser";
 
-import RenderToString from "preact-render-to-string";
-
 // types
 export type BaseNode = {
     Type: string;

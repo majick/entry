@@ -100,6 +100,7 @@ export const EntryCodeHighlight = HighlightStyle.define([
 // create editor function
 export function CreateEditor(
     element: HTMLElement,
+    mode: "html",
     UpdateNode: (content: string) => void
 ) {
     if (globalThis.Bun) return; // must be run from client
@@ -109,7 +110,7 @@ export function CreateEditor(
         state: EditorState.create({
             doc: "",
             extensions: [
-                placeholder("HTML Contents"),
+                placeholder(`${mode.toUpperCase()} Contents`),
                 lineNumbers(),
                 highlightActiveLineGutter(),
                 highlightSpecialChars(),
@@ -195,7 +196,7 @@ export function CreateEditor(
                         },
                     },
                 ]),
-                // javascript
+                // language
                 html({ autoCloseTags: true }),
             ],
         }),

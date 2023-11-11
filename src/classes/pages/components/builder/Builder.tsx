@@ -661,6 +661,34 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         }, 1000);
     }
 
+    function CreateStyle(content: string, element: HTMLElement | ShadowRoot) {
+        const NewStyle = document.createElement("link");
+
+        // create blob
+        const blob = new Blob([content], {
+            type: "text/css",
+        });
+
+        // get url
+        const url = URL.createObjectURL(blob);
+
+        // add attributes
+        NewStyle.rel = "stylesheet";
+        NewStyle.href = url;
+
+        // append
+        element.appendChild(NewStyle);
+
+        // if content includes "@font-face", append outside of the shadowroot too
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=336876
+        if (content.includes("@font-face")) document.head.appendChild(NewStyle);
+
+        // revoke url
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }
+
     function RenderCurrentPage(element: HTMLElement | ShadowRoot) {
         RenderCycles++;
 
@@ -704,6 +732,12 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             for (const script of scripts as any as HTMLScriptElement[])
                 CreateScript(script.innerHTML, element);
         }
+
+        // load styles
+        const styles = element.querySelectorAll("style");
+
+        for (const style of styles as any as HTMLScriptElement[])
+            CreateStyle(style.innerHTML, element);
 
         // ...
         return true;
@@ -925,6 +959,12 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
             // render
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
+
+            // reload styles
+            const styles = _page.querySelectorAll("style");
+
+            for (const style of styles as any as HTMLScriptElement[])
+                CreateStyle(style.innerHTML, _page);
         }, 1000);
 
         // save initial state

@@ -49,7 +49,7 @@ export const DefaultHeaders = {
             "default-src 'self' blob:",
             "img-src *",
             "font-src *",
-            "style-src 'unsafe-inline' 'self'",
+            "style-src 'unsafe-inline' 'self' blob: *",
             "script-src 'self' 'unsafe-inline' blob:",
             "object-src 'self' blob:",
             "upgrade-insecure-requests",
