@@ -38,6 +38,7 @@ import SearchForm from "./components/form/SearchForm";
 import BaseParser from "../db/helpers/BaseParser";
 import Modal from "./components/site/modals/Modal";
 import { ServerConfig } from "../..";
+import { ReposNav } from "./repos/Repos";
 
 // ...
 
@@ -2486,21 +2487,23 @@ export class UserSettings implements Endpoint {
                         <TopNav
                             breadcrumbs={["paste", "settings", name]}
                             border={false}
+                            margin={false}
                         />
 
-                        <main>
+                        <div className="flex flex-column g-8">
                             <div
+                                className="card secondary flex justify-space-between"
                                 style={{
-                                    padding: "0.5rem",
+                                    padding: "calc(var(--u-12) * 4) var(--u-12)",
                                 }}
                             >
-                                <div
-                                    className="builder\:card"
-                                    style={{
-                                        width: "100%",
-                                        borderRadius: "0.4rem",
-                                    }}
-                                >
+                                <h1 class={"no-margin"}>{name}</h1>
+                            </div>
+
+                            <main class={"small flex flex-column g-4"}>
+                                <ReposNav name={name} current="Settings" />
+
+                                <div className="card round border">
                                     <div
                                         class={"mobile-flex-center"}
                                         style={{
@@ -2508,7 +2511,7 @@ export class UserSettings implements Endpoint {
                                             gap: "0.5rem",
                                             alignItems: "center",
                                             justifyContent: "space-between",
-                                            margin: "2rem 0 1rem 0",
+                                            margin: "1rem 0 1rem 0",
                                             flexWrap: "wrap",
                                         }}
                                     >
@@ -2518,12 +2521,12 @@ export class UserSettings implements Endpoint {
                                                 textAlign: "center",
                                             }}
                                         >
-                                            Paste Settings ({name})
+                                            Paste Settings
                                         </h4>
 
                                         <a
                                             href={"javascript:window.history.back()"}
-                                            class={"button secondary round"}
+                                            class={"button round"}
                                         >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -2571,7 +2574,7 @@ export class UserSettings implements Endpoint {
                                             />
 
                                             <input
-                                                class={"secondary round mobile-max"}
+                                                class={"round mobile-max"}
                                                 type="text"
                                                 placeholder={"Edit code"}
                                                 maxLength={EntryDB.MaxPasswordLength}
@@ -2589,11 +2592,7 @@ export class UserSettings implements Endpoint {
                                                 value={""}
                                             />
 
-                                            <button
-                                                class={
-                                                    "secondary round green mobile-max"
-                                                }
-                                            >
+                                            <button class={"round green mobile-max"}>
                                                 Save
                                             </button>
                                         </form>
@@ -2623,12 +2622,12 @@ export class UserSettings implements Endpoint {
                                                 <hr id={"PasteMedia"} />
                                                 <h4>Paste Media</h4>
 
-                                                <div class="card round flex justify-space-between align-center flex-wrap g-4">
+                                                <div class="card secondary border round flex justify-space-between align-center flex-wrap g-4">
                                                     <b>Paste Media Uploads</b>
 
                                                     <a
                                                         href={`/paste/media/${result.CustomURL}`}
-                                                        className="button round"
+                                                        className="secondary button round"
                                                     >
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
@@ -2655,7 +2654,7 @@ export class UserSettings implements Endpoint {
                                                 <hr id={"CustomDomain"} />
                                                 <h4>Custom Domain</h4>
 
-                                                <div class="card round flex justify-space-between flex-wrap g-4">
+                                                <div class="card secondary border round flex justify-space-between flex-wrap g-4">
                                                     <div
                                                         class={"mobile-max"}
                                                         style={{
@@ -2691,7 +2690,7 @@ export class UserSettings implements Endpoint {
 
                                                         <input
                                                             class={
-                                                                "round mobile-max"
+                                                                "round mobile-max secondary"
                                                             }
                                                             type="text"
                                                             placeholder={"Edit code"}
@@ -2707,7 +2706,7 @@ export class UserSettings implements Endpoint {
 
                                                         <input
                                                             class={
-                                                                "round mobile-max"
+                                                                "round mobile-max secondary"
                                                             }
                                                             type="text"
                                                             name={"Domain"}
@@ -2729,7 +2728,7 @@ export class UserSettings implements Endpoint {
                                                         />
 
                                                         <button
-                                                            className="green round"
+                                                            className="secondary green round"
                                                             style={{ width: "100%" }}
                                                         >
                                                             Save
@@ -2739,24 +2738,25 @@ export class UserSettings implements Endpoint {
                                             </>
                                         )}
                                 </div>
-                            </div>
 
-                            <script
-                                type={"module"}
-                                dangerouslySetInnerHTML={{
-                                    __html: `import _e from "/MetadataEditor.js";
+                                <script
+                                    type={"module"}
+                                    dangerouslySetInnerHTML={{
+                                        __html: `import _e from "/MetadataEditor.js";
 
-                                    window.ENTRYDB_CONFIG_ENABLE_COMMENTS = ${
-                                        EntryDB.config.app &&
-                                        EntryDB.config.app.enable_comments === true
-                                    }
+                                        window.ENTRYDB_CONFIG_ENABLE_COMMENTS = ${
+                                            EntryDB.config.app &&
+                                            EntryDB.config.app.enable_comments ===
+                                                true
+                                        }
 
-                                    _e.ClientEditor(\`${BaseParser.stringify(
-                                        result.Metadata as any
-                                    )}\`, "_doc");`,
-                                }}
-                            />
-                        </main>
+                                        _e.ClientEditor(\`${BaseParser.stringify(
+                                            result.Metadata as any
+                                        )}\`, "_doc");`,
+                                    }}
+                                />
+                            </main>
+                        </div>
                     </>,
                     <>
                         <title>Paste Settings - {EntryDB.config.name}</title>

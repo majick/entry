@@ -233,12 +233,7 @@ export function ClientEditor(_metadata: string, id: string): any {
             // push to inputs
             // these should all just be true or false inputs
             Inputs.push(
-                <div
-                    className="card flex justify-space-between align-center flex-wrap g-4 round"
-                    style={{
-                        background: "var(--background-surface)",
-                    }}
-                >
+                <div className="card secondary border flex justify-space-between align-center flex-wrap g-4 round">
                     <div
                         className="flex flex-column g-4 mobile-max"
                         style={{ width: "45%" }}
@@ -261,6 +256,7 @@ export function ClientEditor(_metadata: string, id: string): any {
                             name={data[0]}
                             round={true}
                             checked={data[1][0]}
+                            secondary={true}
                             changed={(event: Event<HTMLInputElement>) => {
                                 // update value (handle json nesting too)
                                 let prev = metadata;
@@ -310,7 +306,7 @@ export function ClientEditor(_metadata: string, id: string): any {
                                 // regenerate metadata
                                 UpdateMetadata();
                             }}
-                            class={"round"}
+                            class={"round secondary"}
                             style={{
                                 width: "20rem",
                                 maxWidth: "100%",

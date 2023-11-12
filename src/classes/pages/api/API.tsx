@@ -470,8 +470,13 @@ export class CreatePaste implements Endpoint {
         }
 
         // if result[0] IS NOT TRUE, set association to nothing!!! this makes sure
-        // people don't get associated with a paste that is already taken.,..
-        if (result[0] !== true) Association[1] = "";
+        // people don't get associated with a paste that is already taken...
+        if (result[0] !== true) {
+            Association[1] = ""; // clear association
+
+            // remove from session
+            GetAssociation(request, _ip, false, undefined, true);
+        }
 
         // return
         return new Response(JSON.stringify(result), {
