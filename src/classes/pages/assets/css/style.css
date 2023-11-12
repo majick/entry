@@ -232,12 +232,13 @@ button,
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: all 0.1s;
+    transition: all 0.1s, box-shadow 0.2s;
     height: max-content;
     width: max-content;
     font-weight: normal;
     text-decoration: none;
     gap: 0.5rem;
+    box-shadow: 0 0 1px transparent;
 }
 
 button.round,
@@ -337,7 +338,7 @@ button.active,
 
 button.glow:hover,
 .button.glow:hover {
-    box-shadow: 0 0 2px var(--background-surface1);
+    box-shadow: 0 0 4px currentColor;
 }
 
 button.visual-active:active,

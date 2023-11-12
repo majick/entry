@@ -7,11 +7,13 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import BaseParser from "../../db/helpers/BaseParser";
 import { Paste } from "../../db/objects/Paste";
 import { CheckInstance, db } from "../Pages";
 import EntryDB from "../../db/EntryDB";
 
 // import components
+import { BuilderDocument } from "../components/builder/schema";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
 import { PageHeaders } from "../api/API";
@@ -24,7 +26,7 @@ export function ReposNav(props: { name: string; current: string }) {
             style={{ userSelect: "none" }}
         >
             <a
-                href={`/paste/vers/${props.name}`}
+                href={`/paste/v/${props.name}`}
                 className={`${
                     props.current === "Home" ? "secondary " : ""
                 }button round full`}
@@ -105,13 +107,18 @@ export class RepoView implements Endpoint {
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
-        if (name.startsWith("paste/vers/")) name = name.split("paste/vers/")[1];
+        if (name.startsWith("paste/v/")) name = name.split("paste/v/")[1];
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
         const BuilderPaste = result.Content.startsWith("_builder:");
+        const BuilderDocument: BuilderDocument = BuilderPaste
+            ? BaseParser.parse(
+                  result.Content.split("_builder:")[1].split("_metadata:")[0]
+              )
+            : ({} as any);
 
         // return
         return new Response(
@@ -121,7 +128,7 @@ export class RepoView implements Endpoint {
 
                     <div className="flex flex-column g-8">
                         <div
-                            className="card secondary flex justify-space-between mobile-flex-center"
+                            className="card secondary flex justify-center"
                             style={{
                                 padding: "calc(var(--u-12) * 4) var(--u-12)",
                             }}
@@ -138,55 +145,79 @@ export class RepoView implements Endpoint {
                                 </div>
 
                                 <div
-                                    className="card round has-header"
+                                    className="card round has-header flex flex-column g-4"
                                     style={{
                                         userSelect: "none",
                                     }}
                                 >
-                                    {
-                                        <>
-                                            <a
-                                                href={`/${name}`}
-                                                target={"_blank"}
-                                                className="button round full justify-space-between flex-wrap"
-                                            >
-                                                <div className="flex align-center g-4">
-                                                    {(!BuilderPaste && (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                            aria-label={
-                                                                "Markdown Symbol"
-                                                            }
-                                                        >
-                                                            <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
-                                                        </svg>
-                                                    )) || (
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                            aria-label={
-                                                                "Binary File Symbol"
-                                                            }
-                                                        >
-                                                            <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
-                                                        </svg>
-                                                    )}
-                                                    {name}.
-                                                    {BuilderPaste ? "bldr" : "md"}
-                                                </div>
+                                    <a
+                                        href={`/${name}`}
+                                        target={"_blank"}
+                                        className="button round full justify-space-between flex-wrap"
+                                    >
+                                        <div className="flex align-center g-4">
+                                            {(!BuilderPaste && (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Markdown Symbol"}
+                                                >
+                                                    <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
+                                                </svg>
+                                            )) || (
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Binary File Symbol"}
+                                                >
+                                                    <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                </svg>
+                                            )}
+                                            {name}.{BuilderPaste ? "bldr" : "md"}
+                                        </div>
 
-                                                <span>
-                                                    {result.Content.length}{" "}
-                                                    characters
-                                                </span>
-                                            </a>
+                                        <span>
+                                            {result.Content.length} characters
+                                        </span>
+                                    </a>
+
+                                    {BuilderPaste && (
+                                        <>
+                                            <hr style={{ margin: 0 }} />
+
+                                            {BuilderDocument.Pages.map((Page) => (
+                                                <a
+                                                    href={`/${name}#/${Page.ID}`}
+                                                    target={"_blank"}
+                                                    className="button round full justify-space-between flex-wrap"
+                                                >
+                                                    <div className="flex align-center g-4">
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "File Link Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M2 1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 12.25 15h-7a.75.75 0 0 1 0-1.5h7a.25.25 0 0 0 .25-.25V6H9.75A1.75 1.75 0 0 1 8 4.25V1.5H3.75a.25.25 0 0 0-.25.25V4.5a.75.75 0 0 1-1.5 0Zm-.5 10.487v1.013a.75.75 0 0 1-1.5 0v-1.012a3.748 3.748 0 0 1 3.77-3.749L4 8.49V6.573a.25.25 0 0 1 .42-.183l2.883 2.678a.25.25 0 0 1 0 .366L4.42 12.111a.25.25 0 0 1-.42-.183V9.99l-.238-.003a2.25 2.25 0 0 0-2.262 2.25Zm8-10.675V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                        </svg>
+                                                        {Page.ID}
+                                                    </div>
+
+                                                    <span>
+                                                        {Page.Children.length}{" "}
+                                                        children
+                                                    </span>
+                                                </a>
+                                            ))}
                                         </>
-                                    }
+                                    )}
                                 </div>
                             </div>
 
@@ -200,7 +231,7 @@ export class RepoView implements Endpoint {
                                         <li>
                                             <b>Owner</b>:{" "}
                                             <a
-                                                href={`/paste/vers/${
+                                                href={`/paste/v/${
                                                     result.Metadata!.Owner
                                                 }`}
                                             >

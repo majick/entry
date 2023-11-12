@@ -960,6 +960,12 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             // render
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
 
+            // reload scripts
+            const scripts = _page.querySelectorAll("script");
+
+            for (const script of scripts as any as HTMLScriptElement[])
+                CreateScript(script.innerHTML, _page);
+
             // reload styles
             const styles = _page.querySelectorAll("style");
 

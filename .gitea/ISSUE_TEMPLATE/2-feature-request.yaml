@@ -17,6 +17,6 @@ body:
       id: "version"
       attributes:
           label: Entry Version
-          description: This can be found by visiting /v on your Entry server.
+          description: This can be found by visiting /ver on your Entry server.
       validations:
           required: true

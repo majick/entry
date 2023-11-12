@@ -141,24 +141,12 @@ export default class EntryDB {
                 if (!storedVersion) {
                     // create version paste
                     // this is used to check if the server is outdated
-                    await SQL.QueryOBJ({
-                        db: db,
-                        query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                        params: [
-                            pack.version,
-                            "", // an empty EditPassword essentially makes this paste uneditable without server access
-                            //     this is because, by default, both the server and the client prevent paste passwords
-                            //     that are less than 5 characters, so this isn't possible unless the server created it
-                            "v", // a custom URL is required to be more than 2 characters by client and server, this is
-                            //      basically just the same thing we did above with the EditPassword
-                            "",
-                            new Date().toUTCString(), // PubDate
-                            new Date().toUTCString(), // EditDate
-                            "server",
-                            "", // same deal as EditPassword
-                        ],
-                        transaction: true,
-                        use: "Prepare",
+                    await this.CreatePaste({
+                        CustomURL: "ver",
+                        EditPassword: EntryDB.config.admin,
+                        Content: pack.version,
+                        PubDate: new Date().getTime(),
+                        EditDate: new Date().getTime(),
                     });
 
                     storedVersion = await this.GetPasteFromURL("v");
@@ -169,17 +157,22 @@ export default class EntryDB {
                     // than the version file contains
                     storedVersion!.Content = pack.version;
 
-                    await SQL.QueryOBJ({
-                        db: db,
-                        query: "UPDATE Pastes SET (Content, EditDate) = (?, ?) WHERE CustomURL = ?",
-                        params: [
-                            storedVersion!.Content,
-                            new Date().toUTCString(), // new edit date
-                            storedVersion!.CustomURL,
-                        ],
-                        transaction: true,
-                        use: "Prepare",
-                    });
+                    await this.EditPaste(
+                        {
+                            CustomURL: "ver",
+                            EditPassword: EntryDB.config.admin,
+                            Content: pack.version,
+                            PubDate: new Date().getTime(),
+                            EditDate: new Date().getTime(),
+                        },
+                        {
+                            CustomURL: "ver",
+                            EditPassword: EntryDB.config.admin,
+                            Content: pack.version,
+                            PubDate: new Date().getTime(),
+                            EditDate: new Date().getTime(),
+                        }
+                    );
                 }
             }
         })();

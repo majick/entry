@@ -8,8 +8,6 @@ import { Database } from "bun:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
-import EntryDB from "../EntryDB";
-
 /**
  * @export
  * @class SQL
@@ -146,6 +144,7 @@ export default class SQL {
         all?: boolean;
         use?: "Query" | "Prepare";
     }): Promise<any> {
+        // sqlite
         if (params.use === "Prepare")
             return SQL.Prepare(
                 params.db,

@@ -1,7 +1,7 @@
 import { mock, test, expect, describe } from "bun:test";
 
 // create request mock
-const request = mock(() => fetch("http://localhost:8080/v"));
+const request = mock(() => fetch("http://localhost:8080/ver"));
 
 // create test
 describe("performance", () => {
@@ -10,7 +10,7 @@ describe("performance", () => {
         const beforeMem = process.memoryUsage.rss();
 
         // run test
-        console.log("Sending 5,000 requests to /v");
+        console.log("Sending 5,000 requests to /ver");
         for (let i = 0; i < 5000; i++) await request(); // request 10,000 times
 
         // collect results

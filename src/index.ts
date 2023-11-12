@@ -298,7 +298,7 @@ export const ServerConfig: HoneybeeConfig = {
         // GET builder
         "/paste/builder": { Page: Builder.Builder },
         // GET repos
-        "/paste/vers/": { Type: "begins", Page: Repos.RepoView },
+        "/paste/v/": { Type: "begins", Page: Repos.RepoView },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },

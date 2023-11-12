@@ -361,7 +361,7 @@ export function PageNode(props: {
 
     // return page
     return (
-        <div
+        <body
             id={props.node.ID || crypto.randomUUID()}
             class={`component builder:page ${props.node.ClassString || ""}`}
             style={{
@@ -389,15 +389,12 @@ export function PageNode(props: {
                 // the StyleString on pages can change more than just the page element,
                 // so it's within its own style element... instead of just the attribute!
                 dangerouslySetInnerHTML={{
-                    __html: (props.node.StyleString || "").replaceAll(
-                        "body {",
-                        ".builder\\:page {"
-                    ),
+                    __html: props.node.StyleString || "",
                 }}
             />
 
             <EventScript node={props.node} />
-        </div>
+        </body>
     );
 }
 
