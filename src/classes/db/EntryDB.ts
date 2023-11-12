@@ -544,7 +544,7 @@ export default class EntryDB {
                 else
                     record.Metadata = {
                         Version: 1,
-                        Owner: "",
+                        Owner: record.CustomURL,
                     };
 
                 // if record.Metadata contains an owner, but that owner record does not exist
@@ -561,7 +561,7 @@ export default class EntryDB {
 
                     // if !Owner, remove from metadata
                     if (!Owner) record.Metadata.Owner = "";
-                }
+                } else if (record.Metadata) record.Metadata.Owner = record.CustomURL;
 
                 // return
                 return resolve(record);
@@ -1049,6 +1049,8 @@ export default class EntryDB {
         if (
             PasteInfo.EditPassword === UndefinedHash &&
             PasteInfo.Associated &&
+            paste.Metadata &&
+            paste.Metadata.Owner &&
             PasteInfo.Associated === paste.Metadata!.Owner
         ) {
             PasteInfo.EditPassword = paste.EditPassword!;

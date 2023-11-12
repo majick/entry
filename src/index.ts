@@ -89,6 +89,7 @@ export type Config = {
         enable_builder?: boolean; // true default
         enable_paste_settings?: boolean; // true default
         enable_comments?: boolean; // false default
+        enable_versioning?: boolean; // false default
         association_required?: boolean; // requires an association to create pastes
         auto_tag?: boolean;
         favicon?: string;
@@ -198,6 +199,7 @@ import Honeybee, { HoneybeeConfig } from "honeybee";
 import _404, { _404Page } from "./classes/pages/components/404";
 import Builder from "./classes/pages/components/builder";
 import AdminAPI from "./classes/pages/api/AdminAPI";
+import Repos from "./classes/pages/repos/Repos";
 import Admin from "./classes/pages/Admin";
 import Pages from "./classes/pages/Pages";
 
@@ -295,6 +297,8 @@ export const ServerConfig: HoneybeeConfig = {
         "/paste/notifications": { Page: Pages.Notifications },
         // GET builder
         "/paste/builder": { Page: Builder.Builder },
+        // GET repos
+        "/paste/vers/": { Type: "begins", Page: Repos.RepoView },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
