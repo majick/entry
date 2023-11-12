@@ -38,25 +38,30 @@ export function ReposNav(props: { name: string; current: string }) {
                 >
                     <path d="M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z"></path>
                 </svg>
-                {props.name}
+                {props.name.length > 15
+                    ? `${props.name.substring(0, 14)}...`
+                    : props.name}
             </a>
 
-            <a
-                className={`${
-                    props.current === "Versions" ? "secondary " : ""
-                }button round full`}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 16 16"
-                    width="16"
-                    height="16"
-                    aria-label={"Versions Symbol"}
+            {EntryDB.config.app && EntryDB.config.app.enable_versioning && (
+                <a
+                    disabled
+                    className={`${
+                        props.current === "Versions" ? "secondary " : ""
+                    }button round full`}
                 >
-                    <path d="M7.75 14A1.75 1.75 0 0 1 6 12.25v-8.5C6 2.784 6.784 2 7.75 2h6.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14Zm-.25-1.75c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25h-6.5a.25.25 0 0 0-.25.25ZM4.9 3.508a.75.75 0 0 1-.274 1.025.249.249 0 0 0-.126.217v6.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.75 1.75 0 0 1 3 11.25v-6.5c0-.649.353-1.214.874-1.516a.75.75 0 0 1 1.025.274ZM1.625 5.533h.001a.249.249 0 0 0-.126.217v4.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.748 1.748 0 0 1 0 10.25v-4.5a1.748 1.748 0 0 1 .873-1.516.75.75 0 1 1 .752 1.299Z"></path>
-                </svg>
-                Versions
-            </a>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Versions Symbol"}
+                    >
+                        <path d="M7.75 14A1.75 1.75 0 0 1 6 12.25v-8.5C6 2.784 6.784 2 7.75 2h6.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14Zm-.25-1.75c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25h-6.5a.25.25 0 0 0-.25.25ZM4.9 3.508a.75.75 0 0 1-.274 1.025.249.249 0 0 0-.126.217v6.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.75 1.75 0 0 1 3 11.25v-6.5c0-.649.353-1.214.874-1.516a.75.75 0 0 1 1.025.274ZM1.625 5.533h.001a.249.249 0 0 0-.126.217v4.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.748 1.748 0 0 1 0 10.25v-4.5a1.748 1.748 0 0 1 .873-1.516.75.75 0 1 1 .752 1.299Z"></path>
+                    </svg>
+                    Versions
+                </a>
+            )}
 
             {(!EntryDB.config.app ||
                 EntryDB.config.app.enable_paste_settings !== false) && (
@@ -83,6 +88,12 @@ export function ReposNav(props: { name: string; current: string }) {
 }
 
 // ...
+
+/**
+ * @export
+ * @class RepoView
+ * @implements {Endpoint}
+ */
 export class RepoView implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
@@ -110,7 +121,7 @@ export class RepoView implements Endpoint {
 
                     <div className="flex flex-column g-8">
                         <div
-                            className="card secondary flex justify-space-between"
+                            className="card secondary flex justify-space-between mobile-flex-center"
                             style={{
                                 padding: "calc(var(--u-12) * 4) var(--u-12)",
                             }}
@@ -121,37 +132,114 @@ export class RepoView implements Endpoint {
                         <main className="small flex flex-column g-4">
                             <ReposNav name={name} current="Home" />
 
-                            <div className="card round border">
-                                {!BuilderPaste && (
-                                    // not builder paste, only show main file
-                                    // for builder pastes: show all pages as a separate file
-                                    <>
-                                        <a
-                                            href={`/${name}`}
-                                            target={"_blank"}
-                                            className="button round full justify-start"
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Markdown Symbol"}
+                            <div className="card border round NoPadding">
+                                <div className="card round header">
+                                    <b>File List</b>
+                                </div>
+
+                                <div
+                                    className="card round has-header"
+                                    style={{
+                                        userSelect: "none",
+                                    }}
+                                >
+                                    {
+                                        <>
+                                            <a
+                                                href={`/${name}`}
+                                                target={"_blank"}
+                                                className="button round full justify-space-between flex-wrap"
                                             >
-                                                <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
-                                            </svg>
-                                            {name}.md
-                                        </a>
-                                    </>
-                                )}
+                                                <div className="flex align-center g-4">
+                                                    {(!BuilderPaste && (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Markdown Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
+                                                        </svg>
+                                                    )) || (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Binary File Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                        </svg>
+                                                    )}
+                                                    {name}.
+                                                    {BuilderPaste ? "bldr" : "md"}
+                                                </div>
+
+                                                <span>
+                                                    {result.Content.length}{" "}
+                                                    characters
+                                                </span>
+                                            </a>
+                                        </>
+                                    }
+                                </div>
                             </div>
 
-                            <div
-                                className="card round border"
-                                dangerouslySetInnerHTML={{
-                                    __html: await ParseMarkdown(result.Content),
-                                }}
-                            />
+                            <div class={"card border round NoPadding"}>
+                                <div className="card round header">
+                                    <b>Information</b>
+                                </div>
+
+                                <div className="card round has-header">
+                                    <ul style={{ margin: 0 }}>
+                                        <li>
+                                            <b>Owner</b>:{" "}
+                                            <a
+                                                href={`/paste/vers/${
+                                                    result.Metadata!.Owner
+                                                }`}
+                                            >
+                                                {result.Metadata!.Owner}
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <b>Comments</b>: {result.Comments}
+                                        </li>
+
+                                        <li>
+                                            <b>Type</b>:{" "}
+                                            {BuilderPaste ? "builder" : "markdown"}
+                                        </li>
+
+                                        <li>
+                                            <b>Zone</b>: entry
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {!BuilderPaste && (
+                                <div className="card border round NoPadding">
+                                    <div className="card round header">
+                                        <b>Rendered</b>
+                                    </div>
+
+                                    <div
+                                        className="card round has-header"
+                                        dangerouslySetInnerHTML={{
+                                            __html: await ParseMarkdown(
+                                                result.Content
+                                            ),
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </main>
                     </div>
                 </>,

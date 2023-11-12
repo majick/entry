@@ -2492,7 +2492,7 @@ export class UserSettings implements Endpoint {
 
                         <div className="flex flex-column g-8">
                             <div
-                                className="card secondary flex justify-space-between"
+                                className="card secondary flex justify-space-between mobile-flex-center"
                                 style={{
                                     padding: "calc(var(--u-12) * 4) var(--u-12)",
                                 }}

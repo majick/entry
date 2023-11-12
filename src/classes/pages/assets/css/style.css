@@ -914,6 +914,19 @@ dialog[open] {
     border-radius: var(--u-04);
 }
 
+.card.header {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    background: inherit;
+    user-select: none;
+    border-bottom: solid 1px var(--background-surface2a);
+}
+
+.card.has-header {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
 .card.secondary {
     background: var(--background-surface1);
 }
