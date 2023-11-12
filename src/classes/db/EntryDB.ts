@@ -547,21 +547,9 @@ export default class EntryDB {
                         Owner: record.CustomURL,
                     };
 
-                // if record.Metadata contains an owner, but that owner record does not exist
-                // ...remove record.Metadata.owner (this will also allow value to be overwritten)
-                if (record.Metadata && record.Metadata.Owner) {
-                    // get owner record
-                    const Owner = (await SQL.QueryOBJ({
-                        db: this.db,
-                        query: "SELECT CustomURL FROM Pastes WHERE CustomURL = ?",
-                        params: [record.Metadata.Owner],
-                        get: true,
-                        use: "Prepare",
-                    })) as Paste;
-
-                    // if !Owner, remove from metadata
-                    if (!Owner) record.Metadata.Owner = "";
-                } else if (record.Metadata) record.Metadata.Owner = record.CustomURL;
+                // MAKE SURE paste has an owner value!
+                if (record.Metadata && !record.Metadata.Owner)
+                    record.Metadata.Owner = record.CustomURL;
 
                 // return
                 return resolve(record);
@@ -1522,7 +1510,7 @@ export default class EntryDB {
                 else
                     paste.Metadata = {
                         Version: 1,
-                        Owner: "",
+                        Owner: paste.CustomURL,
                     };
 
                 // replace paste
@@ -1779,7 +1767,7 @@ export default class EntryDB {
             else
                 paste.Metadata = {
                     Version: 1,
-                    Owner: "",
+                    Owner: paste.CustomURL,
                 };
 
             // set comment owner
