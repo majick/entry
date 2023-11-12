@@ -38,6 +38,7 @@ export type PasteMetadata = {
     ShowViewCount?: boolean;
     Favicon?: string; // favicon shown on paste
     Title?: string; // title shown on paste
+    Description?: string; // description shown on paste (opengraph)
     PrivateSource?: boolean;
     SocialIcon?: string; // shown as a "profile picture" in some places
     Badges?: string; // comma separated array of badges, shown under paste

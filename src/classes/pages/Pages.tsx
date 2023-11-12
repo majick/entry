@@ -517,6 +517,11 @@ export class GetPasteFromURL implements Endpoint {
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
 
                         <OpenGraph
+                            description={
+                                result.Metadata && result.Metadata.Description
+                                    ? result.Metadata.Description
+                                    : result.CustomURL
+                            }
                             title={
                                 result.Metadata && result.Metadata.Title
                                     ? result.Metadata.Title
@@ -1133,10 +1138,12 @@ export class GetPasteFromURL implements Endpoint {
                                 : result.CustomURL
                         }
                         description={
-                            // if length of content is greater than 150, cut it at 150 characters and add "..."
-                            // otherwise, we can just show the full content
-                            result.Content.length > 150
-                                ? `${result.Content.substring(0, 150)}...`
+                            result.Metadata && result.Metadata.Description
+                                ? result.Metadata.Description
+                                : // if length of content is greater than 150, cut it at 150 characters and add "..."
+                                // otherwise, we can just show the full content result.Content.length > 150
+                                result.Content.length > 150
+                                ? `${result.Content.substring(0, 149)}...`
                                 : result.Content
                         }
                         icon={
