@@ -642,6 +642,14 @@ export class EditPaste implements Endpoint {
             }
         );
 
+        // if the edit operation failed, remove association
+        if (result[0] !== true) {
+            Association[1] = ""; // clear association
+
+            // remove from session
+            GetAssociation(request, _ip, false, undefined, true);
+        }
+
         // remove association from all associated sessions if the password has changed
         if (
             body.NewEditPassword &&
