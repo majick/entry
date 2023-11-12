@@ -1016,12 +1016,15 @@ export default class EntryDB {
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
         if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
 
-        if (NewPasteInfo.EditPassword)
-            NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
-        else NewPasteInfo.EditPassword = paste.EditPassword!;
-
         // hash passwords
+
+        // ...store unhashed
+        PasteInfo.UnhashedEditPassword = `${PasteInfo.EditPassword}`;
+        NewPasteInfo.UnhashedEditPassword = `${NewPasteInfo.EditPassword}`;
+
+        // ...hash
         PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
+        NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
 
         // if PasteInfo doesn't include an EditPassword, set it to the current password
         // ...ONLY IF we're the owner of the paste!
@@ -1033,13 +1036,12 @@ export default class EntryDB {
             paste.Metadata &&
             paste.Metadata.Owner &&
             PasteInfo.Associated === paste.Metadata!.Owner
-        ) {
+        )
             PasteInfo.EditPassword = paste.EditPassword!;
 
-            // if we're not changing the edit password, set to the same
-            if (NewPasteInfo.EditPassword === UndefinedHash)
-                NewPasteInfo.EditPassword = paste.EditPassword!;
-        }
+        // if we're not changing the edit password, set to the same
+        if (NewPasteInfo.EditPassword === UndefinedHash)
+            NewPasteInfo.EditPassword = paste.EditPassword!;
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
@@ -1078,7 +1080,8 @@ export default class EntryDB {
         if (
             paste.EditPassword !== PasteInfo.EditPassword &&
             PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin) &&
-            PasteInfo.Associated !== paste.Metadata!.Owner
+            PasteInfo.Associated !== paste.Metadata!.Owner &&
+            !Force
         )
             return [false, "Invalid password!", NewPasteInfo];
 

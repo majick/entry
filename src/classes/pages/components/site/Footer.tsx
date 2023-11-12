@@ -148,7 +148,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 <div
                     style={{
                         position: "absolute",
-                        bottom: "10px",
+                        bottom: "8px",
                         right: "0",
                     }}
                 >

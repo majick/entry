@@ -936,24 +936,40 @@ export default class Home implements Endpoint {
                                                     required
                                                 />
 
-                                                <input
-                                                    class={"round mobile-max"}
-                                                    type="text"
-                                                    placeholder={"Edit code"}
-                                                    maxLength={
-                                                        EntryDB.MaxPasswordLength
-                                                    }
-                                                    minLength={
-                                                        EntryDB.MinPasswordLength
-                                                    }
-                                                    name={"EditPassword"}
-                                                    disabled={
-                                                        Association[0] &&
+                                                <div className="tooltip-wrapper mobile-max flex justify-center">
+                                                    <input
+                                                        style={{
+                                                            width: "100%",
+                                                        }}
+                                                        class={"round"}
+                                                        type="text"
+                                                        placeholder={"Edit code"}
+                                                        maxLength={
+                                                            EntryDB.MaxPasswordLength
+                                                        }
+                                                        minLength={
+                                                            EntryDB.MinPasswordLength
+                                                        }
+                                                        name={"EditPassword"}
+                                                        disabled={
+                                                            Association[0] &&
+                                                            Association[1] ===
+                                                                paste.Metadata!.Owner
+                                                        }
+                                                        required
+                                                    />
+
+                                                    {Association[0] &&
                                                         Association[1] ===
-                                                            paste.Metadata!.Owner
-                                                    }
-                                                    required
-                                                />
+                                                            paste.Metadata!
+                                                                .Owner && (
+                                                            <div className="card secondary round border tooltip top">
+                                                                You don't need a
+                                                                password, you own
+                                                                this!
+                                                            </div>
+                                                        )}
+                                                </div>
 
                                                 {
                                                     // we're going to provide the old Custom URL as well because the server expects it
