@@ -25,7 +25,7 @@
     "@codemirror/view": "latest",
     "@lezer/highlight": "^1.1.6",
     "highlight.js": "^11.8.0",
-    "honeybee": "https://git.sentrytwo.com/api/packages/hkau/npm/honeybee/-/1.0.9-patch-1/honeybee-1.0.9-patch-1.tgz",
+    "honeybee": "https://git.sentrytwo.com/api/packages/hkau/npm/honeybee/-/1.0.10/honeybee-1.0.10.tgz",
     "marked": "^5.1.0",
     "pg": "^8.11.3"
   },

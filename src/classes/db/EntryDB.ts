@@ -1579,6 +1579,12 @@ export default class EntryDB {
             if (paste.GroupName)
                 paste.CustomURL = paste.CustomURL.replace(`${paste.GroupName}/`, "");
 
+            if (typeof paste.PubDate === "string")
+                paste.PubDate = new Date().getTime();
+
+            if (typeof paste.EditDate === "string")
+                paste.EditDate = new Date().getTime();
+
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,

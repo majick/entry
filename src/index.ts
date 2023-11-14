@@ -234,6 +234,7 @@ export const ServerConfig: HoneybeeConfig = {
     Port: EntryDB.config.port || 8080,
     AssetsDir: import.meta.dir,
     NotFoundPage: _404Page(),
+    maxRequestBodySize: parseFloat(process.env.MAX_BODY_SIZE || "52428800"),
     Pages: {
         // GET admin
         "/admin": { Page: Admin.Login },
