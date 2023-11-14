@@ -263,6 +263,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/admin/api/delete": { Method: "POST", Page: AdminAPI.APIDeletePaste },
         "/admin/api/export": { Method: "POST", Page: AdminAPI.APIExport },
         "/admin/api/import": { Method: "POST", Page: AdminAPI.APIImport },
+        "/admin/api/importjson": { Method: "POST", Page: AdminAPI.APIImportRaw },
         "/admin/api/mass-delete": { Method: "POST", Page: AdminAPI.APIMassDelete },
         "/admin/api/sql": { Method: "POST", Page: AdminAPI.APISQL },
         "/admin/api/logs/export": { Method: "POST", Page: AdminAPI.APIExportLogs },
