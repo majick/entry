@@ -599,19 +599,6 @@ export class EditPaste implements Endpoint {
         } else if (!Association[1].startsWith("associated=refresh"))
             body.Associated = Association[1];
 
-        if (
-            Association[0] === true &&
-            !Association[1].startsWith("associated") &&
-            paste.Metadata &&
-            !paste.ViewPassword
-        ) {
-            // edit paste metadata (keep owner up-to-date)
-            paste.Metadata.Owner = Association[1];
-
-            // add to content
-            body.Content += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
-        }
-
         // check NewEditPassword length
         if (
             // if NewEditPassword is less than the expected length, set it to the old edit password
@@ -620,6 +607,23 @@ export class EditPaste implements Endpoint {
             CreateHash(body.EditPassword) === paste.EditPassword
         )
             body.NewEditPassword = body.EditPassword;
+
+        if (
+            Association[0] === true &&
+            !Association[1].startsWith("associated") &&
+            paste.Metadata &&
+            !paste.ViewPassword &&
+            // verify edit password
+            // OR check if association matches owner
+            (CreateHash(body.EditPassword) === paste.EditPassword ||
+                (paste.Metadata.Owner && paste.Metadata.Owner === Association[1]))
+        ) {
+            // edit paste metadata (keep owner up-to-date)
+            paste.Metadata.Owner = Association[1];
+
+            // add to content
+            body.Content += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
+        }
 
         // edit paste
         const result = await db.EditPaste(
@@ -657,7 +661,7 @@ export class EditPaste implements Endpoint {
             result[0]
         ) {
             const Sessions = await EntryDB.Logs.QueryLogs(
-                `Type = "session" AND Content LIKE "%;_with;${paste.CustomURL}"`
+                `Type = "session" AND \"Content\" LIKE "%;_with;${paste.CustomURL}"`
             );
 
             if (Sessions[2])
@@ -675,7 +679,6 @@ export class EditPaste implements Endpoint {
             headers: {
                 ...DefaultHeaders,
                 "Content-Type": "application/json; charset=utf-8",
-                "Set-Cookie": Association[1],
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste
@@ -726,7 +729,7 @@ export class DeletePaste implements Endpoint {
         // remove association from all associated sessions if the password has changed
         if (body.NewEditPassword && result[0]) {
             const Sessions = await EntryDB.Logs.QueryLogs(
-                `Type = "session" AND Content LIKE "%;_with;${body.CustomURL}"`
+                `Type = "session" AND \"Content\" LIKE "%;_with;${body.CustomURL}"`
             );
 
             if (Sessions[2])
@@ -1366,6 +1369,7 @@ export class EditMetadata implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
         const db = EntryDB.Zones[(body as any).Zone] || GlobalEntryDB; // support zones
+        if (!body.Metadata) return new Response("You changed nothing!");
 
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL, false, true); // do not fetch from cache!
@@ -1424,7 +1428,7 @@ export class EditMetadata implements Endpoint {
         // update paste
         await SQL.QueryOBJ({
             db: db.db,
-            query: "UPDATE Pastes SET (Content) = (?) WHERE CustomURL = ?",
+            query: 'UPDATE "Pastes" SET "Content" = ? WHERE "CustomURL" = ?',
             params: [paste.Content, paste.CustomURL],
             use: "Prepare",
         });
@@ -1734,7 +1738,7 @@ export class UpdateCustomDomain implements Endpoint {
         // make sure a log with that domain doesn't already exist
         const DomainLog = (
             await EntryDB.Logs.QueryLogs(
-                `Type = "custom_domain" AND Content LIKE "%;${body.Domain}"`
+                `Type = "custom_domain" AND \"Content\" LIKE "%;${body.Domain}"`
             )
         )[2][0];
 
@@ -1750,7 +1754,7 @@ export class UpdateCustomDomain implements Endpoint {
         // get log
         const CustomDomainLog = (
             await EntryDB.Logs.QueryLogs(
-                `Type = "custom_domain" AND Content LIKE "${paste.CustomURL};%"`
+                `Type = "custom_domain" AND \"Content\" LIKE "${paste.CustomURL};%"`
             )
         )[2][0];
 

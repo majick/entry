@@ -8,6 +8,8 @@ import { Database } from "bun:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
+import pg, { Client } from "pg";
+
 /**
  * @export
  * @class SQL
@@ -18,6 +20,7 @@ export default class SQL {
      * @param {string} name
      * @param {string} data
      * @param {boolean} [wal=true]
+     * @param {"sqlite" | "postgres"} [type="sqlite"]
      * @return {[Database, boolean]}
      * @memberof SQL
      */
@@ -41,6 +44,33 @@ export default class SQL {
 
         // return
         return [db, needToCreate]; // needToCreate tells us if we need to create tables
+    }
+
+    /**
+     * @method CreatePostgres
+     *
+     * @static
+     * @param {string} host
+     * @param {string} user
+     * @param {string} password
+     * @return {Client}
+     * @memberof SQL
+     */
+    public static CreatePostgres(
+        host: string,
+        user: string,
+        password: string,
+        database: string
+    ): Client {
+        // ...
+        if (!host || !user || !password) throw new Error("Missing values!");
+
+        // create database
+        const db = new pg.Client({ host, user, password, database });
+        db.connect();
+
+        // return
+        return db;
     }
 
     /**
@@ -120,6 +150,7 @@ export default class SQL {
     }
 
     /**
+     * @method QueryOBJ
      * @static
      * @param {({
      *         db: Database;
@@ -144,6 +175,10 @@ export default class SQL {
         all?: boolean;
         use?: "Query" | "Prepare";
     }): Promise<any> {
+        // if db has a host value, forward to pg
+        if ((params.db as any).host)
+            return await SQL.PostgresQueryOBJ(params as any);
+
         // sqlite
         if (params.use === "Prepare")
             return SQL.Prepare(
@@ -163,5 +198,52 @@ export default class SQL {
             params.get,
             params.all
         );
+    }
+
+    /**
+     * @method PostgresQueryOBJ
+     * @static
+     * @param {({
+     *         db: Client;
+     *         query: string;
+     *         insertValues?: any[];
+     *         params?: any[]; // alias of insertValues
+     *         transaction?: boolean;
+     *         get?: boolean;
+     *         all?: boolean;
+     *         use?: "Query" | "Prepare";
+     *     })} params
+     * @return {Promise<any>}
+     * @memberof SQL
+     */
+    public static async PostgresQueryOBJ(params: {
+        db: Client;
+        query: string;
+        insertValues?: any[];
+        params?: any[]; // alias of insertValues
+        transaction?: boolean;
+        get?: boolean;
+        all?: boolean;
+        use?: "Query" | "Prepare";
+    }): Promise<any> {
+        // postgres
+
+        // replace question marks in query with $<num>
+        let ParamNumber = 0;
+        params.query = params.query.replaceAll("?", () => {
+            ParamNumber++;
+            return `$${ParamNumber}`;
+        });
+
+        // add semicolon
+        params.query += `;`;
+
+        // ...prepare and query are the same here!
+        const res = await params.db.query(params.query, params.params);
+
+        // determine return value
+        if (params.all) return res.rows;
+        else if (params.get) return res.rows[0];
+        else return res.fields;
     }
 }

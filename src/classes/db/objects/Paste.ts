@@ -95,7 +95,7 @@ export default class PasteConnection {
         // fetch paste content from the db
         const res = (await SQL.QueryOBJ({
             db: this.Database.db,
-            query: "SELECT Content FROM Pastes WHERE CustomURL = ?",
+            query: 'SELECT "Content" FROM "Pastes" WHERE "CustomURL" = ?',
             params: [this._name],
             get: true,
             use: "Query",

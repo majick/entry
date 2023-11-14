@@ -408,7 +408,7 @@ export class APIGetUsers implements Endpoint {
         // get logs
         const _export = (
             await EntryDB.Logs.QueryLogs(
-                'Type = "session" AND Content LIKE "%;_with;%"'
+                'Type = "session" AND "Content" LIKE "%;_with;%"'
             )
         )[2];
 

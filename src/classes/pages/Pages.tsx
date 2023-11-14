@@ -137,7 +137,7 @@ export async function CheckInstance(
     // ...check against custom domain
     const CustomDomainLog = (
         await EntryDB.Logs.QueryLogs(
-            `Type = "custom_domain" AND Content LIKE "%;${url.hostname}"`
+            `Type = "custom_domain" AND \"Content\" LIKE "%;${url.hostname}"`
         )
     )[2][0];
 
@@ -1393,14 +1393,14 @@ export class PastesSearch implements Endpoint {
         // ...
         if (search.get("q") || search.get("owner")) {
             // build query
-            let query = `CustomURL LIKE "%${(search.get("q") || "")
+            let query = `\"CustomURL\" LIKE "%${(search.get("q") || "")
                 .toLowerCase()
                 .replaceAll('"', "'")}%" LIMIT 100`;
 
             // if q does not exist (or is "explore"), set explore mode
             let ExploreMode = false;
             if (!search.get("q") || search.get("q") === "explore") {
-                query = `CustomURL IS NOT NULL ORDER BY cast(EditDate as float) DESC LIMIT 100`;
+                query = `CustomURL IS NOT NULL ORDER BY cast(\"EditDate\" as float) DESC LIMIT 100`;
                 search.set("q", "explore");
                 ExploreMode = true;
             }
@@ -2483,7 +2483,7 @@ export class UserSettings implements Endpoint {
             // try to fetch custom domain log
             const CustomDomainLog = (
                 await EntryDB.Logs.QueryLogs(
-                    `Type = "custom_domain" AND Content LIKE "${result.CustomURL};%"`
+                    `Type = "custom_domain" AND \"Content\" LIKE "${result.CustomURL};%"`
                 )
             )[2][0];
 
@@ -3181,7 +3181,7 @@ export class Notifications implements Endpoint {
         // get notifications
         const Notifications = (
             await EntryDB.Logs.QueryLogs(
-                `Type = "notification" AND Content LIKE "%${Association[1]}"`
+                `Type = "notification" AND \"Content\" LIKE "%${Association[1]}"`
             )
         )[2];
 

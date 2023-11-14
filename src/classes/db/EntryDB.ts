@@ -36,7 +36,7 @@ export default class EntryDB {
         process.env.CONFIG_LOCATION || ":cwd/data/config.json"
     ).replace(":cwd", process.cwd());
 
-    public readonly db: Database;
+    public readonly db: typeof Config.postgres | Database;
     public readonly isNew: boolean = true;
     public static Zones: { [key: string]: EntryDB } = {};
     public static PasteCache: { [key: string]: PasteConnection } = {};
@@ -88,35 +88,47 @@ export default class EntryDB {
 
         // create db link
         // (zones don't get WAL mode)
-        const [db, isNew] = SQL.CreateDB(dbname, dbdir, !ZoneStaticInit);
+        const [db, isNew] = EntryDB.config.pg
+            ? [
+                  SQL.CreatePostgres(
+                      EntryDB.config.pg.host,
+                      EntryDB.config.pg.user,
+                      EntryDB.config.pg.password,
+                      EntryDB.config.pg.database
+                  ),
+                  false,
+              ]
+            : SQL.CreateDB(dbname, dbdir, !ZoneStaticInit);
 
         this.isNew = isNew;
         this.db = db;
 
         (async () => {
             // create tables
-            await SQL.QueryOBJ({
-                db,
-                query: `CREATE TABLE IF NOT EXISTS Pastes (
-                    Content varchar(${EntryDB.MaxContentLength}),
-                    EditPassword varchar(${EntryDB.MaxPasswordLength}),
-                    CustomURL varchar(${EntryDB.MaxCustomURLLength}),
-                    ViewPassword varchar(${EntryDB.MaxPasswordLength}),
-                    PubDate datetime DEFAULT CURRENT_TIMESTAMP,
-                    EditDate datetime DEFAULT CURRENT_TIMESTAMP,
-                    GroupName varchar(${EntryDB.MaxCustomURLLength}),
-                    GroupSubmitPassword varchar(${EntryDB.MaxPasswordLength})
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: db,
+                query: `CREATE TABLE IF NOT EXISTS "Pastes" (
+                    "Content" varchar(${EntryDB.MaxContentLength}),
+                    "EditPassword" varchar(${EntryDB.MaxPasswordLength}),
+                    "CustomURL" varchar(${EntryDB.MaxCustomURLLength}),
+                    "ViewPassword" varchar(${EntryDB.MaxPasswordLength}),
+                    "PubDate" float,
+                    "EditDate" float,
+                    "GroupName" varchar(${EntryDB.MaxCustomURLLength}),
+                    "GroupSubmitPassword" varchar(${EntryDB.MaxPasswordLength})
                 )`,
             });
 
-            await SQL.QueryOBJ({
-                db,
-                query: `CREATE TABLE IF NOT EXISTS Encryption (
-                    ViewPassword varchar(${EntryDB.MaxPasswordLength}),
-                    CustomURL varchar(${EntryDB.MaxCustomURLLength}),
-                    ENC_IV varchar(24),
-                    ENC_KEY varchar(64),
-                    ENC_CODE varchar(32)
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: db,
+                query: `CREATE TABLE IF NOT EXISTS "Encryption" (
+                    "ViewPassword" varchar(${EntryDB.MaxPasswordLength}),
+                    "CustomURL" varchar(${EntryDB.MaxCustomURLLength}),
+                    "ENC_IV" varchar(24),
+                    "ENC_KEY" varchar(64),
+                    "ENC_CODE" varchar(32)
                 )`,
             });
 
@@ -136,7 +148,7 @@ export default class EntryDB {
                 if (!(await EntryDB.GetConfig())) return;
 
                 // check version
-                let storedVersion = await this.GetPasteFromURL("v");
+                let storedVersion = await this.GetPasteFromURL("ver");
 
                 if (!storedVersion) {
                     // create version paste
@@ -149,7 +161,7 @@ export default class EntryDB {
                         EditDate: new Date().getTime(),
                     });
 
-                    storedVersion = await this.GetPasteFromURL("v");
+                    storedVersion = await this.GetPasteFromURL("ver");
                 }
 
                 if (storedVersion!.Content !== pack.version) {
@@ -253,7 +265,7 @@ export default class EntryDB {
         // delete bot sessions
         if (EntryDB.config.log.events.includes("session")) {
             const BotSessions = await EntryDB.Logs.QueryLogs(
-                'Content LIKE "%bot%" OR Content LIKE "%compatible%"'
+                '"Content" LIKE "%bot%" OR "Content" LIKE "%compatible%"'
             );
 
             for (const session of BotSessions[2]) EntryDB.Logs.DeleteLog(session.ID);
@@ -464,9 +476,12 @@ export default class EntryDB {
                 }
 
                 // get paste from local db
-                const record = (await SQL.QueryOBJ({
+                const record = (await (EntryDB.config.pg
+                    ? SQL.PostgresQueryOBJ
+                    : SQL.QueryOBJ)({
+                    // @ts-ignore
                     db: this.db,
-                    query: "SELECT * FROM Pastes WHERE CustomURL = ?",
+                    query: 'SELECT * FROM "Pastes" WHERE "CustomURL" = ?',
                     params: [PasteURL.toLowerCase()],
                     get: true,
                     use: "Query",
@@ -476,9 +491,12 @@ export default class EntryDB {
 
                 // update encryption values
                 if (record.ViewPassword && !SkipExtras) {
-                    const encryption = await SQL.QueryOBJ({
+                    const encryption = await (EntryDB.config.pg
+                        ? SQL.PostgresQueryOBJ
+                        : SQL.QueryOBJ)({
+                        // @ts-ignore
                         db: this.db,
-                        query: "SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
+                        query: 'SELECT * FROM Encryption WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                         params: [record.ViewPassword, record.CustomURL],
                         get: true,
                         use: "Prepare",
@@ -507,7 +525,7 @@ export default class EntryDB {
                 )
                     record.Views = (
                         await EntryDB.Logs.QueryLogs(
-                            `Content LIKE "${record.CustomURL.replaceAll(
+                            `\"Content\" LIKE "${record.CustomURL.replaceAll(
                                 "_",
                                 "\\_"
                             )};%" ESCAPE "\\"`
@@ -516,9 +534,12 @@ export default class EntryDB {
 
                 // count comments
                 if (EntryDB.Logs) {
-                    const comments = await SQL.QueryOBJ({
+                    const comments = await (EntryDB.config.pg
+                        ? SQL.PostgresQueryOBJ
+                        : SQL.QueryOBJ)({
+                        // @ts-ignore
                         db: this.db,
-                        query: "SELECT CustomURL FROM Pastes WHERE CustomURL LIKE ?",
+                        query: 'SELECT "CustomURL" FROM "Pastes" WHERE "CustomURL" LIKE ?',
                         params: [`c.${record.CustomURL.replaceAll("/", "_")}-%`],
                         all: true,
                         transaction: true,
@@ -678,9 +699,12 @@ export default class EntryDB {
         // groups don't really have a table for themselves, more of just if a paste
         // with that group name already exists!
         if (PasteInfo.GroupName) {
-            const GroupRecord = (await SQL.QueryOBJ({
+            const GroupRecord = (await (EntryDB.config.pg
+                ? SQL.PostgresQueryOBJ
+                : SQL.QueryOBJ)({
+                // @ts-ignore
                 db: this.db,
-                query: "SELECT * From Pastes WHERE GroupName = ?",
+                query: 'SELECT * FROM "Pastes" WHERE "GroupName" = ?',
                 params: [PasteInfo.GroupName],
                 get: true, // only return 1
                 transaction: true,
@@ -754,7 +778,8 @@ export default class EntryDB {
             PasteInfo.Content = result[0];
 
             // encryption values are stored in a different table
-            await SQL.QueryOBJ({
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
                 db: this.db,
                 query: "INSERT INTO Encryption VALUES (?, ?, ?, ?, ?)",
                 params: [
@@ -853,7 +878,7 @@ export default class EntryDB {
                     // (only create a notification for pastes that somebody is associated with!)
                     const MentionSession = (
                         await EntryDB.Logs.QueryLogs(
-                            `Type = "session" AND Content LIKE "%;_with;${CommentingOn.Metadata.Owner}"`
+                            `Type = "session" AND \"Content\" LIKE "%;_with;${CommentingOn.Metadata.Owner}"`
                         )
                     )[2][0];
 
@@ -896,7 +921,7 @@ export default class EntryDB {
                 // (only create a notification for pastes that somebody is associated with!)
                 const MentionSession = (
                     await EntryDB.Logs.QueryLogs(
-                        `Type = "session" AND Content LIKE "%;_with;${match.groups.NAME}"`
+                        `Type = "session" AND \"Content\" LIKE "%;_with;${match.groups.NAME}"`
                     )
                 )[2][0];
 
@@ -913,9 +938,10 @@ export default class EntryDB {
         PasteInfo.Content += `_metadata:${BaseParser.stringify(metadata)}`;
 
         // create paste
-        await SQL.QueryOBJ({
+        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: "INSERT INTO Pastes VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            query: 'INSERT INTO "Pastes" VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             params: [
                 PasteInfo.Content,
                 PasteInfo.EditPassword,
@@ -1116,9 +1142,10 @@ export default class EntryDB {
                 ];
 
             // ALSO... delete all view_paste logs that have to do with the old URL
-            await SQL.QueryOBJ({
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
                 db: EntryDB.Logs.db,
-                query: 'DELETE FROM Logs WHERE Type = "view_paste" AND Content LIKE ?',
+                query: 'DELETE FROM Logs WHERE Type = "view_paste" AND "Content" LIKE ?',
                 params: [`%${paste.CustomURL}%`],
                 use: "Prepare",
             });
@@ -1135,9 +1162,10 @@ export default class EntryDB {
 
             // update encryption
             // we select by ViewPassword for the Encryption table
-            await SQL.QueryOBJ({
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
                 db: this.db,
-                query: "UPDATE Encryption SET (ENC_IV, ENC_KEY, ENC_CODE, CustomURL) = (?, ?, ?, ?) WHERE ViewPassword = ? AND CustomURL = ?",
+                query: 'UPDATE Encryption SET (ENC_IV, ENC_KEY, ENC_CODE, CustomURL) = (?, ?, ?, ?) WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                 params: [
                     result[2], // iv
                     result[1], // key
@@ -1151,9 +1179,10 @@ export default class EntryDB {
         }
 
         // update paste
-        await SQL.QueryOBJ({
+        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: "UPDATE Pastes SET (Content, EditPassword, CustomURL, ViewPassword, PubDate, EditDate) = (?, ?, ?, ?, ?, ?) WHERE CustomURL = ?",
+            query: 'UPDATE "Pastes" SET ("Content", "EditPassword", "CustomURL", "ViewPassword", "PubDate", "EditDate") = (?, ?, ?, ?, ?, ?) WHERE "CustomURL" = ?',
             params: [
                 NewPasteInfo.Content,
                 NewPasteInfo.EditPassword,
@@ -1272,18 +1301,20 @@ export default class EntryDB {
 
         // if paste is encrypted, delete the encryption values too
         if (paste.ViewPassword) {
-            await SQL.QueryOBJ({
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
                 db: this.db,
-                query: "DELETE FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?",
+                query: 'DELETE FROM Encryption WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                 params: [paste.ViewPassword, paste.CustomURL],
                 use: "Prepare",
             });
         }
 
         // delete paste
-        await SQL.QueryOBJ({
+        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: "DELETE FROM Pastes WHERE CustomURL = ?",
+            query: 'DELETE FROM "Pastes" WHERE "CustomURL" = ?',
             params: [PasteInfo.CustomURL.toLowerCase()],
             use: "Prepare",
         });
@@ -1305,7 +1336,7 @@ export default class EntryDB {
         // delete all views
         if (EntryDB.config.log && EntryDB.config.log.events.includes("view_paste")) {
             const views = await EntryDB.Logs.QueryLogs(
-                `Type = "view_paste" AND Content LIKE "${PasteInfo.CustomURL};%"`
+                `Type = "view_paste" AND \"Content\" LIKE "${PasteInfo.CustomURL};%"`
             );
 
             for (const view of views[2]) await EntryDB.Logs.DeleteLog(view.ID);
@@ -1413,9 +1444,12 @@ export default class EntryDB {
         ]
     > {
         // get encryption values by view password and customurl
-        const record = (await SQL.QueryOBJ({
+        const record = (await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: `SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?`,
+            query: `SELECT * FROM Encryption WHERE \"ViewPassword\" = ? AND \"CustomURL\" = ?`,
             params: [ViewPassword, CustomURL],
             get: true,
             use: "Prepare",
@@ -1481,9 +1515,12 @@ export default class EntryDB {
         sql?: string
     ): Promise<Paste[]> {
         // get pastes
-        const pastes = await SQL.QueryOBJ({
+        const pastes = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: `SELECT * From Pastes WHERE ${
+            query: `SELECT * FROM \"Pastes\" WHERE ${
                 sql || "CustomURL IS NOT NULL LIMIT 500"
             }`,
             all: true,
@@ -1597,9 +1634,12 @@ export default class EntryDB {
         }
 
         // get pastes
-        const pastes = await SQL.QueryOBJ({
+        const pastes = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: "SELECT * From Pastes WHERE GroupName = ? LIMIT ?",
+            query: 'SELECT * FROM "Pastes" WHERE "GroupName" = ? LIMIT ?',
             params: [group, limit],
             all: true,
             transaction: true,
@@ -1671,7 +1711,10 @@ export default class EntryDB {
         else if (all) get = false;
 
         // run query
-        const result = await SQL.QueryOBJ({
+        const result = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
             query: sql,
             transaction: true,
@@ -1742,9 +1785,12 @@ export default class EntryDB {
             return [false, "Paste has comments disabled", []];
 
         // get comments
-        const comments: Paste[] = await SQL.QueryOBJ({
+        const comments: Paste[] = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
             db: this.db,
-            query: `SELECT * FROM Pastes WHERE CustomURL LIKE ? ORDER BY cast(PubDate as float) DESC LIMIT 50 OFFSET ${offset}`,
+            query: `SELECT * FROM \"Pastes\" WHERE \"CustomURL\" LIKE ? ORDER BY cast(\"PubDate\" as float) DESC LIMIT 50 OFFSET ${offset}`,
             params: [`c.${result.CustomURL.replaceAll("/", "_")}-%`],
             all: true,
             transaction: true,
@@ -1794,9 +1840,10 @@ export default class EntryDB {
 
             // count sub comments (replies) (once)
             paste.Comments = (
-                await SQL.QueryOBJ({
+                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // @ts-ignore
                     db: this.db,
-                    query: "SELECT CustomURL FROM Pastes WHERE CustomURL LIKE ?",
+                    query: 'SELECT "CustomURL" FROM "Pastes" WHERE "CustomURL" LIKE ?',
                     params: [`c.${paste.CustomURL.replaceAll("/", "_")}-%`],
                     all: true,
                     transaction: true,

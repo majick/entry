@@ -394,7 +394,7 @@ export class ManagePastes implements Endpoint {
             true,
             false,
             body.query !== undefined
-                ? `CustomURL LIKE "%${body.query}%" LIMIT ${LIMIT}`
+                ? `\"CustomURL\" LIKE "%${body.query}%" LIMIT ${LIMIT}`
                 : `CustomURL IS NOT NULL LIMIT ${LIMIT}`
         );
 
@@ -430,7 +430,7 @@ export class ManagePastes implements Endpoint {
                                 type="text"
                                 name={"sql"}
                                 id={"sql"}
-                                placeholder={"SELECT * FROM Pastes LIMIT 100"}
+                                placeholder={'SELECT * FROM "Pastes" LIMIT 100'}
                                 className="secondary"
                                 required
                                 style={{
@@ -1290,7 +1290,7 @@ export class ManageReports implements Endpoint {
 
         // fetch all reports
         const reports = await EntryDB.Logs.QueryLogs(
-            `Type = "report" AND Content LIKE "create;${body.paste_customurl}%" ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
+            `Type = "report" AND \"Content\" LIKE "create;${body.paste_customurl}%" ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
         );
 
         // get report logs
@@ -1791,7 +1791,7 @@ export class MetadataEditor implements Endpoint {
         const session =
             body.paste_customurl !== undefined
                 ? await EntryDB.Logs.QueryLogs(
-                      `Content LIKE "%;_with;${result!.CustomURL}"`
+                      `\"Content\" LIKE "%;_with;${result!.CustomURL}"`
                   )
                 : ([false, "", []] as any[]);
 

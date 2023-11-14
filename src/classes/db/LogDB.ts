@@ -108,7 +108,7 @@ export default class LogDB {
         // at the exact same time from the exact same device
         const ExistingLog = await SQL.QueryOBJ({
             db: this.db,
-            query: "SELECT * FROM Logs WHERE Content = ? AND Timestamp = ? AND Type = ?",
+            query: 'SELECT * FROM Logs WHERE "Content" = ? AND Timestamp = ? AND Type = ?',
             params: [_log.Content, _log.Timestamp, _log.Type],
             get: true,
             use: "Prepare",
@@ -220,7 +220,7 @@ export default class LogDB {
         // delete log
         await SQL.QueryOBJ({
             db: this.db,
-            query: "UPDATE Logs SET Content = ? WHERE ID = ?",
+            query: 'UPDATE Logs SET "Content" = ? WHERE ID = ?',
             params: [content, id],
             use: "Prepare",
         });

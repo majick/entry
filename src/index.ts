@@ -115,6 +115,12 @@ export type Config = {
         clear_on_start: boolean;
         events: LogEvent[];
     };
+    pg?: {
+        host: string;
+        user: string;
+        password: string;
+        database: string;
+    };
 };
 
 // check if database is new or config file does not exist

@@ -8,7 +8,7 @@ Certain features of this README only work on Entry! You can view this README at 
 
 Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs and [many more features](#features).
 
-Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite).
+Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Entry also supports using a PostgreSQL database through config `pg`.
 
 The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support provided by Entry.
 
@@ -23,6 +23,24 @@ The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com),
 Entry can also be installed using Docker. Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.
 
 The main Entry repository also includes the source for Entry related packages. These can be found in the [/packages](https://codeberg.org/hkau/entry/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
+
+### PostgreSQL
+
+You can configure a PostgreSQL database to be used for the main paste database through the configuration file.
+
+```json
+{
+    ...
+    "pg": {
+        "host": "localhost",
+        "user": "myuser",
+        "password": "mypassword",
+        "database": "mypastedatabase"
+    }
+}
+```
+
+This is recommended over the default SQLite database, as it provides much faster write speeds at the cost of memory usage. The logs database will still use SQLite!
 
 ## Usage
 
@@ -120,7 +138,7 @@ Encrypted pastes cannot be decrypted from other servers, and the paste decryptio
 // get encryption values by view password and customurl
 const record = (await SQL.QueryOBJ({
     db: this.db,
-    query: `SELECT * FROM Encryption WHERE ViewPassword = ? AND CustomURL = ?`,
+    query: `SELECT * FROM Encryption WHERE \"ViewPassword\" = ? AND \"CustomURL\" = ?`,
     params: [ViewPassword, CustomURL],
     get: true,
     use: "Prepare",

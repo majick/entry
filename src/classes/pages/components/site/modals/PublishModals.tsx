@@ -133,18 +133,26 @@ export default function PublishModals(props: {
 
                         <label htmlFor="EditPassword">Edit Password</label>
 
-                        <input
-                            type="text"
-                            name={"EditPassword"}
-                            id={"EditPassword"}
-                            minLength={2}
-                            maxLength={500}
-                            placeholder={"Edit password"}
-                            class={"round"}
-                            autocomplete={"off"}
-                            disabled={props.DisablePassword === true}
-                            required
-                        />
+                        <div className="tooltip-wrapper mobile-max flex justify-center">
+                            <input
+                                type="text"
+                                name={"EditPassword"}
+                                id={"EditPassword"}
+                                minLength={2}
+                                maxLength={500}
+                                placeholder={"Edit password"}
+                                class={"round"}
+                                autocomplete={"off"}
+                                disabled={props.DisablePassword === true}
+                                required
+                            />
+
+                            {props.DisablePassword && (
+                                <div className="card secondary round border tooltip top">
+                                    You don't need a password, you own this!
+                                </div>
+                            )}
+                        </div>
 
                         <details class={"round"}>
                             <summary>Change Values</summary>
