@@ -1568,25 +1568,37 @@ export default class EntryDB {
      * @method ImportPastes
      *
      * @param {Paste[]} _export
-     * @return {Promise<[boolean, string, Paste][]>} Outputs
+     * @return {Promise<[boolean, string][]>} Outputs
      * @memberof EntryDB
      */
-    public async ImportPastes(
-        _export: Paste[]
-    ): Promise<[boolean, string, Paste][]> {
-        let outputs: [boolean, string, Paste][] = [];
+    public async ImportPastes(_export: Paste[]): Promise<[boolean, string][]> {
+        let outputs: [boolean, string][] = [];
 
         // create each paste
         for (let paste of _export) {
             if (paste.GroupName)
                 paste.CustomURL = paste.CustomURL.replace(`${paste.GroupName}/`, "");
 
-            // delete existing paste if it exists
-            const _paste = await this.GetPasteFromURL(paste.CustomURL);
-            if (_paste) await this.DeletePaste(_paste, EntryDB.config.admin);
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: this.db,
+                query: 'INSERT INTO "Pastes" VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                params: [
+                    paste.Content,
+                    paste.EditPassword,
+                    paste.CustomURL,
+                    paste.ViewPassword,
+                    paste.PubDate,
+                    paste.EditDate,
+                    paste.GroupName,
+                    paste.GroupSubmitPassword,
+                ],
+                transaction: true,
+                use: "Prepare",
+            });
 
             // create paste
-            outputs.push(await this.CreatePaste(paste, true));
+            outputs.push([true, "Paste created!"]);
         }
 
         // return
