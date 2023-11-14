@@ -66,7 +66,7 @@ export default class Home implements Endpoint {
                 // try to fetch log based off hostname
                 const CustomDomainLog = (
                     await EntryDB.Logs.QueryLogs(
-                        `Type = "custom_domain" AND \"Content\" LIKE "%;${url.hostname}"`
+                        `Type = "custom_domain" AND \"Content\" LIKE \'%;${url.hostname}\'`
                     )
                 )[2][0];
 
@@ -155,7 +155,7 @@ export default class Home implements Endpoint {
         )
             Notifications = (
                 await EntryDB.Logs.QueryLogs(
-                    `Type = "notification" AND \"Content\" LIKE "%${Association[1]}"`
+                    `Type = "notification" AND \"Content\" LIKE \'%${Association[1]}\'`
                 )
             )[2];
 

@@ -688,9 +688,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         // set current page in client lib
         if (!EditMode) {
             // change global Page.Element
-            (window as any).Builder.Page.Element = element.querySelector(
-                `#${doc.Pages[CurrentPage].ID!}`
-            );
+            (window as any).Builder.Page.Element =
+                element.querySelector(`#\\${doc.Pages[CurrentPage].ID!}`) || element;
 
             if (!(window as any).Builder.Page.Element)
                 (window as any).Builder.Page.Element = element;

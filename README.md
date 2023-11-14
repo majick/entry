@@ -378,7 +378,7 @@ Example:
 
 Groups allow users to organize their pastes into different groups that are locked by a password. Anybody can view the pastes in an existing group, but in order to add a new paste to the group you must have the correct password. A group must not already exist with the requested name to create a new group. A group will become available once all the pastes inside of it are deleted.
 
-Adding a group name will append the group name to the beginning of your set custom URL. This means the custom URL "example" with the group "example-group" would look like "example-group/example" instead of just the custom URL. This means that, if you add a group, you can have any custom URL you want for your paste. Adding a group is not required.
+Adding a group name will append the group name to the beginning of your set custom URL. This means the custom URL "example" with the group "example-group" would look LIKE \'example-group/example\' instead of just the custom URL. This means that, if you add a group, you can have any custom URL you want for your paste. Adding a group is not required.
 
 Can be disabled through the server config. `app.enable_groups`
 

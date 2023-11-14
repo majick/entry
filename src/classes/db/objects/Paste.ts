@@ -21,7 +21,7 @@ export type Paste = {
     IsEditable?: string; // *
     ExpireOn?: string; //   *
     UnhashedEditPassword?: string; // * only used on paste creation
-    Views?: number; // * amount of log records LIKE "%{CustomURL}%"
+    Views?: number; // * amount of log records LIKE \'%{CustomURL}%\'
     CommentOn?: string; // * the paste the that this paste is commenting on
     IsPM?: string; // * details if the **comment** is a private message, boolean string
     Comments?: number; // * (obvious what this is for, added in GetPasteFromURL)

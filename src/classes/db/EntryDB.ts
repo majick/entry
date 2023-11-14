@@ -265,7 +265,7 @@ export default class EntryDB {
         // delete bot sessions
         if (EntryDB.config.log.events.includes("session")) {
             const BotSessions = await EntryDB.Logs.QueryLogs(
-                '"Content" LIKE "%bot%" OR "Content" LIKE "%compatible%"'
+                "\"Content\" LIKE '%bot%' OR \"Content\" LIKE '%compatible%'"
             );
 
             for (const session of BotSessions[2]) EntryDB.Logs.DeleteLog(session.ID);
@@ -475,23 +475,13 @@ export default class EntryDB {
                     );
                 }
 
-                // if PasteURL has a slash in it, split by GroupName
-                let _GroupName: string | undefined;
-
-                if (PasteURL.split("/")[1]) {
-                    _GroupName = PasteURL.split("/")[0];
-                    PasteURL = PasteURL.split("/")[1];
-                }
-
                 // get paste from local db
                 const record = (await (EntryDB.config.pg
                     ? SQL.PostgresQueryOBJ
                     : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: this.db,
-                    query: `SELECT * FROM "Pastes" WHERE "CustomURL" = ?${
-                        _GroupName ? ` AND "GroupName" = "${_GroupName}"` : ""
-                    }`,
+                    query: 'SELECT * FROM "Pastes" WHERE "CustomURL" = ?',
                     params: [PasteURL.toLowerCase()],
                     get: true,
                     use: "Query",
@@ -888,7 +878,7 @@ export default class EntryDB {
                     // (only create a notification for pastes that somebody is associated with!)
                     const MentionSession = (
                         await EntryDB.Logs.QueryLogs(
-                            `Type = "session" AND \"Content\" LIKE "%;_with;${CommentingOn.Metadata.Owner}"`
+                            `Type = "session" AND \"Content\" LIKE \'%;_with;${CommentingOn.Metadata.Owner}\'`
                         )
                     )[2][0];
 
@@ -931,7 +921,7 @@ export default class EntryDB {
                 // (only create a notification for pastes that somebody is associated with!)
                 const MentionSession = (
                     await EntryDB.Logs.QueryLogs(
-                        `Type = "session" AND \"Content\" LIKE "%;_with;${match.groups.NAME}"`
+                        `Type = "session" AND \"Content\" LIKE \'%;_with;${match.groups.NAME}\'`
                     )
                 )[2][0];
 
@@ -1346,7 +1336,7 @@ export default class EntryDB {
         // delete all views
         if (EntryDB.config.log && EntryDB.config.log.events.includes("view_paste")) {
             const views = await EntryDB.Logs.QueryLogs(
-                `Type = "view_paste" AND \"Content\" LIKE "${PasteInfo.CustomURL};%"`
+                `Type = "view_paste" AND \"Content\" LIKE \'${PasteInfo.CustomURL};%\'`
             );
 
             for (const view of views[2]) await EntryDB.Logs.DeleteLog(view.ID);
@@ -1586,15 +1576,14 @@ export default class EntryDB {
 
         // create each paste
         for (let paste of _export) {
-            if (paste.GroupName)
-                paste.CustomURL = paste.CustomURL.replace(`${paste.GroupName}/`, "");
-
+            // convert date
             if (typeof paste.PubDate === "string")
                 paste.PubDate = new Date().getTime();
 
             if (typeof paste.EditDate === "string")
                 paste.EditDate = new Date().getTime();
 
+            // create paste
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
