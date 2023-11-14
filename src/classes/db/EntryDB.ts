@@ -475,13 +475,23 @@ export default class EntryDB {
                     );
                 }
 
+                // if PasteURL has a slash in it, split by GroupName
+                let _GroupName: string | undefined;
+
+                if (PasteURL.split("/")[1]) {
+                    _GroupName = PasteURL.split("/")[0];
+                    PasteURL = PasteURL.split("/")[1];
+                }
+
                 // get paste from local db
                 const record = (await (EntryDB.config.pg
                     ? SQL.PostgresQueryOBJ
                     : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: this.db,
-                    query: 'SELECT * FROM "Pastes" WHERE "CustomURL" = ?',
+                    query: `SELECT * FROM "Pastes" WHERE "CustomURL" = ?${
+                        _GroupName ? ` AND "GroupName" = "${_GroupName}"` : ""
+                    }`,
                     params: [PasteURL.toLowerCase()],
                     get: true,
                     use: "Query",
