@@ -296,7 +296,7 @@ export class WellKnown implements Endpoint {
                     },
                     // this, however, we can supply
                     localPosts: (
-                        await db.GetAllPastes(true, true, "CustomURL IS NOT NULL")
+                        await db.GetAllPastes(true, true, '"CustomURL" IS NOT NULL')
                     ).length,
                 },
                 openRegistrations: false, // there is no registration at all

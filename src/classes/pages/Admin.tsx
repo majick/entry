@@ -395,7 +395,7 @@ export class ManagePastes implements Endpoint {
             false,
             body.query !== undefined
                 ? `\"CustomURL\" LIKE "%${body.query}%" LIMIT ${LIMIT}`
-                : `CustomURL IS NOT NULL LIMIT ${LIMIT}`
+                : `\"CustomURL\" IS NOT NULL LIMIT ${LIMIT}`
         );
 
         // return

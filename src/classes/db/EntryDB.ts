@@ -1521,7 +1521,7 @@ export default class EntryDB {
             // @ts-ignore
             db: this.db,
             query: `SELECT * FROM \"Pastes\" WHERE ${
-                sql || "CustomURL IS NOT NULL LIMIT 500"
+                sql || '"CustomURL" IS NOT NULL LIMIT 500'
             }`,
             all: true,
             transaction: true,

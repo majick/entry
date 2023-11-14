@@ -97,7 +97,11 @@ export class APIExport implements Endpoint {
             return new Login().request(request, server);
 
         // get pastes
-        const _export = await db.GetAllPastes(true, false, "CustomURL IS NOT NULL");
+        const _export = await db.GetAllPastes(
+            true,
+            false,
+            '"CustomURL" IS NOT NULL'
+        );
 
         // decrypt encrypted pastes
         // if paste is encrypted, decrypt

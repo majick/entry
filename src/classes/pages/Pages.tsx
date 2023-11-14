@@ -1400,7 +1400,7 @@ export class PastesSearch implements Endpoint {
             // if q does not exist (or is "explore"), set explore mode
             let ExploreMode = false;
             if (!search.get("q") || search.get("q") === "explore") {
-                query = `CustomURL IS NOT NULL ORDER BY cast(\"EditDate\" as float) DESC LIMIT 100`;
+                query = `"CustomURL" IS NOT NULL ORDER BY cast(\"EditDate\" as float) DESC LIMIT 100`;
                 search.set("q", "explore");
                 ExploreMode = true;
             }
