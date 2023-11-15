@@ -569,7 +569,12 @@ export default class EntryDB {
                     record.Metadata = {
                         Version: 1,
                         Owner: record.CustomURL,
+                        Comments: { Enabled: true },
                     };
+
+                // make sure comments has a value!
+                if (record.Metadata && !record.Metadata.Comments)
+                    record.Metadata.Comments = { Enabled: true };
 
                 // MAKE SURE paste has an owner value!
                 if (record.Metadata && !record.Metadata.Owner)
