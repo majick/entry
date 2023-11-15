@@ -208,6 +208,22 @@ export class GetPasteFromURL implements Endpoint {
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
+        // ...get revision
+        let RevisionNumber = 0;
+        if (search.get("r")) {
+            const revision = await db.GetRevision(
+                name,
+                parseFloat(search.get("r")!)
+            );
+            if (!revision[0] || !revision[2]) return new _404Page().request(request);
+
+            // ...update result
+            result.Content = revision[2].Content.split("_metadata:")[0];
+            result.EditDate = revision[2].EditDate;
+            RevisionNumber = revision[2].EditDate;
+        }
+
+        // ...end performance timer
         const _fetchEnd = performance.now();
 
         // decrypt (if we can)
@@ -729,6 +745,10 @@ export class GetPasteFromURL implements Endpoint {
                                             // this is so content is automatically decrypted!
                                             ViewPassword !== ""
                                                 ? `&ViewPassword=${ViewPassword}`
+                                                : ""
+                                        }${
+                                            RevisionNumber !== 0
+                                                ? `&r=${RevisionNumber}`
                                                 : ""
                                         }`}
                                     >

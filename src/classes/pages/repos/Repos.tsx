@@ -47,7 +47,7 @@ export function ReposNav(props: { name: string; current: string }) {
 
             {EntryDB.config.app && EntryDB.config.app.enable_versioning && (
                 <a
-                    disabled
+                    href={`/paste/v/r/${props.name}`}
                     className={`${
                         props.current === "Versions" ? "secondary " : ""
                     }button round full`}
@@ -61,7 +61,7 @@ export function ReposNav(props: { name: string; current: string }) {
                     >
                         <path d="M7.75 14A1.75 1.75 0 0 1 6 12.25v-8.5C6 2.784 6.784 2 7.75 2h6.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14Zm-.25-1.75c0 .138.112.25.25.25h6.5a.25.25 0 0 0 .25-.25v-8.5a.25.25 0 0 0-.25-.25h-6.5a.25.25 0 0 0-.25.25ZM4.9 3.508a.75.75 0 0 1-.274 1.025.249.249 0 0 0-.126.217v6.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.75 1.75 0 0 1 3 11.25v-6.5c0-.649.353-1.214.874-1.516a.75.75 0 0 1 1.025.274ZM1.625 5.533h.001a.249.249 0 0 0-.126.217v4.5c0 .09.048.173.126.217a.75.75 0 0 1-.752 1.298A1.748 1.748 0 0 1 0 10.25v-4.5a1.748 1.748 0 0 1 .873-1.516.75.75 0 1 1 .752 1.299Z"></path>
                     </svg>
-                    Versions
+                    Revisions
                 </a>
             )}
 
@@ -113,6 +113,22 @@ export class RepoView implements Endpoint {
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result) return new _404Page().request(request);
 
+        // get revision
+        let RevisionNumber = 0;
+        if (search.get("r")) {
+            const revision = await db.GetRevision(
+                name,
+                parseFloat(search.get("r")!)
+            );
+            if (!revision[0] || !revision[2]) return new _404Page().request(request);
+
+            // ...update result
+            result.Content = revision[2].Content.split("_metadata:")[0];
+            result.EditDate = revision[2].EditDate;
+            RevisionNumber = revision[2].EditDate;
+        }
+
+        // detect if paste is a builder paste
         const BuilderPaste = result.Content.startsWith("_builder:");
         const BuilderDocument: BuilderDocument = BuilderPaste
             ? BaseParser.parse(
@@ -151,7 +167,11 @@ export class RepoView implements Endpoint {
                                     }}
                                 >
                                     <a
-                                        href={`/${name}`}
+                                        href={`/${name}${
+                                            RevisionNumber !== 0
+                                                ? `?r=${RevisionNumber}`
+                                                : ""
+                                        }`}
                                         target={"_blank"}
                                         className="button round full justify-space-between flex-wrap"
                                     >
@@ -177,7 +197,11 @@ export class RepoView implements Endpoint {
                                                     <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
                                                 </svg>
                                             )}
-                                            {name}.{BuilderPaste ? "bldr" : "md"}
+                                            {name}
+                                            {RevisionNumber !== 0
+                                                ? `-r${RevisionNumber}`
+                                                : ""}
+                                            .{BuilderPaste ? "bldr" : "md"}
                                         </div>
 
                                         <span>
@@ -251,6 +275,12 @@ export class RepoView implements Endpoint {
                                         <li>
                                             <b>Zone</b>: entry
                                         </li>
+
+                                        {RevisionNumber !== 0 && (
+                                            <li>
+                                                <b>Revision</b>: {RevisionNumber}
+                                            </li>
+                                        )}
                                     </ul>
                                 </div>
                             </div>
@@ -290,7 +320,109 @@ export class RepoView implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class RevisionsList
+ * @implements {Endpoint}
+ */
+export class RevisionsList implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get paste name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("paste/v/r/")) name = name.split("paste/v/r/")[1];
+
+        // attempt to get paste
+        const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result) return new _404Page().request(request);
+
+        // get revisions
+        const revisions = await db.GetAllPasteRevisions(name);
+        if (!revisions[0]) return new _404Page().request(request);
+        if (!revisions[2]) revisions[2] = [];
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <TopNav border={false} margin={false} />
+
+                    <div className="flex flex-column g-8">
+                        <div
+                            className="card secondary flex justify-center"
+                            style={{
+                                padding: "calc(var(--u-12) * 4) var(--u-12)",
+                            }}
+                        >
+                            <h1 class={"no-margin"}>{name}</h1>
+                        </div>
+
+                        <main className="small flex flex-column g-4">
+                            <ReposNav name={name} current="Versions" />
+
+                            <div className="card border round NoPadding">
+                                <div className="card round header">
+                                    <b>Revisions</b>
+                                </div>
+
+                                <div
+                                    className="card round has-header flex flex-column g-4"
+                                    style={{
+                                        userSelect: "none",
+                                    }}
+                                >
+                                    {revisions[2].map((r) => (
+                                        <a
+                                            href={`/paste/v/${name}?r=${r.EditDate}`}
+                                            className="button round full justify-start flex-wrap"
+                                        >
+                                            Revision{" "}
+                                            <span class={"utc-date-to-localize"}>
+                                                {new Date(r.EditDate).toUTCString()}
+                                            </span>{" "}
+                                            {(revisions[2].indexOf(r) === 0 && (
+                                                // latest tag
+                                                <span className="chip badge mention">
+                                                    latest
+                                                </span>
+                                            )) ||
+                                                (revisions[2].indexOf(r) === 1 && (
+                                                    // previous tag
+                                                    <span className="chip badge">
+                                                        previous
+                                                    </span>
+                                                ))}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </>,
+                <>
+                    <title>
+                        {name} - {EntryDB.config.name}
+                    </title>
+                </>
+            ),
+            {
+                headers: {
+                    "Content-Type": "text/html",
+                    ...PageHeaders,
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     RepoView,
+    RevisionsList,
 };

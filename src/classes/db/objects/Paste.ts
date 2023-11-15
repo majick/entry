@@ -54,6 +54,12 @@ export type PasteMetadata = {
     };
 };
 
+export type Revision = {
+    CustomURL: string;
+    Content: string;
+    EditDate: number;
+};
+
 // ...
 
 /**

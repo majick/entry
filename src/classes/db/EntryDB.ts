@@ -10,7 +10,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 import { ComputeRandomObjectHash, CreateHash, Encrypt } from "./helpers/Hash";
-import PasteConnection, { Paste, PasteMetadata } from "./objects/Paste";
+import PasteConnection, { Paste, PasteMetadata, Revision } from "./objects/Paste";
 import SQL from "./helpers/SQL";
 
 import Media from "./MediaDB";
@@ -129,6 +129,16 @@ export default class EntryDB {
                     "ENC_IV" varchar(24),
                     "ENC_KEY" varchar(64),
                     "ENC_CODE" varchar(32)
+                )`,
+            });
+
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: db,
+                query: `CREATE TABLE IF NOT EXISTS "Revisions" (
+                    "CustomURL" varchar(${EntryDB.MaxCustomURLLength}),
+                    "Content" varchar(${EntryDB.MaxContentLength}),
+                    "EditDate" float
                 )`,
             });
 
@@ -1178,6 +1188,14 @@ export default class EntryDB {
             });
         }
 
+        // create new revision
+        if (EntryDB.config.app && EntryDB.config.app.enable_versioning)
+            await this.CreateRevision({
+                CustomURL: NewPasteInfo.CustomURL,
+                Content: NewPasteInfo.Content,
+                EditDate: NewPasteInfo.EditDate,
+            });
+
         // update paste
         await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
@@ -1883,6 +1901,120 @@ export default class EntryDB {
             }`,
             CommentPastes,
         ];
+    }
+
+    // revisions (versions)
+
+    /**
+     * @method GetRevision
+     *
+     * @param {string} PasteURL
+     * @param {number} time
+     * @return {Promise<[boolean, string, Revision?]>}
+     * @memberof EntryDB
+     */
+    public async GetRevision(
+        PasteURL: string,
+        time: number
+    ): Promise<[boolean, string, Revision?]> {
+        // make sure paste exists
+        const paste = await this.GetPasteFromURL(PasteURL, true);
+        if (!paste) return [false, "Paste does not exist"];
+
+        // get revision
+        const revision = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'SELECT * FROM "Revisions" WHERE "CustomURL" = ? AND "EditDate" = ?',
+            params: [PasteURL, time],
+            transaction: true,
+            get: true,
+            use: "Prepare",
+        });
+
+        // return
+        if (!revision) return [false, "Revision does not exist"];
+        return [true, "Found revision", revision];
+    }
+
+    /**
+     * @method GetAllPasteRevisions
+     *
+     * @param {string} PasteURL
+     * @return {Promise<[boolean, string, Revision[]]>}
+     * @memberof EntryDB
+     */
+    public async GetAllPasteRevisions(
+        PasteURL: string
+    ): Promise<[boolean, string, Revision[]]> {
+        // make sure paste exists
+        const paste = await this.GetPasteFromURL(PasteURL, true);
+        if (!paste) return [false, "Paste does not exist", []];
+
+        // get revisions
+        const revisions = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'SELECT * FROM "Revisions" WHERE "CustomURL" = ? ORDER BY "EditDate" DESC',
+            params: [PasteURL],
+            transaction: true,
+            all: true,
+            use: "Prepare",
+        });
+
+        // return
+        return [true, "Found revisions", revisions];
+    }
+
+    /**
+     * @method CreateRevision
+     *
+     * @param {Revision} props
+     * @return {Promise<[boolean, string, Revision]>}
+     * @memberof EntryDB
+     */
+    public async CreateRevision(
+        props: Revision
+    ): Promise<[boolean, string, Revision]> {
+        // make sure paste exists
+        const paste = await this.GetPasteFromURL(props.CustomURL, true);
+        if (!paste) return [false, "Paste does not exist", props];
+
+        // make sure revision doesn't already exist
+        const revision = await this.GetRevision(props.CustomURL, props.EditDate);
+        if (revision[0]) return [false, "Revision already exists at time", props];
+
+        // get all paste revisions, if there are already 5... delete one!
+        const AllRevisions = await this.GetAllPasteRevisions(props.CustomURL);
+        if (AllRevisions[2] && AllRevisions[2].length >= 5) {
+            const LastRevision = AllRevisions[2].pop();
+            if (LastRevision)
+                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // @ts-ignore
+                    db: this.db,
+                    query: 'DELETE FROM "Revisions" WHERE "CustomURL" = ? AND "EditDate" = ?',
+                    params: [LastRevision.CustomURL, LastRevision.EditDate],
+                    transaction: true,
+                    use: "Prepare",
+                });
+        }
+
+        // create revision
+        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'INSERT INTO "Revisions" VALUES (?, ?, ?)',
+            params: [props.CustomURL, props.Content, props.EditDate],
+            transaction: true,
+            use: "Prepare",
+        });
+
+        // return
+        return [true, "Revision created", props];
     }
 
     // zones

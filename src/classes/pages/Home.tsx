@@ -107,10 +107,27 @@ export default class Home implements Endpoint {
 
         // get paste if search.mode === "edit"
         let paste: Partial<Paste> | undefined;
+        let RevisionNumber = 0;
 
-        if (search.get("mode") === "edit" && search.get("OldURL"))
+        if (search.get("mode") === "edit" && search.get("OldURL")) {
             paste = await db.GetPasteFromURL(search.get("OldURL")!);
-        else if (search.get("Template")) {
+
+            // get revision
+            if (search.get("r") && paste) {
+                const revision = await db.GetRevision(
+                    search.get("OldURL")!,
+                    parseFloat(search.get("r")!)
+                );
+
+                if (!revision[0] || !revision[2])
+                    return new _404Page().request(request);
+
+                // ...update result
+                paste.Content = revision[2].Content.split("_metadata:")[0];
+                paste.EditDate = revision[2].EditDate;
+                RevisionNumber = revision[2].EditDate;
+            }
+        } else if (search.get("Template")) {
             paste = await db.GetPasteFromURL(search.get("Template")!);
 
             if (paste)
@@ -255,6 +272,22 @@ export default class Home implements Endpoint {
                                     You're <b>reporting a paste</b>! Please explain
                                     the reason you are reporting this paste and what
                                     rules it broke. Not what you want?{" "}
+                                    <a href="javascript:history.back()">Go Back</a>
+                                </p>
+                            </div>
+                        )}
+
+                        {RevisionNumber !== 0 && (
+                            <div
+                                class={"mdnote note-info"}
+                                style={{
+                                    marginBottom: "0.5rem",
+                                }}
+                            >
+                                <b class={"mdnote-title"}>Viewing Revision</b>
+                                <p>
+                                    Pressing save will restore the content of the
+                                    paste from the revision!{" "}
                                     <a href="javascript:history.back()">Go Back</a>
                                 </p>
                             </div>
