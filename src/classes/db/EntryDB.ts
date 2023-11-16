@@ -506,7 +506,7 @@ export default class EntryDB {
                         : SQL.QueryOBJ)({
                         // @ts-ignore
                         db: this.db,
-                        query: 'SELECT * FROM Encryption WHERE "ViewPassword" = ? AND "CustomURL" = ?',
+                        query: 'SELECT * FROM "Encryption" WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                         params: [record.ViewPassword, record.CustomURL],
                         get: true,
                         use: "Prepare",
@@ -794,7 +794,7 @@ export default class EntryDB {
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
-                query: "INSERT INTO Encryption VALUES (?, ?, ?, ?, ?)",
+                query: 'INSERT INTO "Encryption" VALUES (?, ?, ?, ?, ?)',
                 params: [
                     PasteInfo.ViewPassword,
                     PasteInfo.CustomURL,
@@ -1181,7 +1181,7 @@ export default class EntryDB {
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
-                query: 'UPDATE Encryption SET (ENC_IV, ENC_KEY, ENC_CODE, CustomURL) = (?, ?, ?, ?) WHERE "ViewPassword" = ? AND "CustomURL" = ?',
+                query: 'UPDATE "Encryption" SET (ENC_IV, ENC_KEY, ENC_CODE, CustomURL) = (?, ?, ?, ?) WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                 params: [
                     result[2], // iv
                     result[1], // key
@@ -1328,7 +1328,7 @@ export default class EntryDB {
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
-                query: 'DELETE FROM Encryption WHERE "ViewPassword" = ? AND "CustomURL" = ?',
+                query: 'DELETE FROM "Encryption" WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                 params: [paste.ViewPassword, paste.CustomURL],
                 use: "Prepare",
             });
@@ -1473,7 +1473,7 @@ export default class EntryDB {
             : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
-            query: `SELECT * FROM Encryption WHERE \"ViewPassword\" = ? AND \"CustomURL\" = ?`,
+            query: `SELECT * FROM \"Encryption\" WHERE \"ViewPassword\" = ? AND \"CustomURL\" = ?`,
             params: [ViewPassword, CustomURL],
             get: true,
             use: "Prepare",
