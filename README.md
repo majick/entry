@@ -35,7 +35,8 @@ You can configure a PostgreSQL database to be used for the main paste database t
         "host": "localhost",
         "user": "myuser",
         "password": "mypassword",
-        "database": "mypastedatabase"
+        "database": "mypastedatabase",
+        // "logdb"?: boolean
     }
 }
 ```

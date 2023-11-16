@@ -863,17 +863,17 @@ export class LogsPage implements Endpoint {
         // get logs
         const logs = await EntryDB.Logs.QueryLogs(
             body.filter_type !== undefined
-                ? `Type = "${body.filter_type}" ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
-                : `ID IS NOT NULL AND ${[
+                ? `"Type" = \'${body.filter_type}\' ORDER BY cast("Timestamp" as float) DESC LIMIT ${LIMIT}`
+                : `"ID" IS NOT NULL AND ${[
                       // these log types should probably never be cleared
-                      'Type IS NOT "view_paste"',
-                      'Type IS NOT "session"',
-                      'Type IS NOT "report"',
-                      'Type IS NOT "custom_domain"',
-                      'Type IS NOT "notification"',
+                      "\"Type\" != 'view_paste'",
+                      "\"Type\" != 'session'",
+                      "\"Type\" != 'report'",
+                      "\"Type\" != 'custom_domain'",
+                      "\"Type\" != 'notification'",
                   ].join(
                       " AND "
-                  )} ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
+                  )} ORDER BY cast("Timestamp" as float) DESC LIMIT ${LIMIT}`
         );
 
         // return
@@ -1290,7 +1290,7 @@ export class ManageReports implements Endpoint {
 
         // fetch all reports
         const reports = await EntryDB.Logs.QueryLogs(
-            `Type = "report" AND \"Content\" LIKE \'create;${body.paste_customurl}%\' ORDER BY cast(Timestamp as float) DESC LIMIT ${LIMIT}`
+            `"Type" = \'report\' AND \"Content\" LIKE \'create;${body.paste_customurl}%\' ORDER BY cast("Timestamp" as float) DESC LIMIT ${LIMIT}`
         );
 
         // get report logs
@@ -1298,7 +1298,7 @@ export class ManageReports implements Endpoint {
         for (const report of reports[2]) {
             // check if report is archived
             const ArchivalLog = await EntryDB.Logs.QueryLogs(
-                `Type = "report" AND Content = "archive;${
+                `"Type" = \'report\' AND "Content" = "archive;${
                     report.Content.split(";")[2]
                 }"`
             );
@@ -1557,7 +1557,7 @@ export class ViewReport implements Endpoint {
 
         // check if report is archived!
         const ArchivalLog = await EntryDB.Logs.QueryLogs(
-            `Type = "report" AND Content = "archive;${
+            `"Type" = \'report\' AND "Content" = "archive;${
                 ReportLog[2].Content.split(";")[2]
             }"`
         );

@@ -242,6 +242,7 @@ export default class SQL {
         const res = await params.db.query(params.query, params.params);
 
         // determine return value
+        if (!res.rows) res.rows = [];
         if (params.all) return res.rows;
         else if (params.get) return res.rows[0];
         else return res.fields;

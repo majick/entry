@@ -37,7 +37,7 @@ export type Log = {
  */
 export default class LogDB {
     public static isNew: boolean = true;
-    public readonly db: Database;
+    public readonly db: typeof Config.postgres | Database;
 
     /**
      * Creates an instance of LogDB.
@@ -45,19 +45,33 @@ export default class LogDB {
      */
     constructor() {
         // create db link
-        const [db, isNew] = SQL.CreateDB("log", EntryDB.DataDirectory);
+        const [db, isNew] =
+            EntryDB.config.pg && EntryDB.config.pg.logdb === true
+                ? [
+                      SQL.CreatePostgres(
+                          EntryDB.config.pg.host,
+                          EntryDB.config.pg.user,
+                          EntryDB.config.pg.password,
+                          EntryDB.config.pg.database
+                      ),
+                      false,
+                  ]
+                : SQL.CreateDB("log", EntryDB.DataDirectory);
 
         LogDB.isNew = isNew;
         this.db = db;
 
         (async () => {
-            await SQL.QueryOBJ({
+            await (EntryDB.config.pg && EntryDB.config.pg.logdb
+                ? SQL.PostgresQueryOBJ
+                : SQL.QueryOBJ)({
+                // @ts-ignore
                 db,
-                query: `CREATE TABLE IF NOT EXISTS Logs (
-                    Content varchar(${EntryDB.MaxContentLength}),
-                    Timestamp datetime DEFAULT CURRENT_TIMESTAMP,
-                    Type varchar(255),
-                    ID varchar(256)
+                query: `CREATE TABLE IF NOT EXISTS "Logs" (
+                    "Content" varchar(${EntryDB.MaxContentLength}),
+                    "Timestamp" float,
+                    "Type" varchar(255),
+                    "ID" varchar(256)
                 )`,
             });
 
@@ -76,9 +90,12 @@ export default class LogDB {
                         continue;
 
                     // delete
-                    await SQL.QueryOBJ({
+                    await (EntryDB.config.pg && EntryDB.config.pg.logdb
+                        ? SQL.PostgresQueryOBJ
+                        : SQL.QueryOBJ)({
+                        // @ts-ignore
                         db,
-                        query: "DELETE FROM Logs WHERE Type = ?",
+                        query: 'DELETE FROM "Logs" WHERE "Type" = ?',
                         params: [event],
                         use: "Prepare",
                         all: true,
@@ -106,9 +123,11 @@ export default class LogDB {
         // return false if this log already exists (same content, timestamp, type)
         // since sessions are stored as logs, this should prevent duplicated being created
         // at the exact same time from the exact same device
-        const ExistingLog = await SQL.QueryOBJ({
+        const ExistingLog = await (EntryDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
             db: this.db,
-            query: 'SELECT * FROM Logs WHERE "Content" = ? AND Timestamp = ? AND Type = ?',
+            query: 'SELECT * FROM "Logs" WHERE "Content" = ? AND "Timestamp" = ? AND "Type" = ?',
             params: [_log.Content, _log.Timestamp, _log.Type],
             get: true,
             use: "Prepare",
@@ -120,9 +139,11 @@ export default class LogDB {
         if (ExistingLog) return [false, "Log exists", ExistingLog];
 
         // create entry
-        await SQL.QueryOBJ({
+        await (EntryDB.config.pg && EntryDB.config.pg.logdb
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
             db: this.db,
-            query: "INSERT INTO Logs VALUES (?, ?, ?, ?)",
+            query: 'INSERT INTO "Logs" VALUES (?, ?, ?, ?)',
             params: [_log.Content, _log.Timestamp, _log.Type, _log.ID],
             use: "Prepare",
         });
@@ -140,9 +161,11 @@ export default class LogDB {
      */
     public async GetLog(id: string): Promise<[boolean, string, Log?]> {
         // attempt to get log
-        const log = await SQL.QueryOBJ({
+        const log = await (EntryDB.config.pg && EntryDB.config.pg.logdb
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
             db: this.db,
-            query: "SELECT * FROM Logs WHERE ID = ?",
+            query: 'SELECT * FROM "Logs" WHERE "ID" = ?',
             params: [id],
             get: true,
             transaction: true,
@@ -168,9 +191,11 @@ export default class LogDB {
         if (!log[2]) return log;
 
         // delete log
-        await SQL.QueryOBJ({
+        await (EntryDB.config.pg && EntryDB.config.pg.logdb
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
             db: this.db,
-            query: "DELETE FROM Logs WHERE ID = ?",
+            query: 'DELETE FROM "Logs" WHERE "ID" = ?',
             params: [id],
             use: "Prepare",
         });
@@ -192,9 +217,11 @@ export default class LogDB {
         select: string = "*"
     ): Promise<[boolean, string, Log[]]> {
         // query logs
-        const logs = await SQL.QueryOBJ({
+        const logs = await (EntryDB.config.pg && EntryDB.config.pg.logdb
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
             db: this.db,
-            query: `SELECT ${select} FROM Logs WHERE ${sql}`,
+            query: `SELECT ${select} FROM \"Logs\" WHERE ${sql}`,
             use: "Query",
             all: true,
             transaction: true,
@@ -218,9 +245,11 @@ export default class LogDB {
         if (!log[2]) return [false, "Log does not exist"];
 
         // delete log
-        await SQL.QueryOBJ({
+        await (EntryDB.config.pg && EntryDB.config.pg.logdb
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
             db: this.db,
-            query: 'UPDATE Logs SET "Content" = ? WHERE ID = ?',
+            query: 'UPDATE "Logs" SET "Content" = ? WHERE "ID" = ?',
             params: [content, id],
             use: "Prepare",
         });

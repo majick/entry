@@ -288,8 +288,11 @@ export class WellKnown implements Endpoint {
                         // we're going to use total to display number of sessions...
                         total:
                             (EntryDB.Logs &&
-                                (await EntryDB.Logs.QueryLogs('Type = "session"'))[2]
-                                    .length - 1) ||
+                                (
+                                    await EntryDB.Logs.QueryLogs(
+                                        "\"Type\" = 'session'"
+                                    )
+                                )[2].length - 1) ||
                             0,
                         activeMonth: 0,
                         activeHalfyear: 0,
@@ -661,7 +664,7 @@ export class EditPaste implements Endpoint {
             result[0]
         ) {
             const Sessions = await EntryDB.Logs.QueryLogs(
-                `Type = "session" AND \"Content\" LIKE \'%;_with;${paste.CustomURL}\'`
+                `"Type" = \'session\' AND \"Content\" LIKE \'%;_with;${paste.CustomURL}\'`
             );
 
             if (Sessions[2])
@@ -729,7 +732,7 @@ export class DeletePaste implements Endpoint {
         // remove association from all associated sessions if the password has changed
         if (body.NewEditPassword && result[0]) {
             const Sessions = await EntryDB.Logs.QueryLogs(
-                `Type = "session" AND \"Content\" LIKE \'%;_with;${body.CustomURL}\'`
+                `"Type" = \'session\' AND \"Content\" LIKE \'%;_with;${body.CustomURL}\'`
             );
 
             if (Sessions[2])
@@ -1738,7 +1741,7 @@ export class UpdateCustomDomain implements Endpoint {
         // make sure a log with that domain doesn't already exist
         const DomainLog = (
             await EntryDB.Logs.QueryLogs(
-                `Type = "custom_domain" AND \"Content\" LIKE \'%;${body.Domain}\'`
+                `"Type" = \'custom_domain\' AND \"Content\" LIKE \'%;${body.Domain}\'`
             )
         )[2][0];
 
@@ -1754,7 +1757,7 @@ export class UpdateCustomDomain implements Endpoint {
         // get log
         const CustomDomainLog = (
             await EntryDB.Logs.QueryLogs(
-                `Type = "custom_domain" AND \"Content\" LIKE \'${paste.CustomURL};%\'`
+                `"Type" = \'custom_domain\' AND \"Content\" LIKE \'${paste.CustomURL};%\'`
             )
         )[2][0];
 

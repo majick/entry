@@ -290,7 +290,7 @@ export default class EntryDB {
         // since they were created. deletes session if it's expired
         const CheckSessions = async () => {
             for (const log of (
-                await EntryDB.Logs.QueryLogs('Type = "session"')
+                await EntryDB.Logs.QueryLogs("\"Type\" = 'session'")
             )[2]) {
                 // get dates
                 const Created = new Date(log.Timestamp);
@@ -535,10 +535,10 @@ export default class EntryDB {
                 )
                     record.Views = (
                         await EntryDB.Logs.QueryLogs(
-                            `\"Content\" LIKE "${record.CustomURL.replaceAll(
+                            `\"Content\" LIKE '${record.CustomURL.replaceAll(
                                 "_",
                                 "\\_"
-                            )};%" ESCAPE "\\"`
+                            )};%' ESCAPE '\\'`
                         )
                     )[2].length;
 
@@ -891,7 +891,7 @@ export default class EntryDB {
                     // (only create a notification for pastes that somebody is associated with!)
                     const MentionSession = (
                         await EntryDB.Logs.QueryLogs(
-                            `Type = "session" AND \"Content\" LIKE \'%;_with;${CommentingOn.Metadata.Owner}\'`
+                            `"Type" = 'session' AND \"Content\" LIKE \'%;_with;${CommentingOn.Metadata.Owner}\'`
                         )
                     )[2][0];
 
@@ -934,7 +934,7 @@ export default class EntryDB {
                 // (only create a notification for pastes that somebody is associated with!)
                 const MentionSession = (
                     await EntryDB.Logs.QueryLogs(
-                        `Type = "session" AND \"Content\" LIKE \'%;_with;${match.groups.NAME}\'`
+                        `"Type" = 'session' AND \"Content\" LIKE \'%;_with;${match.groups.NAME}\'`
                     )
                 )[2][0];
 
@@ -1161,7 +1161,7 @@ export default class EntryDB {
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: EntryDB.Logs.db,
-                query: 'DELETE FROM Logs WHERE Type = "view_paste" AND "Content" LIKE ?',
+                query: 'DELETE FROM "Logs" WHERE "Type" = \'view_paste\' AND "Content" LIKE ?',
                 params: [`%${paste.CustomURL}%`],
                 use: "Prepare",
             });
@@ -1360,7 +1360,7 @@ export default class EntryDB {
         // delete all views
         if (EntryDB.config.log && EntryDB.config.log.events.includes("view_paste")) {
             const views = await EntryDB.Logs.QueryLogs(
-                `Type = "view_paste" AND \"Content\" LIKE \'${PasteInfo.CustomURL};%\'`
+                `"Type" = 'view_paste' AND \"Content\" LIKE \'${PasteInfo.CustomURL};%\'`
             );
 
             for (const view of views[2]) await EntryDB.Logs.DeleteLog(view.ID);

@@ -137,7 +137,7 @@ export async function CheckInstance(
     // ...check against custom domain
     const CustomDomainLog = (
         await EntryDB.Logs.QueryLogs(
-            `Type = "custom_domain" AND \"Content\" LIKE \'%;${url.hostname}\'`
+            `"Type" = \'custom_domain\' AND \"Content\" LIKE \'%;${url.hostname}\'`
         )
     )[2][0];
 
@@ -283,7 +283,7 @@ export class GetPasteFromURL implements Endpoint {
                 // (make sure length of query for log is 0)
                 (
                     await EntryDB.Logs.QueryLogs(
-                        `Content = "${result.CustomURL};${SessionCookieValue}"`
+                        `"Content" = '${result.CustomURL};${SessionCookieValue}'`
                     )
                 )[2].length === 0 &&
                 // make sure session id is valid
@@ -1213,7 +1213,7 @@ export class PasteDocView implements Endpoint {
                 // (make sure length of query for log is 0)
                 (
                     await EntryDB.Logs.QueryLogs(
-                        `Content = "${result.CustomURL};${SessionCookieValue}"`
+                        `"Content" = '${result.CustomURL};${SessionCookieValue}'`
                     )
                 )[2].length === 0 &&
                 // make sure session id is valid
@@ -2476,7 +2476,7 @@ export class UserSettings implements Endpoint {
             // try to fetch custom domain log
             const CustomDomainLog = (
                 await EntryDB.Logs.QueryLogs(
-                    `Type = "custom_domain" AND \"Content\" LIKE \'${result.CustomURL};%\'`
+                    `"Type" = \'custom_domain\' AND \"Content\" LIKE \'${result.CustomURL};%\'`
                 )
             )[2][0];
 
@@ -3174,7 +3174,7 @@ export class Notifications implements Endpoint {
         // get notifications
         const Notifications = (
             await EntryDB.Logs.QueryLogs(
-                `Type = "notification" AND \"Content\" LIKE \'%${Association[1]}\'`
+                `"Type" = \'notification\' AND \"Content\" LIKE \'%${Association[1]}\'`
             )
         )[2];
 

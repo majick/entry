@@ -330,7 +330,7 @@ export class APIExportLogs implements Endpoint {
             return new Login().request(request, server);
 
         // get logs
-        const _export = await EntryDB.Logs.QueryLogs("ID IS NOT NULL");
+        const _export = await EntryDB.Logs.QueryLogs('"ID" IS NOT NULL');
 
         // return
         return new Response(JSON.stringify(_export[2]), {
@@ -452,7 +452,7 @@ export class APIGetUsers implements Endpoint {
         // get logs
         const _export = (
             await EntryDB.Logs.QueryLogs(
-                'Type = "session" AND "Content" LIKE \'%;_with;%\''
+                "\"Type\" = 'session' AND \"Content\" LIKE '%;_with;%'"
             )
         )[2];
 
