@@ -557,7 +557,9 @@ export default class EntryDB {
                     });
 
                     record.Comments = comments.length;
-                } else record.Comments = 0;
+                }
+
+                if (record.Comments === undefined) record.Comments = 0;
 
                 // remove metadata
                 const [RealContent, _Metadata] = record.Content.split("_metadata:");
@@ -571,10 +573,6 @@ export default class EntryDB {
                         Owner: record.CustomURL,
                         Comments: { Enabled: true },
                     };
-
-                // make sure comments has a value!
-                if (record.Metadata && !record.Metadata.Comments)
-                    record.Metadata.Comments = { Enabled: true };
 
                 // MAKE SURE paste has an owner value!
                 if (record.Metadata && !record.Metadata.Owner)
@@ -1081,7 +1079,10 @@ export default class EntryDB {
             PasteInfo.EditPassword = paste.EditPassword!;
 
         // if we're not changing the edit password, set to the same
-        if (NewPasteInfo.EditPassword === UndefinedHash)
+        if (
+            NewPasteInfo.EditPassword === UndefinedHash ||
+            NewPasteInfo.EditPassword === PasteInfo.EditPassword
+        )
             NewPasteInfo.EditPassword = paste.EditPassword!;
 
         // validate lengths

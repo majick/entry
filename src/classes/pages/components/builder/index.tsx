@@ -88,6 +88,21 @@ export class Builder implements Endpoint {
             )
                 return new _404Page().request(request);
 
+            // get revision
+            if (search.get("r") && result) {
+                const revision = await db.GetRevision(
+                    search.get("OldURL")!,
+                    parseFloat(search.get("r")!)
+                );
+
+                if (!revision[0] || !revision[2])
+                    return new _404Page().request(request);
+
+                // ...update result
+                result.Content = revision[2].Content.split("_metadata:")[0];
+                result.EditDate = revision[2].EditDate;
+            }
+
             // if paste isn't a builder paste, convert it
             if (
                 !result.Content.startsWith("_builder:") &&

@@ -758,10 +758,6 @@ export class GetPasteFromURL implements Endpoint {
                                     {EntryDB.config.app &&
                                         EntryDB.config.app.enable_comments ===
                                             true &&
-                                        result.Comments !== undefined &&
-                                        !result.Content.includes(
-                                            "<% disable comments %>"
-                                        ) &&
                                         (!result.Metadata ||
                                             !result.Metadata.Comments ||
                                             result.Metadata.Comments.Enabled !==
@@ -898,29 +894,6 @@ export class GetPasteFromURL implements Endpoint {
                                                     View Group
                                                 </a>
                                             )}
-
-                                            {/* {(!EntryDB.config.app ||
-                                                EntryDB.config.app.auto_tag !==
-                                                    false) &&
-                                                Association[0] &&
-                                                result.CustomURL !==
-                                                    Association[1] && (
-                                                    <form
-                                                        action={"/api/block"}
-                                                        method={"POST"}
-                                                    >
-                                                        <input
-                                                            type="hidden"
-                                                            name="CustomURL"
-                                                            value={result.CustomURL}
-                                                            required
-                                                        />
-
-                                                        <button className="round">
-                                                            Block
-                                                        </button>
-                                                    </form>
-                                                    )} */}
 
                                             {EntryDB.config.log &&
                                                 EntryDB.config.log.events.includes(
