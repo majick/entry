@@ -101,7 +101,9 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 
 - `POST /admin/api/delete`, Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
 - `POST /admin/api/export`, Get JSON of all pastes in server (decrypted): `AdminPassword`
-- `POST /admin/api/import`, Import pastes JSON: `AdminPassword, pastes` (with `paste` being the JSON export from `/admin/api/export`)
+- `POST /admin/api/import`, Import pastes JSON: `AdminPassword, pastes` (with `pastes` being the JSON export from `/admin/api/export`) (`multipart/form-data`)
+- `POST /admin/api/import/json`, Import pastes JSON: `AdminPassword, pastes` (`application/json`)
+- `POST /admin/api/logs/import/json`, Import logs JSON: `AdminPassword, logs` (`application/json`)
 - `POST /admin/api/mass-delete`, Delete pastes by sql query: `AdminPassword, pastes`
 - `POST /admin/api/sql`, Directly run sql on the server: `AdminPassword, sql, get, all` (`get` and `all` represent the type of operation, `get` returns one result while `all` returns... all results)
 - `POST /admin/api/logs/export`, Get all server logs: `AdminPassword`

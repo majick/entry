@@ -8,7 +8,7 @@ import { Database } from "bun:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
-import pg, { Client } from "pg";
+import pg, { Pool } from "pg";
 
 /**
  * @export
@@ -61,12 +61,12 @@ export default class SQL {
         user: string,
         password: string,
         database: string
-    ): Client {
+    ): Pool {
         // ...
         if (!host || !user || !password) throw new Error("Missing values!");
 
         // create database
-        const db = new pg.Client({ host, user, password, database });
+        const db = new pg.Pool({ host, user, password, database, max: 5 });
         db.connect();
 
         // return
@@ -176,7 +176,7 @@ export default class SQL {
         use?: "Query" | "Prepare";
     }): Promise<any> {
         // if db has a host value, forward to pg
-        if ((params.db as any).host)
+        if ((params.db as any).options)
             return await SQL.PostgresQueryOBJ(params as any);
 
         // sqlite
@@ -204,7 +204,7 @@ export default class SQL {
      * @method PostgresQueryOBJ
      * @static
      * @param {({
-     *         db: Client;
+     *         db: Pool;
      *         query: string;
      *         insertValues?: any[];
      *         params?: any[]; // alias of insertValues
@@ -217,7 +217,7 @@ export default class SQL {
      * @memberof SQL
      */
     public static async PostgresQueryOBJ(params: {
-        db: Client;
+        db: Pool;
         query: string;
         insertValues?: any[];
         params?: any[]; // alias of insertValues
@@ -238,8 +238,14 @@ export default class SQL {
         // add semicolon
         params.query += `;`;
 
+        // get client
+        const client = await params.db.connect();
+
         // ...prepare and query are the same here!
-        const res = await params.db.query(params.query, params.params);
+        const res = await client.query(params.query, params.params);
+
+        // release
+        client.release();
 
         // determine return value
         if (!res.rows) res.rows = [];

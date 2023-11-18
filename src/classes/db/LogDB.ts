@@ -257,4 +257,38 @@ export default class LogDB {
         // return
         return [true, "Log updated"];
     }
+
+    /**
+     * @method ImportPastes
+     *
+     * @param {Log[]} _export
+     * @return {Promise<[boolean, string][]>} Outputs
+     * @memberof EntryDB
+     */
+    public async ImportLogs(_export: Log[]): Promise<[boolean, string][]> {
+        let outputs: [boolean, string][] = [];
+
+        // create each log
+        for (let log of _export) {
+            // convert date
+            if (typeof log.Timestamp === "string")
+                log.Timestamp = new Date().getTime();
+
+            // create log
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: this.db,
+                query: 'INSERT INTO "Logs" VALUES (?, ?, ?, ?)',
+                params: [log.Content, log.Timestamp, log.Type, log.ID],
+                transaction: true,
+                use: "Prepare",
+            });
+
+            // create paste
+            outputs.push([true, "Paste created!"]);
+        }
+
+        // return
+        return outputs;
+    }
 }

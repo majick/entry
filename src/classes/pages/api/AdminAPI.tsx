@@ -219,6 +219,50 @@ export class APIImportRaw implements Endpoint {
 
 /**
  * @export
+ * @class APIImportLogsRaw
+ * @implements {Endpoint}
+ */
+export class APIImportLogsRaw implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // verify content type
+        const WrongType = VerifyContentType(request, "application/json");
+
+        if (
+            WrongType &&
+            !(request.headers.get("content-type") || "").includes("application/json")
+        )
+            return WrongType;
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // make sure logs are enabled
+        if (!EntryDB.config.log)
+            return new Response("Logs are disabled!", { status: 400 });
+
+        // get request body
+        const body = (await request.json()) as any;
+
+        // validate password
+        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+            return new Login().request(request, server);
+
+        // get pastes
+        const output = await EntryDB.Logs.ImportLogs(body.logs || []);
+
+        // return
+        return new Response(JSON.stringify(output), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+/**
+ * @export
  * @class APIMassDelete
  * @implements {Endpoint}
  */
@@ -480,6 +524,7 @@ export default {
     APIExport,
     APIImport,
     APIImportRaw,
+    APIImportLogsRaw,
     APIMassDelete,
     APISQL,
     APIExportLogs,
