@@ -16,6 +16,7 @@ export type PrefetchOptions = {
 export default class Prefetch {
     public readonly Options: PrefetchOptions;
     private Read: { [key: string]: string } = {};
+    public PreviousURL: URL = new URL(window.location.href);
 
     constructor(Options: PrefetchOptions) {
         // ...options
@@ -27,6 +28,10 @@ export default class Prefetch {
 
         // ...make normal history changes function
         window.addEventListener("popstate", async (event) => {
+            // make sure we actually changed pages (not just hash)
+            if (new URL(window.location.href).pathname === this.PreviousURL.pathname)
+                return;
+
             // make sure stored state exists
             if (!this.Read[window.location.href]) {
                 const res = await fetch(window.location.href);
@@ -36,11 +41,22 @@ export default class Prefetch {
             }
 
             // load page
+            this.PreviousURL = new URL(window.location.href);
             await this.LoadPage(
                 new URL(window.location.href),
                 event,
                 document.documentElement
             );
+        });
+
+        window.addEventListener("hashchange", (event) => {
+            // get element
+            const element = document.body.querySelector(
+                window.location.hash.replaceAll(/[\\\/\!\@\$\%\^\&\*\(\)]/g, "")
+            );
+
+            // scroll to element
+            if (element) element.scrollTo();
         });
     }
 
@@ -145,6 +161,10 @@ export default class Prefetch {
         element: PrefetchOptions["Element"]
     ): Promise<void> {
         if (!element) return;
+
+        // check PreviousURL
+        if (href.pathname === this.PreviousURL.pathname) return;
+        this.PreviousURL = href;
 
         // try to get link from read cache
         const StoredState = this.Read[href.href];
