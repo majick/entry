@@ -1583,7 +1583,7 @@ br:not(.cm-line br) {
     align-items: center;
     animation: SlideInFromLeft 0.15s 0s running;
     overflow: auto;
-    z-index: 10000000;
+    z-index: 500250000;
     transition: all 0.15s;
 }
 

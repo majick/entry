@@ -270,12 +270,6 @@ function BasicCompletion(context: CompletionContext): any {
                 detail: "extras",
             },
             {
-                label: "disable comments",
-                type: "function",
-                apply: `<% disable comments %>`,
-                detail: "Extras",
-            },
-            {
                 label: "enable template",
                 type: "function",
                 apply: `<% enable template %>`,

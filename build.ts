@@ -13,6 +13,7 @@ const output = await build({
         "./src/classes/pages/components/builder/Builder.tsx",
         "./src/classes/pages/components/MetadataEditor.tsx",
         "./src/classes/pages/components/site/UserSettings.tsx",
+        "./src/classes/pages/components/Prefetch.ts",
     ],
     minify: {
         identifiers: true,

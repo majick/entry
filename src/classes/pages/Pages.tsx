@@ -1650,10 +1650,9 @@ export class PasteCommentsPage implements Endpoint {
 
         // return 404 if page does not allow comments
         if (
-            result.Content.includes("<% disable comments %>") ||
-            (result.Metadata &&
-                result.Metadata.Comments &&
-                result.Metadata.Comments.Enabled === false)
+            result.Metadata &&
+            result.Metadata.Comments &&
+            result.Metadata.Comments.Enabled === false
         )
             return new _404Page().request(request);
 

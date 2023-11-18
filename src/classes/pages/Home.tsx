@@ -111,6 +111,7 @@ export default class Home implements Endpoint {
 
         if (search.get("mode") === "edit" && search.get("OldURL")) {
             paste = await db.GetPasteFromURL(search.get("OldURL")!);
+            if (!paste) search.set("mode", "new");
 
             // get revision
             if (search.get("r") && paste) {

@@ -1818,10 +1818,9 @@ export default class EntryDB {
 
         // return false if page does not allow comments
         if (
-            result.Content.includes("<% disable comments %>") ||
-            (result.Metadata &&
-                result.Metadata.Comments &&
-                result.Metadata.Comments.Enabled === false)
+            result.Metadata &&
+            result.Metadata.Comments &&
+            result.Metadata.Comments.Enabled === false
         )
             return [false, "Paste has comments disabled", []];
 

@@ -199,6 +199,15 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 }}
             />
 
+            {/* handle prefetch */}
+            <script
+                data-state="save"
+                type={"module"}
+                dangerouslySetInnerHTML={{
+                    __html: `import Prefetch from "/Prefetch.js"; new Prefetch({});`,
+                }}
+            />
+
             {/* footer extras */}
             {FooterExtras.map((html) => (
                 <div dangerouslySetInnerHTML={{ __html: html }}></div>
