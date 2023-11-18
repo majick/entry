@@ -88,10 +88,11 @@ export function OpenGraph(props: {
     description?: string;
     title?: string;
     icon?: string;
+    color?: string;
 }) {
     return (
         <>
-            <meta name={"theme-color"} value={"#55a4e0"} />
+            <meta name={"theme-color"} value={props.color || "#55a4e0"} />
             <meta name={"og:type"} value={"website"} />
             <meta name={"og:site_name"} value={EntryDB.config.name} />
             {props.url && <meta name={"og:url"} value={props.url} />}
@@ -141,15 +142,14 @@ export async function CheckInstance(
         )
     )[2][0];
 
-    if (CustomDomainLog) {
+    if (CustomDomainLog && CustomDomainLog.Content.startsWith("ins://")) {
         // ...create new request
         const req = new Request(
-            `${url.protocol}//ins-${CustomDomainLog.Content.split(";")[0].replaceAll(
-                "/",
-                "."
-            )}.${EntryDB.config.app.hostname}${url.pathname}${url.search}${
-                url.hash
-            }`,
+            `${url.protocol}//ins-${CustomDomainLog.Content.split(";")[0]
+                .replaceAll("/", ".")
+                .replaceAll("ins://", "")}.${EntryDB.config.app.hostname}${
+                url.pathname
+            }${url.search}${url.hash}`,
             {
                 method: request.method,
                 headers: request.headers,
@@ -164,7 +164,6 @@ export async function CheckInstance(
         );
     }
 
-    // default return
     return undefined;
 }
 
@@ -548,6 +547,11 @@ export class GetPasteFromURL implements Endpoint {
                                     ? result.Metadata.Favicon
                                     : undefined
                             }
+                            color={
+                                result.Metadata && result.Metadata.EmbedColor
+                                    ? result.Metadata.EmbedColor
+                                    : undefined
+                            }
                         />
                     </>
                 ),
@@ -614,6 +618,11 @@ export class GetPasteFromURL implements Endpoint {
                                 result.Metadata && result.Metadata.Title
                                     ? result.Metadata.Title
                                     : result.CustomURL
+                            }
+                            color={
+                                result.Metadata && result.Metadata.EmbedColor
+                                    ? result.Metadata.EmbedColor
+                                    : undefined
                             }
                         />
                     </>
@@ -1142,6 +1151,11 @@ export class GetPasteFromURL implements Endpoint {
                         icon={
                             result.Metadata && result.Metadata.Favicon
                                 ? result.Metadata.Favicon
+                                : undefined
+                        }
+                        color={
+                            result.Metadata && result.Metadata.EmbedColor
+                                ? result.Metadata.EmbedColor
                                 : undefined
                         }
                     />
@@ -2296,6 +2310,11 @@ export class PasteCommentsPage implements Endpoint {
                         icon={
                             result.Metadata && result.Metadata.Favicon
                                 ? result.Metadata.Favicon
+                                : undefined
+                        }
+                        color={
+                            result.Metadata && result.Metadata.EmbedColor
+                                ? result.Metadata.EmbedColor
                                 : undefined
                         }
                     />

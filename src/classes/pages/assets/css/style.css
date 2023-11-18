@@ -1545,6 +1545,7 @@ br:not(.cm-line br) {
     justify-content: center;
     align-items: center;
     height: 3.5rem;
+    z-index: 500000000;
 
     animation: FadeIn 0.75s 0s running;
 }

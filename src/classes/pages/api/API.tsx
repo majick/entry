@@ -1412,6 +1412,7 @@ export class EditMetadata implements Endpoint {
             paste.Metadata.Favicon = Unpacked.Favicon;
             paste.Metadata.Title = Unpacked.Title;
             paste.Metadata.Description = Unpacked.Description;
+            paste.Metadata.EmbedColor = Unpacked.EmbedColor;
             paste.Metadata.PrivateSource = Unpacked.PrivateSource;
             paste.Metadata.SocialIcon = Unpacked.SocialIcon;
 

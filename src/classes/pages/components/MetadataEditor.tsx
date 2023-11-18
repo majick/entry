@@ -346,6 +346,10 @@ export function ClientEditor(_metadata: string, id: string): any {
             metadata.root.Description || "",
             "Change the social embed description for this paste",
         ],
+        EmbedColor: [
+            metadata.root.EmbedColor || "#55a4e0",
+            "Change the social embed color for this paste",
+        ],
         // privacy section
         Privacy: ["div", "Privacy and Security"],
         PrivateSource: [
