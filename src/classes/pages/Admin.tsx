@@ -1298,9 +1298,9 @@ export class ManageReports implements Endpoint {
         for (const report of reports[2]) {
             // check if report is archived
             const ArchivalLog = await EntryDB.Logs.QueryLogs(
-                `"Type" = \'report\' AND "Content" = "archive;${
+                `"Type" = \'report\' AND "Content" = 'archive;${
                     report.Content.split(";")[2]
-                }"`
+                }'`
             );
 
             // add to reportpastes

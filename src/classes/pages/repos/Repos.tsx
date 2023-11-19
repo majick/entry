@@ -22,7 +22,7 @@ import { PageHeaders } from "../api/API";
 export function ReposNav(props: { name: string; current: string }) {
     return (
         <div
-            class="card secondary border round flex g-4 flex-column-mobile"
+            class="card secondary border round flex g-4 mobile-flex-column"
             style={{ userSelect: "none" }}
         >
             <a
@@ -140,7 +140,7 @@ export class RepoView implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <TopNav border={false} margin={false} />
+                    <TopNav margin={false} />
 
                     <div className="flex flex-column g-8">
                         <div
@@ -272,10 +272,6 @@ export class RepoView implements Endpoint {
                                             {BuilderPaste ? "builder" : "markdown"}
                                         </li>
 
-                                        <li>
-                                            <b>Zone</b>: entry
-                                        </li>
-
                                         {RevisionNumber !== 0 && (
                                             <li>
                                                 <b>Revision</b>: {RevisionNumber}
@@ -351,7 +347,7 @@ export class RevisionsList implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <TopNav border={false} margin={false} />
+                    <TopNav margin={false} />
 
                     <div className="flex flex-column g-8">
                         <div

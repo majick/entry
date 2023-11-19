@@ -103,7 +103,7 @@ export default function TopNav(props: {
 
                 <button
                     id={"entry:button.PageMenu"}
-                    className="round invisible"
+                    className="round invisible tooltip-wrapper"
                     title={"Menu"}
                 >
                     <svg
@@ -115,6 +115,10 @@ export default function TopNav(props: {
                     >
                         <path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"></path>
                     </svg>
+
+                    <div className="card secondary round border tooltip left">
+                        Menu
+                    </div>
                 </button>
             </div>
 
@@ -175,14 +179,16 @@ export default function TopNav(props: {
             {/* scripts */}
             <script
                 dangerouslySetInnerHTML={{
-                    __html: `const nav = document.getElementById("entry:nav.Top");
-                    document.body.addEventListener("scroll", () => {
-                        if (document.body.scrollTop < 50)
-                            nav.classList.remove("scroll");
-                        else
-                            if (!nav.classList.contains("scroll")) 
-                                nav.classList.add("scroll");
-                    })`,
+                    __html: `(() => {
+                        const nav = document.getElementById("entry:nav.Top");
+                        document.body.addEventListener("scroll", () => {
+                            if (document.body.scrollTop < 50)
+                                nav.classList.remove("scroll");
+                            else
+                                if (!nav.classList.contains("scroll")) 
+                                    nav.classList.add("scroll");
+                        })
+                    })();`,
                 }}
             />
         </nav>

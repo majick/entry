@@ -38,7 +38,6 @@ export default class EntryDB {
 
     public readonly db: typeof Config.postgres | Database;
     public readonly isNew: boolean = true;
-    public static Zones: { [key: string]: EntryDB } = {};
     public static PasteCache: { [key: string]: PasteConnection } = {};
 
     public static Expiry: Expiry; // hold expiry registry
@@ -62,14 +61,9 @@ export default class EntryDB {
      * Creates an instance of EntryDB.
      * @param {string} [dbname="entry"] Set the name of the database file
      * @param {string} [dbdir] Set the parent directory of the database file
-     * @param {boolean} [ZoneStaticInit=true] Force new database functions to run
      * @memberof EntryDB
      */
-    constructor(
-        dbname: string = "entry",
-        dbdir?: string,
-        ZoneStaticInit: boolean = false
-    ) {
+    constructor(dbname: string = "entry", dbdir?: string) {
         // set datadirectory based on config file
         if (fs.existsSync(EntryDB.ConfigLocation))
             EntryDB.DataDirectory =
@@ -87,7 +81,6 @@ export default class EntryDB {
         if (!dbdir) dbdir = EntryDB.DataDirectory;
 
         // create db link
-        // (zones don't get WAL mode)
         const [db, isNew] = EntryDB.config.pg
             ? [
                   SQL.CreatePostgres(
@@ -98,7 +91,7 @@ export default class EntryDB {
                   ),
                   false,
               ]
-            : SQL.CreateDB(dbname, dbdir, !ZoneStaticInit);
+            : SQL.CreateDB(dbname, dbdir);
 
         this.isNew = isNew;
         this.db = db;
@@ -143,7 +136,7 @@ export default class EntryDB {
             });
 
             // static init
-            if (!EntryDB.StaticInit || ZoneStaticInit === true) {
+            if (!EntryDB.StaticInit) {
                 EntryDB.StaticInit = true;
 
                 await EntryDB.GetConfig(); // fill config
@@ -152,7 +145,6 @@ export default class EntryDB {
                 await EntryDB.CreateExpiry();
                 await EntryDB.InitLogs();
                 await EntryDB.InitMedia();
-                await EntryDB.InitZones();
 
                 // version paste check
                 if (!(await EntryDB.GetConfig())) return;
@@ -2020,90 +2012,5 @@ export default class EntryDB {
 
         // return
         return [true, "Revision created", props];
-    }
-
-    // zones
-
-    /**
-     * @method InitZones
-     *
-     * @return {Promise<boolean>}
-     * @memberof EntryDB
-     */
-    public static async InitZones(): Promise<boolean> {
-        const ZonesDir = path.resolve(EntryDB.DataDirectory, "zones");
-
-        // make sure zones are enabled
-        if (!EntryDB.config.zones) return false;
-
-        // create zones directory (if needed)
-        if (!fs.existsSync(ZonesDir)) fs.mkdirSync(ZonesDir);
-
-        // remove all invalid zone files (zones that don't exist in the array)
-        for (const zone of fs.readdirSync(ZonesDir)) {
-            // make sure zone is a .sqlite file
-            if (!zone.endsWith(".sqlite")) continue;
-            const ZoneName = zone.split(".sqlite")[0];
-            if (ZoneName.startsWith("perm:")) continue; // don't delete permanent zones!
-
-            // make sure zone is valid
-            const IsValid = EntryDB.GetZone(ZoneName);
-            if (IsValid) continue;
-
-            // delete zone (and zone files)
-            fs.rmSync(path.resolve(ZonesDir, zone));
-
-            // ...WAL files
-            if (fs.existsSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-shm`)))
-                fs.rmSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-shm`));
-
-            if (fs.existsSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-wal`)))
-                fs.rmSync(path.resolve(ZonesDir, `${ZoneName}.sqlite-wal`));
-        }
-
-        // create zones
-        for (const zone of EntryDB.config.zones)
-            if (!EntryDB.Zones[zone])
-                EntryDB.Zones[zone] = new EntryDB(zone, ZonesDir, true);
-
-        // return
-        return true;
-    }
-
-    /**
-     * @name CreateNewZone
-     *
-     * @static
-     * @param {string} name Should start with "perm:" so that the zone isn't deleted on server restart!
-     * @return {boolean}
-     * @memberof EntryDB
-     */
-    public static CreateNewZone(name: string): boolean {
-        if (!EntryDB.config.zones) return false;
-        const ZonesDir = path.resolve(EntryDB.DataDirectory, "zones");
-
-        // make sure zone doesn't already exist
-        if (EntryDB.GetZone(name)) return false;
-
-        // add zone to config
-        EntryDB.config.zones.push(name);
-
-        // create EntryDB
-        EntryDB.Zones[name] = new EntryDB(name, ZonesDir, true);
-
-        // return
-        return true;
-    }
-
-    /**
-     * @method GetZone
-     *
-     * @param {string} zone
-     * @return {boolean}
-     * @memberof EntryDB
-     */
-    public static GetZone(zone: string): boolean {
-        if (!EntryDB.config.zones) return false;
-        return EntryDB.config.zones.includes(zone);
     }
 }

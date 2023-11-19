@@ -52,154 +52,53 @@ export default function PublishModals(props: {
                 }
             ></iframe>
 
-            {(props.EditingPaste === undefined && (
-                <>
-                    {/* create new paste */}
-                    <form
-                        action={props.Endpoints.new}
-                        method={"POST"}
-                        className="flex flex-column g-8"
-                        target={"publish_frame"}
-                    >
-                        <input
-                            type="hidden"
-                            name="Content"
-                            id={"contentInput"}
-                            required
-                        />
-
-                        <label htmlFor="CustomURL">Custom URL</label>
-
-                        <input
-                            type="text"
-                            name={"CustomURL"}
-                            id={"CustomURL"}
-                            minLength={2}
-                            maxLength={500}
-                            placeholder={"Custom URL"}
-                            class={"round"}
-                            autocomplete={"off"}
-                            required
-                        />
-
-                        <label htmlFor="EditPassword">Edit Password</label>
-
-                        <input
-                            type="text"
-                            name={"EditPassword"}
-                            id={"EditPassword"}
-                            minLength={2}
-                            maxLength={500}
-                            placeholder={"Custom edit password"}
-                            class={"round"}
-                            autocomplete={"off"}
-                            required
-                        />
-
-                        <hr style={{ margin: "0" }} />
-
-                        <button
-                            className="green round modal:entry:button.Submit"
-                            style={{
-                                width: "100%",
-                            }}
+            <div style={{ width: "25rem", maxWidth: "100%" }}>
+                {(props.EditingPaste === undefined && (
+                    <>
+                        {/* create new paste */}
+                        <form
+                            action={props.Endpoints.new}
+                            method={"POST"}
+                            className="flex flex-column g-8"
+                            target={"publish_frame"}
                         >
-                            Publish
-                        </button>
-                    </form>
-                </>
-            )) || (
-                <>
-                    {/* update existing */}
-                    <form
-                        action={props.Endpoints.edit}
-                        method={"POST"}
-                        className="flex flex-column g-8"
-                        target={"publish_frame"}
-                    >
-                        <input
-                            type="hidden"
-                            name="Content"
-                            id={"contentInput"}
-                            required
-                        />
+                            <input
+                                type="hidden"
+                                name="Content"
+                                id={"contentInput"}
+                                required
+                            />
 
-                        <input
-                            type="hidden"
-                            name={"OldURL"}
-                            value={props.EditingPaste}
-                            required
-                        />
+                            <label htmlFor="CustomURL">Custom URL</label>
 
-                        <label htmlFor="EditPassword">Edit Password</label>
+                            <input
+                                type="text"
+                                name={"CustomURL"}
+                                id={"CustomURL"}
+                                minLength={2}
+                                maxLength={500}
+                                placeholder={"Custom URL"}
+                                class={"round"}
+                                autocomplete={"off"}
+                                required
+                            />
 
-                        <div className="tooltip-wrapper mobile-max flex justify-center">
+                            <label htmlFor="EditPassword">Edit Password</label>
+
                             <input
                                 type="text"
                                 name={"EditPassword"}
                                 id={"EditPassword"}
                                 minLength={2}
                                 maxLength={500}
-                                placeholder={"Edit password"}
+                                placeholder={"Custom edit password"}
                                 class={"round"}
                                 autocomplete={"off"}
-                                disabled={props.DisablePassword === true}
                                 required
                             />
 
-                            {props.DisablePassword && (
-                                <div className="card secondary round border tooltip top">
-                                    You don't need a password, you own this!
-                                </div>
-                            )}
-                        </div>
+                            <hr style={{ margin: "0" }} />
 
-                        <details class={"round"}>
-                            <summary>Change Values</summary>
-
-                            <div className="details-flex-content-list-box">
-                                <label htmlFor="NewCustomURL">
-                                    Change Custom URL (optional)
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name={"NewCustomURL"}
-                                    id={"NewCustomURL"}
-                                    minLength={2}
-                                    maxLength={500}
-                                    placeholder={"New Custom URL"}
-                                    class={"round"}
-                                    autocomplete={"off"}
-                                />
-
-                                <label htmlFor="NewEditPassword">
-                                    Change Edit Password (optional)
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name={"NewEditPassword"}
-                                    id={"NewEditPassword"}
-                                    minLength={2}
-                                    maxLength={500}
-                                    placeholder={"New custom edit password"}
-                                    class={"round"}
-                                    autocomplete={"off"}
-                                />
-                            </div>
-                        </details>
-
-                        <hr style={{ margin: "0" }} />
-
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                gap: "0.5rem",
-                            }}
-                        >
                             <button
                                 className="green round modal:entry:button.Submit"
                                 style={{
@@ -208,151 +107,255 @@ export default function PublishModals(props: {
                             >
                                 Publish
                             </button>
-
-                            <a
-                                className="button red round"
-                                id={"entry:button.DeletePaste"}
-                                style={{
-                                    width: "100%",
-                                }}
-                                href={"#"}
-                            >
-                                Delete
-                            </a>
-                        </div>
-                    </form>
-
-                    {props.EditingPaste && (
-                        <Modal
-                            buttonid="entry:button.DeletePaste"
-                            modalid="entry:modal.DeletePaste"
-                            round={true}
+                        </form>
+                    </>
+                )) || (
+                    <>
+                        {/* update existing */}
+                        <form
+                            action={props.Endpoints.edit}
+                            method={"POST"}
+                            className="flex flex-column g-8"
+                            target={"publish_frame"}
                         >
-                            <h4
-                                style={{
-                                    textAlign: "center",
-                                    width: "100%",
-                                }}
-                            >
-                                Confirm Deletion
-                            </h4>
+                            <input
+                                type="hidden"
+                                name="Content"
+                                id={"contentInput"}
+                                required
+                            />
 
-                            <hr />
+                            <input
+                                type="hidden"
+                                name={"OldURL"}
+                                value={props.EditingPaste}
+                                required
+                            />
 
-                            <ul>
-                                <li>
-                                    If you delete your paste, it will be gone forever
-                                </li>
-                                <li>
-                                    You cannot restore your paste and it will be
-                                    removed from the server
-                                </li>
-                                <li>
-                                    Your custom URL (
-                                    <b>
-                                        {
-                                            // everything before @ so (if there is a server),
-                                            // it isn't included here
-                                            props.EditingPaste!.split(":")[0]
-                                        }
-                                    </b>
-                                    ) will be available
-                                </li>
-                            </ul>
+                            <label htmlFor="EditPassword">Edit Password</label>
 
-                            <hr />
+                            <div className="tooltip-wrapper mobile-max flex justify-center">
+                                <input
+                                    type="text"
+                                    name={"EditPassword"}
+                                    id={"EditPassword"}
+                                    minLength={2}
+                                    maxLength={500}
+                                    placeholder={"Edit password"}
+                                    class={"round"}
+                                    autocomplete={"off"}
+                                    disabled={props.DisablePassword === true}
+                                    required
+                                />
+
+                                {props.DisablePassword && (
+                                    <div className="card secondary round border tooltip top">
+                                        You don't need a password, you own this!
+                                    </div>
+                                )}
+                            </div>
+
+                            <details class={"round"}>
+                                <summary>Change Values</summary>
+
+                                <div className="details-flex-content-list-box">
+                                    <label htmlFor="NewCustomURL">
+                                        Change Custom URL (optional)
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name={"NewCustomURL"}
+                                        id={"NewCustomURL"}
+                                        minLength={2}
+                                        maxLength={500}
+                                        placeholder={"New Custom URL"}
+                                        class={"round"}
+                                        autocomplete={"off"}
+                                    />
+
+                                    <label htmlFor="NewEditPassword">
+                                        Change Edit Password (optional)
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name={"NewEditPassword"}
+                                        id={"NewEditPassword"}
+                                        minLength={2}
+                                        maxLength={500}
+                                        placeholder={"New custom edit password"}
+                                        class={"round"}
+                                        autocomplete={"off"}
+                                    />
+                                </div>
+                            </details>
+
+                            <hr style={{ margin: "0" }} />
 
                             <div
                                 style={{
                                     display: "flex",
-                                    justifyContent: "space-between",
+                                    justifyContent: "center",
                                     alignItems: "center",
-                                    flexWrap: "wrap",
-                                    gap: "1rem",
+                                    gap: "0.5rem",
                                 }}
                             >
-                                <form method="dialog" class={"mobile-max"}>
-                                    <button class={"green round mobile-max"}>
-                                        Cancel
-                                    </button>
-
-                                    <div style={{ margin: "0.25rem 0" }}>
-                                        <hr class={"mobile-only"} />
-                                    </div>
-                                </form>
-
-                                <form
-                                    method="POST"
-                                    action={props.Endpoints.delete}
-                                    class={"mobile-max flex flex-wrap g-4"}
+                                <button
+                                    className="green round modal:entry:button.Submit"
                                     style={{
-                                        justifyContent: "right",
-                                        maxWidth: "100%",
+                                        width: "100%",
                                     }}
                                 >
-                                    <input
-                                        type="text"
-                                        required
-                                        minLength={5}
-                                        maxLength={256}
-                                        placeholder={"Edit password"}
-                                        id={"DEL_EditPassword"}
-                                        name={"EditPassword"}
-                                        autoComplete={"off"}
-                                        class={"round mobile-max"}
-                                    />
+                                    Publish
+                                </button>
 
-                                    <input
-                                        type="hidden"
-                                        required
-                                        name={"CustomURL"}
-                                        value={props.EditingPaste!}
-                                    />
+                                <a
+                                    className="button red round"
+                                    id={"entry:button.DeletePaste"}
+                                    style={{
+                                        width: "100%",
+                                    }}
+                                    href={"#"}
+                                >
+                                    Delete
+                                </a>
+                            </div>
+                        </form>
 
-                                    <button
-                                        class={
-                                            "red round mobile-max modal:entry:button.Submit"
-                                        }
+                        {props.EditingPaste && (
+                            <Modal
+                                buttonid="entry:button.DeletePaste"
+                                modalid="entry:modal.DeletePaste"
+                                round={true}
+                            >
+                                <h4
+                                    style={{
+                                        textAlign: "center",
+                                        width: "100%",
+                                    }}
+                                >
+                                    Confirm Deletion
+                                </h4>
+
+                                <hr />
+
+                                <ul>
+                                    <li>
+                                        If you delete your paste, it will be gone
+                                        forever
+                                    </li>
+                                    <li>
+                                        You cannot restore your paste and it will be
+                                        removed from the server
+                                    </li>
+                                    <li>
+                                        Your custom URL (
+                                        <b>
+                                            {
+                                                // everything before @ so (if there is a server),
+                                                // it isn't included here
+                                                props.EditingPaste!.split(":")[0]
+                                            }
+                                        </b>
+                                        ) will be available
+                                    </li>
+                                </ul>
+
+                                <hr />
+
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                        flexWrap: "wrap",
+                                        gap: "1rem",
+                                    }}
+                                >
+                                    <form method="dialog" class={"mobile-max"}>
+                                        <button class={"green round mobile-max"}>
+                                            Cancel
+                                        </button>
+
+                                        <div style={{ margin: "0.25rem 0" }}>
+                                            <hr class={"mobile-only"} />
+                                        </div>
+                                    </form>
+
+                                    <form
+                                        method="POST"
+                                        action={props.Endpoints.delete}
+                                        class={"mobile-max flex flex-wrap g-4"}
+                                        style={{
+                                            justifyContent: "right",
+                                            maxWidth: "100%",
+                                        }}
                                     >
-                                        Delete
-                                    </button>
-                                </form>
+                                        <input
+                                            type="text"
+                                            required
+                                            minLength={5}
+                                            maxLength={256}
+                                            placeholder={"Edit password"}
+                                            id={"DEL_EditPassword"}
+                                            name={"EditPassword"}
+                                            autoComplete={"off"}
+                                            class={"round mobile-max"}
+                                        />
+
+                                        <input
+                                            type="hidden"
+                                            required
+                                            name={"CustomURL"}
+                                            value={props.EditingPaste!}
+                                        />
+
+                                        <button
+                                            class={
+                                                "red round mobile-max modal:entry:button.Submit"
+                                            }
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </Modal>
+                        )}
+
+                        <Modal
+                            buttonid="entry:button.Submit"
+                            modalid="entry:modal.Submit"
+                            noIdMatch={true}
+                            round={true}
+                        >
+                            <div className="flex flex-column g-10">
+                                <span>Loading...</span>
+
+                                <a
+                                    href="javascript:window.location.reload()"
+                                    class={"button red round"}
+                                >
+                                    Refresh
+                                </a>
                             </div>
                         </Modal>
-                    )}
+                    </>
+                )}
 
-                    <Modal
-                        buttonid="entry:button.Submit"
-                        modalid="entry:modal.Submit"
-                        noIdMatch={true}
-                        round={true}
+                <hr />
+
+                <form method={"dialog"}>
+                    <button
+                        className="red round"
+                        style={{
+                            width: "100%",
+                        }}
                     >
-                        <div className="flex flex-column g-10">
-                            <span>Loading...</span>
-
-                            <a
-                                href="javascript:window.location.reload()"
-                                class={"button red round"}
-                            >
-                                Refresh
-                            </a>
-                        </div>
-                    </Modal>
-                </>
-            )}
-
-            <hr />
-
-            <form method={"dialog"}>
-                <button
-                    className="red round"
-                    style={{
-                        width: "100%",
-                    }}
-                >
-                    Cancel
-                </button>
-            </form>
+                        Cancel
+                    </button>
+                </form>
+            </div>
         </Modal>
     );
 }

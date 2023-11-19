@@ -78,7 +78,6 @@ export type Config = {
     allow_access_from?: string[];
     env?: "production" | "development";
     do_not_cache?: boolean;
-    zones?: string[]; // special database "zones", each of these zones has its own sqlite db file!
     app?: {
         info?: string;
         how?: string;

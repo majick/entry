@@ -827,11 +827,16 @@ table td:first-child {
 }
 
 table tr {
+    background: var(--background-surface1);
     border-bottom: solid 1px rgba(120, 125, 125, 0.1);
 }
 
 table tr:nth-child(even) {
-    background: var(--background-surface1a);
+    background: var(--background-surface1-5);
+}
+
+table tr:hover {
+    background: var(--background-surface2a);
 }
 
 table td:focus-within {
@@ -1750,14 +1755,14 @@ nav {
     justify-content: space-between;
     align-items: center;
     background: var(--background-surface);
-    border-bottom: solid 1px var(--background-surface2);
+    border-bottom: solid 1px transparent;
     position: -webkit-sticky;
     position: sticky;
     width: 100%;
     top: 0;
     z-index: 9999;
     max-width: 100vw;
-    animation: SlideInFromTop 0.15s 0s running;
+    animation: FadeIn 0.15s 0s running;
     transition: background 0.15s;
     height: var(--nav-height);
 }
