@@ -517,7 +517,6 @@ export class InspectMedia implements Endpoint {
 
                                     <div className="card round has-header flex justify-center">
                                         <img
-                                            class={"card border round NoPadding"}
                                             src={`/api/media/file/${name}/${FileName}`}
                                             alt={FileName}
                                             style={{
