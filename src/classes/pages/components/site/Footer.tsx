@@ -114,7 +114,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 >
                     <a
                         href="https://codeberg.org/hkau/entry"
-                        title={`Running Entry${pack ? ` v${pack.version}` : ""}`}
+                        title={`Powered by Entry${pack ? ` v${pack.version}` : ""}`}
                     >
                         {EntryDB.config.name || "Entry"}
                     </a>{" "}
@@ -137,7 +137,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 <div
                     style={{
                         position: "absolute",
-                        bottom: "8px",
+                        bottom: props.ShowBottomRow !== false ? "8px" : "0",
                         right: "0",
                     }}
                 >

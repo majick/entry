@@ -56,7 +56,7 @@ export default function TopNav(props: {
     // return
     return (
         <nav
-            class={"g-8 mobile-flex-center"}
+            class={"g-8"}
             id={"entry:nav.Top"}
             style={{
                 marginBottom: props.margin !== false ? "1rem" : "",
@@ -90,6 +90,10 @@ export default function TopNav(props: {
                 )}
 
                 {crumbs.map((c) => c)}
+            </span>
+
+            <span className="mobile-only">
+                <a href="/">{EntryDB.config.name}</a>
             </span>
 
             {/* right */}
@@ -127,53 +131,38 @@ export default function TopNav(props: {
                 modalid="entry:modal.PageMenu"
                 round={true}
             >
-                {props.breadcrumbs && (
-                    <>
-                        <div className="flex justify-center align-center g-4 flex-wrap">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                height="16"
-                                aria-label={"Path Symbol"}
-                            >
-                                <path d="M13.94 3.045a.75.75 0 0 0-1.38-.59l-4.5 10.5a.75.75 0 1 0 1.38.59l4.5-10.5ZM5 11.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"></path>
-                            </svg>
-                            {crumbs.map((c) => c)}
-                        </div>
-                    </>
-                )}
+                <div
+                    class={"flex flex-column"}
+                    style={{
+                        width: "25rem",
+                        maxWidth: "100%",
+                    }}
+                >
+                    {props.breadcrumbs && (
+                        <>
+                            <div className="card round border secondary flex justify-center align-center g-4 flex-wrap">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Path Symbol"}
+                                >
+                                    <path d="M13.94 3.045a.75.75 0 0 0-1.38-.59l-4.5 10.5a.75.75 0 1 0 1.38.59l4.5-10.5ZM5 11.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"></path>
+                                </svg>
+                                {crumbs.map((c) => c)}
+                            </div>
 
-                <hr />
+                            <hr />
+                        </>
+                    )}
 
-                <div className="flex justify-center align-center g-4">
-                    <a
-                        href={
-                            EntryDB.config.app &&
-                            EntryDB.config.app.enable_builder !== false
-                                ? "javascript:"
-                                : "/"
-                        }
-                        className={`button round border${
-                            EntryDB.config.app &&
-                            EntryDB.config.app.enable_builder !== false
-                                ? " modal:entry:button.NewPaste"
-                                : ""
-                        }`}
-                    >
-                        New Paste
-                    </a>
-                </div>
-
-                <hr />
-
-                <div className="flex justify-center align-center">
-                    <form method={"dialog"}>
-                        <button className="green round">Close Menu</button>
+                    <form method={"dialog"} class={"full"}>
+                        <button class={"green full round"}>Close</button>
                     </form>
-                </div>
 
-                <Footer />
+                    <Footer />
+                </div>
             </Modal>
 
             {/* scripts */}

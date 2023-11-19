@@ -252,6 +252,10 @@ export default class Prefetch {
                 try {
                     const res = await fetch(href.href);
 
+                    // make sure page is HTML
+                    if (!res.headers.get("Content-Type")!.includes("text/html"))
+                        return;
+
                     // store
                     this.Read[href.href] = await res.text();
                     console.info("Link prefetched!");

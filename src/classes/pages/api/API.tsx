@@ -492,7 +492,11 @@ export class CreatePaste implements Endpoint {
                         ? // if successful, redirect to paste
                           body.CommentOn === ""
                             ? body.ReportOn === ""
-                                ? `/${result[2].CustomURL}?UnhashedEditPassword=${result[2].UnhashedEditPassword}`
+                                ? `/${
+                                      result[2].CustomURL
+                                  }?UnhashedEditPassword=${punycode.toASCII(
+                                      result[2].UnhashedEditPassword!
+                                  )}`
                                 : "/?msg=Paste reported!"
                             : `/paste/comments/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message
@@ -629,7 +633,10 @@ export class EditPaste implements Endpoint {
         const result = await db.EditPaste(
             {
                 Content: body.OldContent,
-                EditPassword: body.EditPassword,
+                // @ts-ignore
+                EditPassword: body.EditPassword
+                    ? punycode.toASCII(body.EditPassword)
+                    : undefined,
                 CustomURL: body.OldURL,
                 PubDate: 0,
                 EditDate: 0,
@@ -638,7 +645,9 @@ export class EditPaste implements Endpoint {
             },
             {
                 Content: body.Content,
-                EditPassword: body.NewEditPassword || body.EditPassword,
+                EditPassword: body.NewEditPassword
+                    ? punycode.toASCII(body.NewEditPassword)
+                    : body.EditPassword,
                 CustomURL: body.NewURL || body.OldURL,
                 PubDate: (paste || { PubDate: 0 }).PubDate!,
                 EditDate: new Date().getTime(),
@@ -723,7 +732,7 @@ export class DeletePaste implements Endpoint {
             {
                 CustomURL: body.CustomURL,
             },
-            body.EditPassword
+            punycode.toASCII(body.EditPassword)
         );
 
         // remove association from all associated sessions if the password has changed
@@ -1188,7 +1197,7 @@ export class PasteLogin implements Endpoint {
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
         if (!paste) return new _404Page().request(request);
-        if (paste.HostServer) return new _404Page().request(request); // can't post comments as a paste from another server... right now!
+        if (paste.HostServer) return new _404Page().request(request);
 
         // check edit password
         if (
@@ -1204,7 +1213,7 @@ export class PasteLogin implements Endpoint {
             });
 
         // generate association
-        await GetAssociation(request, _ip, true, paste.CustomURL);
+        await GetAssociation(request, _ip, true, body.CustomURL);
 
         // create profile
         if (EntryDB.config.app && EntryDB.config.app.curiosity)
@@ -1470,215 +1479,6 @@ export class GetPasteComments implements Endpoint {
 
 /**
  * @export
- * @class GetFile
- * @implements {Endpoint}
- */
-export class GetFile implements Endpoint {
-    public async request(request: Request, server: Server): Promise<Response> {
-        const url = new URL(request.url);
-
-        // handle cloud pages
-        const IncorrectInstance = await Pages.CheckInstance(request, server);
-        if (IncorrectInstance) return IncorrectInstance;
-
-        // don't check if media is disabled, as files should still be viewable even with media disabled!
-
-        // get owner name and ifle name
-        const name = url.pathname.slice(
-            "/api/media/file/".length,
-            url.pathname.length
-        );
-
-        const Owner = name.split("/")[0];
-        const File = name.split("/")[1];
-
-        if (!Owner || !File) return new _404Page().request(request);
-
-        // get file
-        const file = await EntryDB.Media.GetFile(Owner, File);
-        if (!file[0] && !file[2]) return new _404Page().request(request);
-
-        // return
-        return new Response(file[2], {
-            status: 200,
-            headers: {
-                // get file content type based on name
-                "Content-Type": contentType(File) || "application/octet-stream",
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class ListFiles
- * @implements {Endpoint}
- */
-export class ListFiles implements Endpoint {
-    public async request(request: Request, server: Server): Promise<Response> {
-        const url = new URL(request.url);
-
-        // handle cloud pages
-        const IncorrectInstance = await Pages.CheckInstance(request, server);
-        if (IncorrectInstance) return IncorrectInstance;
-
-        // don't check if media is disabled, as files should still be viewable even with media disabled!
-
-        // get owner name and ifle name
-        const name = url.pathname.slice(
-            "/api/media/list/".length,
-            url.pathname.length
-        );
-
-        const Owner = name.split("/")[0];
-        const File = name.split("/")[1];
-
-        if (!Owner || !File) return new _404Page().request(request);
-
-        // get file
-        const files = await EntryDB.Media.GetMediaByOwner(Owner);
-        if (!files[0] && !files[2]) return new _404Page().request(request);
-
-        // return
-        return new Response(JSON.stringify(files), {
-            status: 200,
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class UploadFile
- * @implements {Endpoint}
- */
-export class UploadFile implements Endpoint {
-    public async request(request: Request, server: Server): Promise<Response> {
-        // handle cloud pages
-        const IncorrectInstance = await Pages.CheckInstance(request, server);
-        if (IncorrectInstance) return IncorrectInstance;
-
-        // make sure media is enabled (and exists)
-        if (!EntryDB.Media) return new _404Page().request(request);
-
-        // verify content type
-        const WrongType = VerifyContentType(request, "multipart/form-data");
-        if (WrongType) return WrongType;
-
-        // get request body
-        const FormData = await request.formData();
-
-        // create body
-        const body = {
-            CustomURL: FormData.get("CustomURL") as string | undefined,
-            EditPassword: FormData.get("EditPassword") as string | undefined,
-        };
-
-        const _file = FormData.get("File") as File | undefined;
-
-        if (!body.CustomURL || !body.EditPassword || !_file)
-            return new _404Page().request(request);
-
-        // get paste
-        const paste = await db.GetPasteFromURL(body.CustomURL);
-        if (!paste) return new _404Page().request(request);
-
-        // validate password
-        const admin =
-            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
-
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
-            return new Response("Invalid password", {
-                status: 302,
-                headers: {
-                    Location: "/?err=Cannot upload file: Invalid password!",
-                    "X-Entry-Error": "Cannot upload file: Invalid password!",
-                },
-            });
-
-        // upload file
-        const res = await EntryDB.Media.UploadFile(paste.CustomURL as string, _file);
-
-        // return
-        return new Response(JSON.stringify(res), {
-            status: 302,
-            headers: {
-                "Content-Type": "application/json",
-                Location: res[0] === true ? `/?msg=${res[1]}` : `/?err=${res[1]}`,
-            },
-        });
-    }
-}
-
-/**
- * @export
- * @class DeleteFile
- * @implements {Endpoint}
- */
-export class DeleteFile implements Endpoint {
-    public async request(request: Request, server: Server): Promise<Response> {
-        // handle cloud pages
-        const IncorrectInstance = await Pages.CheckInstance(request, server);
-        if (IncorrectInstance) return IncorrectInstance;
-
-        // make sure media is enabled (and exists)
-        if (!EntryDB.Media) return new _404Page().request(request);
-
-        // verify content type
-        const WrongType = VerifyContentType(request, "multipart/form-data");
-        if (WrongType) return WrongType;
-
-        // get request body
-        const FormData = await request.formData();
-
-        // create body
-        const body = {
-            CustomURL: FormData.get("CustomURL") as string | undefined,
-            EditPassword: FormData.get("EditPassword") as string | undefined,
-            File: FormData.get("File") as string | undefined,
-        };
-
-        if (!body.CustomURL || !body.EditPassword || !body.File)
-            return new _404Page().request(request);
-
-        // get paste
-        const paste = await db.GetPasteFromURL(body.CustomURL);
-        if (!paste) return new _404Page().request(request);
-
-        // validate password
-        const admin =
-            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
-
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
-            return new Response("Invalid password", {
-                status: 302,
-                headers: {
-                    Location: "/?err=Cannot delete file: Invalid password!",
-                    "X-Entry-Error": "Cannot delete file: Invalid password!",
-                },
-            });
-
-        // upload file
-        const res = await EntryDB.Media.DeleteFile(
-            paste.CustomURL as string,
-            body.File
-        );
-
-        // return
-        return new Response(JSON.stringify(res), {
-            status: 302,
-            headers: {
-                "Content-Type": "application/json",
-                Location: res[0] === true ? `/?msg=${res[1]}` : `/?err=${res[1]}`,
-            },
-        });
-    }
-}
-
-/**
- * @export
  * @class UpdateCustomDomain
  * @implements {Endpoint}
  */
@@ -1807,6 +1607,9 @@ export class UpdateCustomDomain implements Endpoint {
         });
     }
 }
+
+// ...
+import { GetFile, ListFiles, UploadFile, DeleteFile } from "../repos/Media";
 
 // default export
 export default {

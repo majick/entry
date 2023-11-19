@@ -248,7 +248,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/api/exists": { Type: "begins", Page: API.PasteExists },
         "/api/html": { Type: "begins", Page: API.GetPasteHTML },
         "/api/comments": { Type: "begins", Page: API.GetPasteComments },
-        "/api/media/file": { Type: "begins", Page: API.GetFile },
+        "/api/media/file/": { Type: "begins", Page: Pages.InspectMedia }, // alias of /f
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
@@ -306,6 +306,7 @@ export const ServerConfig: HoneybeeConfig = {
         // GET user
         "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
         "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
+        "/f/": { Type: "begins", Page: Pages.InspectMedia }, // view file
         "/paste/notifications": { Page: Pages.Notifications },
         // GET builder
         "/paste/builder": { Page: Builder.Builder },

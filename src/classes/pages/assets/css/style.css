@@ -309,6 +309,18 @@ html.dark-theme .button.border.dimmed {
     box-shadow: inset 0 0 0 1px var(--background-surface1-5);
 }
 
+button.anchor,
+.button.anchor {
+    padding: 0;
+    height: max-content !important;
+    background: transparent;
+}
+
+button.anchor:hover,
+.button.anchor:hover {
+    text-decoration: underline;
+}
+
 button.green,
 .button.green {
     color: var(--green3);
@@ -865,6 +877,7 @@ dialog {
     border: none;
     position: fixed;
     margin: auto;
+    transition: transform 0.15s;
 }
 
 dialog h4 {
@@ -877,7 +890,7 @@ dialog::backdrop {
 }
 
 dialog[open] {
-    animation: Grow 0.15s 0s running;
+    animation: Grow 0.15s 0s forwards running;
 }
 
 .editor-tab h1,
@@ -1774,7 +1787,7 @@ nav a {
 
 nav.scroll {
     background: var(--background-surface1);
-    border-color: var(--background-surface2);
+    border-color: var(--background-surface2a);
 }
 
 .hr-left {

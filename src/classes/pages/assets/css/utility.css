@@ -136,3 +136,8 @@
 .text-right {
     text-align: right;
 }
+
+/* misc */
+.full {
+    width: 100%;
+}

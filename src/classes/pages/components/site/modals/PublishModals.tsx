@@ -52,7 +52,7 @@ export default function PublishModals(props: {
                 }
             ></iframe>
 
-            <div style={{ width: "25rem", maxWidth: "100%" }}>
+            <div style={{ width: "20rem", maxWidth: "100%" }}>
                 {(props.EditingPaste === undefined && (
                     <>
                         {/* create new paste */}
