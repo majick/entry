@@ -36,7 +36,7 @@ export default function Checkbox(props: {
                     viewBox="0 0 16 16"
                     width="18"
                     height="18"
-                    aria-label={"Check Symbol"}
+                    aria-label={"Check Mark Symbol"}
                     style={{
                         fill: "var(--green)",
                     }}

@@ -325,10 +325,7 @@ export class InspectMedia implements Endpoint {
 
         // if request.headers.Accept does not include "text/html", just return the file!
         // (this means it was sent from an img element or similar)
-        if (
-            request.headers.get("Accept") &&
-            !request.headers.get("Accept")!.includes("text/html")
-        )
+        if (!request.headers.get("Accept")!.includes("text/html"))
             return new GetFile().request(request, server);
 
         // get association
@@ -551,8 +548,16 @@ export class InspectMedia implements Endpoint {
                                             <li>
                                                 <b>Link</b>:{" "}
                                                 <a
-                                                    href={`${url.origin}/f/${name}/${FileName}`}
-                                                >{`${url.origin}/f/${name}/${FileName}`}</a>
+                                                    href={url.href.replace(
+                                                        "http:",
+                                                        "https:"
+                                                    )}
+                                                >
+                                                    {url.href.replace(
+                                                        "http:",
+                                                        "https:"
+                                                    )}
+                                                </a>
                                             </li>
 
                                             <li>

@@ -312,10 +312,7 @@ function RenderPage() {
                 <button
                     id={"entry:button.PublishPaste"}
                     aria-label={"Publish Paste"}
-                    class={"tooltip-wrapper visual-active"}
-                    style={{
-                        background: "var(--green1)",
-                    }}
+                    class={"tooltip-wrapper visual-active green-cta"}
                     onClick={() => {
                         (
                             document.getElementById(

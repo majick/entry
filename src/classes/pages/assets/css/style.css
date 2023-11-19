@@ -22,6 +22,12 @@
         calc(var(--base-lit) + 0%)
     );
 
+    --background-surface0-5: hsl(
+        var(--base-hue),
+        var(--base-sat),
+        calc(var(--base-lit) var(--mod) 2% + var(--diff))
+    );
+
     --background-surface1: hsl(
         var(--base-hue),
         var(--base-sat),
@@ -69,19 +75,20 @@
 
     --text-color: hsl(208, 7%, `%);
     --text-color-faded: hsl(208, 7%, 38%);
-    --blue: #2d6886;
-    --blue1: #d9edf7;
-    --blue2: #025fb1;
-    --green: #2b542c;
-    --green1: #dff0d8;
-    --green2: #f8fdf6;
-    --green3: #0a7c00;
-    --yellow: #826430;
-    --yellow1: #f8edba;
-    --red: #a6413f;
-    --red1: #f2dede;
-    --red2: #fdf6f6;
-    --red3: #ad0008;
+    --blue: hsl(200, 50%, 35%);
+    --blue1: hsl(200, 65%, 91%);
+    --blue2: hsl(208, 98%, 35%);
+    --green: hsl(121, 32%, 25%);
+    --green0-5: hsl(103, 44%, 85%);
+    --green1: hsl(103, 44%, 89%);
+    --green2: hsl(97, 50%, 97%);
+    --green3: hsl(115, 100%, 24%);
+    --yellow: hsl(38, 46%, 35%);
+    --yellow1: hsl(49, 82%, 85%);
+    --red: hsl(1, 45%, 45%);
+    --red1: hsl(0, 43%, 91%);
+    --red2: hsl(0, 64%, 98%);
+    --red3: hsl(357, 100%, 34%);
 }
 
 .dark-theme {
@@ -91,19 +98,19 @@
 
     --text-color: hsl(204, 4%, 80%);
     --text-color-faded: hsl(207, 5%, 54%);
-    --blue: #5c8ca4;
-    --blue1: #2b383e;
-    --blue2: #4b99d1;
-    --green: #699269;
-    --green1: #2d3829;
-    --green2: #75a37126;
-    --green3: #aee0ae;
-    --yellow: #d1bb94;
-    --yellow1: #4e4632;
-    --red: #bb8483;
-    --red1: #4c2a2a;
-    --red2: #a3717126;
-    --red3: #e0aeb4;
+    --blue: hsl(200, 28%, 50%);
+    --blue1: hsl(199, 18%, 21%);
+    --blue2: hsl(205, 59%, 56%);
+    --green: hsl(120, 16%, 49%);
+    --green1: hsl(104, 15%, 19%);
+    --green2: hsla(115, 21%, 54%, 0.149);
+    --green3: hsl(120, 45%, 78%);
+    --yellow: hsl(38, 40%, 70%);
+    --yellow1: hsl(43, 22%, 25%);
+    --red: hsl(1, 29%, 62%);
+    --red1: hsl(0, 29%, 23%);
+    --red2: hsla(0, 21%, 54%, 0.149);
+    --red3: hsl(353, 45%, 78%);
 }
 
 .purple-theme {
@@ -209,7 +216,7 @@ svg {
     min-height: 15rem;
 }
 
-@media screen and (max-height: 900px) {
+@media screen and (max-width: 900px) {
     .tab-container {
         max-height: 65vh;
         padding: 1rem;
@@ -266,12 +273,12 @@ button.secondary:hover,
 
 button.tertiary,
 .button.tertiary {
-    background: var(--background-surface1-5a);
+    background: var(--background-surface1);
 }
 
 button.tertiary:hover,
 .button.tertiary:hover {
-    background: var(--background-surface1a);
+    background: var(--background-surface0-5);
 }
 
 button.border,
@@ -324,6 +331,21 @@ button.anchor:hover,
 button.green,
 .button.green {
     color: var(--green3);
+}
+
+button.green-cta,
+.button.green-cta {
+    background: var(--green1) !important;
+}
+
+button.green-cta:hover,
+.button.green-cta:hover {
+    background: var(--green0-5) !important;
+}
+
+html.dark-theme button.green-cta:hover,
+html.dark-theme .button.green-cta:hover {
+    background: var(--green2) !important;
 }
 
 button.red,
