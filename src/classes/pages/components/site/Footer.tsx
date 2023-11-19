@@ -1,19 +1,10 @@
 import ToggleTheme from "./ToggleTheme";
 import Modal from "./modals/Modal";
 
-import type { Paste } from "../../../db/objects/Paste";
 import EntryDB from "../../../db/EntryDB";
 import { HoneybeeConfig } from "honeybee";
 
-import { db } from "../../api/API";
-
-// get version
-let version: Partial<Paste> | undefined;
-
-if (!EntryDB.config) {
-    const _r = await EntryDB.GetConfig();
-    if (_r && db) version = await db.GetPasteFromURL("v");
-}
+import pack from "../../../../../package.json";
 
 // plugin footer load
 const FooterExtras: string[] = [];
@@ -123,9 +114,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 >
                     <a
                         href="https://codeberg.org/hkau/entry"
-                        title={`Running Entry${
-                            version ? ` v${version!.Content}` : ""
-                        }`}
+                        title={`Running Entry${pack ? ` v${pack.version}` : ""}`}
                     >
                         {EntryDB.config.name || "Entry"}
                     </a>{" "}

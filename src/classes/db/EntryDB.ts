@@ -97,6 +97,8 @@ export default class EntryDB {
         this.db = db;
 
         (async () => {
+            await EntryDB.GetConfig(); // fill config
+
             // create tables
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
@@ -138,8 +140,6 @@ export default class EntryDB {
             // static init
             if (!EntryDB.StaticInit) {
                 EntryDB.StaticInit = true;
-
-                await EntryDB.GetConfig(); // fill config
 
                 // ...inits
                 await EntryDB.CreateExpiry();

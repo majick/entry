@@ -102,15 +102,19 @@ export default class PasteConnection {
         // fetch paste content from the db
         const res = (await SQL.QueryOBJ({
             db: this.Database.db,
-            query: 'SELECT "Content" FROM "Pastes" WHERE "CustomURL" = ?',
+            query: 'SELECT "Content", "EditPassword" FROM "Pastes" WHERE "CustomURL" = ?',
             params: [this._name],
             get: true,
             use: "Query",
-        })) as { Content: string };
+        })) as { Content: string; EditPassword: string };
 
         // if the content differs from what we have, sync paste
         // (or if this._paste is undefined!)
-        if (!this._paste || res.Content !== this._paste!.Content)
+        if (
+            !this._paste ||
+            res.Content !== this._paste!.Content ||
+            res.EditPassword !== this._paste.EditPassword
+        )
             return await this.Sync();
 
         // return

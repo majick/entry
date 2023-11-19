@@ -689,7 +689,9 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         if (!EditMode) {
             // change global Page.Element
             (window as any).Builder.Page.Element =
-                element.querySelector(`#\\${doc.Pages[CurrentPage].ID!}`) || element;
+                element.querySelector(
+                    `#\\${doc.Pages[CurrentPage].ID!.replaceAll(":", "")}`
+                ) || element;
 
             if (!(window as any).Builder.Page.Element)
                 (window as any).Builder.Page.Element = element;

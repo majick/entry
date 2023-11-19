@@ -21,8 +21,8 @@ import BaseParser from "../../db/helpers/BaseParser";
 import type { Paste, PasteMetadata } from "../../db/objects/Paste";
 import EntryDB from "../../db/EntryDB";
 
+await EntryDB.GetConfig();
 export const db = new EntryDB();
-const GlobalEntryDB = db; // alias of db
 
 import pack from "../../../../package.json";
 import { Config } from "../../..";
