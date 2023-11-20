@@ -1079,7 +1079,6 @@ export default class Home implements Endpoint {
                                                         class={"round green-cta"}
                                                         id={"entry:button.Submit"}
                                                         style={{ fontWeight: "500" }}
-                                                        disabled
                                                     >
                                                         <svg
                                                             xmlns="http://www.w3.org/2000/svg"
