@@ -1726,12 +1726,7 @@ export class PasteCommentsPage implements Endpoint {
         // return
         return new Response(
             Renderer.Render(
-                <div
-                    class="builder:page"
-                    style={{
-                        gap: "0",
-                    }}
-                >
+                <>
                     <TopNav
                         breadcrumbs={[
                             "paste",
@@ -1811,159 +1806,165 @@ export class PasteCommentsPage implements Endpoint {
                         </a>
                     </TopNav>
 
-                    <div
-                        className="tab-container editor-tab page-content"
-                        style={{
-                            marginBottom: "0",
-                        }}
-                    >
-                        <main
+                    <div className="flex flex-column g-8">
+                        <div
+                            className="card secondary flex justify-center"
                             style={{
-                                maxWidth: "100%",
+                                padding: "calc(var(--u-12) * 4) var(--u-12)",
                             }}
                         >
+                            <h1 class={"no-margin"}>{name}</h1>
+                        </div>
+
+                        <main class={"small flex flex-column g-4"}>
+                            <ReposNav name={name} current="Home" />
+
                             <div
                                 class={
-                                    "flex flex-wrap justify-space-between align-center g-4"
+                                    "card round border secondary flex mobile-flex-column g-4"
                                 }
                             >
-                                <span>
-                                    <b>{result.Comments}</b> comment
-                                    {(result.Comments || 0) > 1
-                                        ? "s"
-                                        : (result.Comments || 0) === 1
-                                        ? ""
-                                        : "s"}
-                                    , posting as{" "}
-                                    {(PostingAs && (
-                                        <>
-                                            <b>{PostingAs}</b> (
-                                            <a
-                                                href="#entry:logout"
-                                                class={"modal:entry:button.logout"}
-                                            >
-                                                logout
-                                            </a>
-                                            )
-                                        </>
-                                    )) || (
-                                        <>
-                                            <b>anonymous</b> (
-                                            <a
-                                                href="#entry:login"
-                                                class={"modal:entry:button.login"}
-                                            >
-                                                login
-                                            </a>
-                                            )
-                                        </>
-                                    )}
-                                </span>
+                                <a
+                                    href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
+                                    className="button full round border"
+                                >
+                                    Add Comment
+                                </a>
 
-                                <div class={"mobile-flex-center flex flex-wrap g-4"}>
-                                    <a
-                                        href={`${HostnameURL}?CommentOn=${result.CustomURL}`}
-                                        className="button secondary round"
-                                    >
-                                        Add Comment
-                                    </a>
+                                {
+                                    // private comments cannot be privately commented on
+                                    // ...because then the original paste owner wouldn't
+                                    // be able to see the comments deeper in the thread!
+                                    // cannot post private comments if you're not associated with a paste!
+                                    (!result.Metadata ||
+                                        !result.Metadata.Comments ||
+                                        !result.Metadata.Comments
+                                            .IsPrivateMessage) &&
+                                        PostingAs !== undefined && (
+                                            <a
+                                                href={`${HostnameURL}?CommentOn=${result.CustomURL}&pm=true`}
+                                                className="button full round border"
+                                            >
+                                                Private Comment
+                                            </a>
+                                        )
+                                }
 
-                                    {
-                                        // private comments cannot be privately commented on
-                                        // ...because then the original paste owner wouldn't
-                                        // be able to see the comments deeper in the thread!
-                                        // cannot post private comments if you're not associated with a paste!
-                                        (!result.Metadata ||
-                                            !result.Metadata.Comments ||
-                                            !result.Metadata.Comments
-                                                .IsPrivateMessage) &&
-                                            PostingAs !== undefined && (
+                                {(search.get("edit") !== "true" && (
+                                    <>
+                                        {PostingAs !== undefined ? (
+                                            (result.Metadata &&
+                                                result.Metadata.Comments &&
+                                                PostingAs !==
+                                                    result.Metadata.Owner &&
+                                                PostingAs !==
+                                                    // if we're posting as the paste that
+                                                    // this comment (or its parent) is in reply to,
+                                                    // allow manage access
+                                                    result.Metadata.Comments
+                                                        .ParentCommentOn && (
+                                                    <button
+                                                        // show logout button if we're already associated with a paste
+                                                        class={
+                                                            "button full round border modal:entry:button.logout"
+                                                        }
+                                                    >
+                                                        Manage Comments
+                                                    </button>
+                                                )) || (
                                                 <a
-                                                    href={`${HostnameURL}?CommentOn=${result.CustomURL}&pm=true`}
-                                                    className="button secondary round"
+                                                    // show edit button if we're associated with this paste
+                                                    class={
+                                                        "button full round border"
+                                                    }
+                                                    href={"?edit=true"}
                                                 >
-                                                    Private Comment
+                                                    Manage Comments
                                                 </a>
                                             )
-                                    }
+                                        ) : (
+                                            <button
+                                                // show login button if we're not already associated with a paste
+                                                class={
+                                                    "button full round border modal:entry:button.login"
+                                                }
+                                            >
+                                                Manage Comments
+                                            </button>
+                                        )}
+                                    </>
+                                )) || (
+                                    <a
+                                        href={"?edit=false"}
+                                        className="button full round border"
+                                    >
+                                        Stop Editing
+                                    </a>
+                                )}
+                            </div>
 
-                                    {(search.get("edit") !== "true" && (
-                                        <>
-                                            {PostingAs !== undefined ? (
-                                                (result.Metadata &&
-                                                    result.Metadata.Comments &&
-                                                    PostingAs !==
-                                                        result.Metadata.Owner &&
-                                                    PostingAs !==
-                                                        // if we're posting as the paste that
-                                                        // this comment (or its parent) is in reply to,
-                                                        // allow manage access
-                                                        result.Metadata.Comments
-                                                            .ParentCommentOn && (
-                                                        <button
-                                                            // show logout button if we're already associated with a paste
-                                                            class={
-                                                                "tertiary round modal:entry:button.logout"
-                                                            }
-                                                        >
-                                                            Manage
-                                                        </button>
-                                                    )) || (
-                                                    <a
-                                                        // show edit button if we're associated with this paste
-                                                        class={
-                                                            "button round tertiary"
-                                                        }
-                                                        href={"?edit=true"}
-                                                    >
-                                                        Manage
-                                                    </a>
-                                                )
-                                            ) : (
-                                                <button
-                                                    // show login button if we're not already associated with a paste
+                            <div class={"card border secondary round NoPadding"}>
+                                <div className="card round header">
+                                    <b>Thread</b>
+                                </div>
+
+                                <div className="card round secondary has-header flex mobile-flex-center align-center justify-space-between g-4 flex-wrap">
+                                    <span>
+                                        <b>{result.Comments}</b> comment
+                                        {(result.Comments || 0) > 1
+                                            ? "s"
+                                            : (result.Comments || 0) === 1
+                                            ? ""
+                                            : "s"}
+                                        , posting as{" "}
+                                        {(PostingAs && (
+                                            <>
+                                                <b>{PostingAs}</b> (
+                                                <a
+                                                    href="#entry:logout"
                                                     class={
-                                                        "tertiary round modal:entry:button.login"
+                                                        "modal:entry:button.logout"
                                                     }
                                                 >
-                                                    Manage
-                                                </button>
-                                            )}
-                                        </>
-                                    )) || (
+                                                    logout
+                                                </a>
+                                                )
+                                            </>
+                                        )) || (
+                                            <>
+                                                <b>anonymous</b> (
+                                                <a
+                                                    href="#entry:login"
+                                                    class={
+                                                        "modal:entry:button.login"
+                                                    }
+                                                >
+                                                    login
+                                                </a>
+                                                )
+                                            </>
+                                        )}
+                                    </span>
+
+                                    {PreviousInThread && (
                                         <a
-                                            href={"?edit=false"}
-                                            className="button round tertiary"
+                                            href={`/paste/comments/${PreviousInThread}`}
+                                            class={"button secondary round"}
                                         >
-                                            Stop Editing
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Undo Symbol"}
+                                            >
+                                                <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                            </svg>
+                                            up thread
                                         </a>
                                     )}
                                 </div>
                             </div>
-
-                            <hr />
-
-                            {PreviousInThread && (
-                                <>
-                                    <a
-                                        href={`/paste/comments/${PreviousInThread}`}
-                                        class={"button secondary round"}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            aria-label={"Undo Symbol"}
-                                        >
-                                            <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
-                                        </svg>
-                                        up thread
-                                    </a>
-
-                                    <hr />
-                                </>
-                            )}
 
                             <div class={"flex flex-column g-4"}>
                                 {(search.get("err") && (
@@ -2025,45 +2026,11 @@ export class PasteCommentsPage implements Endpoint {
 
                                     // return
                                     return (
-                                        <div
-                                            class={"card flex justify-center g-10"}
-                                            style={{
-                                                borderRadius: "0.4rem",
-                                            }}
-                                        >
-                                            {/* social */}
-                                            {CommentOwner &&
-                                                CommentOwner.Metadata &&
-                                                CommentOwner.Metadata.SocialIcon && (
-                                                    <div
-                                                        style={{
-                                                            width: "20%",
-                                                        }}
-                                                    >
-                                                        <img
-                                                            title={
-                                                                CommentOwner.Metadata
-                                                                    .Owner
-                                                            }
-                                                            class={
-                                                                "card border round NoPadding"
-                                                            }
-                                                            src={
-                                                                CommentOwner.Metadata
-                                                                    .SocialIcon
-                                                            }
-                                                            alt={
-                                                                CommentOwner.Metadata
-                                                                    .Owner
-                                                            }
-                                                        />
-                                                    </div>
-                                                )}
-
+                                        <div class={"comment"}>
                                             {/* main stuff */}
                                             <div
                                                 class={
-                                                    "flex flex-column justify-space-between"
+                                                    "card border round NoPadding flex flex-column justify-space-between"
                                                 }
                                                 style={{
                                                     width: "100%",
@@ -2071,127 +2038,168 @@ export class PasteCommentsPage implements Endpoint {
                                             >
                                                 {/* stuff */}
                                                 <div>
-                                                    <ul
-                                                        className="__footernav"
-                                                        style={{
-                                                            paddingLeft: 0,
-                                                            flexWrap: "wrap",
-                                                        }}
-                                                    >
-                                                        <li>
-                                                            <b
-                                                                class={
-                                                                    "utc-date-to-localize"
-                                                                }
-                                                            >
-                                                                {new Date(
-                                                                    comment.PubDate ||
-                                                                        0
-                                                                ).toUTCString()}
-                                                            </b>
-                                                        </li>
-
-                                                        {comment.Associated && (
-                                                            <li
-                                                                style={{
-                                                                    color: "var(--text-color-faded)",
-                                                                }}
-                                                            >
-                                                                posted by{" "}
-                                                                <a
+                                                    <div class={"card round header"}>
+                                                        <ul
+                                                            className="__footernav"
+                                                            style={{
+                                                                paddingLeft: 0,
+                                                                margin: 0,
+                                                                flexWrap: "wrap",
+                                                            }}
+                                                        >
+                                                            <li>
+                                                                <b
                                                                     class={
-                                                                        "chip solid"
-                                                                    }
-                                                                    href={`/${comment.Associated}`}
-                                                                    style={{
-                                                                        color:
-                                                                            // if comment poster is the paste owner, make color yellow
-                                                                            // otherwise if comment poster is current user, make color green
-                                                                            comment.Metadata!
-                                                                                .Owner ===
-                                                                            result.CustomURL
-                                                                                ? "var(--yellow)"
-                                                                                : PostingAs ===
-                                                                                  comment.Associated
-                                                                                ? "var(--green)"
-                                                                                : "inherit",
-                                                                    }}
-                                                                    title={
-                                                                        PostingAs ===
-                                                                        comment.Associated
-                                                                            ? "You"
-                                                                            : ""
+                                                                        "utc-date-to-localize"
                                                                     }
                                                                 >
-                                                                    {
-                                                                        comment.Associated
-                                                                    }
-                                                                </a>
+                                                                    {new Date(
+                                                                        comment.PubDate ||
+                                                                            0
+                                                                    ).toUTCString()}
+                                                                </b>
                                                             </li>
-                                                        )}
 
-                                                        {comment.IsPM === "true" && (
-                                                            <li
-                                                                title={
-                                                                    "This is a private comment, but it can still be seen by people with a direct link."
-                                                                }
-                                                            >
-                                                                <span
-                                                                    class={"chip"}
+                                                            {comment.Associated && (
+                                                                <li
                                                                     style={{
                                                                         color: "var(--text-color-faded)",
                                                                     }}
                                                                 >
-                                                                    🔒 private
-                                                                </span>
-                                                            </li>
-                                                        )}
-                                                    </ul>
+                                                                    posted by{" "}
+                                                                    <a
+                                                                        class={
+                                                                            "chip solid"
+                                                                        }
+                                                                        href={`/${comment.Associated}`}
+                                                                        style={{
+                                                                            color:
+                                                                                // if comment poster is the paste owner, make color yellow
+                                                                                // otherwise if comment poster is current user, make color green
+                                                                                comment.Metadata!
+                                                                                    .Owner ===
+                                                                                result.CustomURL
+                                                                                    ? "var(--yellow)"
+                                                                                    : PostingAs ===
+                                                                                      comment.Associated
+                                                                                    ? "var(--green)"
+                                                                                    : "inherit",
+                                                                        }}
+                                                                        title={
+                                                                            PostingAs ===
+                                                                            comment.Associated
+                                                                                ? "You"
+                                                                                : ""
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            comment.Associated
+                                                                        }
+                                                                    </a>
+                                                                </li>
+                                                            )}
+
+                                                            {comment.IsPM ===
+                                                                "true" && (
+                                                                <li
+                                                                    title={
+                                                                        "This is a private comment, but it can still be seen by people with a direct link."
+                                                                    }
+                                                                >
+                                                                    <span
+                                                                        class={
+                                                                            "chip"
+                                                                        }
+                                                                        style={{
+                                                                            color: "var(--text-color-faded)",
+                                                                        }}
+                                                                    >
+                                                                        🔒 private
+                                                                    </span>
+                                                                </li>
+                                                            )}
+                                                        </ul>
+                                                    </div>
 
                                                     <div
+                                                        className="card NoPadding flex flex-wrap"
                                                         style={{
-                                                            maxHeight: "50rem",
-                                                            overflow: "auto",
+                                                            borderBottom:
+                                                                "solid 1px var(--background-surface2a)",
                                                         }}
-                                                        dangerouslySetInnerHTML={{
-                                                            __html: comment.Content!,
-                                                        }}
-                                                    />
+                                                    >
+                                                        {/* social */}
+                                                        {CommentOwner &&
+                                                            CommentOwner.Metadata &&
+                                                            CommentOwner.Metadata
+                                                                .SocialIcon && (
+                                                                <div
+                                                                    style={{
+                                                                        width: "20%",
+                                                                        padding:
+                                                                            "var(--u-10)",
+                                                                        borderRight:
+                                                                            "solid 1px var(--background-surface2a)",
+                                                                    }}
+                                                                >
+                                                                    <img
+                                                                        title={
+                                                                            CommentOwner
+                                                                                .Metadata
+                                                                                .Owner
+                                                                        }
+                                                                        class={
+                                                                            "card border round NoPadding"
+                                                                        }
+                                                                        src={
+                                                                            CommentOwner
+                                                                                .Metadata
+                                                                                .SocialIcon
+                                                                        }
+                                                                        alt={
+                                                                            CommentOwner
+                                                                                .Metadata
+                                                                                .Owner
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                            )}
 
-                                                    {comment.Comments !== 0 && (
-                                                        <div>
-                                                            <hr />
-
-                                                            <a
-                                                                href={`/paste/comments/${comment.CustomURL}`}
-                                                            >
-                                                                View{" "}
-                                                                <b>
-                                                                    {
-                                                                        comment.Comments
-                                                                    }
-                                                                </b>{" "}
-                                                                repl
-                                                                {comment.Comments! >
-                                                                1
-                                                                    ? "ies"
-                                                                    : comment.Comments ===
-                                                                      1
-                                                                    ? "y"
-                                                                    : "ies"}
-                                                            </a>
-                                                        </div>
-                                                    )}
+                                                        {/* content */}
+                                                        <div
+                                                            style={{
+                                                                maxHeight: "50rem",
+                                                                overflow: "auto",
+                                                                width:
+                                                                    CommentOwner &&
+                                                                    CommentOwner.Metadata &&
+                                                                    CommentOwner
+                                                                        .Metadata
+                                                                        .SocialIcon
+                                                                        ? "80%"
+                                                                        : "100%",
+                                                                padding:
+                                                                    "var(--u-10)",
+                                                                background:
+                                                                    "var(--background-surface1)",
+                                                            }}
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: comment.Content!,
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
 
                                                 {/* actions bar */}
-                                                <div>
-                                                    <hr />
-
-                                                    <div class={"flex g-4"}>
+                                                <div
+                                                    class={
+                                                        "card round has-header flex align-center justify-space-between flex-wrap g-4"
+                                                    }
+                                                >
+                                                    <div className="flex g-4">
                                                         <a
                                                             class={
-                                                                "chip button secondary"
+                                                                "button round border"
                                                             }
                                                             href={`${HostnameURL}?CommentOn=${comment.CustomURL}`}
                                                         >
@@ -2211,7 +2219,7 @@ export class PasteCommentsPage implements Endpoint {
 
                                                         <a
                                                             class={
-                                                                "chip button secondary"
+                                                                "button round border"
                                                             }
                                                             href={`/${comment.CustomURL}`}
                                                             target={"_blank"}
@@ -2256,7 +2264,7 @@ export class PasteCommentsPage implements Endpoint {
 
                                                                 <button
                                                                     class={
-                                                                        "chip solid button secondary"
+                                                                        "button border red round"
                                                                     }
                                                                 >
                                                                     <svg
@@ -2275,6 +2283,19 @@ export class PasteCommentsPage implements Endpoint {
                                                             </form>
                                                         )}
                                                     </div>
+
+                                                    <a
+                                                        href={`/paste/comments/${comment.CustomURL}`}
+                                                    >
+                                                        View{" "}
+                                                        <b>{comment.Comments}</b>{" "}
+                                                        repl
+                                                        {comment.Comments! > 1
+                                                            ? "ies"
+                                                            : comment.Comments === 1
+                                                            ? "y"
+                                                            : "ies"}
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -2289,7 +2310,7 @@ export class PasteCommentsPage implements Endpoint {
 
                     {/* curiosity */}
                     <Curiosity Association={_Association} />
-                </div>,
+                </>,
                 <>
                     <title>Comments on {result.CustomURL}</title>
                     <link rel="icon" href="/favicon" />

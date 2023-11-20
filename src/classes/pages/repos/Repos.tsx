@@ -285,7 +285,10 @@ export class RepoView implements Endpoint {
                                         </li>
 
                                         <li>
-                                            <b>Comments</b>: {result.Comments}
+                                            <b>Comments</b>:{" "}
+                                            <a href={`/paste/comments/${name}`}>
+                                                {result.Comments}
+                                            </a>
                                         </li>
 
                                         <li>

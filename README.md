@@ -6,7 +6,7 @@ Certain features of this README only work on Entry! You can view this README at 
 ***
 </comment>
 
-Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs and [many more features](#features).
+Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features).
 
 Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Entry also supports using a PostgreSQL database through config `pg`.
 

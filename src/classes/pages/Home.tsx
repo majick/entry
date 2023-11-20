@@ -523,7 +523,6 @@ export default class Home implements Endpoint {
                                                 class={"round green-cta"}
                                                 id={"entry:button.Submit"}
                                                 style={{ fontWeight: "500" }}
-                                                disabled
                                             >
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
@@ -1113,7 +1112,7 @@ export default class Home implements Endpoint {
                                                                 width="16"
                                                                 height="16"
                                                                 style={{
-                                                                    marginTop: "4px",
+                                                                    marginTop: "2px",
                                                                 }}
                                                                 aria-label={
                                                                     "Repo Symbol"

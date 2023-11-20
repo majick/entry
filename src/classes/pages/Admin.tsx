@@ -1557,9 +1557,9 @@ export class ViewReport implements Endpoint {
 
         // check if report is archived!
         const ArchivalLog = await EntryDB.Logs.QueryLogs(
-            `"Type" = \'report\' AND "Content" = "archive;${
+            `"Type" = \'report\' AND "Content" = 'archive;${
                 ReportLog[2].Content.split(";")[2]
-            }"`
+            }'`
         );
 
         // attempt to get report

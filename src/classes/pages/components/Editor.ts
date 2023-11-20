@@ -367,10 +367,6 @@ export default function CreateEditor(ElementID: string, content: string) {
                 // update the hidden contentInput element so we can save the paste
                 (document.getElementById("contentInput") as HTMLInputElement).value =
                     encodeURIComponent(content); // encoded so we can send it through form
-
-                document
-                    .getElementById("entry:button.Submit")!
-                    .removeAttribute("disabled");
             }
         }),
         EditorState.allowMultipleSelections.of(true),
