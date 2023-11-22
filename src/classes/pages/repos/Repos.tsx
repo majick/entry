@@ -89,7 +89,7 @@ export function ReposNav(props: { name: string; current: string }) {
             {(!EntryDB.config.app ||
                 EntryDB.config.app.enable_paste_settings !== false) && (
                 <a
-                    href={`/paste/settings/${props.name}`}
+                    href={`/s/${props.name}`}
                     className={`${
                         props.current === "Settings" ? "secondary " : ""
                     }button round full`}
@@ -319,33 +319,42 @@ export class RepoView implements Endpoint {
                                         <>
                                             <hr style={{ margin: 0 }} />
 
-                                            {BuilderDocument.Pages.map((Page) => (
-                                                <a
-                                                    href={`/${name}#/${Page.ID}`}
-                                                    target={"_blank"}
-                                                    className="button round full justify-space-between flex-wrap"
-                                                >
-                                                    <div className="flex align-center g-4">
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                            aria-label={
-                                                                "File Link Symbol"
-                                                            }
-                                                        >
-                                                            <path d="M2 1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 12.25 15h-7a.75.75 0 0 1 0-1.5h7a.25.25 0 0 0 .25-.25V6H9.75A1.75 1.75 0 0 1 8 4.25V1.5H3.75a.25.25 0 0 0-.25.25V4.5a.75.75 0 0 1-1.5 0Zm-.5 10.487v1.013a.75.75 0 0 1-1.5 0v-1.012a3.748 3.748 0 0 1 3.77-3.749L4 8.49V6.573a.25.25 0 0 1 .42-.183l2.883 2.678a.25.25 0 0 1 0 .366L4.42 12.111a.25.25 0 0 1-.42-.183V9.99l-.238-.003a2.25 2.25 0 0 0-2.262 2.25Zm8-10.675V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
-                                                        </svg>
-                                                        {Page.ID}
-                                                    </div>
+                                            {BuilderDocument.Pages.map((Page) =>
+                                                Page.ID !== "node:removed" ? (
+                                                    <a
+                                                        href={`/${name}#/${Page.ID}`}
+                                                        target={"_blank"}
+                                                        className="button round full justify-space-between flex-wrap"
+                                                    >
+                                                        <div className="flex align-center g-4">
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 16 16"
+                                                                width="16"
+                                                                height="16"
+                                                                aria-label={
+                                                                    "File Link Symbol"
+                                                                }
+                                                            >
+                                                                <path d="M2 1.75C2 .784 2.784 0 3.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 12.25 15h-7a.75.75 0 0 1 0-1.5h7a.25.25 0 0 0 .25-.25V6H9.75A1.75 1.75 0 0 1 8 4.25V1.5H3.75a.25.25 0 0 0-.25.25V4.5a.75.75 0 0 1-1.5 0Zm-.5 10.487v1.013a.75.75 0 0 1-1.5 0v-1.012a3.748 3.748 0 0 1 3.77-3.749L4 8.49V6.573a.25.25 0 0 1 .42-.183l2.883 2.678a.25.25 0 0 1 0 .366L4.42 12.111a.25.25 0 0 1-.42-.183V9.99l-.238-.003a2.25 2.25 0 0 0-2.262 2.25Zm8-10.675V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                            </svg>
+                                                            {Page.ID}
+                                                        </div>
 
-                                                    <span>
-                                                        {Page.Children.length}{" "}
-                                                        children
-                                                    </span>
-                                                </a>
-                                            ))}
+                                                        {Page.Children && (
+                                                            <span>
+                                                                {
+                                                                    Page.Children
+                                                                        .length
+                                                                }{" "}
+                                                                children
+                                                            </span>
+                                                        )}
+                                                    </a>
+                                                ) : (
+                                                    <></>
+                                                )
+                                            )}
                                         </>
                                     )}
                                 </div>

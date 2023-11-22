@@ -616,6 +616,7 @@ export default class EntryDB {
                             (await request).headers.get("X-Paste-GroupName") || "",
                         HostServer: server,
                         Views: 0,
+                        Metadata: { Version: 1, Owner: PasteURL },
                     });
                 else return resolve(undefined);
             }

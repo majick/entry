@@ -1861,6 +1861,7 @@ export class PasteCommentsPage implements Endpoint {
                                                 width="16"
                                                 height="16"
                                                 aria-label={"Undo Symbol"}
+                                                style={{ userSelect: "none" }}
                                             >
                                                 <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
                                             </svg>
@@ -2272,11 +2273,13 @@ export class UserSettings implements Endpoint {
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
-        if (name.startsWith("paste/settings/"))
+
+        if (name.startsWith("s/")) name = name.split("s/")[1];
+        else if (name.startsWith("paste/settings/"))
             name = name.split("paste/settings/")[1];
 
         // if no paste is provided, show global settings
-        if (name === "paste/settings") {
+        if (name === "s") {
             // get association
             const _ip = server !== undefined ? server.requestIP(request) : null;
             const Association = await GetAssociation(request, _ip);
@@ -2320,6 +2323,7 @@ export class UserSettings implements Endpoint {
                                                 width="16"
                                                 height="16"
                                                 aria-label={"Undo Symbol"}
+                                                style={{ userSelect: "none" }}
                                             >
                                                 <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
                                             </svg>
@@ -2471,6 +2475,7 @@ export class UserSettings implements Endpoint {
                                                 width="16"
                                                 height="16"
                                                 aria-label={"Undo Symbol"}
+                                                style={{ userSelect: "none" }}
                                             >
                                                 <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
                                             </svg>
@@ -2482,7 +2487,7 @@ export class UserSettings implements Endpoint {
                                         Paste settings require the paste edit code to
                                         save. If you want to change how this paste
                                         looks for you, view{" "}
-                                        <a href={"/paste/settings"}>User Settings</a>
+                                        <a href={"/s"}>User Settings</a>
                                     </p>
 
                                     <hr />

@@ -304,7 +304,8 @@ export const ServerConfig: HoneybeeConfig = {
         // (any) plugins
         ...plugins,
         // GET user
-        "/paste/settings": { Type: "begins", Page: Pages.UserSettings },
+        "/paste/settings": { Type: "begins", Page: Pages.UserSettings }, // alias of /s
+        "/s": { Type: "begins", Page: Pages.UserSettings },
         "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
         "/f/": { Type: "begins", Page: Pages.InspectMedia }, // view file
         "/paste/notifications": { Page: Pages.Notifications },

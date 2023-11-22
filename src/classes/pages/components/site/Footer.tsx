@@ -64,7 +64,7 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                 </li>
 
                 <li>
-                    <a href="/paste/settings">settings</a>
+                    <a href="/s">settings</a>
                 </li>
 
                 {EntryDB.config.app &&
