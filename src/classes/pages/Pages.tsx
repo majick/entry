@@ -2278,7 +2278,6 @@ export class UserSettings implements Endpoint {
         else if (name.startsWith("paste/settings/"))
             name = name.split("paste/settings/")[1];
 
-        // if name doesn't include "/", show paste view page
         if (!url.pathname.startsWith("/s/") && name !== "s")
             return await new GetPasteFromURL().request(request, server);
 

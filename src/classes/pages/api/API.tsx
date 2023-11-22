@@ -429,16 +429,16 @@ export class CreatePaste implements Endpoint {
                 // update curiosity
                 if (EntryDB.config.app && EntryDB.config.app.curiosity)
                     await fetch(
-                        `${EntryDB.config.app.curiosity.host}/api/profiles/create`,
+                        `${EntryDB.config.app.curiosity.host}/api/profiles/create?c=json`,
                         {
                             method: "POST",
-                            body: [
-                                `APIKey=${EntryDB.config.app.curiosity.api_key}`,
-                                `ID=${body.CustomURL}`,
-                                `Type=entry_paste_user`,
-                            ].join("&"),
+                            body: JSON.stringify({
+                                APIKey: EntryDB.config.app.curiosity.api_key,
+                                ID: body.CustomURL,
+                                Type: "entry_paste_user",
+                            }),
                             headers: {
-                                "Content-Type": "application/x-www-form-urlencoded",
+                                "Content-Type": "application/json",
                             },
                         }
                     );
@@ -1186,17 +1186,20 @@ export class PasteLogin implements Endpoint {
 
         // create profile
         if (EntryDB.config.app && EntryDB.config.app.curiosity)
-            await fetch(`${EntryDB.config.app.curiosity.host}/api/profiles/create`, {
-                method: "POST",
-                body: [
-                    `APIKey=${EntryDB.config.app.curiosity.api_key}`,
-                    `ID=${paste.CustomURL}`,
-                    `Type=entry_paste_user`,
-                ].join("&"),
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
+            await fetch(
+                `${EntryDB.config.app.curiosity.host}/api/profiles/create?c=json`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        APIKey: EntryDB.config.app.curiosity.api_key,
+                        ID: body.CustomURL,
+                        Type: "entry_paste_user",
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
         // return
         return new Response(paste.CustomURL, {
@@ -1291,16 +1294,19 @@ export class PasteLogout implements Endpoint {
 
         // delete profile
         if (EntryDB.config.app && EntryDB.config.app.curiosity)
-            await fetch(`${EntryDB.config.app.curiosity.host}/api/profiles/delete`, {
-                method: "POST",
-                body: [
-                    `APIKey=${EntryDB.config.app.curiosity.api_key}`,
-                    `ID=${paste.CustomURL}`,
-                ].join("&"),
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-            });
+            await fetch(
+                `${EntryDB.config.app.curiosity.host}/api/profiles/delete?c=json`,
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        APIKey: EntryDB.config.app.curiosity.api_key,
+                        ID: paste.CustomURL,
+                    }),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
         // return
         return new Response(paste.CustomURL, {

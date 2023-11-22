@@ -7,16 +7,16 @@
 import { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import { GetAssociation, PageHeaders } from "../api/API";
+import { CheckInstance, Curiosity, db } from "../Pages";
 import BaseParser from "../../db/helpers/BaseParser";
 import { Paste } from "../../db/objects/Paste";
-import { CheckInstance, db } from "../Pages";
 import EntryDB from "../../db/EntryDB";
 
 // import components
 import { BuilderDocument } from "../components/builder/schema";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
-import { PageHeaders } from "../api/API";
 
 // nav component
 export function ReposNav(props: { name: string; current: string }) {
@@ -125,6 +125,10 @@ export class RepoView implements Endpoint {
         // handle cloud pages
         const IncorrectInstance = await CheckInstance(request, server);
         if (IncorrectInstance) return IncorrectInstance;
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
@@ -413,6 +417,9 @@ export class RepoView implements Endpoint {
                             )}
                         </main>
                     </div>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
                 </>,
                 <>
                     <title>
@@ -443,6 +450,10 @@ export class RevisionsList implements Endpoint {
         // handle cloud pages
         const IncorrectInstance = await CheckInstance(request, server);
         if (IncorrectInstance) return IncorrectInstance;
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
@@ -514,6 +525,9 @@ export class RevisionsList implements Endpoint {
                             </div>
                         </main>
                     </div>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
                 </>,
                 <>
                     <title>

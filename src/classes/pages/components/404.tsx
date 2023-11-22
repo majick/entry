@@ -6,7 +6,8 @@ import EntryDB from "../../db/EntryDB";
 import { Config } from "../../..";
 let config: Config;
 
-import { DefaultHeaders } from "../api/API";
+import { DefaultHeaders, GetAssociation } from "../api/API";
+import { Curiosity } from "../Pages";
 
 /**
  * @function _404Page
@@ -14,14 +15,12 @@ import { DefaultHeaders } from "../api/API";
  * @export
  * @return {*}
  */
-export function _404Page(): any {
+export function _404Page(props: { pathname?: string }): any {
     return (
         <main>
             <div
+                class={"flex flex-column g-4 align-center"}
                 style={{
-                    display: "grid",
-                    flexDirection: "column",
-                    placeItems: "center",
                     margin: "3rem 0 3rem 0",
                 }}
             >
@@ -48,13 +47,23 @@ export function _404Page(): any {
  */
 export default class _404PageEndpoint implements Endpoint {
     public async request(request: Request): Promise<Response> {
-        if (!config) config = (await EntryDB.GetConfig()) as Config;
+        const url = new URL(request.url);
 
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        // return
         return new Response(
             Renderer.Render(
-                _404Page(),
                 <>
-                    <title>404 - {config.name}</title>
+                    <_404Page pathname={url.pathname} />
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
+                </>,
+                <>
+                    <title>404 - {EntryDB.config.name}</title>
                     <link rel="icon" href="/favicon" />
                 </>
             ),

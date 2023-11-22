@@ -577,6 +577,7 @@ export class InspectMedia implements Endpoint {
                     <title>
                         {FileName} - {EntryDB.config.name}
                     </title>
+
                     <link rel="icon" href="/favicon" />
                 </>
             ),
