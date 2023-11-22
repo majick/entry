@@ -26,7 +26,7 @@ export function ReposNav(props: { name: string; current: string }) {
             style={{ userSelect: "none" }}
         >
             <a
-                href={`/paste/v/${props.name}`}
+                href={`/r/${props.name}`}
                 className={`${
                     props.current === "Home" ? "secondary " : ""
                 }button round full`}
@@ -46,7 +46,7 @@ export function ReposNav(props: { name: string; current: string }) {
 
             {EntryDB.config.app && EntryDB.config.app.enable_versioning && (
                 <a
-                    href={`/paste/v/r/${props.name}`}
+                    href={`/r/rev/${props.name}`}
                     className={`${
                         props.current === "Versions" ? "secondary " : ""
                     }button round full`}
@@ -128,7 +128,7 @@ export class RepoView implements Endpoint {
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
-        if (name.startsWith("paste/v/")) name = name.split("paste/v/")[1];
+        if (name.startsWith("r/")) name = name.split("r/")[1];
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
@@ -178,6 +178,87 @@ export class RepoView implements Endpoint {
 
                             <div className="card border round NoPadding">
                                 <div className="card round header">
+                                    <b>Paste</b>
+                                </div>
+
+                                <div className="card round has-header flex justify-center align-center flex-wrap g-4">
+                                    {result.Content.includes(
+                                        "<% enable template %>"
+                                    ) && (
+                                        <a
+                                            href={`/?Template=${result.CustomURL}`}
+                                            class={"button round"}
+                                        >
+                                            Use Template
+                                        </a>
+                                    )}
+
+                                    {result.GroupName && (
+                                        <a
+                                            class={"button round"}
+                                            href={`/search?q=${
+                                                result.GroupName
+                                            }%2F&group=${result.GroupName}${
+                                                // add host server (if it exists)
+                                                result.HostServer
+                                                    ? `:${result.HostServer}`
+                                                    : ""
+                                            }`}
+                                        >
+                                            View Group
+                                        </a>
+                                    )}
+
+                                    {EntryDB.config.log &&
+                                        EntryDB.config.log.events.includes(
+                                            "report"
+                                        ) &&
+                                        !result.HostServer &&
+                                        (!result.Metadata ||
+                                            !result.Metadata.Comments ||
+                                            result.Metadata.Comments
+                                                .ReportsEnabled !== false) && (
+                                            <a
+                                                class={"button round"}
+                                                href={`/?ReportOn=${result.CustomURL}`}
+                                                title={"Report Paste"}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                >
+                                                    <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
+                                                </svg>
+
+                                                <span>Report</span>
+                                            </a>
+                                        )}
+
+                                    {EntryDB.config.app &&
+                                        EntryDB.config.app.enable_builder !==
+                                            false &&
+                                        (!BuilderPaste ? (
+                                            <a
+                                                class={"button round"}
+                                                href={`/paste/builder?edit=${result.CustomURL}`}
+                                            >
+                                                Open As Builder
+                                            </a>
+                                        ) : (
+                                            <a
+                                                class={"button round"}
+                                                href={`/?mode=edit&OldURL=${result.CustomURL}`}
+                                            >
+                                                Open As Markdown
+                                            </a>
+                                        ))}
+                                </div>
+                            </div>
+
+                            <div className="card border round NoPadding">
+                                <div className="card round header">
                                     <b>File List</b>
                                 </div>
 
@@ -194,7 +275,11 @@ export class RepoView implements Endpoint {
                                                 : ""
                                         }`}
                                         target={"_blank"}
-                                        className="button round full justify-space-between flex-wrap"
+                                        className="button round full justify-space-between"
+                                        style={{
+                                            overflow: "hidden",
+                                            position: "relative",
+                                        }}
                                     >
                                         <div className="flex align-center g-4">
                                             {(!BuilderPaste && (
@@ -275,18 +360,14 @@ export class RepoView implements Endpoint {
                                     <ul style={{ margin: 0 }}>
                                         <li>
                                             <b>Owner</b>:{" "}
-                                            <a
-                                                href={`/paste/v/${
-                                                    result.Metadata!.Owner
-                                                }`}
-                                            >
+                                            <a href={`/r/${result.Metadata!.Owner}`}>
                                                 {result.Metadata!.Owner}
                                             </a>
                                         </li>
 
                                         <li>
                                             <b>Comments</b>:{" "}
-                                            <a href={`/paste/comments/${name}`}>
+                                            <a href={`/c/${name}`}>
                                                 {result.Comments}
                                             </a>
                                         </li>
@@ -356,7 +437,7 @@ export class RevisionsList implements Endpoint {
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
-        if (name.startsWith("paste/v/r/")) name = name.split("paste/v/r/")[1];
+        if (name.startsWith("r/rev/")) name = name.split("r/rev/")[1];
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
@@ -399,7 +480,7 @@ export class RevisionsList implements Endpoint {
                                 >
                                     {revisions[2].map((r) => (
                                         <a
-                                            href={`/paste/v/${name}?r=${r.EditDate}`}
+                                            href={`/r/${name}?r=${r.EditDate}`}
                                             className="button round full justify-start flex-wrap"
                                         >
                                             Revision{" "}

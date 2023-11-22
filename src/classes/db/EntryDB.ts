@@ -891,9 +891,9 @@ export default class EntryDB {
                         // create notification
                         await EntryDB.Logs.CreateLog({
                             Type: "notification",
-                            // notification paste must start with "paste/comments/"
+                            // notification paste must start with "c/"
                             // so that the notif dashboard understands this is a new comment!
-                            Content: `paste/comments/${CommentingOn.CustomURL};${CommentingOn.Metadata.Owner}`,
+                            Content: `c/${CommentingOn.CustomURL};${CommentingOn.Metadata.Owner}`,
                         });
                 }
             }
@@ -1060,6 +1060,7 @@ export default class EntryDB {
         // if PasteInfo doesn't include an EditPassword, set it to the current password
         // ...ONLY IF we're the owner of the paste!
         const UndefinedHash = CreateHash("undefined");
+        let UsedPasswordless = false;
 
         if (
             PasteInfo.EditPassword === UndefinedHash &&
@@ -1067,15 +1068,17 @@ export default class EntryDB {
             paste.Metadata &&
             paste.Metadata.Owner &&
             PasteInfo.Associated === paste.Metadata!.Owner
-        )
+        ) {
             PasteInfo.EditPassword = paste.EditPassword!;
+            UsedPasswordless = true;
+        }
 
-        // if we're not changing the edit password, set to the same
+        // ...if we're not changing the paste password, make sure it stays the same!
         if (
-            NewPasteInfo.EditPassword === UndefinedHash ||
-            NewPasteInfo.EditPassword === PasteInfo.EditPassword
+            !NewPasteInfo.EditPassword ||
+            NewPasteInfo.EditPassword === UndefinedHash
         )
-            NewPasteInfo.EditPassword = paste.EditPassword!;
+            NewPasteInfo.EditPassword = PasteInfo.EditPassword;
 
         // validate lengths
         const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
@@ -1094,6 +1097,14 @@ export default class EntryDB {
                 PasteInfo,
             ];
 
+        // validate password
+        if (
+            PasteInfo.EditPassword !== paste.EditPassword &&
+            // also accept admin password
+            PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin)
+        )
+            return [false, "Invalid password", NewPasteInfo];
+
         // make sure paste isn't locked
         if (paste.Metadata && paste.Metadata.Locked === true && Force === false)
             return [
@@ -1101,23 +1112,6 @@ export default class EntryDB {
                 "This paste has been locked by a server administrator.",
                 NewPasteInfo,
             ];
-
-        // validate password
-        // don't use NewPasteInfo to get the password because NewPasteInfo will automatically have the old password
-        // if a new password is not supplied. this is done on the server in API.EditPaste
-        // paste is the version of the paste stored in the server, so the client cannot have messed with it
-        // that means it is safe to compare with what we got from the client
-        // ...comparing paste.EditPassword and PasteInfo.EditPassword because if we DID supply a new password,
-        // PasteInfo will not have it, only NewPasteInfo will
-        // IF we're associated with a paste AND that paste is the owner of this paste,
-        // accept the edit anyways!
-        if (
-            paste.EditPassword !== PasteInfo.EditPassword &&
-            PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin) &&
-            PasteInfo.Associated !== paste.Metadata!.Owner &&
-            !Force
-        )
-            return [false, "Invalid password!", NewPasteInfo];
 
         // if the admin password was used, log an "access_admin" log
         if (
@@ -1139,7 +1133,8 @@ export default class EntryDB {
 
             // make sure the paste we're changing to doesn't already exist
             const _existingPaste = await this.GetPasteFromURL(
-                NewPasteInfo.CustomURL
+                NewPasteInfo.CustomURL,
+                true
             );
 
             if (_existingPaste)
@@ -1155,6 +1150,15 @@ export default class EntryDB {
                 db: EntryDB.Logs.db,
                 query: 'DELETE FROM "Logs" WHERE "Type" = \'view_paste\' AND "Content" LIKE ?',
                 params: [`%${paste.CustomURL}%`],
+                use: "Prepare",
+            });
+
+            // ALSO... free up custom domain
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: EntryDB.Logs.db,
+                query: 'DELETE FROM "Logs" WHERE "Type" = \'custom_domain\' AND "Content" LIKE ?',
+                params: [`${paste.CustomURL}%`],
                 use: "Prepare",
             });
         }

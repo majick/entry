@@ -498,7 +498,7 @@ export class CreatePaste implements Endpoint {
                                       result[2].UnhashedEditPassword!
                                   )}`
                                 : "/?msg=Paste reported!"
-                            : `/paste/comments/${body.CommentOn}?msg=Comment posted!`
+                            : `/c/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}`,
                 "X-Entry-Error": result[1],
@@ -580,29 +580,6 @@ export class EditPaste implements Endpoint {
         // get association
         const Association = await GetAssociation(request, null);
 
-        // load associated
-        if (!Association[1].startsWith("associated") && !Association[0]) {
-            // try to set association
-            if (
-                // can't (shouldn't) set association with a comment
-                !body.CommentOn &&
-                !body.ReportOn &&
-                // make sure auto_tag is enabled
-                (!EntryDB.config.app || EntryDB.config.app.auto_tag !== false)
-            ) {
-                // update association with this paste
-                const UpdateResult = await GetAssociation(
-                    request,
-                    _ip,
-                    true,
-                    body.OldURL
-                );
-
-                if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
-            }
-        } else if (!Association[1].startsWith("associated=refresh"))
-            body.Associated = Association[1];
-
         // check NewEditPassword length
         if (
             // if NewEditPassword is less than the expected length, set it to the old edit password
@@ -654,14 +631,6 @@ export class EditPaste implements Endpoint {
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
             }
         );
-
-        // if the edit operation failed, remove association
-        if (result[0] !== true) {
-            Association[1] = ""; // clear association
-
-            // remove from session
-            GetAssociation(request, _ip, false, undefined, true);
-        }
 
         // remove association from all associated sessions if the password has changed
         if (
@@ -1161,7 +1130,7 @@ export class DeleteComment implements Endpoint {
             status: 302,
             headers: {
                 "Content-Type": "application/json; charset=utf-8",
-                Location: `/paste/comments/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
+                Location: `/c/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
                 "Set-Cookie": association[1].startsWith("associated")
                     ? association[1]
                     : "",

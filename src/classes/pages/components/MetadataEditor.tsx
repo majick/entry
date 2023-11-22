@@ -320,18 +320,6 @@ export function ClientEditor(_metadata: string, id: string): any {
 
     // generate only the fields we want
     GenerateInputFields({
-        ShowOwnerEnabled: [
-            metadata.root.ShowOwnerEnabled === undefined
-                ? true
-                : metadata.root.ShowOwnerEnabled,
-            "Toggle the owner label on this paste",
-        ],
-        ShowViewCount: [
-            metadata.root.ShowViewCount === undefined
-                ? true
-                : metadata.root.ShowViewCount,
-            "Toggle the views counter on this paste",
-        ],
         // tab display section
         TabDisplay: ["div", "Tab Display"],
         Favicon: [
@@ -358,11 +346,29 @@ export function ClientEditor(_metadata: string, id: string): any {
                 : metadata.root.PrivateSource,
             "Make the source of this paste private unless associated with this paste or its owner",
         ],
+        ShowOwnerEnabled: [
+            metadata.root.ShowOwnerEnabled === undefined
+                ? true
+                : metadata.root.ShowOwnerEnabled,
+            "Toggle the owner label on this paste",
+        ],
+        ShowViewCount: [
+            metadata.root.ShowViewCount === undefined
+                ? true
+                : metadata.root.ShowViewCount,
+            "Toggle the views counter on this paste",
+        ],
         // social section
         Social: ["div", "Social Options"],
         SocialIcon: [
             metadata.root.SocialIcon || "",
             "Social icon shown in some places (like comments)",
+        ],
+        // danger section
+        Danger: ["div", "Danger Zone"],
+        Owner: [
+            metadata.root.Owner || "",
+            "Change the owner of the paste, takes another paste URL",
         ],
     });
 

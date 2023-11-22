@@ -1733,9 +1733,7 @@ export class ViewReport implements Endpoint {
                             justifyContent: "center",
                         }}
                     >
-                        <a href={`/paste/comments/${report.CustomURL}`}>
-                            View Report Comments
-                        </a>
+                        <a href={`/c/${report.CustomURL}`}>View Report Comments</a>
                     </div>
                 </AdminLayout>,
                 <>

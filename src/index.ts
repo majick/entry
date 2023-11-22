@@ -311,12 +311,13 @@ export const ServerConfig: HoneybeeConfig = {
         // GET builder
         "/paste/builder": { Page: Builder.Builder },
         // GET repos
-        "/paste/v/r/": { Type: "begins", Page: Repos.RevisionsList },
-        "/paste/v/": { Type: "begins", Page: Repos.RepoView },
+        "/r/rev/": { Type: "begins", Page: Repos.RevisionsList },
+        "/r/": { Type: "begins", Page: Repos.RepoView },
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
-        "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage },
+        "/c/": { Type: "begins", Page: Pages.PasteCommentsPage },
+        "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage }, // alias of /c/
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },
         "/": {

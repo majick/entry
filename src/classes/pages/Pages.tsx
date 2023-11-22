@@ -415,16 +415,25 @@ export class GetPasteFromURL implements Endpoint {
                                         Edit
                                     </a>
 
-                                    {(!EntryDB.config.app ||
-                                        EntryDB.config.app.enable_paste_settings !==
-                                            false) && (
-                                        <a
-                                            href={`${HostnameURL}paste/settings/${result.CustomURL}`}
-                                            className="button round"
+                                    <a
+                                        href={`${HostnameURL}r/${result.CustomURL}`}
+                                        class={"button tertiary round"}
+                                        title={"Inspect Paste"}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            style={{
+                                                marginTop: "2px",
+                                            }}
+                                            aria-label={"Repo Symbol"}
                                         >
-                                            Settings
-                                        </a>
-                                    )}
+                                            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
+                                        </svg>
+                                        More
+                                    </a>
 
                                     {EntryDB.config.app &&
                                         EntryDB.config.app.enable_comments ===
@@ -434,22 +443,10 @@ export class GetPasteFromURL implements Endpoint {
                                             result.Metadata!.Comments.Enabled !==
                                                 false) && (
                                             <a
-                                                href={`${HostnameURL}paste/comments/${result.CustomURL}`}
+                                                href={`${HostnameURL}c/${result.CustomURL}`}
                                                 className="button round"
                                             >
                                                 Comments ({result.Comments || 0})
-                                            </a>
-                                        )}
-
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
-                                            "report"
-                                        ) && (
-                                            <a
-                                                href={`${HostnameURL}?ReportOn=${result.CustomURL}`}
-                                                className="button round"
-                                            >
-                                                Report Paste
                                             </a>
                                         )}
                                 </div>
@@ -664,7 +661,8 @@ export class GetPasteFromURL implements Endpoint {
                                         somewhere safe:{" "}
                                         <code>
                                             {search.get("UnhashedEditPassword")}
-                                        </code>
+                                        </code>{" "}
+                                        ({new Date().getTime()})
                                     </p>
                                 </div>
 
@@ -774,7 +772,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 false) && (
                                             <a
                                                 class={"button round"}
-                                                href={`${HostnameURL}paste/comments/${result.CustomURL}`}
+                                                href={`${HostnameURL}c/${result.CustomURL}`}
                                                 title={"View Comments"}
                                             >
                                                 <svg
@@ -792,19 +790,21 @@ export class GetPasteFromURL implements Endpoint {
                                         )}
 
                                     <a
-                                        href={"javascript:"}
-                                        id={"entry:button.PasteOptions"}
-                                        title={"More Options"}
-                                        class={"button round"}
+                                        href={`${HostnameURL}r/${result.CustomURL}`}
+                                        class={"button tertiary round"}
+                                        title={"Inspect Paste"}
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             height="16"
-                                            aria-label={"Ellipsis Symbol"}
+                                            style={{
+                                                marginTop: "2px",
+                                            }}
+                                            aria-label={"Repo Symbol"}
                                         >
-                                            <path d="M0 5.75C0 4.784.784 4 1.75 4h12.5c.966 0 1.75.784 1.75 1.75v4.5A1.75 1.75 0 0 1 14.25 12H1.75A1.75 1.75 0 0 1 0 10.25ZM12 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0ZM4 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
+                                            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
                                         </svg>
                                         More
                                     </a>
@@ -863,101 +863,6 @@ export class GetPasteFromURL implements Endpoint {
                                             </a>
                                         </div>
                                     </details>
-
-                                    <Modal
-                                        buttonid="entry:button.PasteOptions"
-                                        modalid="entry:modal.PasteOptions"
-                                        round={true}
-                                    >
-                                        <div
-                                            class={
-                                                "flex justify-center flex-wrap g-4"
-                                            }
-                                            style={{
-                                                width: "25rem",
-                                                maxWidth: "100%",
-                                            }}
-                                        >
-                                            {result.Content.includes(
-                                                "<% enable template %>"
-                                            ) && (
-                                                <a
-                                                    href={`${HostnameURL}?Template=${result.CustomURL}`}
-                                                    class={"button round"}
-                                                >
-                                                    Use Template
-                                                </a>
-                                            )}
-
-                                            {result.GroupName && (
-                                                <a
-                                                    class={"button round"}
-                                                    href={`${HostnameURL}search?q=${
-                                                        result.GroupName
-                                                    }%2F&group=${result.GroupName}${
-                                                        // add host server (if it exists)
-                                                        result.HostServer
-                                                            ? `:${result.HostServer}`
-                                                            : ""
-                                                    }`}
-                                                >
-                                                    View Group
-                                                </a>
-                                            )}
-
-                                            {EntryDB.config.log &&
-                                                EntryDB.config.log.events.includes(
-                                                    "report"
-                                                ) &&
-                                                !result.HostServer &&
-                                                (!result.Metadata ||
-                                                    !result.Metadata.Comments ||
-                                                    result.Metadata.Comments
-                                                        .ReportsEnabled !==
-                                                        false) && (
-                                                    <a
-                                                        class={"button round"}
-                                                        href={`${HostnameURL}?ReportOn=${result.CustomURL}`}
-                                                        title={"Report Paste"}
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                        >
-                                                            <path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
-                                                        </svg>
-
-                                                        <span>Report</span>
-                                                    </a>
-                                                )}
-
-                                            {EntryDB.config.app &&
-                                                EntryDB.config.app.enable_builder !==
-                                                    false && (
-                                                    <a
-                                                        class={"button round"}
-                                                        href={`${HostnameURL}paste/builder?edit=${result.CustomURL}`}
-                                                    >
-                                                        Edit in Builder
-                                                    </a>
-                                                )}
-                                        </div>
-
-                                        <hr />
-
-                                        <form method="dialog" class={"mobile-max"}>
-                                            <button
-                                                class={"green round"}
-                                                style={{
-                                                    width: "100%",
-                                                }}
-                                            >
-                                                Cancel
-                                            </button>
-                                        </form>
-                                    </Modal>
                                 </div>
 
                                 <div className="mobile-only">
@@ -1638,8 +1543,7 @@ export class PasteCommentsPage implements Endpoint {
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
-        if (name.startsWith("paste/comments/"))
-            name = name.split("paste/comments/")[1];
+        if (name.startsWith("c/")) name = name.split("c/")[1];
 
         // return home if name === ""
         if (name === "") return new Home().request(request, server);
@@ -1948,7 +1852,7 @@ export class PasteCommentsPage implements Endpoint {
 
                                     {PreviousInThread && (
                                         <a
-                                            href={`/paste/comments/${PreviousInThread}`}
+                                            href={`/c/${PreviousInThread}`}
                                             class={"button secondary round"}
                                         >
                                             <svg
@@ -2285,7 +2189,7 @@ export class PasteCommentsPage implements Endpoint {
                                                     </div>
 
                                                     <a
-                                                        href={`/paste/comments/${comment.CustomURL}`}
+                                                        href={`/c/${comment.CustomURL}`}
                                                     >
                                                         View{" "}
                                                         <b>{comment.Comments}</b>{" "}
@@ -2848,7 +2752,7 @@ export class Notifications implements Endpoint {
                                         >
                                             {Notification.Content.split(
                                                 ";"
-                                            )[0].startsWith("paste/comments/")
+                                            )[0].startsWith("c/")
                                                 ? "New Comment"
                                                 : Notification.Content.split(";")[0]}
                                         </a>
