@@ -501,21 +501,65 @@ export class RevisionsList implements Endpoint {
                                     {revisions[2].map((r) => (
                                         <a
                                             href={`/r/${name}?r=${r.EditDate}`}
-                                            className="button round full justify-start flex-wrap"
+                                            className="button round full justify-start flex-wrap g-4"
                                         >
-                                            Revision{" "}
-                                            <span class={"utc-date-to-localize"}>
-                                                {new Date(r.EditDate).toUTCString()}
-                                            </span>{" "}
+                                            <span>
+                                                Revision{" "}
+                                                <span class={"utc-date-to-localize"}>
+                                                    {new Date(
+                                                        r.EditDate
+                                                    ).toUTCString()}
+                                                </span>
+                                            </span>
+                                            {r.Content.split("_metadata:")[0] ===
+                                                result.Content && (
+                                                // live tag
+                                                <span className="chip badge green">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={
+                                                            "Broadcast Symbol"
+                                                        }
+                                                    >
+                                                        <path d="M8.75 8.582v5.668a.75.75 0 0 1-1.5 0V8.582a1.75 1.75 0 1 1 1.5 0Zm3.983-7.125a.75.75 0 0 1 1.06.026A7.976 7.976 0 0 1 16 7c0 2.139-.84 4.083-2.207 5.517a.75.75 0 1 1-1.086-1.034A6.474 6.474 0 0 0 14.5 7a6.474 6.474 0 0 0-1.793-4.483.75.75 0 0 1 .026-1.06Zm-9.466 0c.3.286.312.76.026 1.06A6.474 6.474 0 0 0 1.5 7a6.47 6.47 0 0 0 1.793 4.483.75.75 0 0 1-1.086 1.034A7.973 7.973 0 0 1 0 7c0-2.139.84-4.083 2.207-5.517a.75.75 0 0 1 1.06-.026Zm8.556 2.321A4.988 4.988 0 0 1 13 7a4.988 4.988 0 0 1-1.177 3.222.75.75 0 1 1-1.146-.967A3.487 3.487 0 0 0 11.5 7c0-.86-.309-1.645-.823-2.255a.75.75 0 0 1 1.146-.967Zm-6.492.958A3.48 3.48 0 0 0 4.5 7a3.48 3.48 0 0 0 .823 2.255.75.75 0 0 1-1.146.967A4.981 4.981 0 0 1 3 7a4.982 4.982 0 0 1 1.188-3.236.75.75 0 1 1 1.143.972Z"></path>
+                                                    </svg>
+                                                    live
+                                                </span>
+                                            )}
                                             {(revisions[2].indexOf(r) === 0 && (
                                                 // latest tag
                                                 <span className="chip badge mention">
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={
+                                                            "Bookmark Symbol"
+                                                        }
+                                                    >
+                                                        <path d="M3 2.75C3 1.784 3.784 1 4.75 1h6.5c.966 0 1.75.784 1.75 1.75v11.5a.75.75 0 0 1-1.227.579L8 11.722l-3.773 3.107A.751.751 0 0 1 3 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.91l3.023-2.489a.75.75 0 0 1 .954 0l3.023 2.49V2.75a.25.25 0 0 0-.25-.25Z"></path>
+                                                    </svg>
                                                     latest
                                                 </span>
                                             )) ||
                                                 (revisions[2].indexOf(r) === 1 && (
                                                     // previous tag
                                                     <span className="chip badge">
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "History Symbol"
+                                                            }
+                                                        >
+                                                            <path d="m.427 1.927 1.215 1.215a8.002 8.002 0 1 1-1.6 5.685.75.75 0 1 1 1.493-.154 6.5 6.5 0 1 0 1.18-4.458l1.358 1.358A.25.25 0 0 1 3.896 6H.25A.25.25 0 0 1 0 5.75V2.104a.25.25 0 0 1 .427-.177ZM7.75 4a.75.75 0 0 1 .75.75v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7 8.25v-3.5A.75.75 0 0 1 7.75 4Z"></path>
+                                                        </svg>
                                                         previous
                                                     </span>
                                                 ))}

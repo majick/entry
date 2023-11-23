@@ -567,6 +567,10 @@ h6:focus .htag {
     border: dashed 1px currentColor;
     transition: all 0.15s;
     height: max-content !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--u-04);
 }
 
 .chip.solid {
@@ -588,6 +592,10 @@ h6:focus .htag {
 
 .chip.badge.mention {
     color: var(--yellow);
+}
+
+.chip.badge.green {
+    color: var(--green);
 }
 
 .mobile-only {

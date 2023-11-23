@@ -91,7 +91,7 @@ export class Builder implements Endpoint {
             // get revision
             if (search.get("r") && result) {
                 const revision = await db.GetRevision(
-                    search.get("OldURL")!,
+                    search.get("edit")!,
                     parseFloat(search.get("r")!)
                 );
 
@@ -155,6 +155,10 @@ export class Builder implements Endpoint {
                         dangerouslySetInnerHTML={{
                             __html: `import Builder, { Debug } from "/Builder.js";
                             window.DisablePasswordField = ${DisablePasswordField};
+                            window.EnableDrafts = ${
+                                EntryDB.config.app &&
+                                EntryDB.config.app.enable_versioning === true
+                            };
                             Builder(\`${stringified}\`, true); window.Debug = Debug;`,
                         }}
                     />

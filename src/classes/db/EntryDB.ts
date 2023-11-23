@@ -985,13 +985,15 @@ export default class EntryDB {
      * @param {Paste} PasteInfo
      * @param {Paste} NewPasteInfo
      * @param {boolean} Force
+     * @param {boolean} [OnlyCreateRevision=false]
      * @return {Promise<[boolean, string, Paste]>}
      * @memberof EntryDB
      */
     public async EditPaste(
         PasteInfo: Paste,
         NewPasteInfo: Paste,
-        Force: boolean = false
+        Force: boolean = false,
+        OnlyCreateRevision: boolean = false
     ): Promise<[boolean, string, Paste]> {
         // check if paste is from another server
         const server = PasteInfo.CustomURL.split(":")[1];
@@ -1127,7 +1129,7 @@ export default class EntryDB {
 
         // if custom url was changed, add the group back to it
         // ...users cannot add the group manually because of the custom url regex
-        if (NewPasteInfo.CustomURL !== paste.CustomURL) {
+        if (NewPasteInfo.CustomURL !== paste.CustomURL && !OnlyCreateRevision) {
             // add groupname
             if (paste.GroupName)
                 NewPasteInfo.CustomURL = `${paste.GroupName}/${NewPasteInfo.CustomURL}`;
@@ -1162,10 +1164,20 @@ export default class EntryDB {
                 params: [`${paste.CustomURL}%`],
                 use: "Prepare",
             });
+
+            // ALSO... delete all revisions
+            if (EntryDB.config.app && EntryDB.config.app.enable_versioning)
+                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // @ts-ignore
+                    db: this.db,
+                    query: 'DELETE FROM "Revisions" WHERE "CustomURL" = ?',
+                    params: [paste.CustomURL],
+                    use: "Prepare",
+                });
         }
 
         // rencrypt (if needed, again)
-        if (NewPasteInfo.ViewPassword) {
+        if (NewPasteInfo.ViewPassword && !OnlyCreateRevision) {
             // using NewPasteInfo for all of these values because PasteInfo doesn't actually
             // really matter for this, as the content is only defined in NewPasteInfo
             const result = Encrypt(NewPasteInfo.Content);
@@ -1200,21 +1212,22 @@ export default class EntryDB {
             });
 
         // update paste
-        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
-            // @ts-ignore
-            db: this.db,
-            query: 'UPDATE "Pastes" SET ("Content", "EditPassword", "CustomURL", "ViewPassword", "PubDate", "EditDate") = (?, ?, ?, ?, ?, ?) WHERE "CustomURL" = ?',
-            params: [
-                NewPasteInfo.Content,
-                NewPasteInfo.EditPassword,
-                NewPasteInfo.CustomURL,
-                NewPasteInfo.ViewPassword,
-                NewPasteInfo.PubDate,
-                NewPasteInfo.EditDate,
-                PasteInfo.CustomURL, // select by old CustomURL
-            ],
-            use: "Prepare",
-        });
+        if (!OnlyCreateRevision)
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: this.db,
+                query: 'UPDATE "Pastes" SET ("Content", "EditPassword", "CustomURL", "ViewPassword", "PubDate", "EditDate") = (?, ?, ?, ?, ?, ?) WHERE "CustomURL" = ?',
+                params: [
+                    NewPasteInfo.Content,
+                    NewPasteInfo.EditPassword,
+                    NewPasteInfo.CustomURL,
+                    NewPasteInfo.ViewPassword,
+                    NewPasteInfo.PubDate,
+                    NewPasteInfo.EditDate,
+                    PasteInfo.CustomURL, // select by old CustomURL
+                ],
+                use: "Prepare",
+            });
 
         // get server config
         const config = (await EntryDB.GetConfig()) as Config;
@@ -1346,6 +1359,16 @@ export default class EntryDB {
 
         // delete media
         if (EntryDB.Media) await EntryDB.Media.DeleteOwner(PasteInfo.CustomURL);
+
+        // delete all revisions
+        if (EntryDB.config.app && EntryDB.config.app.enable_versioning)
+            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: this.db,
+                query: 'DELETE FROM "Revisions" WHERE "CustomURL" = ?',
+                params: [paste.CustomURL],
+                use: "Prepare",
+            });
 
         // register event
         if (EntryDB.config.log && EntryDB.config.log.events.includes("delete_paste"))

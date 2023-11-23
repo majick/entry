@@ -437,6 +437,7 @@ function RenderPage() {
             <PublishModals
                 EditingPaste={EditingPaste || undefined}
                 DisablePassword={(window as any).DisablePasswordField}
+                EnableDrafts={(window as any).EnableDrafts}
                 Endpoints={{
                     new: "/api/new",
                     edit: "/api/edit",

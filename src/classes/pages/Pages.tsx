@@ -215,6 +215,14 @@ export class GetPasteFromURL implements Endpoint {
                 name,
                 parseFloat(search.get("r")!)
             );
+
+            // ...fetch latest revision if requested
+            if (search.get("r")! === "latest") {
+                revision[2] = (await db.GetAllPasteRevisions(name))[2][0];
+                revision[0] = true;
+            }
+
+            // ...return 404 if revision doesn't exist
             if (!revision[0] || !revision[2]) return new _404Page().request(request);
 
             // ...update result
@@ -408,7 +416,13 @@ export class GetPasteFromURL implements Endpoint {
                                     }}
                                 >
                                     <a
-                                        href={`${HostnameURL}paste/builder?edit=${result.CustomURL}`}
+                                        href={`${HostnameURL}paste/builder?edit=${
+                                            result.CustomURL
+                                        }${
+                                            RevisionNumber !== 0
+                                                ? `&r=${RevisionNumber}`
+                                                : ""
+                                        }`}
                                         className="button round"
                                         disabled={HideSource}
                                     >
@@ -684,6 +698,21 @@ export class GetPasteFromURL implements Endpoint {
                                     </p>
                                 </div>
                             </>
+                        )}
+
+                        {RevisionNumber !== 0 && (
+                            <div
+                                class={"mdnote note-info"}
+                                style={{
+                                    marginBottom: "0.5rem",
+                                }}
+                            >
+                                <b class={"mdnote-title"}>Viewing Revision</b>
+                                <p>
+                                    This may not be the live content of this paste.{" "}
+                                    <a href={`/r/rev/${name}`}>All Versions</a>
+                                </p>
+                            </div>
                         )}
 
                         {result.ViewPassword && <DecryptionForm paste={result} />}

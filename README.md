@@ -77,6 +77,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 
 - `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
 - `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldURL, EditPassword, Content, NewURL, NewEditPassword`
+    - Supports `?draft=true` query parameter, saves changes as a new revision instead of publishing
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
 - `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))

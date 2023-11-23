@@ -548,6 +548,7 @@ export class GetPasteRecord implements Endpoint {
 export class EditPaste implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
         const _ip = server !== undefined ? server.requestIP(request) : null;
+        const url = new URL(request.url);
 
         // verify content type
         const WrongType = VerifyContentType(
@@ -597,10 +598,7 @@ export class EditPaste implements Endpoint {
         const result = await db.EditPaste(
             {
                 Content: body.OldContent,
-                // @ts-ignore
-                EditPassword: body.EditPassword
-                    ? punycode.toASCII(body.EditPassword)
-                    : undefined,
+                EditPassword: body.EditPassword ? body.EditPassword : undefined,
                 CustomURL: body.OldURL,
                 PubDate: 0,
                 EditDate: 0,
@@ -610,13 +608,15 @@ export class EditPaste implements Endpoint {
             {
                 Content: body.Content,
                 EditPassword: body.NewEditPassword
-                    ? punycode.toASCII(body.NewEditPassword)
+                    ? body.NewEditPassword
                     : body.EditPassword,
                 CustomURL: body.NewURL || body.OldURL,
                 PubDate: (paste || { PubDate: 0 }).PubDate!,
                 EditDate: new Date().getTime(),
                 ViewPassword: (paste || { ViewPassword: "" }).ViewPassword,
-            }
+            },
+            false,
+            url.searchParams.get("draft") === "true"
         );
 
         // remove association from all associated sessions if the password has changed
@@ -647,7 +647,11 @@ export class EditPaste implements Endpoint {
                 Location:
                     result[0] === true
                         ? // if successful, redirect to paste
-                          `/${result[2].CustomURL}`
+                          `/${result[2].CustomURL}${
+                              url.searchParams.get("draft") === "true"
+                                  ? "?r=latest"
+                                  : ""
+                          }`
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
                               result[2].CustomURL

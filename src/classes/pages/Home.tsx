@@ -287,8 +287,8 @@ export default class Home implements Endpoint {
                             >
                                 <b class={"mdnote-title"}>Viewing Revision</b>
                                 <p>
-                                    Pressing save will restore the content of the
-                                    paste from the revision!{" "}
+                                    Pressing "Publish" will publish the content of
+                                    the revision to the live paste!{" "}
                                     <a href="javascript:history.back()">Go Back</a>
                                 </p>
                             </div>
@@ -1077,7 +1077,7 @@ export default class Home implements Endpoint {
                                                 <div class={"flex g-4"}>
                                                     <button
                                                         class={"round green-cta"}
-                                                        id={"entry:button.Submit"}
+                                                        id={"entry:button.Publish"}
                                                         style={{ fontWeight: "500" }}
                                                     >
                                                         <svg
@@ -1091,32 +1091,38 @@ export default class Home implements Endpoint {
                                                         >
                                                             <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
                                                         </svg>
-                                                        Save
+                                                        Publish
                                                     </button>
 
-                                                    <a
-                                                        href={`/r/${paste.CustomURL}`}
-                                                        class={
-                                                            "button tertiary round"
-                                                        }
-                                                        title={"Inspect Paste"}
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 16 16"
-                                                            width="16"
-                                                            height="16"
-                                                            style={{
-                                                                marginTop: "2px",
-                                                            }}
-                                                            aria-label={
-                                                                "Repo Symbol"
-                                                            }
-                                                        >
-                                                            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
-                                                        </svg>
-                                                        More
-                                                    </a>
+                                                    {/* draft button */}
+                                                    {EntryDB.config.app &&
+                                                        EntryDB.config.app
+                                                            .enable_versioning && (
+                                                            <button
+                                                                class={
+                                                                    "round tertiary"
+                                                                }
+                                                                id={
+                                                                    "entry:button.Save"
+                                                                }
+                                                                formAction={
+                                                                    "/api/edit?draft=true"
+                                                                }
+                                                            >
+                                                                <svg
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 16 16"
+                                                                    width="16"
+                                                                    height="16"
+                                                                    aria-label={
+                                                                        "Draft Icon"
+                                                                    }
+                                                                >
+                                                                    <path d="M14.307 11.655a.75.75 0 0 1 .165 1.048 8.05 8.05 0 0 1-1.769 1.77.75.75 0 0 1-.883-1.214 6.552 6.552 0 0 0 1.44-1.439.75.75 0 0 1 1.047-.165Zm-2.652-9.962a.75.75 0 0 1 1.048-.165 8.05 8.05 0 0 1 1.77 1.769.75.75 0 0 1-1.214.883 6.552 6.552 0 0 0-1.439-1.44.75.75 0 0 1-.165-1.047ZM6.749.097a8.074 8.074 0 0 1 2.502 0 .75.75 0 1 1-.233 1.482 6.558 6.558 0 0 0-2.036 0A.751.751 0 0 1 6.749.097ZM.955 6.125a.75.75 0 0 1 .624.857 6.558 6.558 0 0 0 0 2.036.75.75 0 1 1-1.482.233 8.074 8.074 0 0 1 0-2.502.75.75 0 0 1 .858-.624Zm14.09 0a.75.75 0 0 1 .858.624c.13.829.13 1.673 0 2.502a.75.75 0 1 1-1.482-.233 6.558 6.558 0 0 0 0-2.036.75.75 0 0 1 .624-.857Zm-8.92 8.92a.75.75 0 0 1 .857-.624 6.558 6.558 0 0 0 2.036 0 .75.75 0 1 1 .233 1.482c-.829.13-1.673.13-2.502 0a.75.75 0 0 1-.624-.858Zm-4.432-3.39a.75.75 0 0 1 1.048.165 6.552 6.552 0 0 0 1.439 1.44.751.751 0 0 1-.883 1.212 8.05 8.05 0 0 1-1.77-1.769.75.75 0 0 1 .166-1.048Zm2.652-9.962A.75.75 0 0 1 4.18 2.74a6.556 6.556 0 0 0-1.44 1.44.751.751 0 0 1-1.212-.883 8.05 8.05 0 0 1 1.769-1.77.75.75 0 0 1 1.048.166Z"></path>
+                                                                </svg>
+                                                                Save Draft
+                                                            </button>
+                                                        )}
                                                 </div>
 
                                                 <div className="flex g-4">
