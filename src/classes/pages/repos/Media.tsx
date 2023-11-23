@@ -326,7 +326,7 @@ export class InspectMedia implements Endpoint {
 
         // if request.headers.Accept does not include "text/html", just return the file!
         // (this means it was sent from an img element or similar)
-        if (request.headers.get("Accept")!.includes("image/"))
+        if (request.headers.get("Sec-Fetch-Dest") === "image")
             return new GetFile().request(request, server);
 
         // get association

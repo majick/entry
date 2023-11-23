@@ -8,8 +8,6 @@ import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server, SocketAddress } from "bun";
 import punycode from "node:punycode";
 
-import { contentType } from "mime-types";
-
 // import components
 import _404Page from "../components/404";
 import Pages from "../Pages";

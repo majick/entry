@@ -425,6 +425,8 @@ export class RepoView implements Endpoint {
                     <title>
                         {name} - {EntryDB.config.name}
                     </title>
+
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
@@ -577,6 +579,8 @@ export class RevisionsList implements Endpoint {
                     <title>
                         {name} - {EntryDB.config.name}
                     </title>
+
+                    <link rel="icon" href="/favicon" />
                 </>
             ),
             {
