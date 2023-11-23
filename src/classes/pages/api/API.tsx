@@ -1381,6 +1381,7 @@ export class EditMetadata implements Endpoint {
         // if !admin, force some values to be kept the way they are
         if (!admin && paste.Metadata) {
             // these are the only values that will actually be updated!
+            paste.Metadata.Owner = Unpacked.Owner;
             paste.Metadata.ShowViewCount = Unpacked.ShowViewCount;
             paste.Metadata.ShowOwnerEnabled = Unpacked.ShowOwnerEnabled;
             paste.Metadata.Favicon = Unpacked.Favicon;
@@ -1586,6 +1587,53 @@ export class UpdateCustomDomain implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class GetSocialProfile
+ * @implements {Endpoint}
+ */
+export class GetSocialProfile implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get paste name
+        let name = url.pathname.slice(
+            "/api/social/get/".length,
+            url.pathname.length
+        );
+        if (!name || !EntryDB.config.app || !EntryDB.config.app.curiosity)
+            return new _404Page().request(request);
+
+        // fetch
+        const res = await fetch(
+            `${EntryDB.config.app.curiosity.host}/api/profiles/get?c=json`,
+            {
+                method: "POST",
+                body: JSON.stringify({
+                    APIKey: EntryDB.config.app.curiosity.api_key,
+                    ID: name,
+                }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        // return
+        return new Response(await res.json(), {
+            status: res.status,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
 // ...
 import { GetFile, ListFiles, UploadFile, DeleteFile } from "../repos/Media";
 
@@ -1609,7 +1657,7 @@ export default {
     GetRawPaste, // supports cloud routing
     PasteExists, // supports cloud routing
     RenderMarkdown,
-    GetPasteHTML, // supports cloud routin
+    GetPasteHTML, // supports cloud routing
     JSONAPI, // supports cloud routing
     DeleteComment, // supports cloud routing
     PasteLogin, // supports cloud routing
@@ -1621,4 +1669,5 @@ export default {
     UploadFile, // supports cloud routing
     DeleteFile, // supports cloud routing
     UpdateCustomDomain, // supports cloud routing
+    GetSocialProfile, // supports cloud routing
 };

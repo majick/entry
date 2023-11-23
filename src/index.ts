@@ -233,7 +233,7 @@ await InitFooterExtras(plugins); // load footer pages to the footer
 export const ServerConfig: HoneybeeConfig = {
     Port: EntryDB.config.port || 8080,
     AssetsDir: import.meta.dir,
-    NotFoundPage: _404Page(),
+    NotFoundPage: _404Page({}),
     maxRequestBodySize: parseFloat(process.env.MAX_BODY_SIZE || "52428800"),
     Pages: {
         // GET admin
@@ -241,14 +241,22 @@ export const ServerConfig: HoneybeeConfig = {
         "/admin/": { Page: Admin.Login },
         "/admin/login": { Page: Admin.Login },
         "/admin/login/": { Page: Admin.Login },
+
         // GET api
+
+        // ...pastes
         "/api/get": { Type: "begins", Page: API.GetPasteRecord },
         "/api/group": { Type: "begins", Page: API.GetAllPastesInGroup },
         "/api/raw": { Type: "begins", Page: API.GetRawPaste },
         "/api/exists": { Type: "begins", Page: API.PasteExists },
         "/api/html": { Type: "begins", Page: API.GetPasteHTML },
+        // ...comments
         "/api/comments": { Type: "begins", Page: API.GetPasteComments },
+        // ...media
         "/api/media/file/": { Type: "begins", Page: Pages.InspectMedia }, // alias of /f
+        // ...social
+        "/api/social/get/": { Type: "begins", Page: API.GetSocialProfile },
+
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
         "/admin/export": { Method: "POST", Page: Admin.ExportPastesPage },
@@ -281,39 +289,53 @@ export const ServerConfig: HoneybeeConfig = {
             Method: "POST",
             Page: AdminAPI.APIExportConfig,
         },
+
         // POST api
+
+        // ...pastes
         "/api/new": { Method: "POST", Page: API.CreatePaste },
         "/api/edit": { Method: "POST", Page: API.EditPaste },
         "/api/delete": { Method: "POST", Page: API.DeletePaste },
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
-        "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
+        // ...comments
         "/api/comments/delete": {
             Type: "begins",
             Method: "POST",
             Page: API.DeleteComment,
         },
+        // ...login
         "/api/associate": { Method: "POST", Page: API.PasteLogin },
         "/api/disassociate": { Method: "POST", Page: API.PasteLogout },
+        // ...metadata
         "/api/metadata": { Method: "POST", Page: API.EditMetadata },
+        // ...media
         "/api/media/upload": { Method: "POST", Page: API.UploadFile },
         "/api/media/delete": { Method: "POST", Page: API.DeleteFile },
+        // ...misc
+        "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
         "/api/domain": { Method: "POST", Page: API.UpdateCustomDomain },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
+
         // GET search
         "/search": { Page: Pages.PastesSearch },
+
         // (any) plugins
         ...plugins,
+
         // GET user
         "/paste/settings": { Type: "begins", Page: Pages.UserSettings }, // alias of /s
         "/s": { Type: "begins", Page: Pages.UserSettings },
         "/paste/media/": { Type: "begins", Page: Pages.ViewPasteMedia },
         "/f/": { Type: "begins", Page: Pages.InspectMedia }, // view file
         "/paste/notifications": { Page: Pages.Notifications },
+
         // GET builder
         "/paste/builder": { Page: Builder.Builder },
+
         // GET repos
         "/r/rev/": { Type: "begins", Page: Repos.RevisionsList },
         "/r/": { Type: "begins", Page: Repos.RepoView },
+
         // GET root
         "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
@@ -328,6 +350,7 @@ export const ServerConfig: HoneybeeConfig = {
             Type: "begins",
             Page: Pages.GetPasteFromURL,
         },
+
         // POST root
         "/paste/dec/": {
             Method: "POST",

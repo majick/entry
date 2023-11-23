@@ -69,6 +69,8 @@ export class Builder implements Endpoint {
         // get editing paste (if it exists)
         let result: Paste | undefined;
         let DisablePasswordField = false;
+        let RevisionNumber = 0;
+
         if (search.get("edit")) {
             // get paste
             result = (await db.GetPasteFromURL(search.get("edit")!)) as Paste;
@@ -95,12 +97,22 @@ export class Builder implements Endpoint {
                     parseFloat(search.get("r")!)
                 );
 
+                // ...fetch latest revision if requested
+                if (search.get("r")! === "latest") {
+                    revision[2] = (
+                        await db.GetAllPasteRevisions(search.get("edit")!)
+                    )[2][0];
+                    revision[0] = true;
+                }
+
+                // ...return 404 if revision doesn't exist
                 if (!revision[0] || !revision[2])
                     return new _404Page().request(request);
 
                 // ...update result
                 result.Content = revision[2].Content.split("_metadata:")[0];
                 result.EditDate = revision[2].EditDate;
+                RevisionNumber = revision[2].EditDate;
             }
 
             // if paste isn't a builder paste, convert it
@@ -159,6 +171,7 @@ export class Builder implements Endpoint {
                                 EntryDB.config.app &&
                                 EntryDB.config.app.enable_versioning === true
                             };
+                            window.ViewingRevision = ${RevisionNumber !== 0};
                             Builder(\`${stringified}\`, true); window.Debug = Debug;`,
                         }}
                     />

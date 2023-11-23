@@ -438,6 +438,7 @@ function RenderPage() {
                 EditingPaste={EditingPaste || undefined}
                 DisablePassword={(window as any).DisablePasswordField}
                 EnableDrafts={(window as any).EnableDrafts}
+                ViewingRevision={(window as any).ViewingRevision}
                 Endpoints={{
                     new: "/api/new",
                     edit: "/api/edit",

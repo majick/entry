@@ -4,6 +4,7 @@ export default function PublishModals(props: {
     EditingPaste?: string;
     DisablePassword?: boolean;
     EnableDrafts?: boolean;
+    ViewingRevision?: boolean;
     Endpoints: {
         new: string;
         edit: string;
@@ -53,14 +54,29 @@ export default function PublishModals(props: {
                 }
             ></iframe>
 
-            <div style={{ width: "20rem", maxWidth: "100%" }}>
+            <div style={{ width: "25rem", maxWidth: "100%" }}>
+                {props.ViewingRevision === true && (
+                    <div
+                        class={"mdnote note-info"}
+                        style={{
+                            marginBottom: "0.5rem",
+                        }}
+                    >
+                        <b class={"mdnote-title"}>Viewing Revision</b>
+                        <p>
+                            Pressing "Publish" will publish the content of the
+                            revision to the live paste!{" "}
+                        </p>
+                    </div>
+                )}
+
                 {(props.EditingPaste === undefined && (
                     <>
                         {/* create new paste */}
                         <form
                             action={props.Endpoints.new}
                             method={"POST"}
-                            className="flex flex-column g-8"
+                            className="flex flex-column g-8 full"
                             target={"publish_frame"}
                         >
                             <input
@@ -93,19 +109,14 @@ export default function PublishModals(props: {
                                 minLength={2}
                                 maxLength={500}
                                 placeholder={"Custom edit password"}
-                                class={"round"}
+                                class={"round full"}
                                 autocomplete={"off"}
                                 required
                             />
 
                             <hr style={{ margin: "0" }} />
 
-                            <button
-                                className="green round modal:entry:button.Submit"
-                                style={{
-                                    width: "100%",
-                                }}
-                            >
+                            <button className="green round modal:entry:button.Submit full">
                                 Publish
                             </button>
                         </form>
@@ -116,7 +127,7 @@ export default function PublishModals(props: {
                         <form
                             action={props.Endpoints.edit}
                             method={"POST"}
-                            className="flex flex-column g-8"
+                            className="flex flex-column g-8 full"
                             target={"publish_frame"}
                         >
                             <input
@@ -143,7 +154,7 @@ export default function PublishModals(props: {
                                     minLength={2}
                                     maxLength={500}
                                     placeholder={"Edit password"}
-                                    class={"round"}
+                                    class={"round full"}
                                     autocomplete={"off"}
                                     disabled={props.DisablePassword === true}
                                     required
