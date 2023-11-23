@@ -2281,13 +2281,13 @@ export class UserSettings implements Endpoint {
         if (!url.pathname.startsWith("/s/") && name !== "s")
             return await new GetPasteFromURL().request(request, server);
 
+        // get association
+        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
         // if no paste is provided, show global settings
         if (name === "s") {
-            // get association
-            const _ip = server !== undefined ? server.requestIP(request) : null;
-            const Association = await GetAssociation(request, _ip);
-            if (Association[1].startsWith("associated=")) Association[0] = false;
-
             // render
             return new Response(
                 Renderer.Render(
@@ -2518,16 +2518,38 @@ export class UserSettings implements Endpoint {
                                                 required
                                             />
 
-                                            <input
-                                                class={"round mobile-max"}
-                                                type="text"
-                                                placeholder={"Edit code"}
-                                                maxLength={EntryDB.MaxPasswordLength}
-                                                minLength={EntryDB.MinPasswordLength}
-                                                name={"EditPassword"}
-                                                id={"EditPassword"}
-                                                required
-                                            />
+                                            <div className="tooltip-wrapper mobile-max flex justify-center">
+                                                <input
+                                                    style={{
+                                                        width: "100%",
+                                                    }}
+                                                    class={"round"}
+                                                    type="text"
+                                                    placeholder={"Edit code"}
+                                                    maxLength={
+                                                        EntryDB.MaxPasswordLength
+                                                    }
+                                                    minLength={
+                                                        EntryDB.MinPasswordLength
+                                                    }
+                                                    name={"EditPassword"}
+                                                    disabled={
+                                                        Association[0] &&
+                                                        Association[1] ===
+                                                            result.Metadata!.Owner
+                                                    }
+                                                    required
+                                                />
+
+                                                {Association[0] &&
+                                                    Association[1] ===
+                                                        result.Metadata!.Owner && (
+                                                        <div className="card secondary round border tooltip top">
+                                                            You don't need a
+                                                            password, you own this!
+                                                        </div>
+                                                    )}
+                                            </div>
 
                                             <input
                                                 type="hidden"

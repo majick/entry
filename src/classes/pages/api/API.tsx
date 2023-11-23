@@ -589,22 +589,9 @@ export class EditPaste implements Endpoint {
         )
             body.NewEditPassword = body.EditPassword;
 
-        if (
-            Association[0] === true &&
-            !Association[1].startsWith("associated") &&
-            paste.Metadata &&
-            !paste.ViewPassword &&
-            // verify edit password
-            // OR check if association matches owner
-            (CreateHash(body.EditPassword) === paste.EditPassword ||
-                (paste.Metadata.Owner && paste.Metadata.Owner === Association[1]))
-        ) {
-            // edit paste metadata (keep owner up-to-date)
-            paste.Metadata.Owner = Association[1];
-
-            // add to content
+        // add metadata to content
+        if (paste.Metadata)
             body.Content += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
-        }
 
         // edit paste
         const result = await db.EditPaste(
@@ -1349,11 +1336,25 @@ export class EditMetadata implements Endpoint {
         const paste = await db.GetPasteFromURL(body.CustomURL, false, true); // do not fetch from cache!
         if (!paste) return new _404Page().request(request);
 
+        // get association
+        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
         // validate password
         const admin =
             CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
 
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+        if (
+            // if we used the wrong password
+            paste.EditPassword !== CreateHash(body.EditPassword) &&
+            // ...and we're not using the admin password
+            !admin &&
+            // ...and we're not the owner of the paste
+            (!Association[0] ||
+                !paste.Metadata ||
+                Association[1] !== paste.Metadata!.Owner)
+        )
             return new Response("Invalid password", {
                 status: 302,
                 headers: {
