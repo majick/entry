@@ -504,6 +504,9 @@ export class RevisionsList implements Endpoint {
                                         <a
                                             href={`/r/${name}?r=${r.EditDate}`}
                                             className="button round full justify-start flex-wrap g-4"
+                                            style={{
+                                                height: "auto !important",
+                                            }}
                                         >
                                             <span>
                                                 Revision{" "}

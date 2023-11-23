@@ -25,6 +25,7 @@ import {
 import { Node } from "../schema";
 import parser from "../parser";
 
+import NodeListing from "./NodeListing";
 import HTMLEditor from "./HTMLEditor";
 let CurrentEditor: any;
 
@@ -372,7 +373,7 @@ export default function Sidebar(props: { Page?: string }): any {
                             {/* pages list */}
                             <button
                                 class={
-                                    "green normal round full secondary justify-space-between"
+                                    "green-cta normal round full secondary justify-space-between"
                                 }
                                 onClick={() => AddComponent("Page")}
                             >
@@ -559,71 +560,39 @@ export default function Sidebar(props: { Page?: string }): any {
                         )) ||
                         (props.Page === "Tree" && (
                             <>
+                                {(() => {
+                                    // force update
+                                    Update();
+                                })()}
+
+                                <button
+                                    className="green-cta normal full round justify-space-between"
+                                    onClick={() =>
+                                        (window as any).modals[
+                                            "entry:modal.AddComponent"
+                                        ](true)
+                                    }
+                                >
+                                    Create New
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="18"
+                                        height="18"
+                                        aria-label={"Plus Square Symbol"}
+                                    >
+                                        <path d="M2.75 1h10.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 15H2.75A1.75 1.75 0 0 1 1 13.25V2.75C1 1.784 1.784 1 2.75 1Zm10.5 1.5H2.75a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM8 4a.75.75 0 0 1 .75.75v2.5h2.5a.75.75 0 0 1 0 1.5h-2.5v2.5a.75.75 0 0 1-1.5 0v-2.5h-2.5a.75.75 0 0 1 0-1.5h2.5v-2.5A.75.75 0 0 1 8 4Z"></path>
+                                    </svg>
+                                </button>
+
                                 {/* component tree */}
-                                {parser.GetNodes().map((node) => {
-                                    return (
-                                        <button
-                                            title={node.ID}
-                                            onClick={() => {
-                                                // get parent node
-                                                let parent = parser
-                                                    .GetNodes()
-                                                    .find(
-                                                        (n) =>
-                                                            n.Type === "Card" &&
-                                                            n.Children.includes(node)
-                                                    );
-
-                                                if (!parent) {
-                                                    // try to find in current page
-                                                    if (
-                                                        Document.Pages[
-                                                            CurrentPage
-                                                        ].Children.includes(node)
-                                                    )
-                                                        parent =
-                                                            Document.Pages[
-                                                                CurrentPage
-                                                            ];
-                                                    else return;
-                                                }
-
-                                                // select
-                                                Select(node, parent.Children!);
-                                            }}
-                                            onMouseEnter={() => {
-                                                // try to get rendered node
-                                                const rendered =
-                                                    document.getElementById(
-                                                        node.ID!
-                                                    );
-
-                                                if (!rendered) return;
-
-                                                // add hover
-                                                return rendered.classList.add(
-                                                    "hover"
-                                                );
-                                            }}
-                                            onMouseLeave={() => {
-                                                // try to get rendered node
-                                                const rendered =
-                                                    document.getElementById(
-                                                        node.ID!
-                                                    );
-
-                                                if (!rendered) return;
-
-                                                // remove hover
-                                                return rendered.classList.remove(
-                                                    "hover"
-                                                );
-                                            }}
-                                        >
-                                            {node.Type}
-                                        </button>
-                                    );
-                                })}
+                                <div className="card round border flex flex-column g-4 secondary">
+                                    {Document.Pages[CurrentPage].Children.map(
+                                        (node) => {
+                                            return <NodeListing Node={node} />;
+                                        }
+                                    )}
+                                </div>
                             </>
                         )) ||
                         (props.Page === "History" && (
@@ -643,6 +612,12 @@ export default function Sidebar(props: { Page?: string }): any {
                         )))) ||
                     (Selected && !props.Page && (
                         <>
+                            <QuickInput
+                                name="Nickname"
+                                property="Nickname"
+                                type="input"
+                            />
+
                             {(Selected.Type === "Page" && (
                                 <>
                                     {/* page element controls */}

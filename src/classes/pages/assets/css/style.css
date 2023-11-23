@@ -1161,6 +1161,31 @@ details.file-list-entry .details-flex-content-list-box {
     padding: 0 0 0 0.75rem;
 }
 
+details.file-list-entry[open] .details-flex-content-list-box {
+    border-left: solid 2px var(--background-surface2a);
+}
+
+details[open] summary .open-icon {
+    display: block;
+}
+
+details[open] summary .closed-icon {
+    display: none;
+}
+
+details:not([open]) summary .open-icon {
+    display: none;
+}
+
+details:not([open]) summary .closed-icon {
+    display: block;
+}
+
+details summary:has(.open-icon)::before {
+    /* hide marker if summary has an open-icon */
+    display: none;
+}
+
 /* codemirror styles */
 .cm-cursor {
     border-color: currentColor !important;
@@ -1664,16 +1689,19 @@ br:not(.cm-line br) {
 }
 
 .builder\:sidebar .options button:not(.normal):hover,
-.builder\:sidebar .options .option:hover {
+.builder\:sidebar .options .option:hover,
+.builder\:sidebar .options details[open] summary.option {
     box-shadow: inset 0 0 2px var(--background-surface2a);
+    background: var(--background-surface1-5) !important;
 }
 
-.builder\:sidebar .options button:not(.normal) {
+.builder\:sidebar .options button:not(.normal),
+.builder\:sidebar .options .option:not(.normal) {
     border-color: var(--background-surface3);
 }
 
 .builder\:sidebar .options button:not(.normal).green {
-    border-color: var(--green2);
+    border-color: var(--green3);
 }
 
 .builder\:sidebar .options button:not(.normal).red {

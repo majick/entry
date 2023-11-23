@@ -912,6 +912,12 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         _page = _page.shadowRoot!;
         _page.innerHTML = `<style>@import url("/style.css");</style>${_page.innerHTML}`;
 
+        (window as any).Builder = {
+            Page: {
+                Element: _page,
+            },
+        };
+
         // initial page render
         RenderCurrentPage(_page);
 
@@ -993,7 +999,13 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
             // move mode
             if (EditOrderMode && EditMode) {
-                const OriginTarget = document.getElementById(Selected.ID!)!;
+                const OriginTarget = Array.from(
+                    _page.firstElementChild!.querySelectorAll(
+                        "*[id]"
+                    ) as any as HTMLElement[]
+                ).find((n) => n.id === Selected.ID);
+
+                if (!OriginTarget) return;
 
                 (OriginTarget.getAttribute("data-component")
                     ? OriginTarget

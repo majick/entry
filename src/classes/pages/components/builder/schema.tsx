@@ -17,6 +17,7 @@ export type BaseNode = {
     EditMode?: boolean;
     StyleString?: string; // injected directly into the element style attribute
     ClassString?: string; // injected directly into the element class
+    Nickname?: string;
     // ...events
     onClick?: string;
     onMouseEnter?: string;
