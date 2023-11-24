@@ -1076,7 +1076,9 @@ export default class Home implements Endpoint {
                                             >
                                                 <div class={"flex g-4"}>
                                                     <button
-                                                        class={"round green-cta"}
+                                                        class={
+                                                            "round green-cta entry:button.Submit"
+                                                        }
                                                         id={"entry:button.Publish"}
                                                         style={{ fontWeight: "500" }}
                                                     >
@@ -1100,7 +1102,7 @@ export default class Home implements Endpoint {
                                                             .enable_versioning && (
                                                             <button
                                                                 class={
-                                                                    "round tertiary"
+                                                                    "round tertiary entry:button.Submit"
                                                                 }
                                                                 id={
                                                                     "entry:button.Save"

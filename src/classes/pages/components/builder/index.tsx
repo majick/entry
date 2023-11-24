@@ -36,6 +36,7 @@ export class Builder implements Endpoint {
 
         // get document
         let Document: BuilderDocument = {
+            Version: 2,
             Pages: [
                 {
                     Type: "Page",

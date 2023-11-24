@@ -4,6 +4,9 @@
  * @license MIT
  */
 
+import { parse as TParse, stringify as TStringify } from "smol-toml";
+const TOML = { parse: TParse, stringify: TStringify };
+
 /**
  * @function stringify
  *
@@ -14,7 +17,7 @@
 export function stringify(node: { [key: string]: any }): string {
     return btoa(
         encodeURIComponent(
-            JSON.stringify(node).replaceAll(/%([a-f0-9]{2})/gi, (match, offset) =>
+            TOML.stringify(node).replaceAll(/%([a-f0-9]{2})/gi, (match, offset) =>
                 String.fromCharCode(parseInt(offset, 16))
             )
         )
@@ -29,14 +32,15 @@ export function stringify(node: { [key: string]: any }): string {
  * @return {{[key: string]: any}}
  */
 export function parse(node: string): { [key: string]: any } {
-    return JSON.parse(
-        decodeURIComponent(
-            atob(node).replaceAll(
-                /[\x80-\uffff]/g,
-                (match) => `%${match.charCodeAt(0).toString(16).padStart(2, "0")}`
-            )
+    const decoded = decodeURIComponent(
+        atob(node).replaceAll(
+            /[\x80-\uffff]/g,
+            (match) => `%${match.charCodeAt(0).toString(16).padStart(2, "0")}`
         )
     );
+
+    // return
+    return (decoded.startsWith("{") ? JSON : TOML).parse(decoded);
 }
 
 // default export

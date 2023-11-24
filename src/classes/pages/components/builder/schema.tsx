@@ -89,6 +89,13 @@ export interface SourceNode extends BaseNode {
     UseContentBox?: string; // use "display: contents;" if "true"
 }
 
+export interface HTMLEntityNode extends BaseNode {
+    // represents HTML elements defined inside a SourceNode
+    Type: "HTMLEntity";
+    Content: string;
+    NotRemoveable: true;
+}
+
 export interface StarInfoNode extends BaseNode {
     Type: "StarInfo";
     NotRemovable: true;
@@ -103,9 +110,11 @@ export type Node =
     | ImageNode
     | EmbedNode
     | SourceNode
+    | HTMLEntityNode
     | StarInfoNode;
 
 export type BuilderDocument = {
+    Version: 1 | 2;
     Pages: PageNode[];
 };
 

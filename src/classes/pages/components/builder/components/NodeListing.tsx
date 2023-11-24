@@ -6,16 +6,31 @@ import parser from "../parser";
  * @function NodeListing
  *
  * @export
- * @param {{ Node: Node }} props
+ * @param {{ Node: Node, DisableBuilderFeatures?: boolean }} props
  * @return {any}
  */
-export default function NodeListing(props: { Node: Node }): any {
+export default function NodeListing(props: {
+    Node: Node;
+    DisableBuilderFeatures?: boolean;
+}): any {
     const node = props.Node;
 
+    // if node has the id "node:removed", return nothing
+    if (props.Node.ID === "node:removed") return <></>;
+
+    // if node has a child node with the id "node:removed", remove it
+    if (props.Node.Children)
+        for (const child of props.Node.Children)
+            if (child.ID === "node:removed")
+                delete props.Node.Children[props.Node.Children.indexOf(child)];
+
+    // return
     return (
         <div
             title={node.ID}
             onMouseEnter={() => {
+                if (props.DisableBuilderFeatures === true) return;
+
                 // try to get rendered node
                 const rendered = (window as any).Builder.Page.Element.getElementById(
                     node.ID!
@@ -33,6 +48,8 @@ export default function NodeListing(props: { Node: Node }): any {
                 return rendered.classList.add("hover");
             }}
             onMouseLeave={() => {
+                if (props.DisableBuilderFeatures === true) return;
+
                 // try to get rendered node
                 const rendered = (window as any).Builder.Page.Element.getElementById(
                     node.ID!
@@ -49,8 +66,10 @@ export default function NodeListing(props: { Node: Node }): any {
                 if (!props.Node.Children || props.Node.Children.length === 0)
                     return (
                         <button
-                            class={"justify-start"}
+                            class={"justify-start round full"}
                             onClick={() => {
+                                if (props.DisableBuilderFeatures === true) return;
+
                                 // get parent node
                                 let parent = parser
                                     .GetNodes()
@@ -91,7 +110,7 @@ export default function NodeListing(props: { Node: Node }): any {
                 // element has child nodes!
                 else
                     return (
-                        <details class="file-list-entry full">
+                        <details class="file-list-entry full round">
                             <summary
                                 class={"option full justify-space-between"}
                                 style={{
@@ -124,52 +143,60 @@ export default function NodeListing(props: { Node: Node }): any {
                                     {node.Nickname && <>({node.Type})</>}
                                 </span>
 
-                                <button
-                                    class={"normal round"}
-                                    title={"Inspect Component"}
-                                    style={{
-                                        background: "transparent",
-                                    }}
-                                    onClick={() => {
-                                        // get parent node
-                                        let parent = parser
-                                            .GetNodes()
-                                            .find(
-                                                (n) =>
-                                                    n.Type === "Card" &&
-                                                    n.Children.includes(node)
-                                            );
+                                {props.DisableBuilderFeatures !== true && (
+                                    <button
+                                        class={"normal round"}
+                                        title={"Inspect Component"}
+                                        style={{
+                                            background: "transparent",
+                                        }}
+                                        onClick={() => {
+                                            // get parent node
+                                            let parent = parser
+                                                .GetNodes()
+                                                .find(
+                                                    (n) =>
+                                                        n.Type === "Card" &&
+                                                        n.Children.includes(node)
+                                                );
 
-                                        if (!parent) {
-                                            // try to find in current page
-                                            if (
-                                                Document.Pages[
-                                                    CurrentPage
-                                                ].Children.includes(node)
-                                            )
-                                                parent = Document.Pages[CurrentPage];
-                                            else return;
-                                        }
+                                            if (!parent) {
+                                                // try to find in current page
+                                                if (
+                                                    Document.Pages[
+                                                        CurrentPage
+                                                    ].Children.includes(node)
+                                                )
+                                                    parent =
+                                                        Document.Pages[CurrentPage];
+                                                else return;
+                                            }
 
-                                        // select
-                                        Select(node, parent.Children!);
-                                    }}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        aria-label={"Pencil Symbol"}
+                                            // select
+                                            Select(node, parent.Children!);
+                                        }}
                                     >
-                                        <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
-                                    </svg>
-                                </button>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Pencil Symbol"}
+                                        >
+                                            <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                        </svg>
+                                    </button>
+                                )}
                             </summary>
 
                             <div className="details-flex-content-list-box">
                                 {node.Children!.map((n) => (
-                                    <NodeListing Node={n} />
+                                    <NodeListing
+                                        Node={n}
+                                        DisableBuilderFeatures={
+                                            props.DisableBuilderFeatures || false
+                                        }
+                                    />
                                 ))}
                             </div>
                         </details>

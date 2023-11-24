@@ -431,7 +431,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                     <a
                                         href={`${HostnameURL}r/${result.CustomURL}`}
-                                        class={"button tertiary round"}
+                                        class={"button round"}
                                         title={"Inspect Paste"}
                                     >
                                         <svg
