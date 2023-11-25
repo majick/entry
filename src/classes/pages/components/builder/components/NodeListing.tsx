@@ -22,7 +22,11 @@ export default function NodeListing(props: {
     if (props.Node.Children)
         for (const child of props.Node.Children)
             if (child.ID === "node:removed")
-                delete props.Node.Children[props.Node.Children.indexOf(child)];
+                props.Node.Children[props.Node.Children.indexOf(child)] = {
+                    Type: "HTMLEntity",
+                    NotRemovable: true,
+                    Content: "",
+                };
 
     // return
     return (

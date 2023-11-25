@@ -93,7 +93,7 @@ export interface HTMLEntityNode extends BaseNode {
     // represents HTML elements defined inside a SourceNode
     Type: "HTMLEntity";
     Content: string;
-    NotRemoveable: true;
+    NotRemovable: true;
 }
 
 export interface StarInfoNode extends BaseNode {
