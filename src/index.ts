@@ -120,6 +120,7 @@ export type Config = {
         password: string;
         database: string;
         logdb?: boolean;
+        max_clients?: number;
     };
 };
 

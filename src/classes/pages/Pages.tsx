@@ -90,6 +90,7 @@ export function OpenGraph(props: {
     title?: string;
     icon?: string;
     color?: string;
+    largeimage?: string;
 }) {
     return (
         <>
@@ -104,6 +105,7 @@ export function OpenGraph(props: {
 
             {props.title && <meta name={"og:title"} value={props.title} />}
             {props.icon && <meta name={"og:image"} value={props.icon} />}
+            {props.largeimage && <meta name={"og:image"} value={props.largeimage} />}
         </>
     );
 }
@@ -564,6 +566,11 @@ export class GetPasteFromURL implements Endpoint {
                                     ? result.Metadata.EmbedColor
                                     : undefined
                             }
+                            largeimage={
+                                result.Metadata && result.Metadata.EmbedImage
+                                    ? result.Metadata.EmbedImage
+                                    : undefined
+                            }
                         />
                     </>
                 ),
@@ -837,61 +844,6 @@ export class GetPasteFromURL implements Endpoint {
                                         </svg>
                                         More
                                     </a>
-
-                                    <details
-                                        class={"horizontal round"}
-                                        style={{
-                                            width: "max-content",
-                                        }}
-                                    >
-                                        <summary
-                                            style={{
-                                                fontWeight: "normal",
-                                                width: "100px",
-                                            }}
-                                        >
-                                            Export
-                                        </summary>
-
-                                        <div
-                                            class={"details-content"}
-                                            style={{
-                                                minWidth: "calc(80px * 3)",
-                                            }}
-                                        >
-                                            <a
-                                                class={"button"}
-                                                target={"_blank"}
-                                                href={`${HostnameURL}api/raw/${result.CustomURL}`}
-                                                style={{
-                                                    width: "80px",
-                                                }}
-                                            >
-                                                Raw
-                                            </a>
-
-                                            <a
-                                                class={"button"}
-                                                href={`${HostnameURL}api/html/${result.CustomURL}`}
-                                                target={"_blank"}
-                                                style={{
-                                                    width: "100px",
-                                                }}
-                                            >
-                                                HTML
-                                            </a>
-
-                                            <a
-                                                class={"button"}
-                                                href={`${HostnameURL}paste/doc/${result.CustomURL}`}
-                                                style={{
-                                                    width: "80px",
-                                                }}
-                                            >
-                                                Doc
-                                            </a>
-                                        </div>
-                                    </details>
                                 </div>
 
                                 <div className="mobile-only">
@@ -1090,6 +1042,11 @@ export class GetPasteFromURL implements Endpoint {
                         color={
                             result.Metadata && result.Metadata.EmbedColor
                                 ? result.Metadata.EmbedColor
+                                : undefined
+                        }
+                        largeimage={
+                            result.Metadata && result.Metadata.EmbedImage
+                                ? result.Metadata.EmbedImage
                                 : undefined
                         }
                     />

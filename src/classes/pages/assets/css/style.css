@@ -1181,7 +1181,7 @@ details:not([open]) summary .closed-icon {
     display: block;
 }
 
-details summary:has(.open-icon)::before {
+details.file-list-entry summary::before {
     /* hide marker if summary has an open-icon */
     display: none;
 }

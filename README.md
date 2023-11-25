@@ -37,6 +37,7 @@ You can configure a PostgreSQL database to be used for the main paste database t
         "password": "mypassword",
         "database": "mypastedatabase",
         // "logdb"?: boolean
+        // "max_clients"?: boolean (DEFAULT 10)
     }
 }
 ```
@@ -423,12 +424,6 @@ Users can build multi-page "pastes" using the paste builder. These pages are bui
 These pages can be published as normal pastes, and will open rendered when viewed.
 
 A basic introduction to the layout of the builder can be found [here](https://builder.sntry.cc)!
-
-#### Toolbox
-
-Components created in the builder can be saved to the component toolbox, allowing them to be shared and used by other users. Components saved to the toolbox are saved under the `components` paste group. Their content is just a JSON export of the component.
-
-Saved toolbox components can be found in the paste builder on the top right. These components can be inserted into a paste builder page by selecting them in the library.
 
 #### Technical
 

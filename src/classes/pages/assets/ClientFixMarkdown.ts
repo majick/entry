@@ -31,10 +31,8 @@ export function HandleCustomElements() {
         const hue = document.querySelector("#editor-tab-preview hue") as HTMLElement;
         const sat = document.querySelector("#editor-tab-preview sat") as HTMLElement;
         const lit = document.querySelector("#editor-tab-preview lit") as HTMLElement;
-        const styleElement = document.querySelector(
-            "#editor-tab-preview style"
-        ) as HTMLStyleElement;
 
+        // ...
         if (hue) style += `--base-hue: ${hue.innerText};`;
         if (sat) style += `--base-sat: ${sat.innerText};`;
         if (lit) style += `--base-lit: ${lit.innerText};`;
@@ -89,6 +87,14 @@ export function HandleCustomElements() {
             ".anim"
         ) as any as HTMLElement[])
             element.style.animation = "";
+
+    // if entry:user.DisableCustomPasteCSS is true, delete all style elements
+    const styleElements = Array.from(
+        document.querySelectorAll("#editor-tab-preview style")
+    );
+
+    if (window.localStorage.getItem("entry:user.DisableCustomPasteCSS") === "true")
+        for (const element of styleElements) element.remove();
 }
 
 /**

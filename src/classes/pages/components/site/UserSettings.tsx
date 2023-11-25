@@ -144,6 +144,7 @@ export default function UserSettings(id: string): any {
     );
 
     AddOption("Force Global Theme", "entry:user.ForceClientTheme");
+    AddOption("Disable Custom Paste CSS", "entry:user.DisableCustomPasteCSS");
     AddOption("Disable Images", "entry:user.DisableImages");
     AddOption("Disable Animations", "entry:user.DisableAnimations");
     AddOption("Editor Hints", "entry:user.EditorHints");

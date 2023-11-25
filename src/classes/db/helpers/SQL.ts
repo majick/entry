@@ -8,6 +8,7 @@ import { Database } from "bun:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
+import EntryDB from "../EntryDB";
 import pg, { Pool } from "pg";
 
 /**
@@ -62,11 +63,20 @@ export default class SQL {
         password: string,
         database: string
     ): Pool {
+        if (!EntryDB.config.pg) throw new Error("PostgreSQL is not configured!");
+
         // ...
         if (!host || !user || !password) throw new Error("Missing values!");
 
         // create database
-        const db = new pg.Pool({ host, user, password, database, max: 5 });
+        const db = new pg.Pool({
+            host,
+            user,
+            password,
+            database,
+            max: EntryDB.config.pg.max_clients || 10,
+        });
+
         db.connect();
 
         // return

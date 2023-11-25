@@ -116,7 +116,16 @@ export default function PublishModals(props: {
 
                             <hr style={{ margin: "0" }} />
 
-                            <button className="green round modal:entry:button.Submit full">
+                            <button className="green-cta round modal:entry:button.Submit full">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="18"
+                                    height="18"
+                                    aria-label={"Check Mark Symbol"}
+                                >
+                                    <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+                                </svg>
                                 Publish
                             </button>
                         </form>
@@ -213,7 +222,16 @@ export default function PublishModals(props: {
                                     gap: "0.5rem",
                                 }}
                             >
-                                <button className="green round modal:entry:button.Submit full">
+                                <button className="green-cta round modal:entry:button.Submit full">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="18"
+                                        height="18"
+                                        aria-label={"Check Mark Symbol"}
+                                    >
+                                        <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+                                    </svg>
                                     Publish
                                 </button>
 

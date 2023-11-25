@@ -338,6 +338,10 @@ export function ClientEditor(_metadata: string, id: string): any {
             metadata.root.EmbedColor || "#55a4e0",
             "Change the social embed color for this paste",
         ],
+        EmbedImage: [
+            metadata.root.EmbedImage || "",
+            "Change the large embed image for this paste (thumbnail)",
+        ],
         // privacy section
         Privacy: ["div", "Privacy and Security"],
         PrivateSource: [

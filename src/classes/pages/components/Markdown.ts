@@ -36,11 +36,13 @@ export function ParseMarkdownSync(
 
     // allowed elements
     for (let element of [
+        // custom elements
         "hue",
         "sat",
         "lit",
         "theme",
         "comment",
+        // html elements
         "p",
         "span",
         "style",
@@ -229,6 +231,8 @@ export function ParseMarkdownSync(
                 result = "";
             // class block
             else if (_class === "class") result = `<span class="${attributes[0]}">`;
+            // id block
+            else if (_class === "id") result = `<span id="${attributes[0]}">`;
             // include block
             else if (_class === "include" && attributes[0] !== CurrentPaste)
                 // set temp result

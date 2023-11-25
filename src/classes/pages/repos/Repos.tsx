@@ -264,6 +264,64 @@ export class RepoView implements Endpoint {
 
                             <div className="card border round NoPadding">
                                 <div className="card round header">
+                                    <b>Export</b>
+                                </div>
+
+                                <div className="card round has-header flex g-4 flex-wrap justify-center">
+                                    <a
+                                        class={"button round"}
+                                        target={"_blank"}
+                                        href={`/api/raw/${result.CustomURL}`}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Markdown Symbol"}
+                                        >
+                                            <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
+                                        </svg>
+                                        Markdown
+                                    </a>
+
+                                    <a
+                                        class={"button round"}
+                                        href={`/api/html/${result.CustomURL}`}
+                                        target={"_blank"}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Code Symbol"}
+                                        >
+                                            <path d="m11.28 3.22 4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734L13.94 8l-3.72-3.72a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215Zm-6.56 0a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L2.06 8l3.72 3.72a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L.47 8.53a.75.75 0 0 1 0-1.06Z"></path>
+                                        </svg>
+                                        HTML Render
+                                    </a>
+
+                                    <a
+                                        class={"button round"}
+                                        href={`/paste/doc/${result.CustomURL}`}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"File Symbol"}
+                                        >
+                                            <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                        </svg>
+                                        Document
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div className="card border round NoPadding">
+                                <div className="card round header">
                                     <b>File List</b>
                                 </div>
 
