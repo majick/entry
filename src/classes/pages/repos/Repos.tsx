@@ -137,7 +137,7 @@ export class RepoView implements Endpoint {
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
-        if (!result) return new _404Page().request(request);
+        if (!result || result.HostServer) return new _404Page().request(request);
 
         // get revision
         let RevisionNumber = 0;
@@ -492,7 +492,7 @@ export class RevisionsList implements Endpoint {
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
-        if (!result) return new _404Page().request(request);
+        if (!result || result.HostServer) return new _404Page().request(request);
 
         // get revisions
         const revisions = await db.GetAllPasteRevisions(name);

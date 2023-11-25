@@ -122,8 +122,8 @@ export class Builder implements Endpoint {
                 result.GroupName !== "components"
             ) {
                 Document.Pages[0].Children[0] = {
-                    Type: "Text",
-                    Content: result.Content,
+                    Type: "Source",
+                    Content: await ParseMarkdown(result.Content),
                 };
 
                 result.Content = `_builder:${parser.stringify(Document)}`;

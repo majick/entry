@@ -37,7 +37,7 @@ export class ViewPasteMedia implements Endpoint {
 
         // get paste
         const paste = await db.GetPasteFromURL(name, true);
-        if (!paste) return new _404Page().request(request);
+        if (!paste || paste.HostServer) return new _404Page().request(request);
 
         // get association
         const Association = await GetAssociation(request, null);
@@ -311,6 +311,7 @@ export class InspectMedia implements Endpoint {
 
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+
         if (name.startsWith("paste/file/")) name = name.split("paste/file/")[1];
         else if (name.startsWith("api/media/file/"))
             name = name.split("api/media/file/")[1];
@@ -322,7 +323,7 @@ export class InspectMedia implements Endpoint {
 
         // get paste
         const paste = await db.GetPasteFromURL(name, true);
-        if (!paste) return new _404Page().request(request);
+        if (!paste || paste.HostServer) return new _404Page().request(request);
 
         // if request.headers.Accept does not include "text/html", just return the file!
         // (this means it was sent from an img element or similar)

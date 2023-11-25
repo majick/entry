@@ -28,6 +28,9 @@ export default function NodeListing(props: {
                     Content: "",
                 };
 
+    // don't render HTMLEntity
+    if (props.Node.Type === "HTMLEntity") return <></>;
+
     // return
     return (
         <div

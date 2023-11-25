@@ -22,10 +22,12 @@ import {
     HistoryCurrent,
 } from "../Builder";
 
+import { TOML } from "../../../../db/helpers/BaseParser";
 import { Node } from "../schema";
 import parser from "../parser";
 
 import NodeListing from "./NodeListing";
+import Expandable from "./Expandable";
 import HTMLEditor from "./HTMLEditor";
 let CurrentEditor: any;
 
@@ -54,6 +56,7 @@ export function QuickInput(props: {
     step?: number; // inputType number only
     value?: string; // input/textarea only
     options?: { label: string; value: string }[]; // select only
+    children?: any;
 }): any {
     return (
         <div className="option">
@@ -165,6 +168,8 @@ export function QuickInput(props: {
                         ))}
                     </select>
                 ))}
+
+            {props.children !== undefined && props.children}
         </div>
     );
 }
@@ -556,6 +561,30 @@ export default function Sidebar(props: { Page?: string }): any {
                                     </svg>
                                     Document History
                                 </button>
+
+                                <hr />
+
+                                <Expandable title={"Extras"}>
+                                    <button
+                                        onClick={() => {
+                                            RenderSidebar({
+                                                Page: "TOML",
+                                            });
+                                        }}
+                                    >
+                                        Inspect TOML
+                                    </button>
+
+                                    <button
+                                        onClick={() => {
+                                            (window as any).Debug(
+                                                document.getElementById("debug")!
+                                            );
+                                        }}
+                                    >
+                                        Open Debug
+                                    </button>
+                                </Expandable>
                             </>
                         )) ||
                         (props.Page === "Tree" && (
@@ -608,6 +637,23 @@ export default function Sidebar(props: { Page?: string }): any {
                                 >
                                     Forward
                                 </button>
+                            </>
+                        )) ||
+                        (props.Page === "TOML" && (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        RenderSidebar({
+                                            Page: "Tree",
+                                        });
+                                    }}
+                                >
+                                    Render Tree
+                                </button>
+
+                                <pre>
+                                    <code>{TOML.stringify(Document)}</code>
+                                </pre>
                             </>
                         )))) ||
                     (Selected && !props.Page && (
@@ -673,14 +719,8 @@ export default function Sidebar(props: { Page?: string }): any {
                                                 value: "true",
                                             },
                                         ]}
-                                    />
-
-                                    <details className="option round">
-                                        <summary>
-                                            Automatic Positioning Options
-                                        </summary>
-
-                                        <div class={"details-flex-content-list-box"}>
+                                    >
+                                        <Expandable title="Customize">
                                             <p className="option">
                                                 These options only apply if
                                                 "Automatic Positioning" is set to
@@ -736,8 +776,8 @@ export default function Sidebar(props: { Page?: string }): any {
                                                     Selected.Spacing || 10
                                                 ).toString()}
                                             />
-                                        </div>
-                                    </details>
+                                        </Expandable>
+                                    </QuickInput>
                                 </>
                             )) ||
                                 (Selected.Type === "Card" && (
@@ -782,17 +822,9 @@ export default function Sidebar(props: { Page?: string }): any {
                                                     value: "flex",
                                                 },
                                             ]}
-                                        />
-
-                                        <details class={"option round"}>
-                                            <summary>
-                                                Container Display Options
-                                            </summary>
-
-                                            <div
-                                                class={
-                                                    "details-flex-content-list-box"
-                                                }
+                                        >
+                                            <Expandable
+                                                title={"Container Display Options"}
                                             >
                                                 <QuickInput
                                                     name="Gap"
@@ -862,8 +894,8 @@ export default function Sidebar(props: { Page?: string }): any {
                                                         },
                                                     ]}
                                                 />
-                                            </div>
-                                        </details>
+                                            </Expandable>
+                                        </QuickInput>
                                     </>
                                 )) ||
                                 (Selected.Type === "Text" && (
@@ -1081,106 +1113,95 @@ export default function Sidebar(props: { Page?: string }): any {
                                 Selected.Type !== "Source" &&
                                 Selected.Type !== "StarInfo" &&
                                 Selected.Type !== "Card" && (
-                                    <details class={"option round"}>
-                                        <summary>Events</summary>
-
-                                        <div class={"details-flex-content-list-box"}>
-                                            <div className="option">
-                                                Events will not preview in the
-                                                editor.
-                                            </div>
-
-                                            <QuickInput
-                                                name="on:click"
-                                                property={"onClick"}
-                                                value={Selected.onClick || "\n"}
-                                                type="textarea"
-                                            />
-
-                                            <QuickInput
-                                                name="on:mouseenter"
-                                                property={"onMouseEnter"}
-                                                value={Selected.onMouseEnter || "\n"}
-                                                type="textarea"
-                                            />
-
-                                            <QuickInput
-                                                name="on:mouseleave"
-                                                property={"onMouseLeave"}
-                                                value={Selected.onMouseLeave || "\n"}
-                                                type="textarea"
-                                            />
-
-                                            <QuickInput
-                                                name="on:keypress"
-                                                property={"onKeyPress"}
-                                                value={Selected.onKeyPress || "\n"}
-                                                type="textarea"
-                                            />
+                                    <Expandable title="Events">
+                                        <div className="option">
+                                            Events will not preview in the editor.
                                         </div>
-                                    </details>
+
+                                        <QuickInput
+                                            name="on:click"
+                                            property={"onClick"}
+                                            value={Selected.onClick || "\n"}
+                                            type="textarea"
+                                        />
+
+                                        <QuickInput
+                                            name="on:mouseenter"
+                                            property={"onMouseEnter"}
+                                            value={Selected.onMouseEnter || "\n"}
+                                            type="textarea"
+                                        />
+
+                                        <QuickInput
+                                            name="on:mouseleave"
+                                            property={"onMouseLeave"}
+                                            value={Selected.onMouseLeave || "\n"}
+                                            type="textarea"
+                                        />
+
+                                        <QuickInput
+                                            name="on:keypress"
+                                            property={"onKeyPress"}
+                                            value={Selected.onKeyPress || "\n"}
+                                            type="textarea"
+                                        />
+                                    </Expandable>
                                 )}
 
                             {/* import/export */}
-                            <details className="option round">
-                                <summary>Advanced</summary>
+                            <Expandable title="Advanced">
+                                <button
+                                    onClick={() => {
+                                        // remove EditMode
+                                        Selected.EditMode = undefined;
 
-                                <div class={"details-flex-content-list-box"}>
-                                    <button
-                                        onClick={() => {
-                                            // remove EditMode
-                                            Selected.EditMode = undefined;
+                                        // create blob
+                                        const blob = new Blob(
+                                            [JSON.stringify(Selected)],
+                                            {
+                                                type: "application/json",
+                                            }
+                                        );
 
-                                            // create blob
-                                            const blob = new Blob(
-                                                [JSON.stringify(Selected)],
-                                                {
-                                                    type: "application/json",
-                                                }
-                                            );
+                                        // get url and open
+                                        window.open(
+                                            URL.createObjectURL(blob),
+                                            "_blank"
+                                        );
+                                    }}
+                                >
+                                    Export
+                                </button>
 
-                                            // get url and open
-                                            window.open(
-                                                URL.createObjectURL(blob),
-                                                "_blank"
-                                            );
-                                        }}
-                                    >
-                                        Export
-                                    </button>
+                                <button
+                                    onClick={() => {
+                                        // ask for element json
+                                        const element = prompt(
+                                            "Enter exported component JSON below:"
+                                        );
+                                        if (!element) return;
 
-                                    <button
-                                        onClick={() => {
-                                            // ask for element json
-                                            const element = prompt(
-                                                "Enter exported component JSON below:"
-                                            );
-                                            if (!element) return;
+                                        // parse
+                                        const parsed = JSON.parse(element) as Node;
 
-                                            // parse
-                                            const parsed = JSON.parse(
-                                                element
-                                            ) as Node;
+                                        // randomize ID (so we don't have any ID conflicts)
+                                        parsed.ID = crypto.randomUUID();
 
-                                            // randomize ID (so we don't have any ID conflicts)
-                                            parsed.ID = crypto.randomUUID();
+                                        // set node
+                                        SelectedParent[
+                                            SelectedParent.indexOf(Selected)
+                                        ] = parsed;
 
-                                            // set node
-                                            SelectedParent[
-                                                SelectedParent.indexOf(Selected)
-                                            ] = parsed;
+                                        // refresh all nodes
+                                        parser.ResetNodes();
 
-                                            // refresh all nodes
-                                            parser.ResetNodes();
-
-                                            // return and update
-                                            return Update();
-                                        }}
-                                    >
-                                        Import
-                                    </button>
-                                </div>
-                            </details>
+                                        // return and update
+                                        return Update();
+                                    }}
+                                >
+                                    Import
+                                </button>
+                            </Expandable>
                         </>
                     ))}
             </div>

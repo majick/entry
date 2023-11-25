@@ -1536,7 +1536,7 @@ export class PasteCommentsPage implements Endpoint {
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
-        if (!result) return new _404Page().request(request);
+        if (!result || result.HostServer) return new _404Page().request(request);
 
         // return 404 if page does not allow comments
         if (

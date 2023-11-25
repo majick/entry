@@ -45,7 +45,7 @@ export const DefaultHeaders = {
         process.env.CONTENT_SECURITY_POLICY ||
         [
             "default-src 'self' blob:",
-            "img-src *",
+            "img-src * data:",
             "font-src *",
             "style-src 'unsafe-inline' 'self' blob: *",
             "script-src 'self' 'unsafe-inline' blob:",

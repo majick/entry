@@ -5,7 +5,7 @@
  */
 
 import { parse as TParse, stringify as TStringify } from "smol-toml";
-const TOML = { parse: TParse, stringify: TStringify };
+export const TOML = { parse: TParse, stringify: TStringify };
 
 /**
  * @function stringify
@@ -47,4 +47,5 @@ export function parse(node: string): { [key: string]: any } {
 export default {
     stringify,
     parse,
+    TOML,
 };
