@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.1.13-rev-1",
+  "version": "1.1.13-rev-2",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -39,7 +39,7 @@
     "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag git.sentrytwo.com/hkau/entry:latest .",
     "build:docker-nopush": "bun run build && docker buildx build --load --tag git.sentrytwo.com/hkau/entry:latest .",
     "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 git.sentrytwo.com/hkau/entry:latest",
-    "build:exec": "bun run build && bun build dist/index.js --compile --minify  --outfile dist/entry"
+    "build:exec": "bun run build && bun build dist/index.js --compile --minify --outfile build/entry"
   },
   "repository": {
     "type": "git",

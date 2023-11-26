@@ -216,7 +216,7 @@ export class GetPasteFromURL implements Endpoint {
         const search = new URLSearchParams(url.search);
 
         // handle executable package
-        if (path.basename(process.execPath) === "entry") {
+        if (path.basename(process.execPath).startsWith("entry")) {
             const FilePath = path.resolve(
                 process.env.IMPORT_DIR!,
                 url.pathname.slice(1)

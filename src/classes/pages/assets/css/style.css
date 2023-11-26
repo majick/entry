@@ -235,7 +235,7 @@ button,
     outline: none;
     color: inherit;
     font-size: 16px;
-    padding: 0.5rem 0.75rem;
+    padding: var(--u-04) var(--u-08);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -650,53 +650,84 @@ ol {
     margin-bottom: 1rem;
 }
 
-code {
+code,
+.code {
     padding: 0.2rem;
     background: var(--red2);
     color: var(--red3);
     font-family: monospace;
     font-size: 13.5px;
-    line-height: 1em;
+    line-height: 1rem;
     max-width: 100%;
 }
 
-code * {
+code *,
+.code * {
     font-family: inherit;
 }
 
-pre code {
+pre code,
+pre .code {
     white-space: pre;
     color: currentColor;
     padding: 0;
     background: inherit;
 }
 
-pre code p {
+pre code p,
+pre .code p {
     display: none;
 }
 
 pre,
 code,
+.code,
 pre code span {
     font-family: monospace;
 }
 
 pre {
-    border-left: solid 5px var(--red3);
-    padding-left: 0.5rem;
+    gap: var(--u-04);
     white-space: pre;
     overflow-x: auto;
     overflow-y: hidden;
     height: max-content;
+    background: var(--background-surface);
+    padding: var(--u-04) 0;
 }
 
 pre .line-numbers {
     text-align: right;
     color: var(--text-color-faded);
     user-select: none;
-    padding-right: 0.5rem;
-    margin-right: 0.5rem;
     border-right: solid 1px var(--background-surface1-5);
+    display: flex;
+    flex-direction: column;
+    width: max-content;
+    min-width: 30px;
+}
+
+pre .line-numbers .line-number {
+    padding: 0 var(--u-04);
+    color: var(--text-color-faded);
+    display: block;
+}
+
+pre .line-numbers .line-number:hover {
+    text-decoration: none;
+    background: var(--background-surface2a);
+    color: var(--text-color);
+}
+
+pre .copy-button {
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+pre:hover .copy-button {
+    opacity: 1;
 }
 
 input,
@@ -713,7 +744,7 @@ select {
     color: currentColor;
     border: none;
     outline: solid 2px transparent;
-    padding: 0.5rem 0.75rem;
+    padding: var(--u-04) var(--u-08);
     font-size: 16px;
     height: max-content;
     max-width: 100%;
@@ -773,7 +804,7 @@ textarea {
 
 .checkbox-container {
     background: var(--background-surface1);
-    padding: 0.5rem 0.75rem;
+    padding: var(--u-04) var(--u-08);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1024,7 +1055,7 @@ details * {
 
 details summary {
     transition: all 0.15s;
-    padding: 0.5rem 0.75rem;
+    padding: var(--u-04) var(--u-08);
     cursor: pointer;
     font-weight: 600;
     height: 40px; /* WHY is it normally 40.5px??? WHEN EVERTHING ELSE IS JUST 40!!! */

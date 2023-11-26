@@ -169,6 +169,7 @@ dist
 .pnp.\*
 
 # testing
+
 data/
 bun.lockb
 
@@ -177,3 +178,8 @@ bun.lockb
 favicon.ico
 favicon.png
 favicon.svg
+
+# build
+
+build/
+dist/

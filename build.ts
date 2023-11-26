@@ -36,4 +36,4 @@ const output = await build({
 });
 
 // log finished
-console.log("\x1b[30;100m build \x1b[0m Build finished!");
+console.log("\x1b[30;100m info \x1b[0m Build finished!");

@@ -138,8 +138,8 @@ if (!fs.existsSync(process.env.IMPORT_DIR))
     fs.mkdirSync(process.env.IMPORT_DIR, { recursive: true });
 
 try {
-    if (path.basename(process.execPath) === "entry") {
-        console.log("\x1b[93mRunning in executable mode!\x1b[0m");
+    if (path.basename(process.execPath).startsWith("entry")) {
+        console.log("\x1b[30;100m info \x1b[0m Running in executable mode!");
         console.log(
             "\x1b[30;43m warn \x1b[0m Executable mode will make many calls to https//sentrytwo.com during start, and will likely download various files. These downloads will be logged in the standard output."
         );
