@@ -7,6 +7,9 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import path from "node:path";
+import fs from "node:fs";
+
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import TopNav from "./components/site/TopNav";
@@ -30,6 +33,8 @@ import API, {
     PageHeaders,
     GetAssociation,
 } from "./api/API";
+
+let HashStore: { [key: string]: string } = {}; // store file hashes BY PATH
 
 // ...
 import { PageNode, StarInfoNode } from "./components/builder/schema";
@@ -172,6 +177,36 @@ export async function CheckInstance(
 
 /**
  * @export
+ * @class HashList
+ * @implements {Endpoint}
+ */
+export class HashList implements Endpoint {
+    public async request(
+        request: Request,
+        server?: Server | undefined
+    ): Promise<Response> {
+        // fill hashes for all files (if they don't already exist)
+        for (const file of fs.readdirSync(process.env.IMPORT_DIR!)) {
+            if (HashStore[file]) continue;
+
+            const hash = CreateHash(
+                await Bun.file(path.resolve(process.env.IMPORT_DIR!, file)).text()
+            );
+
+            if (!HashStore[file]) HashStore[file] = hash;
+        }
+
+        // return
+        return new Response(JSON.stringify(HashStore, undefined, 4), {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+/**
+ * @export
  * @class GetPasteFromURL
  * @implements {Endpoint}
  */
@@ -179,6 +214,23 @@ export class GetPasteFromURL implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
         const url = new URL(request.url);
         const search = new URLSearchParams(url.search);
+
+        // handle executable package
+        if (path.basename(process.execPath) === "entry") {
+            const FilePath = path.resolve(
+                process.env.IMPORT_DIR!,
+                url.pathname.slice(1)
+            );
+
+            const ContentType = contentType(path.extname(FilePath));
+
+            if (fs.existsSync(FilePath) && ContentType)
+                return new Response(await Bun.file(FilePath).arrayBuffer(), {
+                    headers: {
+                        "Content-Type": ContentType,
+                    },
+                });
+        }
 
         // handle cloud pages
         const IncorrectInstance = await CheckInstance(request, server);
@@ -2823,12 +2875,15 @@ export class Notifications implements Endpoint {
 
 // ...
 import { ViewPasteMedia, InspectMedia } from "./repos/Media";
+import { contentType } from "mime-types";
+import { CreateHash } from "../db/helpers/Hash";
 
 // default export
 export default {
     Curiosity,
     CheckInstance,
     // pages
+    HashList,
     GetPasteFromURL,
     PasteDocView,
     PastesSearch,

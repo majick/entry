@@ -22,7 +22,7 @@ import {
     HistoryCurrent,
 } from "../Builder";
 
-import { TOML } from "../../../../db/helpers/BaseParser";
+import BaseParser, { TOML } from "../../../../db/helpers/BaseParser";
 import { Node } from "../schema";
 import parser from "../parser";
 
@@ -1157,9 +1157,9 @@ export default function Sidebar(props: { Page?: string }): any {
 
                                         // create blob
                                         const blob = new Blob(
-                                            [JSON.stringify(Selected)],
+                                            [BaseParser.stringify(Selected)],
                                             {
-                                                type: "application/json",
+                                                type: "text/plain",
                                             }
                                         );
 
@@ -1177,12 +1177,14 @@ export default function Sidebar(props: { Page?: string }): any {
                                     onClick={() => {
                                         // ask for element json
                                         const element = prompt(
-                                            "Enter exported component JSON below:"
+                                            "Enter exported component below:"
                                         );
                                         if (!element) return;
 
                                         // parse
-                                        const parsed = JSON.parse(element) as Node;
+                                        const parsed = BaseParser.parse(
+                                            element
+                                        ) as Node;
 
                                         // randomize ID (so we don't have any ID conflicts)
                                         parsed.ID = crypto.randomUUID();

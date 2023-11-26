@@ -612,7 +612,9 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 `let ScriptAborted = false;
                 window.Builder.State._ScriptAbort.signal.addEventListener("abort", () => { 
                     ScriptAborted = true;
-                });\nconst document = Builder.Page.Element;document.body = document;\n(async () => { ${content} })();`,
+                });\nconst document = Builder.Page.Element;document.body = document;
+                document.getElementById = (id) => document.querySelector(\`#\${id}\`);
+                (async () => { ${content} })();`,
             ],
             {
                 type: "application/javascript",

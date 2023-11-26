@@ -9,7 +9,7 @@
     "@types/marked": "^5.0.0",
     "@types/mime-types": "^2.1.2",
     "@types/pg": "^8.10.9",
-    "bun-types": "^1.0.10",
+    "bun-types": "latest",
     "prettier": "^3.0.0"
   },
   "peerDependencies": {
@@ -38,7 +38,8 @@
     "format": "prettier src/ --write --config ./.prettierrc",
     "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag git.sentrytwo.com/hkau/entry:latest .",
     "build:docker-nopush": "bun run build && docker buildx build --load --tag git.sentrytwo.com/hkau/entry:latest .",
-    "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 git.sentrytwo.com/hkau/entry:latest"
+    "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 git.sentrytwo.com/hkau/entry:latest",
+    "build:exec": "bun run build && bun build dist/index.js --compile --minify  --outfile dist/entry"
   },
   "repository": {
     "type": "git",

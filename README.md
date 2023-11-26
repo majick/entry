@@ -24,6 +24,10 @@ Entry can also be installed using Docker. Follow [these instructions](https://ww
 
 The main Entry repository also includes the source for Entry related packages. These can be found in the [/packages](https://codeberg.org/hkau/entry/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
 
+### Executable
+
+Entry can be installed through an executable. The executable will automatically install static files the client needs into the directory it is contained in. You can change this install location through the `EXECUTABLE_STATIC_DIR` environment variable. This must be an exact path to the directory you want static files to be contained in.
+
 ### PostgreSQL
 
 You can configure a PostgreSQL database to be used for the main paste database through the configuration file.

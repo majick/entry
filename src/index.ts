@@ -4,9 +4,13 @@
  * @license MIT
  */
 
+import path from "node:path";
+import fs from "node:fs";
+
 // ...EntryDB
 import EntryDB from "./classes/db/EntryDB";
 import type { LogEvent } from "./classes/db/LogDB";
+import { CreateHash } from "./classes/db/helpers/Hash";
 
 import API from "./classes/pages/api/API";
 
@@ -39,7 +43,7 @@ export type EntryGlobalType = {
     API: typeof API;
 };
 
-(globalThis as any).DistDirectory = import.meta.dir;
+(globalThis as any).DistDirectory = process.env.IMPORT_DIR!;
 (globalThis as any).Config = EntryDB.config;
 (globalThis as any).Footer = Footer;
 (globalThis as any).TopNav = TopNav;
@@ -123,6 +127,62 @@ export type Config = {
         max_clients?: number;
     };
 };
+
+// handle executable launch
+process.env.IMPORT_DIR! =
+    import.meta.dir ||
+    process.env.EXECUTABLE_STATIC_DIR ||
+    path.dirname(process.execPath);
+
+try {
+    if (path.basename(process.execPath) === "entry") {
+        console.log("\x1b[93mRunning in executable mode!\x1b[0m");
+        console.log(
+            "\x1b[30;43m warn \x1b[0m Executable mode will make many calls to https//sentrytwo.com during start, and will likely download various files. These downloads will be logged in the standard output."
+        );
+
+        // download files
+        const RequiredFiles = await (
+            await fetch("https://sentrytwo.com/.hashes")
+        ).json();
+
+        // ...check files
+        for (const file of Object.entries(RequiredFiles)) {
+            // 0: file name, 1: hash
+
+            // check if file exists locally
+            const FilePath = path.resolve(process.env.IMPORT_DIR!, file[0]);
+
+            if (fs.existsSync(FilePath)) {
+                // check hash
+                const CurrentHash = CreateHash(await Bun.file(FilePath).text());
+                if (CurrentHash === file[1]) continue;
+
+                // ...delete file
+                fs.rmSync(FilePath);
+
+                // ...allow execution of the "download file" part
+                console.log(
+                    `\x1b[30;100m sync \x1b[0m Syncing asset: "${file[0]}"\x1b[0m]`
+                );
+            }
+
+            // download file
+            await Bun.write(
+                FilePath,
+                await fetch(`https://sentrytwo.com/${file[0]}`)
+            );
+
+            console.log(
+                `\x1b[30;100m sync \x1b[0m Asset synced: "${file[0]}"\x1b[0m]`
+            );
+
+            continue;
+        }
+    }
+} catch (err) {
+    throw new Error(`Failed to start in executable mode!\n${err}`);
+}
 
 // check if database is new or config file does not exist
 if (!(await EntryDB.GetConfig())) {
@@ -233,7 +293,7 @@ await InitFooterExtras(plugins); // load footer pages to the footer
 // ...create config
 export const ServerConfig: HoneybeeConfig = {
     Port: EntryDB.config.port || 8080,
-    AssetsDir: import.meta.dir,
+    AssetsDir: process.env.IMPORT_DIR!,
     NotFoundPage: _404Page({}),
     maxRequestBodySize: parseFloat(process.env.MAX_BODY_SIZE || "52428800"),
     Pages: {
@@ -344,6 +404,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage }, // alias of /c/
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },
+        "/.hashes": { Page: Pages.HashList },
         "/": {
             // return paste view, will return homepage if no paste is provided
             // at the end so it tests this last because everything starts with /, which means
@@ -362,8 +423,15 @@ export const ServerConfig: HoneybeeConfig = {
 };
 
 // ...start server
-new Honeybee(ServerConfig);
-console.log("\x1b[92m[entry] Started server on port:\x1b[0m", ServerConfig.Port);
+const server = new Honeybee(ServerConfig);
+console.log(
+    "\x1b[30;42m entry \x1b[0m Started server at:\x1b[93m",
+    (
+        server.server.url ||
+        new URL(`http://${server.server.hostname}:${server.server.port}`)
+    ).href,
+    "\x1b[0m"
+);
 
 // gc interval
 setInterval(() => {
