@@ -134,6 +134,9 @@ process.env.IMPORT_DIR! =
     process.env.EXECUTABLE_STATIC_DIR ||
     path.dirname(process.execPath);
 
+if (!fs.existsSync(process.env.IMPORT_DIR))
+    fs.mkdirSync(process.env.IMPORT_DIR, { recursive: true });
+
 try {
     if (path.basename(process.execPath) === "entry") {
         console.log("\x1b[93mRunning in executable mode!\x1b[0m");
@@ -145,6 +148,18 @@ try {
         const RequiredFiles = await (
             await fetch("https://sentrytwo.com/.hashes")
         ).json();
+
+        // ...check current files (remove unneeded)
+        for (const file of fs.readdirSync(process.env.IMPORT_DIR!))
+            if (!RequiredFiles[file]) {
+                // ...delete file
+                fs.rmSync(path.resolve(process.env.IMPORT_DIR!, file));
+
+                // ...log
+                console.log(
+                    `\x1b[30;100m sync \x1b[0m Removing unneeded asset: "${file}"\x1b[0m`
+                );
+            }
 
         // ...check files
         for (const file of Object.entries(RequiredFiles)) {
@@ -163,7 +178,7 @@ try {
 
                 // ...allow execution of the "download file" part
                 console.log(
-                    `\x1b[30;100m sync \x1b[0m Syncing asset: "${file[0]}"\x1b[0m]`
+                    `\x1b[30;100m sync \x1b[0m Syncing asset: "${file[0]}"\x1b[0m`
                 );
             }
 
@@ -174,7 +189,7 @@ try {
             );
 
             console.log(
-                `\x1b[30;100m sync \x1b[0m Asset synced: "${file[0]}"\x1b[0m]`
+                `\x1b[30;100m sync \x1b[0m Asset synced: "${file[0]}"\x1b[0m`
             );
 
             continue;
@@ -425,7 +440,7 @@ export const ServerConfig: HoneybeeConfig = {
 // ...start server
 const server = new Honeybee(ServerConfig);
 console.log(
-    "\x1b[30;42m entry \x1b[0m Started server at:\x1b[93m",
+    "\x1b[30;42m info \x1b[0m Started server at:\x1b[93m",
     (
         server.server.url ||
         new URL(`http://${server.server.hostname}:${server.server.port}`)
