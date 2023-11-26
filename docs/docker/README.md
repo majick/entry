@@ -11,7 +11,7 @@ Entry can be run by copying the [docker-compose.yml](https://codeberg.org/hkau/e
 ```yml
 services:
     web:
-        image: git.sentrytwo.com/hkau/entry:latest
+        image: codeberg.org/hkau/entry:latest
         restart: unless-stopped
         ports:
             - "8080:8080" # match this (both sides) with your values from env.port

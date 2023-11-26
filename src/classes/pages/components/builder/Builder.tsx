@@ -720,6 +720,11 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         return true;
     }
 
+    // remove everything in Document.Pages that isn't a page node
+    for (const node of Document.Pages)
+        if (node.Type !== "Page")
+            Document.Pages.splice(Document.Pages.indexOf(node), 1);
+
     // ...(not) edit mode stuff
     if (!_EditMode && globalThis.Bun === undefined) {
         // fix mistakes from server render (by removing whole page and redrawing)

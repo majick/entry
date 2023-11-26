@@ -25,7 +25,7 @@
     "@codemirror/view": "latest",
     "@lezer/highlight": "^1.1.6",
     "highlight.js": "^11.8.0",
-    "honeybee": "https://git.sentrytwo.com/api/packages/hkau/npm/honeybee/-/1.0.10/honeybee-1.0.10.tgz",
+    "honeybee": "https://codeberg.org/api/packages/hkau/npm/honeybee/-/1.0.10/honeybee-1.0.10.tgz",
     "marked": "^5.1.0",
     "pg": "^8.11.3",
     "smol-toml": "^1.1.3"
@@ -36,9 +36,9 @@
     "start": "bun run build && bun run start:no-build",
     "start:no-build": "bun run dist/index.js",
     "format": "prettier src/ --write --config ./.prettierrc",
-    "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag git.sentrytwo.com/hkau/entry:latest .",
-    "build:docker-nopush": "bun run build && docker buildx build --load --tag git.sentrytwo.com/hkau/entry:latest .",
-    "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 git.sentrytwo.com/hkau/entry:latest",
+    "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag codeberg.org/hkau/entry:latest .",
+    "build:docker-nopush": "bun run build && docker buildx build --load --tag codeberg.org/hkau/entry:latest .",
+    "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 codeberg.org/hkau/entry:latest",
     "build:exec": "bun run build && bun build dist/index.js --compile --minify --outfile build/entry"
   },
   "repository": {

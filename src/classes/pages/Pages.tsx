@@ -37,7 +37,7 @@ import API, {
 let HashStore: { [key: string]: string } = {}; // store file hashes BY PATH
 
 // ...
-import { PageNode, StarInfoNode } from "./components/builder/schema";
+import { Node, PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
@@ -383,7 +383,9 @@ export class GetPasteFromURL implements Endpoint {
             );
 
             // get current page
-            let Page: PageNode = TrueContent.Pages[0];
+            let Page: PageNode = TrueContent.Pages.find(
+                (n: Node) => n.Type === "Page"
+            );
 
             // get star for favicon
             const Star: StarInfoNode | undefined = Page.Children.find(
@@ -879,7 +881,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                     <a
                                         href={`${HostnameURL}r/${result.CustomURL}`}
-                                        class={"button tertiary round"}
+                                        class={"button round"}
                                         title={"Inspect Paste"}
                                     >
                                         <svg
