@@ -77,7 +77,7 @@ export class ViewPasteMedia implements Endpoint {
                                         "flex g-4 align-center justify-space-between"
                                     }
                                 >
-                                    <div className="card border round secondary flex mobile-flex-column justify-center align-center g-4">
+                                    <div className="card border round secondary flex mobile\:flex-column justify-center align-center g-4">
                                         <button
                                             id={"entry:button.UploadFile"}
                                             className="border round full"
@@ -361,7 +361,7 @@ export class InspectMedia implements Endpoint {
                             <ReposNav name={name} current="Media" />
 
                             <div className="flex flex-column g-4">
-                                <div className="card border round secondary flex mobile-flex-column justify-center align-center g-4">
+                                <div className="card border round secondary flex mobile\:flex-column justify-center align-center g-4">
                                     <a
                                         href={`/paste/media/${name}`}
                                         class={"button border round full"}

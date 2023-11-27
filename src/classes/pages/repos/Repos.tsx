@@ -7,9 +7,9 @@
 import { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import BaseParser, { TOML } from "../../db/helpers/BaseParser";
 import { GetAssociation, PageHeaders } from "../api/API";
 import { CheckInstance, Curiosity, db } from "../Pages";
-import BaseParser from "../../db/helpers/BaseParser";
 import { Paste } from "../../db/objects/Paste";
 import EntryDB from "../../db/EntryDB";
 
@@ -26,7 +26,7 @@ import { createTwoFilesPatch } from "diff";
 export function ReposNav(props: { name: string; current: string }) {
     return (
         <div
-            class="card secondary border round flex g-4 mobile-flex-column"
+            class="card secondary border round flex g-4 mobile\:flex-column"
             style={{ userSelect: "none" }}
         >
             <a
@@ -169,7 +169,7 @@ export class RepoView implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <TopNav margin={false} />
+                    <TopNav margin={false} breadcrumbs={["r", name]} />
 
                     <div className="flex flex-column g-8">
                         <div
@@ -524,7 +524,7 @@ export class RevisionsList implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <TopNav margin={false} />
+                    <TopNav margin={false} breadcrumbs={["r", "rev", name]} />
 
                     <div className="flex flex-column g-8">
                         <div
@@ -699,10 +699,17 @@ export class DiffView implements Endpoint {
         // detect if paste is a builder paste
         const BuilderPaste = result.Content.startsWith("_builder:");
 
-        if (BuilderPaste)
-            return new Response(
-                "Difference viewer is not supported for builder pastes."
-            );
+        const BuilderDocument1: BuilderDocument = BuilderPaste
+            ? BaseParser.parse(
+                  revision[2].Content.split("_builder:")[1].split("_metadata:")[0]
+              )
+            : ({} as any);
+
+        const BuilderDocument2: BuilderDocument = BuilderPaste
+            ? BaseParser.parse(
+                  result.Content.split("_builder:")[1].split("_metadata:")[0]
+              )
+            : ({} as any);
 
         // generate diff
         if (RevisionNumber2) result.CustomURL += `@${RevisionNumber2}`;
@@ -710,21 +717,18 @@ export class DiffView implements Endpoint {
         let diff = createTwoFilesPatch(
             result.CustomURL,
             `${name}@${RevisionNumber}`,
-            revision[2].Content.split("_metadata:")[0],
-            result.Content.split("_metadata:")[0]
+            TOML.stringify(BuilderDocument1),
+            TOML.stringify(BuilderDocument2)
         );
 
         // ...remove some extra things
         diff = diff.replaceAll("\\ No newline at end of file\n", "");
 
-        const summary = diff.split(diff.split("\n")[4])[0];
-        diff = diff.replace(summary, "");
-
         // return
         return new Response(
             Renderer.Render(
                 <>
-                    <TopNav margin={false} />
+                    <TopNav margin={false} breadcrumbs={["r", "diff", name]} />
 
                     <div className="flex flex-column g-8">
                         <div
@@ -758,12 +762,6 @@ export class DiffView implements Endpoint {
                                         {RevisionNumber || "latest"}
                                     </a>
                                 </p>
-
-                                <hr />
-
-                                <StaticCode block={1} margin={false}>
-                                    {summary}
-                                </StaticCode>
 
                                 <hr />
 

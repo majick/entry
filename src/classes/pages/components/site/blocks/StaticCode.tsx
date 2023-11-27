@@ -32,23 +32,31 @@ export default function StaticCode(props: {
             <LineNumbers block={props.block}>{props.children}</LineNumbers>
 
             <code class={`language-${props.lang || "plain"} flex`} id={BlockID}>
-                {props.children.split("\n").map((line) => (
-                    <span
-                        class={`${
-                            line.startsWith("+")
-                                ? "added"
-                                : line.startsWith("-")
-                                ? "removed"
-                                : ""
-                        }`}
-                    >
-                        {line}
-                    </span>
-                ))}
+                {props.children.split("\n").map((line) => {
+                    // fix whitespace
+                    if (line === "") line = "\n";
+
+                    // return
+                    return (
+                        <span
+                            class={`${
+                                line.startsWith("+")
+                                    ? "added"
+                                    : line.startsWith("-")
+                                    ? "removed"
+                                    : line.startsWith("@@")
+                                    ? "marker"
+                                    : ""
+                            }`}
+                        >
+                            {line}
+                        </span>
+                    );
+                })}
             </code>
 
             <button
-                class="secondary copy-button"
+                class="secondary copy-button normal"
                 title="Copy Code"
                 id={`copy-${BlockID}`}
             >

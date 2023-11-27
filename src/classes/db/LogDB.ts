@@ -8,28 +8,8 @@ import { ComputeRandomObjectHash } from "./helpers/Hash";
 import { Database } from "bun:sqlite";
 import SQL from "./helpers/SQL";
 
+import LogConnection, { Log } from "./objects/Log";
 import EntryDB from "./EntryDB";
-
-// types
-export type LogEvent =
-    | "generic"
-    | "create_paste"
-    | "edit_paste"
-    | "delete_paste"
-    | "access_admin"
-    | "session"
-    | "error"
-    | "view_paste"
-    | "report"
-    | "custom_domain"
-    | "notification";
-
-export type Log = {
-    Content: string;
-    Timestamp: number;
-    Type: LogEvent;
-    ID: string;
-};
 
 /**
  * @export
@@ -38,6 +18,8 @@ export type Log = {
 export default class LogDB {
     public static isNew: boolean = true;
     public readonly db: typeof Config.postgres | Database;
+
+    public static LogCache: { [key: string]: LogConnection } = {};
 
     /**
      * Creates an instance of LogDB.
@@ -156,10 +138,27 @@ export default class LogDB {
      * @method GetLog
      *
      * @param {string} id
+     * @param {boolean} [isFromCon=false]
      * @return {Promise<[boolean, string, Log?]>} success, message, log
      * @memberof LogDB
      */
-    public async GetLog(id: string): Promise<[boolean, string, Log?]> {
+    public async GetLog(
+        id: string,
+        isFromCon: boolean = false
+    ): Promise<[boolean, string, Log?]> {
+        // check LogCache for paste!
+        if (isFromCon !== true) {
+            if (LogDB.LogCache[id] === undefined)
+                LogDB.LogCache[id] = new LogConnection(
+                    this,
+                    id,
+                    true // don't fetch, we're doing that below! (prevent inf loop)
+                );
+
+            // fetch and return
+            return [true, id, await LogDB.LogCache[id].Fetch()];
+        }
+
         // attempt to get log
         const log = await (EntryDB.config.pg && EntryDB.config.pg.logdb
             ? SQL.PostgresQueryOBJ
@@ -199,6 +198,9 @@ export default class LogDB {
             params: [id],
             use: "Prepare",
         });
+
+        // delete from LogCache
+        if (LogDB.LogCache[id]) delete LogDB.LogCache[id];
 
         // return
         return [true, "Log deleted", log[2]];

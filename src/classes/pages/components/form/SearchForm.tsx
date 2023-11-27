@@ -7,7 +7,7 @@ export default function SearchForm(props: {
     return (
         <search
             class={`flex ${
-                props.alwaysCenter ? "justify-center" : "mobile-flex-center"
+                props.alwaysCenter ? "justify-center" : "mobile:justify-center"
             }`}
         >
             <form

@@ -598,45 +598,6 @@ h6:focus .htag {
     color: var(--green);
 }
 
-.mobile-only {
-    display: none !important;
-}
-
-.full {
-    width: 100% !important;
-}
-
-@media screen and (max-width: 800px) {
-    .desktop-only {
-        display: none !important;
-    }
-
-    .mobile-center {
-        margin: auto !important;
-    }
-
-    .mobile-max {
-        width: 100% !important;
-    }
-
-    .mobile-only {
-        display: block !important;
-    }
-
-    .mobile-flex {
-        display: flex !important;
-    }
-
-    .mobile-block {
-        display: block !important;
-    }
-
-    .mobile-flex-center {
-        justify-content: center !important;
-        align-items: center !important;
-    }
-}
-
 ul > li,
 ol > li {
     margin-top: 0.25rem;
@@ -674,6 +635,7 @@ pre .code {
     background: inherit;
     flex-direction: column;
     width: 100%;
+    overflow-x: auto;
 }
 
 pre code p,
@@ -691,7 +653,7 @@ pre code span {
 pre {
     gap: var(--u-04);
     white-space: pre;
-    overflow-x: auto;
+    overflow-x: hidden;
     overflow-y: hidden;
     height: max-content;
     background: var(--background-surface);
@@ -707,6 +669,7 @@ pre .line-numbers {
     flex-direction: column;
     width: max-content;
     min-width: 30px;
+    overflow: hidden;
 }
 
 pre .line-numbers .line-number {
@@ -733,7 +696,8 @@ pre:hover .copy-button {
 }
 
 pre code .added,
-pre code .removed {
+pre code .removed,
+pre code .marker {
     width: 100%;
     display: block;
 }
@@ -744,6 +708,10 @@ pre code .added {
 
 pre code .removed {
     background: var(--red1);
+}
+
+pre code .marker {
+    background: var(--background-surface1);
 }
 
 input,
@@ -1110,12 +1078,12 @@ details summary:hover {
 
 details[open] summary {
     background: var(--background-surface);
-    box-shadow: inset 0 0 0 2px var(--background-surface1);
+    box-shadow: inset 0 0 0 2px var(--background-surface2a);
 }
 
 details.secondary[open] summary {
     background: var(--background-surface-1);
-    box-shadow: inset 0 0 0 2px var(--background-surface1-5);
+    box-shadow: inset 0 0 0 2px var(--background-surface1a);
 }
 
 details:not([open]) summary {

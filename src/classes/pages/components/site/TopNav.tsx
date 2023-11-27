@@ -7,6 +7,7 @@ export default function TopNav(props: {
     margin?: boolean;
     children?: any;
     border?: boolean;
+    IncludeLoading?: boolean;
 }) {
     // build breadcrumbs
     const crumbs: any[] = [];
@@ -161,7 +162,7 @@ export default function TopNav(props: {
                         <button class={"green full round"}>Close</button>
                     </form>
 
-                    <Footer />
+                    <Footer IncludeLoading={props.IncludeLoading || true} />
                 </div>
             </Modal>
 

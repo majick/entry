@@ -692,6 +692,7 @@ export class GetPasteFromURL implements Endpoint {
                                     <b className="mdnote-title">
                                         Don't forget your edit password!
                                     </b>
+
                                     <p>
                                         You cannot edit or delete your paste if you
                                         don't have your edit password. Please save it
@@ -867,7 +868,7 @@ export class GetPasteFromURL implements Endpoint {
                                 </div>
 
                                 <div
-                                    class={"mobile-flex-center text-right"}
+                                    class={"mobile:justify-center text-right"}
                                     style={{
                                         display: "flex",
                                         flexDirection: "column",
@@ -1364,7 +1365,7 @@ export class PastesSearch implements Endpoint {
                         <main>
                             <div
                                 class={
-                                    "flex flex-wrap justify-space-between mobile-flex-center align-center card border round"
+                                    "flex flex-wrap justify-space-between mobile:justify-center align-center card border round"
                                 }
                                 style={{
                                     marginBottom: "0.5rem",
@@ -1727,7 +1728,7 @@ export class PasteCommentsPage implements Endpoint {
 
                             <div
                                 class={
-                                    "card round border secondary flex mobile-flex-column g-4"
+                                    "card round border secondary flex mobile:flex-column g-4"
                                 }
                             >
                                 <a
@@ -1814,7 +1815,7 @@ export class PasteCommentsPage implements Endpoint {
                                     <b>Thread</b>
                                 </div>
 
-                                <div className="card round secondary has-header flex mobile-flex-center align-center justify-space-between g-4 flex-wrap">
+                                <div className="card round secondary has-header flex mobile\:justify-center align-center justify-space-between g-4 flex-wrap">
                                     <span>
                                         <b>{result.Comments}</b> comment
                                         {(result.Comments || 0) > 1
@@ -2439,7 +2440,10 @@ export class UserSettings implements Endpoint {
                         <TopNav
                             breadcrumbs={["paste", "settings", name]}
                             margin={false}
+                            IncludeLoading={false}
                         />
+
+                        <LoadingModal />
 
                         <div className="flex flex-column g-8">
                             <div
@@ -2456,7 +2460,7 @@ export class UserSettings implements Endpoint {
 
                                 <div className="card round border">
                                     <div
-                                        class={"mobile-flex-center"}
+                                        class={"mobile:justify-center"}
                                         style={{
                                             display: "flex",
                                             gap: "0.5rem",
@@ -2499,7 +2503,7 @@ export class UserSettings implements Endpoint {
 
                                     <div
                                         class={
-                                            "mobile-flex-center flex justify-center align-center flex-wrap"
+                                            "mobile:justify-center flex justify-center align-center flex-wrap"
                                         }
                                         style={{
                                             marginBottom: "1rem",
@@ -2561,7 +2565,11 @@ export class UserSettings implements Endpoint {
                                                 value={""}
                                             />
 
-                                            <button class={"round green mobile-max"}>
+                                            <button
+                                                class={
+                                                    "round green mobile-max entry:button.Loading"
+                                                }
+                                            >
                                                 Save
                                             </button>
                                         </form>
@@ -2665,7 +2673,7 @@ export class UserSettings implements Endpoint {
                                                         />
 
                                                         <button
-                                                            className="secondary green round"
+                                                            className="secondary green round entry:button.Loading"
                                                             style={{ width: "100%" }}
                                                         >
                                                             Save
@@ -2767,11 +2775,11 @@ export class Notifications implements Endpoint {
                         {Notifications.map((Notification) => (
                             <div
                                 class={
-                                    "card round border secondary flex justify-space-between align-center flex-wrap g-4 mobile-flex-center"
+                                    "card round border secondary flex justify-space-between align-center flex-wrap g-4 mobile:justify-center"
                                 }
                             >
                                 <ul
-                                    class="__footernav flex-wrap mobile-flex-center"
+                                    class="__footernav flex-wrap mobile\:justify-center"
                                     style={{ margin: 0, padding: 0 }}
                                 >
                                     <li style={{ marginTop: 0 }}>
@@ -2841,6 +2849,7 @@ export class Notifications implements Endpoint {
 import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
 import { CreateHash } from "../db/helpers/Hash";
+import LoadingModal from "./components/site/modals/Loading";
 
 // default export
 export default {

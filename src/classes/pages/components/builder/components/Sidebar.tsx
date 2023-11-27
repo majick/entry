@@ -29,6 +29,7 @@ import parser from "../parser";
 import NodeListing from "./NodeListing";
 import Expandable from "./Expandable";
 import HTMLEditor from "./HTMLEditor";
+import StaticCode from "../../site/blocks/StaticCode";
 let CurrentEditor: any;
 
 /**
@@ -651,9 +652,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                     Render Tree
                                 </button>
 
-                                <pre>
-                                    <code>{TOML.stringify(Document)}</code>
-                                </pre>
+                                <StaticCode>{TOML.stringify(Document)}</StaticCode>
                             </>
                         )))) ||
                     (Selected && !props.Page && (

@@ -9,10 +9,11 @@ import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/AP
 import type { Paste } from "../db/objects/Paste";
 import EntryDB from "../db/EntryDB";
 
+import type { Log } from "../db/objects/Log";
 import Pages, { OpenGraph } from "./Pages";
-import type { Log } from "../db/LogDB";
 
 import { AuthModals } from "./components/site/modals/AuthModals";
+import LoadingModal from "./components/site/modals/Loading";
 import DateOptions from "./components/form/DateOptions";
 import _404Page from "./components/404";
 
@@ -517,11 +518,13 @@ export default class Home implements Endpoint {
                                                 gap: "0.5rem",
                                                 justifyContent: "flex-start",
                                             }}
-                                            class={"mobile-flex-center mobile-max"}
+                                            class={
+                                                "mobile:justify-center mobile-max"
+                                            }
                                         >
                                             <button
                                                 class={"round green-cta"}
-                                                id={"entry:button.Submit"}
+                                                id={"entry:button.Loading"}
                                                 style={{ fontWeight: "500" }}
                                             >
                                                 <svg
@@ -1077,7 +1080,7 @@ export default class Home implements Endpoint {
                                                 <div class={"flex g-4"}>
                                                     <button
                                                         class={
-                                                            "round green-cta entry:button.Submit"
+                                                            "round green-cta entry:button.Loading"
                                                         }
                                                         id={"entry:button.Publish"}
                                                         style={{ fontWeight: "500" }}
@@ -1102,7 +1105,7 @@ export default class Home implements Endpoint {
                                                             .enable_versioning && (
                                                             <button
                                                                 class={
-                                                                    "round tertiary entry:button.Submit"
+                                                                    "round tertiary entry:button.Loading"
                                                                 }
                                                                 id={
                                                                     "entry:button.Save"
@@ -1158,6 +1161,7 @@ export default class Home implements Endpoint {
                         </div>
 
                         <Footer
+                            IncludeLoading={false}
                             ShowBottomRow={
                                 search.get("mode") !== "edit" ||
                                 (
@@ -1171,6 +1175,8 @@ export default class Home implements Endpoint {
                                 ).show_name_on_all_pages === true
                             }
                         />
+
+                        <LoadingModal />
                     </main>
 
                     {paste && (
@@ -1275,32 +1281,6 @@ export default class Home implements Endpoint {
                             )}\`);`,
                         }}
                     />
-
-                    <Modal
-                        buttonid="entry:button.Submit"
-                        modalid="entry:modal.Submit"
-                        round={true}
-                    >
-                        <div className="flex flex-column g-10">
-                            <span>Loading...</span>
-
-                            <div className="flex g-4">
-                                <a
-                                    href="javascript:window.location.reload()"
-                                    class={"button red round"}
-                                >
-                                    Refresh
-                                </a>
-
-                                <a
-                                    href="javascript:window.modals['entry:modal.Submit'](false)"
-                                    class={"button red round"}
-                                >
-                                    Close
-                                </a>
-                            </div>
-                        </div>
-                    </Modal>
 
                     {/* auth flow modals */}
                     <AuthModals use={Association[0] ? "logout" : "login"} />

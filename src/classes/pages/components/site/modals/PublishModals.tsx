@@ -116,7 +116,7 @@ export default function PublishModals(props: {
 
                             <hr style={{ margin: "0" }} />
 
-                            <button className="green-cta round modal:entry:button.Submit full">
+                            <button className="green-cta round modal:entry:button.Loading full">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 16 16"
@@ -222,7 +222,7 @@ export default function PublishModals(props: {
                                     gap: "0.5rem",
                                 }}
                             >
-                                <button className="green-cta round modal:entry:button.Submit full">
+                                <button className="green-cta round modal:entry:button.Loading full">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 16 16"
@@ -355,7 +355,7 @@ export default function PublishModals(props: {
 
                                         <button
                                             class={
-                                                "red round mobile-max modal:entry:button.Submit"
+                                                "red round mobile-max modal:entry:button.Loading"
                                             }
                                         >
                                             Delete
@@ -364,24 +364,6 @@ export default function PublishModals(props: {
                                 </div>
                             </Modal>
                         )}
-
-                        <Modal
-                            buttonid="entry:button.Submit"
-                            modalid="entry:modal.Submit"
-                            noIdMatch={true}
-                            round={true}
-                        >
-                            <div className="flex flex-column g-10">
-                                <span>Loading...</span>
-
-                                <a
-                                    href="javascript:window.location.reload()"
-                                    class={"button red round"}
-                                >
-                                    Refresh
-                                </a>
-                            </div>
-                        </Modal>
                     </>
                 )}
 

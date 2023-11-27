@@ -5,6 +5,7 @@ import EntryDB from "../../../db/EntryDB";
 import { HoneybeeConfig } from "honeybee";
 
 import pack from "../../../../../package.json";
+import LoadingModal from "./modals/Loading";
 
 // plugin footer load
 const FooterExtras: string[] = [];
@@ -24,7 +25,10 @@ export async function InitFooterExtras(plugins: HoneybeeConfig["Pages"]) {
 }
 
 // ...
-export default function Footer(props: { ShowBottomRow?: boolean }) {
+export default function Footer(props: {
+    ShowBottomRow?: boolean;
+    IncludeLoading?: boolean;
+}) {
     const homepageLink =
         (EntryDB.config &&
             EntryDB.config.app &&
@@ -269,6 +273,8 @@ export default function Footer(props: { ShowBottomRow?: boolean }) {
                     </button>
                 </form>
             </Modal>
+
+            {props.IncludeLoading !== false && <LoadingModal />}
         </div>
     );
 }
