@@ -1019,8 +1019,6 @@ details {
     font-size: 16px;
     height: max-content;
     max-width: 100%;
-    user-select: none;
-    -webkit-user-select: none;
     appearance: none;
 }
 
@@ -1047,6 +1045,8 @@ details summary {
     list-style: none;
     display: flex;
     align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 details.secondary summary {
