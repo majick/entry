@@ -18,11 +18,6 @@ export type BaseNode = {
     StyleString?: string; // injected directly into the element style attribute
     ClassString?: string; // injected directly into the element class
     Nickname?: string;
-    // ...events
-    onClick?: string;
-    onMouseEnter?: string;
-    onMouseLeave?: string;
-    onKeyPress?: string;
 };
 
 export interface PageNode extends BaseNode {
@@ -293,56 +288,6 @@ function DragZones(props: {
 }
 
 /**
- * @function EventScript
- *
- * @export
- * @param {{ node: Node }} props
- * @return {*}
- */
-export function EventScript(props: { node: Node }): any {
-    if (!props.node.ID) return <></>;
-    const Selector = `document.getElementById("${props.node.ID}")`;
-
-    return (
-        ((props.node.onClick ||
-            props.node.onKeyPress ||
-            props.node.onMouseEnter ||
-            props.node.onMouseLeave) && (
-            <script
-                class={"builder:drag-element"} // builder:drag-element so it can get removed on client render!
-                dangerouslySetInnerHTML={{
-                    __html: `${
-                        props.node.onClick
-                            ? `${Selector}.addEventListener("click", (event) => {
-                                ${props.node.onClick}
-                            });`
-                            : ""
-                    }${
-                        props.node.onKeyPress
-                            ? `${Selector}.addEventListener("keypress", (event) => {
-                                ${props.node.onKeyPress}
-                            });`
-                            : ""
-                    }${
-                        props.node.onMouseEnter
-                            ? `${Selector}.addEventListener("mouseenter", (event) => {
-                                ${props.node.onMouseEnter}
-                            });`
-                            : ""
-                    }${
-                        props.node.onMouseLeave
-                            ? `${Selector}.addEventListener("mouseleave", (event) => {
-                                ${props.node.onMouseLeave}
-                            });`
-                            : ""
-                    }`,
-                }}
-            />
-        )) || <></>
-    );
-}
-
-/**
  * @function PageNode
  *
  * @export
@@ -402,8 +347,6 @@ export function PageNode(props: {
                     __html: props.node.StyleString || "",
                 }}
             />
-
-            <EventScript node={props.node} />
         </body>
     );
 }
@@ -456,8 +399,6 @@ export function CardNode(props: {
             >
                 {props.children}
             </div>
-
-            <EventScript node={props.node} />
         </DragZones>
     );
 }
@@ -517,8 +458,6 @@ export function TextNode(props: {
                 data-edit={props.node.EditMode}
                 draggable={props.node.EditMode}
             />
-
-            <EventScript node={props.node} />
         </DragZones>
     );
 }
@@ -558,8 +497,6 @@ export function ImageNode(props: {
                 }}
                 draggable={props.node.EditMode}
             />
-
-            <EventScript node={props.node} />
         </DragZones>
     );
 }

@@ -636,6 +636,7 @@ pre .code {
     flex-direction: column;
     width: 100%;
     overflow-x: auto;
+    padding: 1px;
 }
 
 pre code p,

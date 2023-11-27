@@ -682,46 +682,31 @@ export class GetPasteFromURL implements Endpoint {
                 <>
                     <main>
                         {search.get("UnhashedEditPassword") && (
-                            <>
-                                <div
-                                    class="mdnote"
-                                    style={{
-                                        marginBottom: "0.5rem",
-                                    }}
-                                >
-                                    <b className="mdnote-title">
-                                        Don't forget your edit password!
-                                    </b>
+                            <div style={{ marginBottom: "var(--u-04)" }}>
+                                <Expandable title={"Looking for your edit code?"}>
+                                    <StaticCode margin={false}>
+                                        {`Edit code for ${
+                                            result.CustomURL
+                                        }:\n@@ ${"=".repeat(
+                                            search.get("UnhashedEditPassword")!
+                                                .length
+                                        )} @@\n   ${search.get(
+                                            "UnhashedEditPassword"
+                                        )}\n@@ ${"=".repeat(
+                                            search.get("UnhashedEditPassword")!
+                                                .length
+                                        )} @@\nDO NOT LOSE IT! (${new Date().getTime()})`}
+                                    </StaticCode>
+                                </Expandable>
 
-                                    <p>
-                                        You cannot edit or delete your paste if you
-                                        don't have your edit password. Please save it
-                                        somewhere safe:{" "}
-                                        <code>
-                                            {search.get("UnhashedEditPassword")}
-                                        </code>{" "}
-                                        ({new Date().getTime()})
-                                    </p>
-                                </div>
-
-                                <div
-                                    class="mdnote note-warn"
-                                    style={{
-                                        marginBottom: "0.5rem",
+                                <script
+                                    dangerouslySetInnerHTML={{
+                                        __html: `window.addEventListener("blur", () => {
+                                            window.location.href = "?";
+                                        });`,
                                     }}
-                                >
-                                    <b className="mdnote-title">
-                                        The web address you are currently on contains
-                                        the edit password for your paste! Please
-                                        remove it before sharing this current web
-                                        address with anyone.
-                                    </b>
-                                    <p>
-                                        You can click <a href="?">here</a> to remove
-                                        it.
-                                    </p>
-                                </div>
-                            </>
+                                />
+                            </div>
                         )}
 
                         {RevisionNumber !== 0 && (
@@ -2567,7 +2552,7 @@ export class UserSettings implements Endpoint {
 
                                             <button
                                                 class={
-                                                    "round green mobile-max entry:button.Loading"
+                                                    "round green mobile-max modal:entry:button.Loading"
                                                 }
                                             >
                                                 Save
@@ -2673,7 +2658,7 @@ export class UserSettings implements Endpoint {
                                                         />
 
                                                         <button
-                                                            className="secondary green round entry:button.Loading"
+                                                            className="secondary green round modal:entry:button.Loading"
                                                             style={{ width: "100%" }}
                                                         >
                                                             Save
@@ -2850,6 +2835,8 @@ import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
 import { CreateHash } from "../db/helpers/Hash";
 import LoadingModal from "./components/site/modals/Loading";
+import Expandable from "./components/builder/components/Expandable";
+import StaticCode from "./components/site/blocks/StaticCode";
 
 // default export
 export default {

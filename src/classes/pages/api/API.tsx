@@ -150,7 +150,7 @@ export async function Session(request: Request): Promise<string> {
         const ses_log = await EntryDB.Logs.GetLog(session);
 
         // set token to expire if log no longer exists
-        if (!ses_log[0])
+        if (!ses_log[0] && !ses_log[2])
             session =
                 "session-id=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0";
         // otherwise, return nothing (no need to set cookie, it already exists)

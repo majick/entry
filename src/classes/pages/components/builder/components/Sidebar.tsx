@@ -1107,46 +1107,6 @@ export default function Sidebar(props: { Page?: string }): any {
                                 )}
                             />
 
-                            {/* events (not supported on some elements!!) */}
-                            {Selected.Type !== "Embed" &&
-                                Selected.Type !== "Source" &&
-                                Selected.Type !== "StarInfo" &&
-                                Selected.Type !== "Card" && (
-                                    <Expandable title="Events">
-                                        <div className="option">
-                                            Events will not preview in the editor.
-                                        </div>
-
-                                        <QuickInput
-                                            name="on:click"
-                                            property={"onClick"}
-                                            value={Selected.onClick || "\n"}
-                                            type="textarea"
-                                        />
-
-                                        <QuickInput
-                                            name="on:mouseenter"
-                                            property={"onMouseEnter"}
-                                            value={Selected.onMouseEnter || "\n"}
-                                            type="textarea"
-                                        />
-
-                                        <QuickInput
-                                            name="on:mouseleave"
-                                            property={"onMouseLeave"}
-                                            value={Selected.onMouseLeave || "\n"}
-                                            type="textarea"
-                                        />
-
-                                        <QuickInput
-                                            name="on:keypress"
-                                            property={"onKeyPress"}
-                                            value={Selected.onKeyPress || "\n"}
-                                            type="textarea"
-                                        />
-                                    </Expandable>
-                                )}
-
                             {/* import/export */}
                             <Expandable title="Advanced">
                                 <button

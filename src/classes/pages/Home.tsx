@@ -523,8 +523,9 @@ export default class Home implements Endpoint {
                                             }
                                         >
                                             <button
-                                                class={"round green-cta"}
-                                                id={"entry:button.Loading"}
+                                                class={
+                                                    "round green-cta modal:entry:button.Loading"
+                                                }
                                                 style={{ fontWeight: "500" }}
                                             >
                                                 <svg
@@ -1080,7 +1081,7 @@ export default class Home implements Endpoint {
                                                 <div class={"flex g-4"}>
                                                     <button
                                                         class={
-                                                            "round green-cta entry:button.Loading"
+                                                            "round green-cta modal:entry:button.Loading"
                                                         }
                                                         id={"entry:button.Publish"}
                                                         style={{ fontWeight: "500" }}
@@ -1105,7 +1106,7 @@ export default class Home implements Endpoint {
                                                             .enable_versioning && (
                                                             <button
                                                                 class={
-                                                                    "round tertiary entry:button.Loading"
+                                                                    "round tertiary modal:entry:button.Loading"
                                                                 }
                                                                 id={
                                                                     "entry:button.Save"

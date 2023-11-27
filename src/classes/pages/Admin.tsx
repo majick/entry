@@ -11,6 +11,7 @@ import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./api/API";
 import BaseParser from "../db/helpers/BaseParser";
 import type { Paste } from "../db/objects/Paste";
 import EntryDB from "../db/EntryDB";
+import LogDB from "../db/LogDB";
 
 import PasteList from "./components/site/PasteList";
 import Footer from "./components/site/Footer";
@@ -236,6 +237,7 @@ function AdminNav(props: { active: string; pass: string }): any {
 
             <p>CPU Usage: {process.cpuUsage().system}</p>
             <p>Cached Pastes: {Object.keys(EntryDB.PasteCache).length || 0}</p>
+            <p>Cached Logs: {Object.keys(LogDB.LogCache).length || 0}</p>
 
             {/* cloud display */}
             {process.env.ENTRY_CLOUD_NAME && (

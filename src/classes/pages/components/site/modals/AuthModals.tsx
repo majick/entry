@@ -78,7 +78,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                         />
 
                         <button
-                            class={"round"}
+                            class={"round modal:entry:button.Loading"}
                             style={{
                                 width: "100%",
                             }}
@@ -151,7 +151,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                             }}
                         >
                             <button
-                                class={"red round"}
+                                class={"red round round modal:entry:button.Loading"}
                                 style={{
                                     width: "100%",
                                 }}
