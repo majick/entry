@@ -128,7 +128,7 @@ export type Config = {
     };
 };
 
-// handle executable launch
+// ...
 process.env.IMPORT_DIR! =
     import.meta.dir ||
     process.env.EXECUTABLE_STATIC_DIR ||
@@ -136,68 +136,6 @@ process.env.IMPORT_DIR! =
 
 if (!fs.existsSync(process.env.IMPORT_DIR))
     fs.mkdirSync(process.env.IMPORT_DIR, { recursive: true });
-
-try {
-    if (path.basename(process.execPath).startsWith("entry")) {
-        console.log("\x1b[30;100m info \x1b[0m Running in executable mode!");
-        console.log(
-            "\x1b[30;43m warn \x1b[0m Executable mode will make many calls to https//sentrytwo.com during start, and will likely download various files. These downloads will be logged in the standard output."
-        );
-
-        // download files
-        const RequiredFiles = await (
-            await fetch("https://sentrytwo.com/.hashes")
-        ).json();
-
-        // ...check current files (remove unneeded)
-        for (const file of fs.readdirSync(process.env.IMPORT_DIR!))
-            if (!RequiredFiles[file]) {
-                // ...delete file
-                fs.rmSync(path.resolve(process.env.IMPORT_DIR!, file));
-
-                // ...log
-                console.log(
-                    `\x1b[30;100m sync \x1b[0m Removing unneeded asset: "${file}"\x1b[0m`
-                );
-            }
-
-        // ...check files
-        for (const file of Object.entries(RequiredFiles)) {
-            // 0: file name, 1: hash
-
-            // check if file exists locally
-            const FilePath = path.resolve(process.env.IMPORT_DIR!, file[0]);
-
-            if (fs.existsSync(FilePath)) {
-                // check hash
-                const CurrentHash = CreateHash(await Bun.file(FilePath).text());
-                if (CurrentHash === file[1]) continue;
-
-                // ...delete file
-                fs.rmSync(FilePath);
-
-                // ...allow execution of the "download file" part
-                console.log(
-                    `\x1b[30;100m sync \x1b[0m Syncing asset: "${file[0]}"\x1b[0m`
-                );
-            }
-
-            // download file
-            await Bun.write(
-                FilePath,
-                await fetch(`https://sentrytwo.com/${file[0]}`)
-            );
-
-            console.log(
-                `\x1b[30;100m sync \x1b[0m Asset synced: "${file[0]}"\x1b[0m`
-            );
-
-            continue;
-        }
-    }
-} catch (err) {
-    throw new Error(`Failed to start in executable mode!\n${err}`);
-}
 
 // check if database is new or config file does not exist
 if (!(await EntryDB.GetConfig())) {
@@ -332,6 +270,9 @@ export const ServerConfig: HoneybeeConfig = {
         "/api/media/file/": { Type: "begins", Page: Pages.InspectMedia }, // alias of /f
         // ...social
         "/api/social/get/": { Type: "begins", Page: API.GetSocialProfile },
+        // ...dist
+        "/api/hashes": { Page: API.HashList },
+        "/api/dist/": { Type: "begins", Page: API.Distribution },
 
         // POST admin
         "/admin/manage-pastes": { Method: "POST", Page: Admin.ManagePastes },
@@ -420,7 +361,6 @@ export const ServerConfig: HoneybeeConfig = {
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage }, // alias of /c/
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },
-        "/.hashes": { Page: Pages.HashList },
         "/": {
             // return paste view, will return homepage if no paste is provided
             // at the end so it tests this last because everything starts with /, which means

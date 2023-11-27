@@ -7,6 +7,8 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server, SocketAddress } from "bun";
 import punycode from "node:punycode";
+import path from "node:path";
+import fs from "node:fs";
 
 // import components
 import _404Page from "../components/404";
@@ -371,6 +373,74 @@ export class Favicon implements Endpoint {
 
         // return
         return new Response(Bun.file(EntryDB.config.app.favicon));
+    }
+}
+
+let HashStore: { [key: string]: string } = {}; // store file hashes BY PATH
+let DistHashStore: { [key: string]: string } = {}; // store distribution file hashes BY PATH
+
+/**
+ * @export
+ * @class HashList
+ * @implements {Endpoint}
+ */
+export class HashList implements Endpoint {
+    public async request(
+        request: Request,
+        server?: Server | undefined
+    ): Promise<Response> {
+        const url = new URL(request.url);
+        const dir =
+            url.searchParams.get("t") !== "dist"
+                ? process.env.IMPORT_DIR!
+                : process.env.DIST_DIR || process.env.IMPORT_DIR!;
+
+        const Store =
+            url.searchParams.get("t") !== "dist" ? HashStore : DistHashStore;
+
+        // fill hashes for all files (if they don't already exist)
+        for (const file of fs.readdirSync(dir)) {
+            if (Store[file]) continue;
+            const hash = CreateHash(await Bun.file(path.resolve(dir, file)).text());
+            if (!Store[file]) Store[file] = hash;
+        }
+
+        // return
+        return new Response(JSON.stringify(Store, undefined, 4), {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class Distribution
+ * @implements {Endpoint}
+ */
+export class Distribution implements Endpoint {
+    public async request(
+        request: Request,
+        server?: Server | undefined
+    ): Promise<Response> {
+        const url = new URL(request.url);
+
+        const FilePath = path.resolve(
+            process.env.DIST_DIR || process.env.IMPORT_DIR!,
+            url.pathname.split("/api/dist/")[1]
+        );
+
+        const ContentType = contentType(path.extname(FilePath));
+
+        if (fs.existsSync(FilePath))
+            return new Response(await Bun.file(FilePath).arrayBuffer(), {
+                headers: {
+                    "Content-Type": ContentType || "application/octet-stream",
+                },
+            });
+
+        return new _404Page().request(request);
     }
 }
 
@@ -1637,6 +1707,7 @@ export class GetSocialProfile implements Endpoint {
 
 // ...
 import { GetFile, ListFiles, UploadFile, DeleteFile } from "../repos/Media";
+import { contentType } from "mime-types";
 
 // default export
 export default {
@@ -1649,6 +1720,8 @@ export default {
     WellKnown,
     RobotsTXT,
     Favicon,
+    HashList,
+    Distribution,
     CreatePaste, // supports cloud routing
     GetPasteRecord, // supports cloud routing
     EditPaste, // supports cloud routing

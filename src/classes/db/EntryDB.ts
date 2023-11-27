@@ -1190,7 +1190,7 @@ export default class EntryDB {
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
-                query: 'UPDATE "Encryption" SET (ENC_IV, ENC_KEY, ENC_CODE, CustomURL) = (?, ?, ?, ?) WHERE "ViewPassword" = ? AND "CustomURL" = ?',
+                query: 'UPDATE "Encryption" SET ("ENC_IV", "ENC_KEY", "ENC_CODE", "CustomURL") = (?, ?, ?, ?) WHERE "ViewPassword" = ? AND "CustomURL" = ?',
                 params: [
                     result[2], // iv
                     result[1], // key

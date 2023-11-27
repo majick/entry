@@ -7,6 +7,7 @@ if (process.env.DO_NOT_CLEAR_DIST === undefined)
 const output = await build({
     entrypoints: [
         "./src/index.ts",
+        "./src/Executable.ts",
         "./src/classes/pages/components/Editor.ts",
         "./src/classes/pages/assets/ClientFixMarkdown.ts",
         "./src/classes/pages/components/Markdown.ts",

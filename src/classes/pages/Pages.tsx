@@ -34,8 +34,6 @@ import API, {
     GetAssociation,
 } from "./api/API";
 
-let HashStore: { [key: string]: string } = {}; // store file hashes BY PATH
-
 // ...
 import { Node, PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
@@ -173,36 +171,6 @@ export async function CheckInstance(
     }
 
     return undefined;
-}
-
-/**
- * @export
- * @class HashList
- * @implements {Endpoint}
- */
-export class HashList implements Endpoint {
-    public async request(
-        request: Request,
-        server?: Server | undefined
-    ): Promise<Response> {
-        // fill hashes for all files (if they don't already exist)
-        for (const file of fs.readdirSync(process.env.IMPORT_DIR!)) {
-            if (HashStore[file]) continue;
-
-            const hash = CreateHash(
-                await Bun.file(path.resolve(process.env.IMPORT_DIR!, file)).text()
-            );
-
-            if (!HashStore[file]) HashStore[file] = hash;
-        }
-
-        // return
-        return new Response(JSON.stringify(HashStore, undefined, 4), {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-    }
 }
 
 /**
@@ -2879,7 +2847,6 @@ export default {
     Curiosity,
     CheckInstance,
     // pages
-    HashList,
     GetPasteFromURL,
     PasteDocView,
     PastesSearch,
