@@ -270,12 +270,6 @@ export class GetPasteFromURL implements Endpoint {
                 parseFloat(search.get("r")!)
             );
 
-            // ...fetch latest revision if requested
-            if (search.get("r")! === "latest") {
-                revision[2] = (await db.GetAllPasteRevisions(name))[2][0];
-                revision[0] = true;
-            }
-
             // ...return 404 if revision doesn't exist
             if (!revision[0] || !revision[2]) return new _404Page().request(request);
 

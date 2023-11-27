@@ -510,7 +510,7 @@ You can allow people to use custom domains and link with a CNAME record by enabl
 
 ### Revisions
 
-Every paste is given 5 revisions. Every time the paste is updated, a new revision is created for it. These revisions can be viewed as if they are other pastes, allowing users to iterate on versions of their pastes.
+Every paste is given 10 revisions. Every time the paste is updated, a new revision is created for it. These revisions can be viewed as if they are other pastes, allowing users to iterate on versions of their pastes.
 
 Revisions can be enabled through config `app.enable_versioning`.
 

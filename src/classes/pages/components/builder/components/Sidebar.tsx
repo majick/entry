@@ -1186,6 +1186,12 @@ export default function Sidebar(props: { Page?: string }): any {
                                             element
                                         ) as Node;
 
+                                        // check type
+                                        if (parsed.Type !== Selected.Type)
+                                            return alert(
+                                                `Node type differs from selected node!\nMust be of type: ${Selected.Type}\nGot: ${parsed.Type}`
+                                            );
+
                                         // randomize ID (so we don't have any ID conflicts)
                                         parsed.ID = crypto.randomUUID();
 

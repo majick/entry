@@ -1946,6 +1946,10 @@ export default class EntryDB {
         const paste = await this.GetPasteFromURL(PasteURL, true);
         if (!paste) return [false, "Paste does not exist"];
 
+        // handle "latest" revision
+        if (Number.isNaN(time))
+            time = (await this.GetAllPasteRevisions(PasteURL))[2][0].EditDate;
+
         // get revision
         const revision = await (EntryDB.config.pg
             ? SQL.PostgresQueryOBJ
@@ -2015,7 +2019,7 @@ export default class EntryDB {
 
         // get all paste revisions, if there are already 5... delete one!
         const AllRevisions = await this.GetAllPasteRevisions(props.CustomURL);
-        if (AllRevisions[2] && AllRevisions[2].length >= 5) {
+        if (AllRevisions[2] && AllRevisions[2].length >= 10) {
             const LastRevision = AllRevisions[2].pop();
             if (LastRevision)
                 await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({

@@ -409,6 +409,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/paste/builder": { Page: Builder.Builder },
 
         // GET repos
+        "/r/diff/": { Type: "begins", Page: Repos.DiffView },
         "/r/rev/": { Type: "begins", Page: Repos.RevisionsList },
         "/r/": { Type: "begins", Page: Repos.RepoView },
 

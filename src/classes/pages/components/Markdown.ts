@@ -98,7 +98,7 @@ export function ParseMarkdownSync(
                 _current === 1 ? ' padding: 12px 0;"' : ""
             }">
                 <div class="line-numbers code">${LineNumbers}</div>
-                <code class="language-${lang}" id="B${FencedCodeBlocks}C">${code}</code>
+                <code class="language-${lang}" id="B${FencedCodeBlocks}C" style="display: block;">${code}</code>
                 <button 
                     onclick="window.navigator.clipboard.writeText(document.getElementById('B${FencedCodeBlocks}C').innerText);"
                     class="secondary copy-button"

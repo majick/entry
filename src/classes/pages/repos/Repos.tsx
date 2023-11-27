@@ -14,10 +14,13 @@ import { Paste } from "../../db/objects/Paste";
 import EntryDB from "../../db/EntryDB";
 
 // import components
+import NodeListing from "../components/builder/components/NodeListing";
 import { BuilderDocument } from "../components/builder/schema";
+import StaticCode from "../components/site/blocks/StaticCode";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
-import NodeListing from "../components/builder/components/NodeListing";
+
+import { createTwoFilesPatch } from "diff";
 
 // nav component
 export function ReposNav(props: { name: string; current: string }) {
@@ -259,6 +262,24 @@ export class RepoView implements Endpoint {
                                                 Open As Markdown
                                             </a>
                                         ))}
+
+                                    {RevisionNumber !== 0 && (
+                                        <a
+                                            class={"button round"}
+                                            href={`/r/diff/${result.CustomURL}?from=${RevisionNumber}&to=latest`}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Plus/Minus Symbol"}
+                                            >
+                                                <path d="M8.75 1.75V5H12a.75.75 0 0 1 0 1.5H8.75v3.25a.75.75 0 0 1-1.5 0V6.5H4A.75.75 0 0 1 4 5h3.25V1.75a.75.75 0 0 1 1.5 0ZM4 13h8a.75.75 0 0 1 0 1.5H4A.75.75 0 0 1 4 13Z"></path>
+                                            </svg>
+                                            Compare
+                                        </a>
+                                    )}
                                 </div>
                             </div>
 
@@ -625,8 +646,158 @@ export class RevisionsList implements Endpoint {
     }
 }
 
+/*
+ * @export
+ * @class DiffView
+ * @implements {Endpoint}
+ */
+export class DiffView implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        // get paste name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("r/diff/")) name = name.split("r/diff/")[1];
+
+        // attempt to get paste
+        const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result || result.HostServer) return new _404Page().request(request);
+
+        // attempt to get revision(s)
+        const RevisionNumber = search.get("to");
+        const RevisionNumber2 = search.get("from");
+        if (!RevisionNumber) return new _404Page().request(request); // atleast one is required!
+
+        const revision = await db.GetRevision(name, parseFloat(search.get("to")!));
+        if (!revision[0] || !revision[2]) return new _404Page().request(request);
+
+        if (RevisionNumber2) {
+            const revision_2 = await db.GetRevision(
+                name,
+                parseFloat(search.get("from")!)
+            );
+
+            if (!revision_2[0] || !revision_2[2])
+                return new _404Page().request(request);
+
+            // set result content to first revision
+            result.Content = revision[2].Content;
+
+            // set revision content to revision_2 content
+            revision[2].Content = revision_2[2].Content;
+        }
+
+        // detect if paste is a builder paste
+        const BuilderPaste = result.Content.startsWith("_builder:");
+
+        if (BuilderPaste)
+            return new Response(
+                "Difference viewer is not supported for builder pastes."
+            );
+
+        // generate diff
+        if (RevisionNumber2) result.CustomURL += `@${RevisionNumber2}`;
+
+        let diff = createTwoFilesPatch(
+            result.CustomURL,
+            `${name}@${RevisionNumber}`,
+            revision[2].Content.split("_metadata:")[0],
+            result.Content.split("_metadata:")[0]
+        );
+
+        // ...remove some extra things
+        diff = diff.replaceAll("\\ No newline at end of file\n", "");
+
+        const summary = diff.split(diff.split("\n")[4])[0];
+        diff = diff.replace(summary, "");
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <TopNav margin={false} />
+
+                    <div className="flex flex-column g-8">
+                        <div
+                            className="card secondary flex justify-center"
+                            style={{
+                                padding: "calc(var(--u-12) * 4) var(--u-12)",
+                            }}
+                        >
+                            <h1 class={"no-margin"}>{name}</h1>
+                        </div>
+
+                        <main className="small flex flex-column g-4">
+                            <ReposNav name={name} current="Home" />
+
+                            <div className="card border round">
+                                <p>
+                                    Comparing{" "}
+                                    <a
+                                        href={`/r/${result.CustomURL}${
+                                            RevisionNumber2
+                                                ? `?r=${RevisionNumber2}`
+                                                : ""
+                                        }`}
+                                    >
+                                        {RevisionNumber2 || "latest"}
+                                    </a>{" "}
+                                    to{" "}
+                                    <a
+                                        href={`/r/${result.CustomURL}?r=${RevisionNumber}`}
+                                    >
+                                        {RevisionNumber || "latest"}
+                                    </a>
+                                </p>
+
+                                <hr />
+
+                                <StaticCode block={1} margin={false}>
+                                    {summary}
+                                </StaticCode>
+
+                                <hr />
+
+                                <StaticCode block={2} margin={false}>
+                                    {diff}
+                                </StaticCode>
+                            </div>
+                        </main>
+                    </div>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
+                </>,
+                <>
+                    <title>
+                        {name} - {EntryDB.config.name}
+                    </title>
+
+                    <link rel="icon" href="/favicon" />
+                </>
+            ),
+            {
+                headers: {
+                    "Content-Type": "text/html",
+                    ...PageHeaders,
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     RepoView,
     RevisionsList,
+    DiffView,
 };

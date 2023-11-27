@@ -1,10 +1,11 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.1.13-rev-2",
+  "version": "1.1.13-rev-3",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
+    "@types/diff": "^5.0.8",
     "@types/highlight.js": "^10.1.0",
     "@types/marked": "^5.0.0",
     "@types/mime-types": "^2.1.2",
@@ -24,6 +25,7 @@
     "@codemirror/state": "latest",
     "@codemirror/view": "latest",
     "@lezer/highlight": "^1.1.6",
+    "diff": "^5.1.0",
     "highlight.js": "^11.8.0",
     "honeybee": "https://codeberg.org/api/packages/hkau/npm/honeybee/-/1.0.10/honeybee-1.0.10.tgz",
     "marked": "^5.1.0",

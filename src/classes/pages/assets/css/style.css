@@ -672,6 +672,8 @@ pre .code {
     color: currentColor;
     padding: 0;
     background: inherit;
+    flex-direction: column;
+    width: 100%;
 }
 
 pre code p,
@@ -700,7 +702,7 @@ pre .line-numbers {
     text-align: right;
     color: var(--text-color-faded);
     user-select: none;
-    border-right: solid 1px var(--background-surface1-5);
+    border-right: solid 1px var(--background-surface2a);
     display: flex;
     flex-direction: column;
     width: max-content;
@@ -728,6 +730,20 @@ pre .copy-button {
 
 pre:hover .copy-button {
     opacity: 1;
+}
+
+pre code .added,
+pre code .removed {
+    width: 100%;
+    display: block;
+}
+
+pre code .added {
+    background: var(--green1);
+}
+
+pre code .removed {
+    background: var(--red1);
 }
 
 input,
