@@ -823,7 +823,12 @@ export class DecryptPaste implements Endpoint {
         if (!enc[0]) return undefined;
 
         // decrypt and return
-        return Decrypt(paste.Content, enc[1].key, enc[1].iv, enc[1].auth);
+        return Decrypt(
+            paste.Content.split("_metadata:")[0],
+            enc[1].key,
+            enc[1].iv,
+            enc[1].auth
+        );
     }
 
     public async request(request: Request, server: Server): Promise<Response> {

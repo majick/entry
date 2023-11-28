@@ -1176,13 +1176,12 @@ export default class EntryDB {
                 });
         }
 
-        // rencrypt (if needed, again)
+        // re-encrypt (if needed, again)
         if (NewPasteInfo.ViewPassword && !OnlyCreateRevision) {
             // using NewPasteInfo for all of these values because PasteInfo doesn't actually
             // really matter for this, as the content is only defined in NewPasteInfo
-            const result = Encrypt(NewPasteInfo.Content);
+            const result = Encrypt(NewPasteInfo.Content.split("_metadata:")[0]);
             if (!result) return [false, "Encryption error!", NewPasteInfo];
-
             NewPasteInfo.Content = result[0];
 
             // update encryption
@@ -1210,6 +1209,9 @@ export default class EntryDB {
                 Content: NewPasteInfo.Content,
                 EditDate: NewPasteInfo.EditDate,
             });
+
+        // append metadata
+        NewPasteInfo.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;
 
         // update paste
         if (!OnlyCreateRevision)
