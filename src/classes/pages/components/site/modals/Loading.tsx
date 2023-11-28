@@ -1,4 +1,5 @@
 import Expandable from "../../builder/components/Expandable";
+import Modal from "./Modal";
 
 /**
  * @function LoadingModal

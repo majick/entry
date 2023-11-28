@@ -16,7 +16,7 @@ import Modal from "./Modal";
  *         delete: string;
  *     };
  * }} props
- * @return {*} 
+ * @return {*}
  */
 export default function PublishModals(props: {
     EditingPaste?: string;
