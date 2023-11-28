@@ -51,8 +51,10 @@ export default function LoadingModal(): any {
                 >
                     <Expandable title="What?">
                         <span>
-                            During periods of increased traffic, you may experience
-                            some latency when attempting to perform certain actions.
+                            Your action is being processed! Everything takes time.
+                            Some actions may require multiple database reads/writes
+                            to complete. These generally happen very quickly, but
+                            they could stall at times.
                         </span>
                     </Expandable>
 

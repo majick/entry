@@ -714,12 +714,19 @@ export class DiffView implements Endpoint {
         // generate diff
         if (RevisionNumber2) result.CustomURL += `@${RevisionNumber2}`;
 
-        let diff = createTwoFilesPatch(
-            result.CustomURL,
-            `${name}@${RevisionNumber}`,
-            TOML.stringify(BuilderDocument1),
-            TOML.stringify(BuilderDocument2)
-        );
+        let diff = BuilderPaste
+            ? createTwoFilesPatch(
+                  result.CustomURL,
+                  `${name}@${RevisionNumber}`,
+                  TOML.stringify(BuilderDocument1),
+                  TOML.stringify(BuilderDocument2)
+              )
+            : createTwoFilesPatch(
+                  result.CustomURL,
+                  `${name}@${RevisionNumber}`,
+                  revision[2].Content.split("_metadata:")[0],
+                  result.Content.split("_metadata:")[0]
+              );
 
         // ...remove some extra things
         diff = diff.replaceAll("\\ No newline at end of file\n", "");

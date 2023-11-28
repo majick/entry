@@ -1,5 +1,23 @@
+import LoadingModal from "./Loading";
 import Modal from "./Modal";
 
+/**
+ * @function PublishModals
+ *
+ * @export
+ * @param {{
+ *     EditingPaste?: string;
+ *     DisablePassword?: boolean;
+ *     EnableDrafts?: boolean;
+ *     ViewingRevision?: boolean;
+ *     Endpoints: {
+ *         new: string;
+ *         edit: string;
+ *         delete: string;
+ *     };
+ * }} props
+ * @return {*} 
+ */
 export default function PublishModals(props: {
     EditingPaste?: string;
     DisablePassword?: boolean;
@@ -10,7 +28,7 @@ export default function PublishModals(props: {
         edit: string;
         delete: string;
     };
-}) {
+}): any {
     // iframe load function
     function IframeLoadFunction(event: any) {
         // check path
@@ -380,6 +398,8 @@ export default function PublishModals(props: {
                     </button>
                 </form>
             </div>
+
+            <LoadingModal />
         </Modal>
     );
 }
