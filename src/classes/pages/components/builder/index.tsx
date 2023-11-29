@@ -165,6 +165,14 @@ export class Builder implements Endpoint {
                                 EntryDB.config.app.enable_versioning === true
                             };
                             window.ViewingRevision = ${RevisionNumber !== 0};
+                            window.EnableGroups = ${
+                                !EntryDB.config.app ||
+                                EntryDB.config.app.enable_groups !== false
+                            };
+                            window.EnableExpiry = ${
+                                !EntryDB.config.app ||
+                                EntryDB.config.app.enable_expiry !== false
+                            };
                             Builder(\`${stringified}\`, true); window.Debug = Debug;`,
                         }}
                     />
