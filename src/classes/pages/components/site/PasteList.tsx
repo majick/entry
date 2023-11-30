@@ -2,7 +2,7 @@ import EntryDB from "../../../db/EntryDB";
 import { CreateHash } from "../../../db/helpers/Hash";
 import type { Paste } from "../../../db/objects/Paste";
 
-import Modal from "./modals/Modal";
+import { Modal } from "fusion";
 
 export default function PasteList(props: {
     Pastes: Paste[];
@@ -101,20 +101,20 @@ export default function PasteList(props: {
                                         "flex justify-space-between align-center flex-wrap g-10"
                                     }
                                 >
-                                    <form method="dialog" class={"mobile-max"}>
-                                        <button class={"green mobile-max"}>
+                                    <form method="dialog" class={"mobile:max"}>
+                                        <button class={"green mobile:max"}>
                                             Cancel
                                         </button>
 
                                         <div style={{ margin: "0.25rem 0" }}>
-                                            <hr class={"mobile-only"} />
+                                            <hr class={"device:mobile"} />
                                         </div>
                                     </form>
 
                                     <form
                                         method="POST"
                                         action={"/admin/api/mass-delete"}
-                                        class={"mobile-max"}
+                                        class={"mobile:max"}
                                         style={{
                                             display: "flex",
                                             flexWrap: "wrap",
@@ -139,7 +139,7 @@ export default function PasteList(props: {
                                             )}
                                         />
 
-                                        <button class={"red mobile-max"}>
+                                        <button class={"red mobile:max"}>
                                             Delete
                                         </button>
                                     </form>

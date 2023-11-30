@@ -1,5 +1,5 @@
 import ToggleTheme from "./ToggleTheme";
-import Modal from "./modals/Modal";
+import { Modal } from "fusion";
 
 import EntryDB from "../../../db/EntryDB";
 import { HoneybeeConfig } from "honeybee";

@@ -40,7 +40,7 @@ import { AuthModals } from "./components/site/modals/AuthModals";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 import BaseParser from "../db/helpers/BaseParser";
-import Modal from "./components/site/modals/Modal";
+import { Card, Modal } from "fusion";
 import { ServerConfig } from "../..";
 import { ReposNav } from "./repos/Repos";
 
@@ -680,9 +680,9 @@ export class GetPasteFromURL implements Endpoint {
         return new Response(
             Renderer.Render(
                 <>
-                    <main>
+                    <main class={"flex flex-column g-4"}>
                         {search.get("UnhashedEditPassword") && (
-                            <div style={{ marginBottom: "var(--u-04)" }}>
+                            <div>
                                 <Expandable title={"Looking for your edit code?"}>
                                     <StaticCode margin={false}>
                                         {`Edit code for ${
@@ -710,12 +710,7 @@ export class GetPasteFromURL implements Endpoint {
                         )}
 
                         {RevisionNumber !== 0 && (
-                            <div
-                                class={"mdnote note-info"}
-                                style={{
-                                    marginBottom: "0.5rem",
-                                }}
-                            >
+                            <div class={"mdnote note-info"}>
                                 <b class={"mdnote-title"}>Viewing Revision</b>
                                 <p>
                                     This may not be the live content of this paste.{" "}
@@ -732,11 +727,15 @@ export class GetPasteFromURL implements Endpoint {
                                 result.CustomURL &&
                             InformationPageNote()}
 
-                        <div
-                            class={"tab-container card secondary round"}
+                        <Card
+                            round={true}
+                            border={true}
+                            secondary={true}
+                            class={"tab-container secondary round"}
                             style={{
                                 height: "max-content",
                                 maxHeight: "initial",
+                                marginBottom: 0,
                             }}
                         >
                             <div
@@ -749,220 +748,194 @@ export class GetPasteFromURL implements Endpoint {
                                     __html: await ParseMarkdown(result.Content),
                                 }}
                             />
-                        </div>
+                        </Card>
 
                         <div
-                            style={{
-                                marginTop: "0.5rem",
-                                display: "flex",
-                                justifyContent: "space-between",
-                            }}
+                            class={
+                                "flex mobile:flex-column justify-space-between g-4 full"
+                            }
                         >
                             <div
-                                class={"mobile-block"}
+                                class={
+                                    "mobile:center flex flex-wrap justify-center g-4"
+                                }
                                 style={{
-                                    display: "flex",
-                                    justifyContent: "space-between",
-                                    alignItems: "flex-start",
-                                    gap: "0.5rem",
-                                    width: "100%",
+                                    width: "max-content",
+                                    height: "max-content",
                                 }}
                             >
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        gap: "0.5rem",
-                                        flexWrap: "wrap",
-                                        justifyContent: "center",
-                                    }}
+                                <a
+                                    class={"button round"}
+                                    disabled={HideSource}
+                                    href={`${HostnameURL}?mode=edit&OldURL=${
+                                        result.CustomURL.split(":")[0]
+                                    }${
+                                        // add host server (if it exists)
+                                        result.HostServer
+                                            ? `&server=${result.HostServer}`
+                                            : ""
+                                    }${
+                                        // add view password (if it exists)
+                                        // this is so content is automatically decrypted!
+                                        ViewPassword !== ""
+                                            ? `&ViewPassword=${ViewPassword}`
+                                            : ""
+                                    }${
+                                        RevisionNumber !== 0
+                                            ? `&r=${RevisionNumber}`
+                                            : ""
+                                    }`}
                                 >
-                                    <a
-                                        class={"button round"}
-                                        disabled={HideSource}
-                                        href={`${HostnameURL}?mode=edit&OldURL=${
-                                            result.CustomURL.split(":")[0]
-                                        }${
-                                            // add host server (if it exists)
-                                            result.HostServer
-                                                ? `&server=${result.HostServer}`
-                                                : ""
-                                        }${
-                                            // add view password (if it exists)
-                                            // this is so content is automatically decrypted!
-                                            ViewPassword !== ""
-                                                ? `&ViewPassword=${ViewPassword}`
-                                                : ""
-                                        }${
-                                            RevisionNumber !== 0
-                                                ? `&r=${RevisionNumber}`
-                                                : ""
-                                        }`}
-                                    >
-                                        Edit
-                                    </a>
+                                    Edit
+                                </a>
 
-                                    {EntryDB.config.app &&
-                                        EntryDB.config.app.enable_comments ===
-                                            true &&
-                                        (!result.Metadata ||
-                                            !result.Metadata.Comments ||
-                                            result.Metadata.Comments.Enabled !==
-                                                false) && (
-                                            <a
-                                                class={"button round"}
-                                                href={`${HostnameURL}c/${result.CustomURL}`}
-                                                title={"View Comments"}
+                                {EntryDB.config.app &&
+                                    EntryDB.config.app.enable_comments === true &&
+                                    (!result.Metadata ||
+                                        !result.Metadata.Comments ||
+                                        result.Metadata.Comments.Enabled !==
+                                            false) && (
+                                        <a
+                                            class={"button round"}
+                                            href={`${HostnameURL}c/${result.CustomURL}`}
+                                            title={"View Comments"}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Comments Symbol"}
                                             >
+                                                <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 12H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"></path>
+                                            </svg>
+
+                                            <span>{result.Comments}</span>
+                                        </a>
+                                    )}
+
+                                <a
+                                    href={`${HostnameURL}r/${result.CustomURL}`}
+                                    class={"button round"}
+                                    title={"Inspect Paste"}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        style={{
+                                            marginTop: "2px",
+                                        }}
+                                        aria-label={"Repo Symbol"}
+                                    >
+                                        <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
+                                    </svg>
+                                    More
+                                </a>
+                            </div>
+
+                            <div
+                                class={"mobile:justify-center text-right"}
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center",
+                                    alignItems: "flex-end",
+                                    color: "var(--text-color-faded)",
+                                }}
+                            >
+                                {result.Metadata &&
+                                    result.Metadata.Badges &&
+                                    result.Metadata.Badges.split(",").length > 0 && (
+                                        <div class={"flex flex-wrap g-4"}>
+                                            {result.Metadata.Badges.split(",").map(
+                                                (badge) => (
+                                                    <span class={"chip badge"}>
+                                                        {badge}
+                                                    </span>
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+
+                                {result.ExpireOn !== undefined && (
+                                    <span>Expires: {result.ExpireOn}</span>
+                                )}
+
+                                <span title={new Date(result.PubDate).toUTCString()}>
+                                    Pub:{" "}
+                                    <span className="utc-date-to-localize">
+                                        {new Date(result.PubDate).toUTCString()}
+                                    </span>
+                                </span>
+
+                                <span
+                                    title={new Date(result.EditDate).toUTCString()}
+                                >
+                                    Edit:{" "}
+                                    <span className="utc-date-to-localize">
+                                        {new Date(result.EditDate).toUTCString()}
+                                    </span>
+                                </span>
+
+                                {result.Metadata && (
+                                    <>
+                                        {result.Metadata.Owner &&
+                                            !result.Content.includes(
+                                                "<% disable show_owner %>"
+                                            ) &&
+                                            result.Metadata.ShowOwnerEnabled !==
+                                                false && (
+                                                <span>
+                                                    Owner:{" "}
+                                                    <a
+                                                        href={`${HostnameURL}${result.Metadata.Owner}`}
+                                                    >
+                                                        {result.Metadata.Owner
+                                                            .length > 25
+                                                            ? `${result.Metadata.Owner}...`
+                                                            : result.Metadata.Owner}
+                                                    </a>
+                                                </span>
+                                            )}
+                                    </>
+                                )}
+
+                                {EntryDB.config.log &&
+                                    EntryDB.config.log.events.includes(
+                                        "view_paste"
+                                    ) &&
+                                    (!result.Metadata ||
+                                        result.Metadata.ShowViewCount !== false) && (
+                                        <span
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "right",
+                                                alignItems: "center",
+                                                gap: "0.25rem",
+                                                width: "max-content",
+                                            }}
+                                            title={
+                                                Viewed === true
+                                                    ? "Paste Viewed Before"
+                                                    : "Pasted Viewed Just Now"
+                                            }
+                                        >
+                                            {Viewed === true && (
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 16 16"
                                                     width="16"
                                                     height="16"
-                                                    aria-label={"Comments Symbol"}
+                                                    aria-label={"Sparkle Symbol"}
                                                 >
-                                                    <path d="M1.75 1h8.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 10.25 10H7.061l-2.574 2.573A1.458 1.458 0 0 1 2 11.543V10h-.25A1.75 1.75 0 0 1 0 8.25v-5.5C0 1.784.784 1 1.75 1ZM1.5 2.75v5.5c0 .138.112.25.25.25h1a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-8.5a.25.25 0 0 0-.25.25Zm13 2a.25.25 0 0 0-.25-.25h-.5a.75.75 0 0 1 0-1.5h.5c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 12H14v1.543a1.458 1.458 0 0 1-2.487 1.03L9.22 12.28a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l2.22 2.22v-2.19a.75.75 0 0 1 .75-.75h1a.25.25 0 0 0 .25-.25Z"></path>
+                                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
                                                 </svg>
-
-                                                <span>{result.Comments}</span>
-                                            </a>
-                                        )}
-
-                                    <a
-                                        href={`${HostnameURL}r/${result.CustomURL}`}
-                                        class={"button round"}
-                                        title={"Inspect Paste"}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            style={{
-                                                marginTop: "2px",
-                                            }}
-                                            aria-label={"Repo Symbol"}
-                                        >
-                                            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
-                                        </svg>
-                                        More
-                                    </a>
-                                </div>
-
-                                <div className="mobile-only">
-                                    <hr />
-                                </div>
-
-                                <div
-                                    class={"mobile:justify-center text-right"}
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "flex-end",
-                                        color: "var(--text-color-faded)",
-                                    }}
-                                >
-                                    {result.Metadata &&
-                                        result.Metadata.Badges &&
-                                        result.Metadata.Badges.split(",").length >
-                                            0 && (
-                                            <div class={"flex flex-wrap g-4"}>
-                                                {result.Metadata.Badges.split(
-                                                    ","
-                                                ).map((badge) => (
-                                                    <span class={"chip badge"}>
-                                                        {badge}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                    {result.ExpireOn !== undefined && (
-                                        <span>Expires: {result.ExpireOn}</span>
-                                    )}
-
-                                    <span
-                                        title={new Date(
-                                            result.PubDate
-                                        ).toUTCString()}
-                                    >
-                                        Pub:{" "}
-                                        <span className="utc-date-to-localize">
-                                            {new Date(result.PubDate).toUTCString()}
+                                            )}
+                                            Views: {result.Views}
                                         </span>
-                                    </span>
-
-                                    <span
-                                        title={new Date(
-                                            result.EditDate
-                                        ).toUTCString()}
-                                    >
-                                        Edit:{" "}
-                                        <span className="utc-date-to-localize">
-                                            {new Date(result.EditDate).toUTCString()}
-                                        </span>
-                                    </span>
-
-                                    {result.Metadata && (
-                                        <>
-                                            {result.Metadata.Owner &&
-                                                !result.Content.includes(
-                                                    "<% disable show_owner %>"
-                                                ) &&
-                                                result.Metadata.ShowOwnerEnabled !==
-                                                    false && (
-                                                    <span>
-                                                        Owner:{" "}
-                                                        <a
-                                                            href={`${HostnameURL}${result.Metadata.Owner}`}
-                                                        >
-                                                            {result.Metadata.Owner
-                                                                .length > 25
-                                                                ? `${result.Metadata.Owner}...`
-                                                                : result.Metadata
-                                                                      .Owner}
-                                                        </a>
-                                                    </span>
-                                                )}
-                                        </>
                                     )}
-
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
-                                            "view_paste"
-                                        ) &&
-                                        (!result.Metadata ||
-                                            result.Metadata.ShowViewCount !==
-                                                false) && (
-                                            <span
-                                                style={{
-                                                    display: "flex",
-                                                    justifyContent: "right",
-                                                    alignItems: "center",
-                                                    gap: "0.25rem",
-                                                    width: "max-content",
-                                                }}
-                                                title={
-                                                    Viewed === true
-                                                        ? "Paste Viewed Before"
-                                                        : "Pasted Viewed Just Now"
-                                                }
-                                            >
-                                                {Viewed === true && (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        height="16"
-                                                        aria-label={"Sparkle Symbol"}
-                                                    >
-                                                        <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
-                                                    </svg>
-                                                )}
-                                                Views: {result.Views}
-                                            </span>
-                                        )}
-                                </div>
                             </div>
                         </div>
 
@@ -1175,7 +1148,13 @@ export class PasteDocView implements Endpoint {
                                 />
                             </details>
 
-                            <div class={"tab-container editor-tab page-content"}>
+                            <div
+                                class={"tab-container editor-tab page-content"}
+                                style={{
+                                    minHeight: "100vh",
+                                    maxHeight: "unset",
+                                }}
+                            >
                                 <div
                                     id="editor-tab-preview"
                                     class="editor-tab"
@@ -1373,7 +1352,7 @@ export class PastesSearch implements Endpoint {
                                     </div>
                                 )}
 
-                                <span class={"mobile-center"}>
+                                <span class={"mobile:center"}>
                                     <b>{pastes.length}</b> result
                                     {pastes.length > 1 || pastes.length === 0
                                         ? "s"
@@ -2280,7 +2259,7 @@ export class UserSettings implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <TopNav breadcrumbs={["paste", "settings"]} />
+                        <TopNav breadcrumbs={["s"]} />
 
                         <main>
                             <div
@@ -2423,7 +2402,7 @@ export class UserSettings implements Endpoint {
                 Renderer.Render(
                     <>
                         <TopNav
-                            breadcrumbs={["paste", "settings", name]}
+                            breadcrumbs={["s", name]}
                             margin={false}
                             IncludeLoading={false}
                         />
@@ -2509,7 +2488,7 @@ export class UserSettings implements Endpoint {
                                                 required
                                             />
 
-                                            <div className="tooltip-wrapper mobile-max flex justify-center">
+                                            <div className="tooltip-wrapper mobile\:max flex justify-center">
                                                 <input
                                                     style={{
                                                         width: "100%",
@@ -2552,7 +2531,7 @@ export class UserSettings implements Endpoint {
 
                                             <button
                                                 class={
-                                                    "round green mobile-max modal:entry:button.Loading"
+                                                    "round green mobile:max modal:entry:button.Loading"
                                                 }
                                             >
                                                 Save
@@ -2584,9 +2563,14 @@ export class UserSettings implements Endpoint {
                                                 <hr id={"CustomDomain"} />
                                                 <h4>Custom Domain</h4>
 
-                                                <div class="card secondary border round flex justify-space-between flex-wrap g-4">
+                                                <Card
+                                                    round={true}
+                                                    border={true}
+                                                    secondary={true}
+                                                    class="flex justify-space-between flex-wrap g-4"
+                                                >
                                                     <div
-                                                        class={"mobile-max"}
+                                                        class={"mobile:max"}
                                                         style={{
                                                             width: "45%",
                                                         }}
@@ -2606,7 +2590,7 @@ export class UserSettings implements Endpoint {
                                                     <form
                                                         action="/api/domain"
                                                         method={"POST"}
-                                                        className="flex flex-column g-8 flex-wrap mobile-max"
+                                                        className="flex flex-column g-8 flex-wrap mobile\:max"
                                                         style={{
                                                             width: "33.33%",
                                                         }}
@@ -2620,7 +2604,7 @@ export class UserSettings implements Endpoint {
 
                                                         <input
                                                             class={
-                                                                "round mobile-max secondary"
+                                                                "round mobile:max secondary"
                                                             }
                                                             type="text"
                                                             placeholder={"Edit code"}
@@ -2636,7 +2620,7 @@ export class UserSettings implements Endpoint {
 
                                                         <input
                                                             class={
-                                                                "round mobile-max secondary"
+                                                                "round mobile:max secondary"
                                                             }
                                                             type="text"
                                                             name={"Domain"}
@@ -2664,7 +2648,7 @@ export class UserSettings implements Endpoint {
                                                             Save
                                                         </button>
                                                     </form>
-                                                </div>
+                                                </Card>
                                             </>
                                         )}
                                 </div>
@@ -2747,7 +2731,11 @@ export class Notifications implements Endpoint {
                     <TopNav breadcrumbs={["paste", "notifications"]} />
 
                     <main class={"small flex flex-column g-4"}>
-                        <div className="card round border flex justify-space-between g-4 flex-wrap">
+                        <Card
+                            round={true}
+                            border={true}
+                            class="flex justify-space-between g-4 flex-wrap"
+                        >
                             <span>
                                 {Notifications.length} notification
                                 {Notifications.length > 1 ||
@@ -2755,12 +2743,15 @@ export class Notifications implements Endpoint {
                                     ? "s"
                                     : ""}
                             </span>
-                        </div>
+                        </Card>
 
                         {Notifications.map((Notification) => (
-                            <div
+                            <Card
+                                round={true}
+                                border={true}
+                                secondary={true}
                                 class={
-                                    "card round border secondary flex justify-space-between align-center flex-wrap g-4 mobile:justify-center"
+                                    "flex justify-space-between align-center flex-wrap g-4 mobile:justify-center"
                                 }
                             >
                                 <ul
@@ -2808,7 +2799,7 @@ export class Notifications implements Endpoint {
                                 >
                                     View Notification
                                 </a>
-                            </div>
+                            </Card>
                         ))}
                     </main>
 
@@ -2833,7 +2824,7 @@ export class Notifications implements Endpoint {
 // ...
 import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
-import { CreateHash } from "../db/helpers/Hash";
+
 import LoadingModal from "./components/site/modals/Loading";
 import Expandable from "./components/builder/components/Expandable";
 import StaticCode from "./components/site/blocks/StaticCode";

@@ -1,4 +1,6 @@
 import { build } from "bun";
+
+import path from "node:path";
 import fs from "node:fs";
 
 if (process.env.DO_NOT_CLEAR_DIST === undefined)
@@ -35,6 +37,13 @@ const output = await build({
         "data/config.json",
     ],
 });
+
+// import all fusion css
+fs.cpSync(
+    path.resolve(process.cwd(), "node_modules", "fusion", "src/css"),
+    path.resolve(process.cwd(), "dist"),
+    { recursive: true, filter: (name) => name !== "style.css" }
+);
 
 // log finished
 console.log("\x1b[30;100m info \x1b[0m Build finished!");

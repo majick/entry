@@ -9,8 +9,7 @@ import fs from "node:fs";
 
 // ...EntryDB
 import EntryDB from "./classes/db/EntryDB";
-import type { LogEvent } from "./classes/db/LogDB";
-import { CreateHash } from "./classes/db/helpers/Hash";
+import type { LogEvent } from "./classes/db/objects/Log";
 
 import API from "./classes/pages/api/API";
 
@@ -18,8 +17,8 @@ import API from "./classes/pages/api/API";
 import Footer, { InitFooterExtras } from "./classes/pages/components/site/Footer";
 import PublishModals from "./classes/pages/components/site/modals/PublishModals";
 import { ParseMarkdown } from "./classes/pages/components/Markdown";
-import Modal from "./classes/pages/components/site/modals/Modal";
 import TopNav from "./classes/pages/components/site/TopNav";
+import { Modal } from "fusion";
 
 export type EntryGlobalType = {
     DistDirectory: string;
@@ -69,7 +68,6 @@ export type EntryGlobalType = {
 
 // includes
 import "./classes/pages/assets/css/style.css";
-import "./classes/pages/assets/css/utility.css";
 
 // ...
 export type Config = {

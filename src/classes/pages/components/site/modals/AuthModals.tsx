@@ -1,6 +1,5 @@
 import EntryDB from "../../../../db/EntryDB";
-import LoadingModal from "./Loading";
-import Modal from "./Modal";
+import { Modal } from "fusion";
 
 export function AuthModals(props: { use: "login" | "logout" }) {
     return (
@@ -90,7 +89,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
 
                     <hr />
 
-                    <form method="dialog" class={"mobile-max"}>
+                    <form method="dialog" class={"mobile:max"}>
                         <button
                             class={"green round"}
                             style={{

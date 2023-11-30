@@ -1,6 +1,6 @@
 import ExtraPasteOptions from "./ExtraPasteOptions";
 import LoadingModal from "./Loading";
-import Modal from "./Modal";
+import { Modal } from "fusion";
 
 /**
  * @function PublishModals
@@ -195,7 +195,7 @@ export default function PublishModals(props: {
 
                             <label htmlFor="EditPassword">Edit Password</label>
 
-                            <div className="tooltip-wrapper mobile-max flex justify-center">
+                            <div className="tooltip-wrapper mobile\:max flex justify-center">
                                 <input
                                     type="text"
                                     name={"EditPassword"}
@@ -355,20 +355,20 @@ export default function PublishModals(props: {
                                         gap: "1rem",
                                     }}
                                 >
-                                    <form method="dialog" class={"mobile-max"}>
-                                        <button class={"green round mobile-max"}>
+                                    <form method="dialog" class={"mobile:max"}>
+                                        <button class={"green round mobile:max"}>
                                             Cancel
                                         </button>
 
                                         <div style={{ margin: "0.25rem 0" }}>
-                                            <hr class={"mobile-only"} />
+                                            <hr class={"device:mobile"} />
                                         </div>
                                     </form>
 
                                     <form
                                         method="POST"
                                         action={props.Endpoints.delete}
-                                        class={"mobile-max flex flex-wrap g-4"}
+                                        class={"mobile:max flex flex-wrap g-4"}
                                         style={{
                                             justifyContent: "right",
                                             maxWidth: "100%",
@@ -383,7 +383,7 @@ export default function PublishModals(props: {
                                             id={"DEL_EditPassword"}
                                             name={"EditPassword"}
                                             autoComplete={"off"}
-                                            class={"round mobile-max"}
+                                            class={"round mobile:max"}
                                         />
 
                                         <input
@@ -395,7 +395,7 @@ export default function PublishModals(props: {
 
                                         <button
                                             class={
-                                                "red round mobile-max modal:entry:button.Loading"
+                                                "red round mobile:max modal:entry:button.Loading"
                                             }
                                         >
                                             Delete

@@ -1,6 +1,6 @@
 import Expandable from "../../builder/components/Expandable";
 import DateOptions from "../../form/DateOptions";
-import Modal from "./Modal";
+import { Modal } from "fusion";
 
 /**
  * @function ExtraPasteOptions

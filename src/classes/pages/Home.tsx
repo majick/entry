@@ -2,8 +2,8 @@ import { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
 import DecryptionForm from "./components/form/DecryptionForm";
+import { Modal } from "fusion";
 import Footer from "./components/site/Footer";
-import Modal from "./components/site/modals/Modal";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import type { Paste } from "../db/objects/Paste";
@@ -519,7 +519,7 @@ export default class Home implements Endpoint {
                                                 justifyContent: "flex-start",
                                             }}
                                             class={
-                                                "mobile:justify-center mobile-max"
+                                                "mobile:justify-center mobile:max"
                                             }
                                         >
                                             <button
@@ -755,7 +755,7 @@ export default class Home implements Endpoint {
                                                     gridTemplateColumns:
                                                         "repeat(3, 1fr)",
                                                 }}
-                                                class={"mobile-flex"}
+                                                class={"mobile:flex"}
                                             >
                                                 <input
                                                     type="hidden"
@@ -771,7 +771,7 @@ export default class Home implements Endpoint {
                                                     required
                                                 />
 
-                                                <div className="tooltip-wrapper mobile-max flex justify-center">
+                                                <div className="tooltip-wrapper mobile\:max flex justify-center">
                                                     <input
                                                         style={{
                                                             width: "100%",
@@ -811,7 +811,7 @@ export default class Home implements Endpoint {
                                                     // if we don't provide a new Custom URL, this will be used instead so we don't give up our url
                                                 }
                                                 <input
-                                                    class={"round mobile-max"}
+                                                    class={"round mobile:max"}
                                                     type="text"
                                                     placeholder={
                                                         "Change edit code - optional"
@@ -827,7 +827,7 @@ export default class Home implements Endpoint {
                                                 />
 
                                                 <input
-                                                    class={"round mobile-max"}
+                                                    class={"round mobile:max"}
                                                     type="text"
                                                     placeholder={
                                                         "Change Custom URL - optional"
@@ -1002,20 +1002,20 @@ export default class Home implements Endpoint {
                                     gap: "1rem",
                                 }}
                             >
-                                <form method="dialog" class={"mobile-max"}>
-                                    <button class={"green mobile-max round"}>
+                                <form method="dialog" class={"mobile:max"}>
+                                    <button class={"green mobile:max round"}>
                                         Cancel
                                     </button>
 
                                     <div style={{ margin: "0.25rem 0" }}>
-                                        <hr class={"mobile-only"} />
+                                        <hr class={"device:mobile"} />
                                     </div>
                                 </form>
 
                                 <form
                                     method="POST"
                                     action={"/api/delete"}
-                                    class={"mobile-max"}
+                                    class={"mobile:max"}
                                     style={{
                                         display: "flex",
                                         flexWrap: "wrap",
@@ -1033,7 +1033,7 @@ export default class Home implements Endpoint {
                                         id={"DEL_EditPassword"}
                                         name={"EditPassword"}
                                         autoComplete={"off"}
-                                        class={"round mobile-max"}
+                                        class={"round mobile:max"}
                                     />
 
                                     <input
@@ -1043,7 +1043,7 @@ export default class Home implements Endpoint {
                                         value={paste!.CustomURL}
                                     />
 
-                                    <button class={"red round mobile-max"}>
+                                    <button class={"red round mobile:max"}>
                                         Delete
                                     </button>
                                 </form>

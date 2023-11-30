@@ -399,11 +399,28 @@ export class HashList implements Endpoint {
             url.searchParams.get("t") !== "dist" ? HashStore : DistHashStore;
 
         // fill hashes for all files (if they don't already exist)
-        for (const file of fs.readdirSync(dir)) {
-            if (Store[file]) continue;
-            const hash = CreateHash(await Bun.file(path.resolve(dir, file)).text());
-            if (!Store[file]) Store[file] = hash;
+        async function ReadDir(dir: string) {
+            for (let file of fs.readdirSync(dir)) {
+                if (Store[file]) continue;
+
+                // check if file is a directory
+                if (fs.lstatSync(path.resolve(dir, file)).isDirectory()) {
+                    await ReadDir(path.resolve(dir, file));
+                    continue;
+                }
+
+                // ...read hash
+                const hash = CreateHash(
+                    await Bun.file(path.resolve(dir, file)).text()
+                );
+
+                // ...store hash
+                if (dir.endsWith("components")) file = `components/${file}`;
+                if (!Store[file]) Store[file] = hash;
+            }
         }
+
+        ReadDir(dir);
 
         // return
         return new Response(JSON.stringify(Store, undefined, 4), {

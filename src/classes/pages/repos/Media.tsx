@@ -18,6 +18,8 @@ import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
 import { ReposNav } from "./Repos";
 
+import { Card, CardWithHeader } from "fusion";
+
 /**
  * @export
  * @class ViewPasteMedia
@@ -65,54 +67,49 @@ export class ViewPasteMedia implements Endpoint {
                         <main class={"small flex flex-column g-4"}>
                             <ReposNav name={name} current="Media" />
 
-                            <div
-                                className="card round border"
-                                style={{
-                                    width: "100%",
-                                    borderRadius: "0.4rem",
-                                }}
-                            >
-                                <div
+                            <Card round={true} border={true}>
+                                <Card
+                                    border={true}
+                                    round={true}
+                                    secondary={true}
                                     class={
-                                        "flex g-4 align-center justify-space-between"
+                                        "flex mobile:flex-column justify-center align-center g-4"
                                     }
                                 >
-                                    <div className="card border round secondary flex mobile\:flex-column justify-center align-center g-4">
-                                        <button
-                                            id={"entry:button.UploadFile"}
-                                            className="border round full"
+                                    <button
+                                        id={"entry:button.UploadFile"}
+                                        className="border round full"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Upload Symbol"}
                                         >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Upload Symbol"}
-                                            >
-                                                <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
-                                                <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
-                                            </svg>
-                                            Upload File
-                                        </button>
+                                            <path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path>
+                                            <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
+                                        </svg>
+                                        Upload File
+                                    </button>
 
-                                        <a
-                                            href={"javascript:window.history.back()"}
-                                            class={"button border round full"}
+                                    <a
+                                        href={"javascript:window.history.back()"}
+                                        class={"button border round full"}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Undo Symbol"}
+                                            style={{ userSelect: "none" }}
                                         >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Undo Symbol"}
-                                                style={{ userSelect: "none" }}
-                                            >
-                                                <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
-                                            </svg>
-                                            Back
-                                        </a>
-                                    </div>
-                                </div>
+                                            <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
+                                        </svg>
+                                        Back
+                                    </a>
+                                </Card>
 
                                 <hr />
 
@@ -188,7 +185,7 @@ export class ViewPasteMedia implements Endpoint {
                                             ))}
                                     </tbody>
                                 </table>
-                            </div>
+                            </Card>
 
                             <Modal
                                 modalid="entry:modal.UploadFile"
@@ -416,63 +413,59 @@ export class InspectMedia implements Endpoint {
                                 {/* edit mode stuff */}
                                 {!url.searchParams.get("EditPassword") &&
                                     EditMode && (
-                                        <div className="card border round NoPadding">
-                                            <div className="card round header">
-                                                <b>Enter Edit Mode</b>
-                                            </div>
+                                        <CardWithHeader
+                                            round={true}
+                                            border={true}
+                                            header={<b>Enter Edit Mode</b>}
+                                        >
+                                            <div className="flex justify-center">
+                                                <form
+                                                    class={
+                                                        "flex g-4 justify-center flex-wrap"
+                                                    }
+                                                >
+                                                    <input
+                                                        class={"round mobile:max"}
+                                                        type="text"
+                                                        placeholder={"Edit code"}
+                                                        maxLength={
+                                                            EntryDB.MaxPasswordLength
+                                                        }
+                                                        minLength={
+                                                            EntryDB.MinPasswordLength
+                                                        }
+                                                        name={"EditPassword"}
+                                                        id={"EditPassword"}
+                                                        required
+                                                    />
 
-                                            <div className="card round has-header">
-                                                <div className="flex justify-center">
-                                                    <form
+                                                    <input
+                                                        type="hidden"
+                                                        name="edit"
+                                                        value={"true"}
+                                                        required
+                                                    />
+
+                                                    <button
                                                         class={
-                                                            "flex g-4 justify-center flex-wrap"
+                                                            "round green mobile:max"
                                                         }
                                                     >
-                                                        <input
-                                                            class={
-                                                                "round mobile-max"
-                                                            }
-                                                            type="text"
-                                                            placeholder={"Edit code"}
-                                                            maxLength={
-                                                                EntryDB.MaxPasswordLength
-                                                            }
-                                                            minLength={
-                                                                EntryDB.MinPasswordLength
-                                                            }
-                                                            name={"EditPassword"}
-                                                            id={"EditPassword"}
-                                                            required
-                                                        />
-
-                                                        <input
-                                                            type="hidden"
-                                                            name="edit"
-                                                            value={"true"}
-                                                            required
-                                                        />
-
-                                                        <button
-                                                            class={
-                                                                "round green mobile-max"
-                                                            }
-                                                        >
-                                                            Continue
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                                        Continue
+                                                    </button>
+                                                </form>
                                             </div>
-                                        </div>
+                                        </CardWithHeader>
                                     )}
 
                                 {url.searchParams.get("EditPassword") &&
                                     EditMode && (
-                                        <div class={"card border round NoPadding"}>
-                                            <div className="card round header">
-                                                <b>Actions</b>
-                                            </div>
-
-                                            <div className="card round has-header flex flex-wrap g-4">
+                                        <CardWithHeader
+                                            round={true}
+                                            border={true}
+                                            header={<b>Actions</b>}
+                                        >
+                                            <div className="flex flex-wrap g-4">
                                                 <form
                                                     action="/api/media/delete"
                                                     encType={"multipart/form-data"}
@@ -508,16 +501,16 @@ export class InspectMedia implements Endpoint {
                                                     </button>
                                                 </form>
                                             </div>
-                                        </div>
+                                        </CardWithHeader>
                                     )}
 
                                 {/* normal stuff */}
-                                <div class={"card border round NoPadding"}>
-                                    <div className="card round header">
-                                        <b>Preview</b>
-                                    </div>
-
-                                    <div className="card round has-header flex justify-center">
+                                <CardWithHeader
+                                    round={true}
+                                    border={true}
+                                    header={<b>Preview</b>}
+                                >
+                                    <div className="flex justify-center">
                                         <img
                                             src={`/api/media/file/${name}/${FileName}`}
                                             alt={FileName}
@@ -528,45 +521,39 @@ export class InspectMedia implements Endpoint {
                                             }}
                                         />
                                     </div>
-                                </div>
+                                </CardWithHeader>
 
-                                <div class={"card border round NoPadding"}>
-                                    <div className="card round header">
-                                        <b>Information</b>
-                                    </div>
+                                <CardWithHeader
+                                    round={true}
+                                    border={true}
+                                    header={<b>Information</b>}
+                                >
+                                    <ul style={{ margin: 0 }}>
+                                        <li>
+                                            <b>File Size</b>: {File[2].size} bytes
+                                        </li>
 
-                                    <div className="card round has-header">
-                                        <ul style={{ margin: 0 }}>
-                                            <li>
-                                                <b>File Size</b>: {File[2].size}{" "}
-                                                bytes
-                                            </li>
+                                        <li>
+                                            <b>File Name</b>: {FileName}
+                                        </li>
 
-                                            <li>
-                                                <b>File Name</b>: {FileName}
-                                            </li>
+                                        <li>
+                                            <b>Link</b>:{" "}
+                                            <a
+                                                href={url.href.replace(
+                                                    "http:",
+                                                    "https:"
+                                                )}
+                                            >
+                                                {url.href.replace("http:", "https:")}
+                                            </a>
+                                        </li>
 
-                                            <li>
-                                                <b>Link</b>:{" "}
-                                                <a
-                                                    href={url.href.replace(
-                                                        "http:",
-                                                        "https:"
-                                                    )}
-                                                >
-                                                    {url.href.replace(
-                                                        "http:",
-                                                        "https:"
-                                                    )}
-                                                </a>
-                                            </li>
-
-                                            <li>
-                                                <b>Tags</b>: N/A
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                        <li>
+                                            <b>Tags</b>: N/A
+                                        </li>
+                                    </ul>
+                                </CardWithHeader>
                             </div>
                         </main>
                     </div>

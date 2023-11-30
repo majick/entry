@@ -20,13 +20,19 @@ import StaticCode from "../components/site/blocks/StaticCode";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
 
+import { Card, CardWithHeader } from "fusion";
+
+// ...
 import { createTwoFilesPatch } from "diff";
 
 // nav component
 export function ReposNav(props: { name: string; current: string }) {
     return (
-        <div
-            class="card secondary border round flex g-4 mobile\:flex-column"
+        <Card
+            round={true}
+            border={true}
+            secondary={true}
+            class="flex g-4 mobile\:flex-column"
             style={{ userSelect: "none" }}
         >
             <a
@@ -110,7 +116,7 @@ export function ReposNav(props: { name: string; current: string }) {
                     Settings
                 </a>
             )}
-        </div>
+        </Card>
     );
 }
 
@@ -184,12 +190,12 @@ export class RepoView implements Endpoint {
                         <main className="small flex flex-column g-4">
                             <ReposNav name={name} current="Home" />
 
-                            <div className="card border round NoPadding">
-                                <div className="card round header">
-                                    <b>Paste</b>
-                                </div>
-
-                                <div className="card round has-header flex justify-center align-center flex-wrap g-4">
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Paste</b>}
+                            >
+                                <div className="flex justify-center align-center flex-wrap g-4">
                                     {result.Content.includes(
                                         "<% enable template %>"
                                     ) && (
@@ -281,14 +287,14 @@ export class RepoView implements Endpoint {
                                         </a>
                                     )}
                                 </div>
-                            </div>
+                            </CardWithHeader>
 
-                            <div className="card border round NoPadding">
-                                <div className="card round header">
-                                    <b>Export</b>
-                                </div>
-
-                                <div className="card round has-header flex g-4 flex-wrap justify-center">
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Export</b>}
+                            >
+                                <div className="flex g-4 flex-wrap justify-center">
                                     <a
                                         class={"button round"}
                                         target={"_blank"}
@@ -339,15 +345,15 @@ export class RepoView implements Endpoint {
                                         Document
                                     </a>
                                 </div>
-                            </div>
+                            </CardWithHeader>
 
-                            <div className="card border round NoPadding">
-                                <div className="card round header">
-                                    <b>File List</b>
-                                </div>
-
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>File List</b>}
+                            >
                                 <div
-                                    className="card round has-header flex flex-column g-4"
+                                    className="flex flex-column g-4"
                                     style={{
                                         userSelect: "none",
                                     }}
@@ -412,58 +418,53 @@ export class RepoView implements Endpoint {
                                         </>
                                     )}
                                 </div>
-                            </div>
+                            </CardWithHeader>
 
-                            <div class={"card border round NoPadding"}>
-                                <div className="card round header">
-                                    <b>Information</b>
-                                </div>
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Information</b>}
+                            >
+                                <ul style={{ margin: 0 }}>
+                                    <li>
+                                        <b>Owner</b>:{" "}
+                                        <a href={`/r/${result.Metadata!.Owner}`}>
+                                            {result.Metadata!.Owner}
+                                        </a>
+                                    </li>
 
-                                <div className="card round has-header">
-                                    <ul style={{ margin: 0 }}>
+                                    <li>
+                                        <b>Comments</b>:{" "}
+                                        <a href={`/c/${name}`}>{result.Comments}</a>
+                                    </li>
+
+                                    <li>
+                                        <b>Type</b>:{" "}
+                                        {BuilderPaste ? "builder" : "markdown"}
+                                    </li>
+
+                                    {RevisionNumber !== 0 && (
                                         <li>
-                                            <b>Owner</b>:{" "}
-                                            <a href={`/r/${result.Metadata!.Owner}`}>
-                                                {result.Metadata!.Owner}
-                                            </a>
+                                            <b>Revision</b>: {RevisionNumber}
                                         </li>
-
-                                        <li>
-                                            <b>Comments</b>:{" "}
-                                            <a href={`/c/${name}`}>
-                                                {result.Comments}
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <b>Type</b>:{" "}
-                                            {BuilderPaste ? "builder" : "markdown"}
-                                        </li>
-
-                                        {RevisionNumber !== 0 && (
-                                            <li>
-                                                <b>Revision</b>: {RevisionNumber}
-                                            </li>
-                                        )}
-                                    </ul>
-                                </div>
-                            </div>
+                                    )}
+                                </ul>
+                            </CardWithHeader>
 
                             {!BuilderPaste && (
-                                <div className="card border round NoPadding">
-                                    <div className="card round header">
-                                        <b>Rendered</b>
-                                    </div>
-
+                                <CardWithHeader
+                                    round={true}
+                                    border={true}
+                                    header={<b>Rendered</b>}
+                                >
                                     <div
-                                        className="card round has-header"
                                         dangerouslySetInnerHTML={{
                                             __html: await ParseMarkdown(
                                                 result.Content
                                             ),
                                         }}
                                     />
-                                </div>
+                                </CardWithHeader>
                             )}
                         </main>
                     </div>
@@ -539,13 +540,13 @@ export class RevisionsList implements Endpoint {
                         <main className="small flex flex-column g-4">
                             <ReposNav name={name} current="Versions" />
 
-                            <div className="card border round NoPadding">
-                                <div className="card round header">
-                                    <b>Revisions</b>
-                                </div>
-
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Revisions</b>}
+                            >
                                 <div
-                                    className="card round has-header flex flex-column g-4"
+                                    className="flex flex-column g-4"
                                     style={{
                                         userSelect: "none",
                                     }}
@@ -621,7 +622,7 @@ export class RevisionsList implements Endpoint {
                                         </a>
                                     ))}
                                 </div>
-                            </div>
+                            </CardWithHeader>
                         </main>
                     </div>
 

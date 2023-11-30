@@ -139,6 +139,7 @@ if (!NeedsExecutableUpdate) {
                 }
 
                 // download file
+                fs.mkdirSync(path.dirname(FilePath), { recursive: true }); // make sure directory exists!
                 await Bun.write(
                     FilePath,
                     await fetch(`https://sentrytwo.com/${file[0]}`)

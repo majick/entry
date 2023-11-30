@@ -1,7 +1,7 @@
 {
   "name": "entry",
   "description": "Open Markdown Pastebin",
-  "version": "1.1.13-rev-5",
+  "version": "1.1.14",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -27,7 +27,8 @@
     "@lezer/highlight": "^1.1.6",
     "diff": "^5.1.0",
     "highlight.js": "^11.8.0",
-    "honeybee": "https://codeberg.org/api/packages/hkau/npm/honeybee/-/1.0.10/honeybee-1.0.10.tgz",
+    "fusion": "https://codeberg.org/api/packages/hkau/npm/fusion/-/1.0.0/fusion-1.0.0.tgz",
+    "honeybee": "https://codeberg.org/api/packages/hkau/npm/honeybee/-/1.0.11/honeybee-1.0.11.tgz",
     "marked": "^5.1.0",
     "pg": "^8.11.3",
     "smol-toml": "^1.1.3"

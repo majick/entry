@@ -1,5 +1,5 @@
 import Expandable from "../../builder/components/Expandable";
-import Modal from "./Modal";
+import { Modal } from "fusion";
 
 /**
  * @function LoadingModal

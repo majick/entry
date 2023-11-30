@@ -6,7 +6,9 @@
 
 import BaseParser from "../../db/helpers/BaseParser";
 import { render } from "preact";
+
 import Checkbox from "./form/Checkbox";
+import { Card } from "fusion";
 
 /**
  * @function Editor
@@ -63,12 +65,7 @@ export function Editor(_metadata: string, id: string): any {
 
             if (ValueType !== "boolean") {
                 Inputs.push(
-                    <div
-                        className="card flex justify-space-between align-center flex-wrap g-4"
-                        style={{
-                            background: "var(--background-surface)",
-                        }}
-                    >
+                    <Card class="flex justify-space-between align-center flex-wrap g-4">
                         <label htmlFor={data[0]}>
                             <b>
                                 {(nested || ["root"]).join(".")}.{data[0]}
@@ -108,16 +105,11 @@ export function Editor(_metadata: string, id: string): any {
                                 maxWidth: "100%",
                             }}
                         />
-                    </div>
+                    </Card>
                 );
             } else {
                 Inputs.push(
-                    <div
-                        className="card flex justify-space-between align-center flex-wrap g-4"
-                        style={{
-                            background: "var(--background-surface)",
-                        }}
-                    >
+                    <Card class="flex justify-space-between align-center flex-wrap g-4">
                         <label htmlFor={data[0]}>
                             <b>
                                 {(nested || ["root"]).join(".")}.{data[0]}
@@ -152,7 +144,7 @@ export function Editor(_metadata: string, id: string): any {
                                 UpdateMetadata();
                             }}
                         />
-                    </div>
+                    </Card>
                 );
             }
         }
@@ -165,15 +157,10 @@ export function Editor(_metadata: string, id: string): any {
     // render and return
     return render(
         <div class={"flex flex-column g-4"}>
-            <div
-                className="card flex justify-space-between align-center flex-wrap g-4"
-                style={{
-                    background: "var(--background-surface)",
-                }}
-            >
+            <Card class="flex justify-space-between align-center flex-wrap g-4">
                 <b>Key</b>
                 <span>Value</span>
-            </div>
+            </Card>
 
             {Inputs}
         </div>,
@@ -233,9 +220,14 @@ export function ClientEditor(_metadata: string, id: string): any {
             // push to inputs
             // these should all just be true or false inputs
             Inputs.push(
-                <div className="card secondary border flex justify-space-between align-center flex-wrap g-4 round">
+                <Card
+                    round={true}
+                    border={true}
+                    secondary={true}
+                    class="flex justify-space-between align-center flex-wrap g-4"
+                >
                     <div
-                        className="flex flex-column g-4 mobile-max"
+                        className="flex flex-column g-4 mobile\:max"
                         style={{ width: "45%" }}
                     >
                         <label
@@ -313,7 +305,7 @@ export function ClientEditor(_metadata: string, id: string): any {
                             }}
                         />
                     )}
-                </div>
+                </Card>
             );
         }
     }

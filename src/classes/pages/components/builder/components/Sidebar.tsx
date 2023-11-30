@@ -485,7 +485,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                 </div>
 
                                 <button
-                                    className="green mobile-only"
+                                    className="green device\:mobile"
                                     onClick={() => SetSidebar(false)}
                                 >
                                     Show Page

@@ -61,7 +61,7 @@ export default function UserSettings(id: string): any {
                         <select
                             name={key}
                             id={key}
-                            class={"mobile-max round"}
+                            class={"mobile:max round"}
                             style={{
                                 width: "20rem",
                             }}

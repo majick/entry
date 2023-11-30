@@ -10,9 +10,9 @@ import parser from "./parser";
 
 import { render, hydrate } from "preact";
 
-import Modal from "../site/modals/Modal";
-import Sidebar from "./components/Sidebar";
 import PublishModals from "../site/modals/PublishModals";
+import { Modal } from "fusion";
+import Sidebar from "./components/Sidebar";
 import Window from "./components/Window";
 
 // render
