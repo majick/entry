@@ -29,7 +29,7 @@ import parser from "../parser";
 import NodeListing from "./NodeListing";
 import Expandable from "./Expandable";
 import HTMLEditor from "./HTMLEditor";
-import StaticCode from "../../site/blocks/StaticCode";
+import { StaticCode } from "fusion";
 let CurrentEditor: any;
 
 /**

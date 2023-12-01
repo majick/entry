@@ -255,7 +255,8 @@ export function ParseMarkdownSync(
             else if (_class === "enable" || _class === "disable" || _class === "tag")
                 result = "";
             // class block
-            else if (_class === "class") result = `<span class="${attributes[0]}">`;
+            else if (_class === "class")
+                result = `<span class="${attributes.join(" ")}">`;
             // id block
             else if (_class === "id") result = `<span id="${attributes[0]}">`;
             // include block

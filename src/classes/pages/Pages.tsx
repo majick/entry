@@ -2827,7 +2827,7 @@ import { contentType } from "mime-types";
 
 import LoadingModal from "./components/site/modals/Loading";
 import Expandable from "./components/builder/components/Expandable";
-import StaticCode from "./components/site/blocks/StaticCode";
+import { StaticCode } from "fusion";
 
 // default export
 export default {

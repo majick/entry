@@ -16,11 +16,10 @@ import EntryDB from "../../db/EntryDB";
 // import components
 import NodeListing from "../components/builder/components/NodeListing";
 import { BuilderDocument } from "../components/builder/schema";
-import StaticCode from "../components/site/blocks/StaticCode";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
 
-import { Card, CardWithHeader } from "fusion";
+import { Card, CardWithHeader, StaticCode } from "fusion";
 
 // ...
 import { createTwoFilesPatch } from "diff";

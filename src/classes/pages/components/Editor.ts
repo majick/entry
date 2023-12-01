@@ -275,6 +275,18 @@ function BasicCompletion(context: CompletionContext): any {
                 apply: `<% enable template %>`,
                 detail: "Extras",
             },
+            {
+                label: "add class",
+                type: "function",
+                apply: `<% class class1 class2 %> content <% close class %>`,
+                detail: "Extras",
+            },
+            {
+                label: "add id",
+                type: "function",
+                apply: `<% id id1 %> content <% close id %>`,
+                detail: "Extras",
+            },
             // animations
             {
                 label: "fade in animation",
