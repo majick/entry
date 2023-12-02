@@ -281,6 +281,9 @@ export default class EntryDB {
         // runs every day, checks sessions to see if it has been more than two months
         // since they were created. deletes session if it's expired
         const CheckSessions = async () => {
+            let query = `DELETE FROM "Logs" WHERE "Type" = 'session'`;
+
+            // ...build query
             for (const log of (
                 await EntryDB.Logs.QueryLogs("\"Type\" = 'session'")
             )[2]) {
@@ -294,9 +297,20 @@ export default class EntryDB {
                 // if difference is more than two months, delete log (invalidating the session)
                 if (Difference > 1000 * 60 * 60 * 24 * 64) {
                     console.log(`Removing session "${log.ID}" (maximum age)`);
-                    EntryDB.Logs.DeleteLog(log.ID);
+                    query += ` AND "ID" = '${log.ID}'`;
                 }
             }
+
+            // ...run query
+            await (EntryDB.config.pg && EntryDB.config.pg.logdb
+                ? SQL.PostgresQueryOBJ
+                : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: EntryDB.Logs.db,
+                query: query,
+                use: "Prepare",
+                all: true,
+            });
         };
 
         setInterval(CheckSessions, 1000 * 60 * 60 * 24); // run every day
