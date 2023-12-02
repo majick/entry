@@ -210,6 +210,9 @@ export default class EntryDB {
         // get config
         const config = await Bun.file(EntryDB.ConfigLocation).json();
 
+        // make sure config has a log entry
+        if (!config.log) config.log = { clear_on_start: true, events: [] };
+
         // store config
         EntryDB.config = config;
 
@@ -259,7 +262,7 @@ export default class EntryDB {
      * @memberof EntryDB
      */
     public static async InitLogs(): Promise<void> {
-        if (!EntryDB.config.log || EntryDB.Logs) return;
+        // if (!EntryDB.config.log || EntryDB.Logs) return; // LOGS ARE NOW REQUIRED
 
         // init logs
         EntryDB.Logs = new LogDB();

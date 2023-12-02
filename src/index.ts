@@ -112,7 +112,7 @@ export type Config = {
             max_size: number; // default 52428800 (50 MB)
         };
     };
-    log?: {
+    log: {
         clear_on_start: boolean;
         events: LogEvent[];
     };
@@ -197,6 +197,8 @@ if (!(await EntryDB.GetConfig())) {
     config.app = {
         auto_tag: false,
     };
+
+    config.log = { clear_on_start: true, events: [] };
 
     // save file
     await Bun.write(EntryDB.ConfigLocation, JSON.stringify(config, undefined, 4));
