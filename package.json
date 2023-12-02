@@ -27,7 +27,7 @@
     "@lezer/highlight": "^1.1.6",
     "diff": "^5.1.0",
     "highlight.js": "^11.8.0",
-    "fusion": "https://codeberg.org/api/packages/hkau/npm/fusion/-/1.0.3/fusion-1.0.3.tgz",
+    "fusion": "https://codeberg.org/api/packages/hkau/npm/fusion/-/1.0.6/fusion-1.0.6.tgz",
     "honeybee": "https://codeberg.org/api/packages/hkau/npm/honeybee/-/1.0.11/honeybee-1.0.11.tgz",
     "marked": "^5.1.0",
     "pg": "^8.11.3",

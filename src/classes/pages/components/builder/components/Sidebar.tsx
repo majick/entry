@@ -26,10 +26,10 @@ import BaseParser, { TOML } from "../../../../db/helpers/BaseParser";
 import { Node } from "../schema";
 import parser from "../parser";
 
+import { StaticCode, Expandable } from "fusion";
 import NodeListing from "./NodeListing";
-import Expandable from "./Expandable";
 import HTMLEditor from "./HTMLEditor";
-import { StaticCode } from "fusion";
+
 let CurrentEditor: any;
 
 /**

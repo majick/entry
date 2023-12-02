@@ -1148,13 +1148,7 @@ export class PasteDocView implements Endpoint {
                                 />
                             </details>
 
-                            <div
-                                class={"tab-container editor-tab page-content"}
-                                style={{
-                                    minHeight: "100vh",
-                                    maxHeight: "unset",
-                                }}
-                            >
+                            <div class={"tab-container editor-tab page-content"}>
                                 <div
                                     id="editor-tab-preview"
                                     class="editor-tab"
@@ -2826,8 +2820,7 @@ import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
 
 import LoadingModal from "./components/site/modals/Loading";
-import Expandable from "./components/builder/components/Expandable";
-import { StaticCode } from "fusion";
+import { StaticCode, Expandable } from "fusion";
 
 // default export
 export default {
