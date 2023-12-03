@@ -1004,10 +1004,10 @@ export class GetPasteFromURL implements Endpoint {
                             result.Metadata && result.Metadata.Description
                                 ? result.Metadata.Description
                                 : // if length of content is greater than 150, cut it at 150 characters and add "..."
-                                // otherwise, we can just show the full content result.Content.length > 150
-                                result.Content.length > 150
-                                ? `${result.Content.substring(0, 149)}...`
-                                : result.Content
+                                  // otherwise, we can just show the full content result.Content.length > 150
+                                  result.Content.length > 150
+                                  ? `${result.Content.substring(0, 149)}...`
+                                  : result.Content
                         }
                         icon={
                             result.Metadata && result.Metadata.Favicon
@@ -1779,8 +1779,8 @@ export class PasteCommentsPage implements Endpoint {
                                         {(result.Comments || 0) > 1
                                             ? "s"
                                             : (result.Comments || 0) === 1
-                                            ? ""
-                                            : "s"}
+                                              ? ""
+                                              : "s"}
                                         , posting as{" "}
                                         {(PostingAs && (
                                             <>
@@ -1947,9 +1947,9 @@ export class PasteCommentsPage implements Endpoint {
                                                                                 result.CustomURL
                                                                                     ? "var(--yellow)"
                                                                                     : PostingAs ===
-                                                                                      comment.Associated
-                                                                                    ? "var(--green)"
-                                                                                    : "inherit",
+                                                                                        comment.Associated
+                                                                                      ? "var(--green)"
+                                                                                      : "inherit",
                                                                         }}
                                                                         title={
                                                                             PostingAs ===
@@ -2159,8 +2159,8 @@ export class PasteCommentsPage implements Endpoint {
                                                         {comment.Comments! > 1
                                                             ? "ies"
                                                             : comment.Comments === 1
-                                                            ? "y"
-                                                            : "ies"}
+                                                              ? "y"
+                                                              : "ies"}
                                                     </a>
                                                 </div>
                                             </div>

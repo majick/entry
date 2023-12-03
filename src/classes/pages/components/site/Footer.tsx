@@ -7,6 +7,8 @@ import { HoneybeeConfig } from "honeybee";
 import pack from "../../../../../package.json";
 import LoadingModal from "./modals/Loading";
 
+import { TOML } from "../../../db/helpers/BaseParser";
+
 // plugin footer load
 const FooterExtras: string[] = [];
 
@@ -198,6 +200,24 @@ export default function Footer(props: {
                 type={"module"}
                 dangerouslySetInnerHTML={{
                     __html: `import Prefetch from "/Prefetch.js"; new Prefetch({});`,
+                }}
+            />
+
+            {/* wsas */}
+            <script
+                data-state="save"
+                type={"module"}
+                dangerouslySetInnerHTML={{
+                    __html: `import WSAS_Client from "/WSAS_Client.js"; window.wsas = new WSAS_Client(
+                        \`\${window.location.protocol === "http:" ? "ws:" : "wss:"}//\${window.location.host}/api/wsas\`
+                    );
+                    
+                    // subscribe
+                    window.wsas.fetch({
+                        method: "send",
+                        path: "api/subscribe",
+                        body: JSON.stringify({ channel: window.location.pathname }),
+                    })`,
                 }}
             />
 

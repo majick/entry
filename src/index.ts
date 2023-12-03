@@ -214,6 +214,7 @@ if (!(await EntryDB.GetConfig())) {
 
 // create server
 import Honeybee, { HoneybeeConfig } from "honeybee";
+import wsas from "wsas/src";
 
 // ...import endpoints
 import _404, { _404Page } from "./classes/pages/components/404";
@@ -243,6 +244,15 @@ if (EntryDB.config.plugin_file) {
 
 await InitFooterExtras(plugins); // load footer pages to the footer
 
+// ...create AssetStreamer
+export const AssetStreamer = new wsas({
+    asset_directory: process.env.IMPORT_DIR!,
+    methods: ["fetch"],
+});
+
+import CreateSocketRoutes from "./classes/pages/api/Socket";
+CreateSocketRoutes(AssetStreamer);
+
 // ...create config
 export const ServerConfig: HoneybeeConfig = {
     Port: EntryDB.config.port || 8080,
@@ -257,6 +267,8 @@ export const ServerConfig: HoneybeeConfig = {
         "/admin/login/": { Page: Admin.Login },
 
         // GET api
+
+        "/api/wsas": { Page: API.WSAS },
 
         // ...pastes
         "/api/get": { Type: "begins", Page: API.GetPasteRecord },
@@ -374,6 +386,15 @@ export const ServerConfig: HoneybeeConfig = {
             Method: "POST",
             Type: "begins",
             Page: Pages.GetPasteFromURL,
+        },
+    },
+    WebSocket: {
+        message: async (sock, message) => {
+            // resolve
+            const response = await AssetStreamer.resolve(sock, message);
+
+            // send response
+            sock.sendBinary(Buffer.from(response), true);
         },
     },
 };

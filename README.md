@@ -46,7 +46,7 @@ You can configure a PostgreSQL database to be used for the main paste database t
 }
 ```
 
-This is recommended over the default SQLite database, as it provides much faster write speeds at the cost of memory usage. The logs database will still use SQLite!
+This is recommended over the default SQLite database, as it provides much faster write speeds at the cost of memory usage. The logs database will still use SQLite unless you set `logdb` to `true`.
 
 ## Usage
 
