@@ -40,9 +40,9 @@ import { AuthModals } from "./components/site/modals/AuthModals";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 import BaseParser from "../db/helpers/BaseParser";
+import { ReposNav } from "./repos/Repos";
 import { Card, Modal } from "fusion";
 import { ServerConfig } from "../..";
-import { ReposNav } from "./repos/Repos";
 
 // ...
 

@@ -304,16 +304,17 @@ export default class EntryDB {
                 }
             }
 
-            // ...run query
-            await (EntryDB.config.pg && EntryDB.config.pg.logdb
-                ? SQL.PostgresQueryOBJ
-                : SQL.QueryOBJ)({
-                // @ts-ignore
-                db: EntryDB.Logs.db,
-                query: query,
-                use: "Prepare",
-                all: true,
-            });
+            if (query.includes("AND"))
+                // ...run query
+                await (EntryDB.config.pg && EntryDB.config.pg.logdb
+                    ? SQL.PostgresQueryOBJ
+                    : SQL.QueryOBJ)({
+                    // @ts-ignore
+                    db: EntryDB.Logs.db,
+                    query,
+                    use: "Prepare",
+                    all: true,
+                });
         };
 
         setInterval(CheckSessions, 1000 * 60 * 60 * 24); // run every day

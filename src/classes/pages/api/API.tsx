@@ -507,43 +507,7 @@ export class CreatePaste implements Endpoint {
         const Association = await GetAssociation(request, null);
 
         // load associated
-        if (!Association[1].startsWith("associated") && !Association[0]) {
-            // try to set association
-            if (
-                // can't (shouldn't) set association with a comment
-                !body.CommentOn &&
-                !body.ReportOn &&
-                // make sure auto_tag is enabled
-                (!EntryDB.config.app || EntryDB.config.app.auto_tag !== false)
-            ) {
-                // update association with this paste
-                const UpdateResult = await GetAssociation(
-                    request,
-                    _ip,
-                    true,
-                    body.CustomURL
-                );
-
-                if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
-
-                // update curiosity
-                if (EntryDB.config.app && EntryDB.config.app.curiosity)
-                    await fetch(
-                        `${EntryDB.config.app.curiosity.host}/api/profiles/create?c=json`,
-                        {
-                            method: "POST",
-                            body: JSON.stringify({
-                                APIKey: EntryDB.config.app.curiosity.api_key,
-                                ID: body.CustomURL,
-                                Type: "entry_paste_user",
-                            }),
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                        }
-                    );
-            }
-        } else if (!Association[1].startsWith("associated=refresh"))
+        if (!Association[1].startsWith("associated=refresh"))
             body.Associated = Association[1];
 
         // if servers requires an association, make sure we have one
@@ -563,13 +527,48 @@ export class CreatePaste implements Endpoint {
             });
 
         // create paste
-
         const result = await db.CreatePaste(body);
 
         // add CommentOn and ReportOn if content starts with _builder:
         if (result[0] === true && result[2].Content.startsWith("_builder:")) {
             body.CommentOn = "";
             body.ReportOn = "";
+        }
+
+        // add association to session
+        if (
+            // can't (shouldn't) set association with a comment
+            !body.CommentOn &&
+            !body.ReportOn &&
+            // make sure auto_tag is enabled
+            (!EntryDB.config.app || EntryDB.config.app.auto_tag !== false)
+        ) {
+            // update association with this paste
+            const UpdateResult = await GetAssociation(
+                request,
+                _ip,
+                true,
+                body.CustomURL
+            );
+
+            if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
+
+            // update curiosity
+            if (EntryDB.config.app && EntryDB.config.app.curiosity)
+                await fetch(
+                    `${EntryDB.config.app.curiosity.host}/api/profiles/create?c=json`,
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            APIKey: EntryDB.config.app.curiosity.api_key,
+                            ID: body.CustomURL,
+                            Type: "entry_paste_user",
+                        }),
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
         }
 
         // if result[0] IS NOT TRUE, set association to nothing!!! this makes sure
