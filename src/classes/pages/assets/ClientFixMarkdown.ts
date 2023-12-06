@@ -19,6 +19,15 @@ export function HandleCustomElements() {
             anchor.href = `/${anchor.href.split("https://rentry.co/")[1]}:rentry.co`;
     }
 
+    // treat text.is links as links to federared entry servers
+    for (let anchor of document.body.querySelectorAll(
+        "a"
+    ) as any as HTMLAnchorElement[]) {
+        anchor.href = anchor.href.replace("https://rentry.net", "https://text.is");
+        if (!anchor.href.split("https://text.is/")[1]) continue;
+        else anchor.href = `/${anchor.href.split("https://text.is/")[1]}:text.is`;
+    }
+
     // handle style elements
     let style = "";
 

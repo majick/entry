@@ -672,6 +672,16 @@ export class DiffView implements Endpoint {
         const result = (await db.GetPasteFromURL(name)) as Paste;
         if (!result || result.HostServer) return new _404Page().request(request);
 
+        // check metadata, if paste metadata has PrivateSource set to true AND we're
+        // not the paste owner, return 404 page!
+        if (
+            result.Metadata &&
+            result.Metadata.Owner &&
+            result.Metadata.PrivateSource === true &&
+            Association[1] !== result.Metadata.Owner
+        )
+            return new _404Page().request(request);
+
         // attempt to get revision(s)
         const RevisionNumber = search.get("to");
         const RevisionNumber2 = search.get("from");

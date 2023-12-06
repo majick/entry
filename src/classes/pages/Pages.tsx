@@ -709,6 +709,25 @@ export class GetPasteFromURL implements Endpoint {
                             </div>
                         )}
 
+                        {(result.HostServer === "rentry.co" ||
+                            result.HostServer === "text.is") && (
+                            <Expandable
+                                title={`Paste is from an inferior server! (${result.HostServer})`}
+                            >
+                                <Card round={true} border={true} secondary={true}>
+                                    The server this paste is loaded from doesn't
+                                    support modern APIs for features such as
+                                    comments, media hosting, settings, versioning,
+                                    cross-server editing, and many more. Please
+                                    migrate this paste to an{" "}
+                                    <a href="https://codeberg.org/hkau/entry">
+                                        Entry
+                                    </a>{" "}
+                                    instance to gain access to these features!
+                                </Card>
+                            </Expandable>
+                        )}
+
                         {RevisionNumber !== 0 && (
                             <div class={"mdnote note-info"}>
                                 <b class={"mdnote-title"}>Viewing Revision</b>

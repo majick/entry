@@ -596,7 +596,11 @@ export default class EntryDB {
                 // just send a /api/get request to the other server
                 if (server.startsWith("%")) return resolve(undefined);
                 const request = fetch(
-                    `https://${server}/api/raw/${PasteURL.split(":")[0]}`
+                    server !== "text.is"
+                        ? // everything
+                          `https://${server}/api/raw/${PasteURL.split(":")[0]}`
+                        : // text.is (terrible api)
+                          `https://${server}/${PasteURL.split(":")[0]}/raw`
                 );
 
                 // handle bad
