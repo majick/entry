@@ -441,7 +441,7 @@ export async function ParseMarkdown(
 
     // AUTO-PARAGRAPH!!!
     content = content.replaceAll(
-        /^(.*?)\n\n/gms,
+        /^(.*?)\n{2,}/gms,
         (match: string, offset: string): string => {
             // return
             return `<p>\n${match}\n</p>`;

@@ -1,8 +1,14 @@
-// yeah, so this didn't want to work on client because when we try to use it on the client,
-// FixMarkdown will not be defined because the script will have already been minified
-// this is the code run to fix the markdown when viewing a paste
+/**
+ * @file Handle minor Markdown adjustments on client
+ * @name ClientFixMarkdown.ts
+ * @license MIT
+ */
 
 import hljs from "highlight.js";
+
+import { ParseNodes } from "../components/builder/parser";
+import { TOML } from "../../db/helpers/BaseParser";
+import { hydrate } from "preact";
 
 /**
  * @function HandleCustomElements
@@ -104,6 +110,17 @@ export function HandleCustomElements() {
 
     if (window.localStorage.getItem("entry:user.DisableCustomPasteCSS") === "true")
         for (const element of styleElements) element.remove();
+
+    // handle Builder Common Schema (parse all .component elements)
+    const ComponentElements = Array.from(document.querySelectorAll(".component"));
+
+    for (const element of ComponentElements) {
+        const component = TOML.parse((element as HTMLElement).innerText) as any;
+        element.innerHTML = ""; // clear element
+
+        // render
+        hydrate(ParseNodes([component], false), element);
+    }
 }
 
 /**

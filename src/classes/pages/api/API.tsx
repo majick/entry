@@ -514,7 +514,7 @@ export class CreatePaste implements Endpoint {
         if (
             EntryDB.config.app &&
             EntryDB.config.app.association_required === true &&
-            !body.Associated
+            Association[0] === false
         )
             return new Response("Association required!", {
                 status: 302,
