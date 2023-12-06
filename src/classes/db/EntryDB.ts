@@ -1422,8 +1422,9 @@ export default class EntryDB {
      * @param {string} server
      * @param {string} endpoint
      * @param {string[]} body
-     * @param [method="POST"]
-     * @param [https=true]
+     * @param {string} [method="POST"]
+     * @param {boolean} [https=true]
+     * @param {Headers} headers
      * @return {Promise<[boolean, Response]>} [isBad, record]
      * @memberof EntryDB
      */
@@ -1432,7 +1433,8 @@ export default class EntryDB {
         endpoint: string,
         body: string[],
         method: string = "POST",
-        https: boolean = true
+        https: boolean = true,
+        headers?: Headers
     ): Promise<[boolean, Response]> {
         // send request
         const request = fetch(
@@ -1442,6 +1444,7 @@ export default class EntryDB {
                 method,
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
+                    ...(headers || new Headers()).toJSON(),
                 },
             }
         );

@@ -512,7 +512,9 @@ export class GetPasteFromURL implements Endpoint {
                                     <>
                                         {result.Metadata.Owner &&
                                             result.Metadata.ShowOwnerEnabled !==
-                                                false && (
+                                                false &&
+                                            result.Metadata.Owner !==
+                                                result.CustomURL && (
                                                 <p>
                                                     Owner:{" "}
                                                     <a
@@ -905,7 +907,9 @@ export class GetPasteFromURL implements Endpoint {
                                                 "<% disable show_owner %>"
                                             ) &&
                                             result.Metadata.ShowOwnerEnabled !==
-                                                false && (
+                                                false &&
+                                            result.Metadata.Owner !==
+                                                result.CustomURL && (
                                                 <span>
                                                     Owner:{" "}
                                                     <a

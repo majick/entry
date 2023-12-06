@@ -682,8 +682,9 @@ export class EditPaste implements Endpoint {
 
         // check NewEditPassword length
         if (
-            // if NewEditPassword is less than the expected length, set it to the old edit password
-            body.NewEditPassword.length < EntryDB.MinPasswordLength &&
+            (!body.NewEditPassword ||
+                // if NewEditPassword is less than the expected length, set it to the old edit password
+                body.NewEditPassword.length < EntryDB.MinPasswordLength) &&
             // verify this supplied EditPassword
             CreateHash(body.EditPassword) === paste.EditPassword
         )
@@ -1153,7 +1154,8 @@ export class JSONAPI implements Endpoint {
             url.pathname.substring("/api/json/".length),
             body,
             request.method,
-            url.protocol.includes("https")
+            url.protocol.includes("https"),
+            request.headers as any
         );
 
         // return
