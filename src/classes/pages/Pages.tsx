@@ -94,21 +94,51 @@ export function OpenGraph(props: {
     icon?: string;
     color?: string;
     largeimage?: string;
+    time?: {
+        publish: string;
+        edit: string;
+    };
+    author?: string;
 }) {
     return (
         <>
             <meta name={"theme-color"} value={props.color || "#55a4e0"} />
-            <meta name={"og:type"} value={"website"} />
-            <meta name={"og:site_name"} value={EntryDB.config.name} />
-            {props.url && <meta name={"og:url"} value={props.url} />}
+            <meta property={"og:type"} value={"website"} />
+            <meta property={"og:site_name"} value={EntryDB.config.name} />
 
-            {props.description && (
-                <meta name={"og:description"} value={props.description} />
+            {props.url && (
+                <>
+                    <meta property={"og:url"} value={props.url} />
+                    <link rel="canonical" href={props.url} />
+                </>
             )}
 
-            {props.title && <meta name={"og:title"} value={props.title} />}
-            {props.icon && <meta name={"og:image"} value={props.icon} />}
-            {props.largeimage && <meta name={"og:image"} value={props.largeimage} />}
+            {props.description && (
+                <meta property={"og:description"} value={props.description} />
+            )}
+
+            {props.title && <meta property={"og:title"} value={props.title} />}
+            {props.icon && <meta property={"og:image"} value={props.icon} />}
+
+            {props.largeimage && (
+                <meta property={"og:image"} value={props.largeimage} />
+            )}
+
+            {props.time && (
+                <>
+                    <meta
+                        property={"article:published_time"}
+                        value={props.time.publish}
+                    />
+
+                    <meta
+                        property={"article:modified_time"}
+                        value={props.time.edit}
+                    />
+                </>
+            )}
+
+            {props.author && <meta name={"article:author"} value={props.author} />}
         </>
     );
 }
@@ -564,6 +594,7 @@ export class GetPasteFromURL implements Endpoint {
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
 
                         <OpenGraph
+                            url={url.href}
                             description={
                                 result.Metadata && result.Metadata.Description
                                     ? result.Metadata.Description
@@ -589,6 +620,11 @@ export class GetPasteFromURL implements Endpoint {
                                     ? result.Metadata.EmbedImage
                                     : undefined
                             }
+                            time={{
+                                publish: new Date(result.PubDate).toDateString(),
+                                edit: new Date(result.EditDate).toDateString(),
+                            }}
+                            author={result.Metadata?.Owner}
                         />
                     </>
                 ),
@@ -786,7 +822,9 @@ export class GetPasteFromURL implements Endpoint {
                                 }}
                             >
                                 <a
-                                    class={"button round"}
+                                    class={`button border round${
+                                        HideSource !== true ? " green-cta" : " red"
+                                    }`}
                                     disabled={HideSource}
                                     href={`${HostnameURL}?mode=edit&OldURL=${
                                         result.CustomURL.split(":")[0]
@@ -807,6 +845,27 @@ export class GetPasteFromURL implements Endpoint {
                                             : ""
                                     }`}
                                 >
+                                    {(HideSource && (
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Lock Symbol"}
+                                        >
+                                            <path d="M4 4a4 4 0 0 1 8 0v2h.25c.966 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25v-5.5C2 6.784 2.784 6 3.75 6H4Zm8.25 3.5h-8.5a.25.25 0 0 0-.25.25v5.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25ZM10.5 6V4a2.5 2.5 0 1 0-5 0v2Z"></path>
+                                        </svg>
+                                    )) || (
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Pencil Symbol"}
+                                        >
+                                            <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                        </svg>
+                                    )}
                                     Edit
                                 </a>
 
@@ -817,7 +876,7 @@ export class GetPasteFromURL implements Endpoint {
                                         result.Metadata.Comments.Enabled !==
                                             false) && (
                                         <a
-                                            class={"button round"}
+                                            class={"button border round"}
                                             href={`${HostnameURL}c/${result.CustomURL}`}
                                             title={"View Comments"}
                                         >
@@ -837,7 +896,7 @@ export class GetPasteFromURL implements Endpoint {
 
                                 <a
                                     href={`${HostnameURL}r/${result.CustomURL}`}
-                                    class={"button round"}
+                                    class={"button border round"}
                                     title={"Inspect Paste"}
                                 >
                                     <svg
@@ -884,19 +943,45 @@ export class GetPasteFromURL implements Endpoint {
                                     <span>Expires: {result.ExpireOn}</span>
                                 )}
 
-                                <span title={new Date(result.PubDate).toUTCString()}>
-                                    Pub:{" "}
-                                    <span className="utc-date-to-localize">
-                                        {new Date(result.PubDate).toUTCString()}
+                                <span
+                                    class={"flex align-center g-4"}
+                                    title={new Date(result.PubDate).toUTCString()}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Calendar Symbol"}
+                                    >
+                                        <path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"></path>
+                                    </svg>
+                                    <span>
+                                        Pub:{" "}
+                                        <span className="utc-date-to-localize">
+                                            {new Date(result.PubDate).toUTCString()}
+                                        </span>
                                     </span>
                                 </span>
 
                                 <span
+                                    class={"flex align-center g-4"}
                                     title={new Date(result.EditDate).toUTCString()}
                                 >
-                                    Edit:{" "}
-                                    <span className="utc-date-to-localize">
-                                        {new Date(result.EditDate).toUTCString()}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Calendar Symbol"}
+                                    >
+                                        <path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"></path>
+                                    </svg>
+                                    <span>
+                                        Edit:{" "}
+                                        <span className="utc-date-to-localize">
+                                            {new Date(result.EditDate).toUTCString()}
+                                        </span>
                                     </span>
                                 </span>
 
@@ -910,16 +995,32 @@ export class GetPasteFromURL implements Endpoint {
                                                 false &&
                                             result.Metadata.Owner !==
                                                 result.CustomURL && (
-                                                <span>
-                                                    Owner:{" "}
-                                                    <a
-                                                        href={`${HostnameURL}${result.Metadata.Owner}`}
+                                                <span
+                                                    class={"flex align-center g-4"}
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={
+                                                            "Shield Lock Symbol"
+                                                        }
                                                     >
-                                                        {result.Metadata.Owner
-                                                            .length > 25
-                                                            ? `${result.Metadata.Owner}...`
-                                                            : result.Metadata.Owner}
-                                                    </a>
+                                                        <path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path>
+                                                    </svg>
+                                                    <span>
+                                                        Owner:{" "}
+                                                        <a
+                                                            href={`${HostnameURL}${result.Metadata.Owner}`}
+                                                        >
+                                                            {result.Metadata.Owner
+                                                                .length > 25
+                                                                ? `${result.Metadata.Owner}...`
+                                                                : result.Metadata
+                                                                      .Owner}
+                                                        </a>
+                                                    </span>
                                                 </span>
                                             )}
                                     </>
@@ -1023,6 +1124,7 @@ export class GetPasteFromURL implements Endpoint {
                                 ? result.Metadata.Title
                                 : result.CustomURL
                         }
+                        url={url.href}
                         description={
                             result.Metadata && result.Metadata.Description
                                 ? result.Metadata.Description
@@ -1047,6 +1149,11 @@ export class GetPasteFromURL implements Endpoint {
                                 ? result.Metadata.EmbedImage
                                 : undefined
                         }
+                        time={{
+                            publish: new Date(result.PubDate).toISOString(),
+                            edit: new Date(result.EditDate).toISOString(),
+                        }}
+                        author={result.Metadata?.Owner}
                     />
                 </>
             ),

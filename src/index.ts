@@ -267,7 +267,6 @@ export const ServerConfig: HoneybeeConfig = {
         "/admin/login/": { Page: Admin.Login },
 
         // GET api
-
         "/api/wsas": { Page: API.WSAS },
 
         // ...pastes

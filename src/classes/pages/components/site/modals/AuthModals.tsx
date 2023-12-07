@@ -1,9 +1,12 @@
 import EntryDB from "../../../../db/EntryDB";
+import LoadingModal from "./Loading";
 import { Modal } from "fusion";
 
 export function AuthModals(props: { use: "login" | "logout" }) {
     return (
         <>
+            <LoadingModal />
+
             <iframe
                 name={"association_frame"}
                 style={{

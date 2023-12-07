@@ -537,6 +537,7 @@ export class CreatePaste implements Endpoint {
 
         // add association to session
         if (
+            !Association[1] &&
             // can't (shouldn't) set association with a comment
             !body.CommentOn &&
             !body.ReportOn &&
