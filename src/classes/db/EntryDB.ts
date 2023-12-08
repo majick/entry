@@ -111,9 +111,28 @@ export default class EntryDB {
                     "PubDate" float,
                     "EditDate" float,
                     "GroupName" varchar(${EntryDB.MaxCustomURLLength}),
-                    "GroupSubmitPassword" varchar(${EntryDB.MaxPasswordLength})
+                    "GroupSubmitPassword" varchar(${EntryDB.MaxPasswordLength}),
+                    "Metadata" varchar(${EntryDB.MaxContentLength})
                 )`,
             });
+
+            try {
+                // check if "Metadata" column exists
+                // I don't want to use an SQL if statement because they're stupidly ugly
+                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // COMPATIBILITY
+                    // @ts-ignore
+                    db: db,
+                    query: `SELECT "Metadata" FROM "Pastes" LIMIT 1`,
+                });
+            } catch {
+                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // COMPATIBILITY
+                    // @ts-ignore
+                    db: db,
+                    query: `ALTER TABLE "Pastes" ADD COLUMN 'Metadata' varchar(${EntryDB.MaxContentLength})`,
+                });
+            }
 
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
@@ -573,16 +592,19 @@ export default class EntryDB {
 
                 // remove metadata
                 const [RealContent, _Metadata] = record.Content.split("_metadata:");
-
                 record.Content = RealContent;
 
                 if (_Metadata) record.Metadata = BaseParser.parse(_Metadata) as any;
-                else
+                else if (!record.Metadata)
+                    // fill default values
                     record.Metadata = {
                         Version: 1,
                         Owner: record.CustomURL,
                         Comments: { Enabled: true },
                     };
+
+                if (typeof record.Metadata === "string")
+                    record.Metadata = JSON.parse(record.Metadata);
 
                 // MAKE SURE paste has an owner value!
                 if (record.Metadata && !record.Metadata.Owner)
@@ -963,13 +985,14 @@ export default class EntryDB {
             }
 
         // add metadata
-        PasteInfo.Content += `_metadata:${BaseParser.stringify(metadata)}`;
+        // PasteInfo.Content += `_metadata:${BaseParser.stringify(metadata)}`; // OLD
+        PasteInfo.Metadata = metadata; // NEW
 
         // create paste
         await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
-            query: 'INSERT INTO "Pastes" VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            query: 'INSERT INTO "Pastes" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
             params: [
                 PasteInfo.Content,
                 PasteInfo.EditPassword,
@@ -979,6 +1002,7 @@ export default class EntryDB {
                 new Date().getTime(), // EditDate
                 PasteInfo.GroupName || "",
                 PasteInfo.GroupSubmitPassword || "",
+                JSON.stringify(PasteInfo.Metadata),
             ],
             transaction: true,
             use: "Prepare",
@@ -1233,14 +1257,14 @@ export default class EntryDB {
             });
 
         // append metadata
-        NewPasteInfo.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;
+        // NewPasteInfo.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;
 
         // update paste
         if (!OnlyCreateRevision)
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
-                query: 'UPDATE "Pastes" SET ("Content", "EditPassword", "CustomURL", "ViewPassword", "PubDate", "EditDate") = (?, ?, ?, ?, ?, ?) WHERE "CustomURL" = ?',
+                query: 'UPDATE "Pastes" SET ("Content", "EditPassword", "CustomURL", "ViewPassword", "PubDate", "EditDate", "Metadata") = (?, ?, ?, ?, ?, ?, ?) WHERE "CustomURL" = ?',
                 params: [
                     NewPasteInfo.Content,
                     NewPasteInfo.EditPassword,
@@ -1248,6 +1272,7 @@ export default class EntryDB {
                     NewPasteInfo.ViewPassword,
                     NewPasteInfo.PubDate,
                     NewPasteInfo.EditDate,
+                    JSON.stringify(paste.Metadata), // update metadata
                     PasteInfo.CustomURL, // select by old CustomURL
                 ],
                 use: "Prepare",
@@ -1742,6 +1767,25 @@ export default class EntryDB {
 
         // return
         return pastes;
+    }
+
+    /**
+     * @method GetAllPastesOwnedByPaste
+     *
+     * @param {string} owner
+     * @return {Promise<Paste[]>}
+     * @memberof EntryDB
+     */
+    public async GetAllPastesOwnedByPaste(owner: string): Promise<Paste[]> {
+        return await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'SELECT * FROM "Pastes" WHERE "Metadata" LIKE ?',
+            params: [`%"Owner":"${owner}"%`],
+            all: true,
+            transaction: true,
+            use: "Prepare",
+        });
     }
 
     /**

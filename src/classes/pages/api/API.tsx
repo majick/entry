@@ -35,11 +35,12 @@ import SQL from "../../db/helpers/SQL";
 export const DefaultHeaders = {
     "Cache-Control":
         // check "do not cache"
-        process.env.DO_NOT_CACHE !== "true"
+        /* process.env.DO_NOT_CACHE !== "true"
             ? // use normal cache
               "public, max-age=604800, must-revalidate"
             : // jk, we're still gonna cache... but not as long and not public
-              "private, max-age=86400, must-revalidate",
+              "private, max-age=86400, must-revalidate", */
+        "no-cache",
     "X-Content-Type-Options": "nosniff",
     "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
     Vary: "Accept-Encoding",
@@ -690,10 +691,6 @@ export class EditPaste implements Endpoint {
             CreateHash(body.EditPassword) === paste.EditPassword
         )
             body.NewEditPassword = body.EditPassword;
-
-        // add metadata to content
-        if (paste.Metadata)
-            body.Content += `_metadata:${BaseParser.stringify(paste.Metadata)}`;
 
         // edit paste
         const result = await db.EditPaste(
@@ -1510,15 +1507,11 @@ export class EditMetadata implements Endpoint {
                 }
         } else paste.Metadata = Unpacked;
 
-        // update metadata
-        paste.Content = paste.Content!.split("_metadata:")[0];
-        paste.Content += `_metadata:${BaseParser.stringify(paste.Metadata!)}`;
-
         // update paste
         await SQL.QueryOBJ({
             db: db.db,
-            query: 'UPDATE "Pastes" SET "Content" = ? WHERE "CustomURL" = ?',
-            params: [paste.Content, paste.CustomURL],
+            query: 'UPDATE "Pastes" SET "Metadata" = ? WHERE "CustomURL" = ?',
+            params: [JSON.stringify(paste.Metadata), paste.CustomURL],
             use: "Prepare",
         });
 

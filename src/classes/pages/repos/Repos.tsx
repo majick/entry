@@ -19,7 +19,7 @@ import { BuilderDocument } from "../components/builder/schema";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
 
-import { Card, CardWithHeader, StaticCode } from "fusion";
+import { Button, Card, CardWithHeader, StaticCode } from "fusion";
 
 // ...
 import { createTwoFilesPatch } from "diff";
@@ -427,7 +427,7 @@ export class RepoView implements Endpoint {
                                 <ul style={{ margin: 0 }}>
                                     <li>
                                         <b>Owner</b>:{" "}
-                                        <a href={`/r/${result.Metadata!.Owner}`}>
+                                        <a href={`/~${result.Metadata!.Owner}`}>
                                             {result.Metadata!.Owner}
                                         </a>
                                     </li>
@@ -810,9 +810,138 @@ export class DiffView implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class ProfileView
+ * @implements {Endpoint}
+ */
+export class ProfileView implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        // get paste name
+        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        if (name.startsWith("~")) name = name.split("~")[1];
+
+        // attempt to get paste
+        const result = (await db.GetPasteFromURL(name)) as Paste;
+        if (!result) return new _404Page().request(request);
+
+        // get pastes
+        const Pastes = await db.GetAllPastesOwnedByPaste(name);
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <TopNav margin={false} breadcrumbs={[`~${name}`]} />
+
+                    <main className="flex justify-center mobile:flex-column g-8">
+                        <Card
+                            round={true}
+                            border={true}
+                            secondary={true}
+                            class="flex flex-column g-4 align-center mobile:max"
+                            style={{
+                                width: "33.33%",
+                            }}
+                        >
+                            {result.Metadata && result.Metadata.SocialIcon && (
+                                <img
+                                    title={result.Metadata.Owner}
+                                    class={"card border round NoPadding"}
+                                    src={result.Metadata.SocialIcon}
+                                    alt={result.Metadata.Owner}
+                                />
+                            )}
+
+                            <Card
+                                border={true}
+                                round={true}
+                                class="flex flex-column align-center g-4"
+                            >
+                                <h2
+                                    class={"no-margin"}
+                                    style={{
+                                        maxWidth: "100%",
+                                    }}
+                                >
+                                    {result.CustomURL}
+                                </h2>
+
+                                <Button
+                                    round={true}
+                                    class="full"
+                                    href={`/${result.CustomURL}`}
+                                >
+                                    View Paste
+                                </Button>
+                            </Card>
+                        </Card>
+
+                        <div class={"flex flex-column g-4 full"}>
+                            <ReposNav name={name} current="Home" />
+
+                            <CardWithHeader
+                                border={true}
+                                round={true}
+                                class="flex flex-column g-4"
+                                header={<b>Pastes</b>}
+                            >
+                                {Pastes.map((paste) => (
+                                    <Card
+                                        round={true}
+                                        border={true}
+                                        secondary={true}
+                                        class="flex justify-space-between flex-wrap"
+                                    >
+                                        <a href={`/r/${paste.CustomURL}`}>
+                                            {paste.CustomURL}
+                                        </a>
+
+                                        <span>
+                                            {paste.Content.length} characters
+                                        </span>
+                                    </Card>
+                                ))}
+                            </CardWithHeader>
+                        </div>
+                    </main>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
+                </>,
+                <>
+                    <title>
+                        {name} - {EntryDB.config.name}
+                    </title>
+
+                    <link rel="icon" href="/favicon" />
+                </>
+            ),
+            {
+                headers: {
+                    "Content-Type": "text/html",
+                    ...PageHeaders,
+                },
+            }
+        );
+    }
+}
+
 // default export
 export default {
     RepoView,
     RevisionsList,
     DiffView,
+    ProfileView,
 };

@@ -40,7 +40,7 @@ import { AuthModals } from "./components/site/modals/AuthModals";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 import BaseParser from "../db/helpers/BaseParser";
-import { ReposNav } from "./repos/Repos";
+import { ProfileView, ReposNav } from "./repos/Repos";
 import { Card, Modal } from "fusion";
 import { ServerConfig } from "../..";
 
@@ -253,6 +253,9 @@ export class GetPasteFromURL implements Endpoint {
 
         // return home if name === ""
         if (name === "") return new Home().request(request, server);
+
+        // if name is referencing a profile, forward to ProfileView
+        if (name.startsWith("~")) return new ProfileView().request(request, server);
 
         // attempt to get paste
         const _fetchStart = performance.now();
@@ -548,7 +551,7 @@ export class GetPasteFromURL implements Endpoint {
                                                 <p>
                                                     Owner:{" "}
                                                     <a
-                                                        href={`${HostnameURL}${result.Metadata.Owner}`}
+                                                        href={`${HostnameURL}~${result.Metadata.Owner}`}
                                                     >
                                                         {result.Metadata.Owner
                                                             .length > 25
@@ -1012,7 +1015,7 @@ export class GetPasteFromURL implements Endpoint {
                                                     <span>
                                                         Owner:{" "}
                                                         <a
-                                                            href={`${HostnameURL}${result.Metadata.Owner}`}
+                                                            href={`${HostnameURL}~${result.Metadata.Owner}`}
                                                         >
                                                             {result.Metadata.Owner
                                                                 .length > 25
