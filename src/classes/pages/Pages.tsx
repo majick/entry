@@ -143,6 +143,75 @@ export function OpenGraph(props: {
     );
 }
 
+export function PasteOpenGraph(props: {
+    paste: Paste;
+    url: URL;
+    isBuilder: boolean;
+    title?: string;
+    content?: string;
+}): any {
+    const { paste, url, isBuilder } = props;
+
+    const description =
+        props.content === undefined
+            ? paste.Metadata && paste.Metadata.Description
+                ? paste.Metadata.Description
+                : isBuilder === true
+                  ? paste.CustomURL // if length of content is greater than 150, cut it at 150 characters and add "..."
+                  : // otherwise, we can just show the full content result.Content.length > 150
+                    paste.Content.length > 150
+                    ? `${paste.Content.substring(0, 149)}...`
+                    : paste.Content
+            : props.content;
+
+    // return
+    return (
+        <>
+            <title>
+                {props.title === undefined
+                    ? paste.Metadata && paste.Metadata.Title
+                        ? paste.Metadata.Title
+                        : paste.CustomURL
+                    : props.title}
+            </title>
+
+            <meta name="description" content={description} />
+
+            <OpenGraph
+                url={url.href}
+                description={description}
+                title={
+                    props.title === undefined
+                        ? paste.Metadata && paste.Metadata.Title
+                            ? paste.Metadata.Title
+                            : paste.CustomURL
+                        : props.title
+                }
+                icon={
+                    paste.Metadata && paste.Metadata.Favicon
+                        ? paste.Metadata.Favicon
+                        : undefined
+                }
+                color={
+                    paste.Metadata && paste.Metadata.EmbedColor
+                        ? paste.Metadata.EmbedColor
+                        : undefined
+                }
+                largeimage={
+                    paste.Metadata && paste.Metadata.EmbedImage
+                        ? paste.Metadata.EmbedImage
+                        : undefined
+                }
+                time={{
+                    publish: new Date(paste.PubDate).toISOString(),
+                    edit: new Date(paste.EditDate).toISOString(),
+                }}
+                author={paste.Metadata?.Owner}
+            />
+        </>
+    );
+}
+
 /**
  * @function CheckInstance
  *
@@ -586,49 +655,8 @@ export class GetPasteFromURL implements Endpoint {
                         </Modal>
                     </>,
                     <>
-                        <meta name="description" content={result.CustomURL} />
-
-                        <title>
-                            {result.Metadata && result.Metadata.Title
-                                ? result.Metadata.Title
-                                : result.CustomURL}
-                        </title>
-
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
-
-                        <OpenGraph
-                            url={url.href}
-                            description={
-                                result.Metadata && result.Metadata.Description
-                                    ? result.Metadata.Description
-                                    : result.CustomURL
-                            }
-                            title={
-                                result.Metadata && result.Metadata.Title
-                                    ? result.Metadata.Title
-                                    : result.CustomURL
-                            }
-                            icon={
-                                result.Metadata && result.Metadata.Favicon
-                                    ? result.Metadata.Favicon
-                                    : undefined
-                            }
-                            color={
-                                result.Metadata && result.Metadata.EmbedColor
-                                    ? result.Metadata.EmbedColor
-                                    : undefined
-                            }
-                            largeimage={
-                                result.Metadata && result.Metadata.EmbedImage
-                                    ? result.Metadata.EmbedImage
-                                    : undefined
-                            }
-                            time={{
-                                publish: new Date(result.PubDate).toDateString(),
-                                edit: new Date(result.EditDate).toDateString(),
-                            }}
-                            author={result.Metadata?.Owner}
-                        />
+                        <PasteOpenGraph paste={result} url={url} isBuilder={true} />
                     </>
                 ),
                 {
@@ -683,24 +711,7 @@ export class GetPasteFromURL implements Endpoint {
                         />
                     </>,
                     <>
-                        <title>
-                            {result.Metadata && result.Metadata.Title
-                                ? result.Metadata.Title
-                                : result.CustomURL}
-                        </title>
-
-                        <OpenGraph
-                            title={
-                                result.Metadata && result.Metadata.Title
-                                    ? result.Metadata.Title
-                                    : result.CustomURL
-                            }
-                            color={
-                                result.Metadata && result.Metadata.EmbedColor
-                                    ? result.Metadata.EmbedColor
-                                    : undefined
-                            }
-                        />
+                        <PasteOpenGraph paste={result} url={url} isBuilder={true} />
                     </>
                 ),
                 {
@@ -1095,23 +1106,6 @@ export class GetPasteFromURL implements Endpoint {
                     />
                 </>,
                 <>
-                    <meta
-                        name="description"
-                        content={
-                            // if length of content is greater than 150, cut it at 150 characters and add "..."
-                            // otherwise, we can just show the full content
-                            result.Content.length > 150
-                                ? `${result.Content.substring(0, 150)}...`
-                                : result.Content
-                        }
-                    />
-
-                    <title>
-                        {result.Metadata && result.Metadata.Title
-                            ? result.Metadata.Title
-                            : result.CustomURL}
-                    </title>
-
                     <link
                         rel="icon"
                         href={
@@ -1121,43 +1115,7 @@ export class GetPasteFromURL implements Endpoint {
                         }
                     />
 
-                    <OpenGraph
-                        title={
-                            result.Metadata && result.Metadata.Title
-                                ? result.Metadata.Title
-                                : result.CustomURL
-                        }
-                        url={url.href}
-                        description={
-                            result.Metadata && result.Metadata.Description
-                                ? result.Metadata.Description
-                                : // if length of content is greater than 150, cut it at 150 characters and add "..."
-                                  // otherwise, we can just show the full content result.Content.length > 150
-                                  result.Content.length > 150
-                                  ? `${result.Content.substring(0, 149)}...`
-                                  : result.Content
-                        }
-                        icon={
-                            result.Metadata && result.Metadata.Favicon
-                                ? result.Metadata.Favicon
-                                : undefined
-                        }
-                        color={
-                            result.Metadata && result.Metadata.EmbedColor
-                                ? result.Metadata.EmbedColor
-                                : undefined
-                        }
-                        largeimage={
-                            result.Metadata && result.Metadata.EmbedImage
-                                ? result.Metadata.EmbedImage
-                                : undefined
-                        }
-                        time={{
-                            publish: new Date(result.PubDate).toISOString(),
-                            edit: new Date(result.EditDate).toISOString(),
-                        }}
-                        author={result.Metadata?.Owner}
-                    />
+                    <PasteOpenGraph paste={result} url={url} isBuilder={false} />
                 </>
             ),
             {
@@ -2311,31 +2269,14 @@ export class PasteCommentsPage implements Endpoint {
                     <Curiosity Association={_Association} />
                 </>,
                 <>
-                    <title>Comments on {result.CustomURL}</title>
                     <link rel="icon" href="/favicon" />
 
-                    <meta
-                        name="description"
-                        content={`View comments on ${result.CustomURL}, on ${EntryDB.config.name}`}
-                    />
-
-                    <OpenGraph
-                        title={`Comments on ${result.CustomURL}`}
-                        description={`View ${CommentPastes.length} comment${
-                            CommentPastes.length > 1 || CommentPastes.length === 0
-                                ? "s"
-                                : ""
-                        } on /${result.CustomURL}`}
-                        icon={
-                            result.Metadata && result.Metadata.Favicon
-                                ? result.Metadata.Favicon
-                                : undefined
-                        }
-                        color={
-                            result.Metadata && result.Metadata.EmbedColor
-                                ? result.Metadata.EmbedColor
-                                : undefined
-                        }
+                    <PasteOpenGraph
+                        paste={result}
+                        url={url}
+                        isBuilder={false}
+                        title={`${result.CustomURL} (comments)`}
+                        content={`View paste comments (${result.Comments || 0})`}
                     />
                 </>
             ),
@@ -2959,6 +2900,8 @@ import { StaticCode, Expandable } from "fusion";
 export default {
     Curiosity,
     CheckInstance,
+    OpenGraph,
+    PasteOpenGraph,
     // pages
     GetPasteFromURL,
     PasteDocView,

@@ -907,9 +907,49 @@ export class GetAllPastesInGroup implements Endpoint {
 
         // get pastes
         const pastes = await db.GetAllPastesInGroup(
-            // if no group is provided this will return all pastes with no group
+            // if no group is provided, this will return all pastes with no group
             url.pathname.slice("/api/group/".length, url.pathname.length) || ""
         );
+
+        // return
+        return new Response(JSON.stringify(pastes), {
+            headers: {
+                ...DefaultHeaders,
+                "Content-Type": "application/json; charset=utf-8",
+            },
+        });
+    }
+}
+
+/**
+ * @export
+ * @class GetAllPastesOwnedByPaste
+ * @implements {Endpoint}
+ */
+export class GetAllPastesOwnedByPaste implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get owner
+        const owner = url.pathname.slice("/api/owner/".length, url.pathname.length);
+        if (!owner) return new _404Page().request(request);
+
+        // get pastes
+        const pastes = await db.GetAllPastesOwnedByPaste(owner);
+
+        // clean pastes
+        for (const paste of pastes) {
+            const clean = db.CleanPaste(paste);
+
+            if (typeof clean.Metadata === "string")
+                clean.Metadata = JSON.parse(clean.Metadata);
+
+            pastes[pastes.indexOf(paste)] = clean;
+        }
 
         // return
         return new Response(JSON.stringify(pastes), {
@@ -1761,6 +1801,7 @@ export default {
     DeletePaste, // supports cloud routing
     DecryptPaste, // supports cloud routing
     GetAllPastesInGroup, // supports cloud routing
+    GetAllPastesOwnedByPaste, // supports cloud routing
     GetRawPaste, // supports cloud routing
     PasteExists, // supports cloud routing
     RenderMarkdown,

@@ -7,9 +7,9 @@
 import { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import { CheckInstance, Curiosity, db, PasteOpenGraph } from "../Pages";
 import BaseParser, { TOML } from "../../db/helpers/BaseParser";
 import { GetAssociation, PageHeaders } from "../api/API";
-import { CheckInstance, Curiosity, db } from "../Pages";
 import { Paste } from "../../db/objects/Paste";
 import EntryDB from "../../db/EntryDB";
 
@@ -19,7 +19,7 @@ import { BuilderDocument } from "../components/builder/schema";
 import TopNav from "../components/site/TopNav";
 import _404Page from "../components/404";
 
-import { Button, Card, CardWithHeader, StaticCode } from "fusion";
+import { Button, Card, CardWithHeader, Expandable, StaticCode } from "fusion";
 
 // ...
 import { createTwoFilesPatch } from "diff";
@@ -472,11 +472,15 @@ export class RepoView implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>
-                        {name} - {EntryDB.config.name}
-                    </title>
-
                     <link rel="icon" href="/favicon" />
+
+                    <PasteOpenGraph
+                        paste={result}
+                        url={url}
+                        isBuilder={false}
+                        title={`${result.CustomURL} (repository)`}
+                        content="View detailed paste information"
+                    />
                 </>
             ),
             {
@@ -629,11 +633,15 @@ export class RevisionsList implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>
-                        {name} - {EntryDB.config.name}
-                    </title>
-
                     <link rel="icon" href="/favicon" />
+
+                    <PasteOpenGraph
+                        paste={result}
+                        url={url}
+                        isBuilder={false}
+                        title={`${result.CustomURL} (revisions)`}
+                        content="View detailed paste information (historical)"
+                    />
                 </>
             ),
             {
@@ -793,11 +801,15 @@ export class DiffView implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>
-                        {name} - {EntryDB.config.name}
-                    </title>
-
                     <link rel="icon" href="/favicon" />
+
+                    <PasteOpenGraph
+                        paste={result}
+                        url={url}
+                        isBuilder={false}
+                        title={`${result.CustomURL} (revision diff)`}
+                        content="View detailed paste information (historical)"
+                    />
                 </>
             ),
             {
@@ -846,47 +858,77 @@ export class ProfileView implements Endpoint {
                     <TopNav margin={false} breadcrumbs={[`~${name}`]} />
 
                     <main className="flex justify-center mobile:flex-column g-8">
-                        <Card
-                            round={true}
-                            border={true}
-                            secondary={true}
-                            class="flex flex-column g-4 align-center mobile:max"
+                        <div
+                            className="flex flex-column g-4 align-center mobile:max"
                             style={{
                                 width: "33.33%",
                             }}
                         >
-                            {result.Metadata && result.Metadata.SocialIcon && (
-                                <img
-                                    title={result.Metadata.Owner}
-                                    class={"card border round NoPadding"}
-                                    src={result.Metadata.SocialIcon}
-                                    alt={result.Metadata.Owner}
-                                />
-                            )}
-
                             <Card
-                                border={true}
                                 round={true}
-                                class="flex flex-column align-center g-4"
+                                border={true}
+                                secondary={true}
+                                class="flex flex-column g-4 align-center"
                             >
-                                <h2
-                                    class={"no-margin"}
-                                    style={{
-                                        maxWidth: "100%",
-                                    }}
-                                >
-                                    {result.CustomURL}
-                                </h2>
+                                {result.Metadata && result.Metadata.SocialIcon && (
+                                    <img
+                                        title={result.Metadata.Owner}
+                                        class={"card border round NoPadding"}
+                                        src={result.Metadata.SocialIcon}
+                                        alt={result.Metadata.Owner}
+                                    />
+                                )}
 
-                                <Button
+                                <Card
+                                    border={true}
                                     round={true}
-                                    class="full"
-                                    href={`/${result.CustomURL}`}
+                                    class="flex flex-column align-center g-4"
                                 >
-                                    View Paste
-                                </Button>
+                                    <h2
+                                        class={"no-margin"}
+                                        style={{
+                                            maxWidth: "100%",
+                                        }}
+                                    >
+                                        {result.CustomURL}
+                                    </h2>
+
+                                    <Button
+                                        round={true}
+                                        class="full"
+                                        href={`/${result.CustomURL}`}
+                                    >
+                                        View Paste
+                                    </Button>
+                                </Card>
                             </Card>
-                        </Card>
+
+                            <Expandable title="Details">
+                                <div class={"flex flex-column g-4"}>
+                                    <div>
+                                        <b>Joined</b>:{" "}
+                                        <span className="utc-date-to-localize">
+                                            {new Date(result.PubDate).toUTCString()}
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <b>Updated</b>:{" "}
+                                        <span className="utc-date-to-localize">
+                                            {new Date(result.EditDate).toUTCString()}
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <b>Views</b>: {result.Views}
+                                    </div>
+                                </div>
+                            </Expandable>
+                        </div>
+
+                        <div className="device:mobile">
+                            <hr />
+                        </div>
 
                         <div class={"flex flex-column g-4 full"}>
                             <ReposNav name={name} current="Home" />
@@ -894,25 +936,26 @@ export class ProfileView implements Endpoint {
                             <CardWithHeader
                                 border={true}
                                 round={true}
-                                class="flex flex-column g-4"
                                 header={<b>Pastes</b>}
                             >
-                                {Pastes.map((paste) => (
-                                    <Card
-                                        round={true}
-                                        border={true}
-                                        secondary={true}
-                                        class="flex justify-space-between flex-wrap"
-                                    >
-                                        <a href={`/r/${paste.CustomURL}`}>
-                                            {paste.CustomURL}
-                                        </a>
+                                <div class="flex flex-column g-4">
+                                    {Pastes.map((paste) => (
+                                        <Card
+                                            round={true}
+                                            border={true}
+                                            secondary={true}
+                                            class="flex justify-space-between flex-wrap"
+                                        >
+                                            <a href={`/r/${paste.CustomURL}`}>
+                                                {paste.CustomURL}
+                                            </a>
 
-                                        <span>
-                                            {paste.Content.length} characters
-                                        </span>
-                                    </Card>
-                                ))}
+                                            <span>
+                                                {paste.Content.length} characters
+                                            </span>
+                                        </Card>
+                                    ))}
+                                </div>
                             </CardWithHeader>
                         </div>
                     </main>
@@ -921,9 +964,12 @@ export class ProfileView implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>
-                        {name} - {EntryDB.config.name}
-                    </title>
+                    <PasteOpenGraph
+                        paste={result}
+                        url={url}
+                        isBuilder={false}
+                        content="View detailed user profile"
+                    />
 
                     <link rel="icon" href="/favicon" />
                 </>

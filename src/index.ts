@@ -272,6 +272,7 @@ export const ServerConfig: HoneybeeConfig = {
         // ...pastes
         "/api/get": { Type: "begins", Page: API.GetPasteRecord },
         "/api/group": { Type: "begins", Page: API.GetAllPastesInGroup },
+        "/api/owner": { Type: "begins", Page: API.GetAllPastesOwnedByPaste },
         "/api/raw": { Type: "begins", Page: API.GetRawPaste },
         "/api/exists": { Type: "begins", Page: API.PasteExists },
         "/api/html": { Type: "begins", Page: API.GetPasteHTML },

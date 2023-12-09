@@ -130,7 +130,7 @@ export default class EntryDB {
                     // COMPATIBILITY
                     // @ts-ignore
                     db: db,
-                    query: `ALTER TABLE "Pastes" ADD COLUMN 'Metadata' varchar(${EntryDB.MaxContentLength})`,
+                    query: `ALTER TABLE "Pastes" ADD COLUMN "Metadata" varchar(${EntryDB.MaxContentLength})`,
                 });
             }
 
