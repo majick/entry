@@ -42,6 +42,7 @@ export type PasteMetadata = {
     EmbedColor?: string; // color shown in opengraph embeds
     EmbedImage?: string; // large image shown in opengraph embeds
     PrivateSource?: boolean;
+    EnablePasteList?: boolean;
     SocialIcon?: string; // shown as a "profile picture" in some places
     Badges?: string; // comma separated array of badges, shown under paste
     PasteType?: "normal" | "builder" | "workshop" | "package";

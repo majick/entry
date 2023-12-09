@@ -342,6 +342,12 @@ export function ClientEditor(_metadata: string, id: string): any {
                 : metadata.root.PrivateSource,
             "Make the source of this paste private unless associated with this paste or its owner",
         ],
+        EnablePasteList: [
+            metadata.root.EnablePasteList === undefined
+                ? true
+                : metadata.root.EnablePasteList,
+            "Toggle paste profile paste list",
+        ],
         ShowOwnerEnabled: [
             metadata.root.ShowOwnerEnabled === undefined
                 ? true

@@ -2453,10 +2453,7 @@ export class UserSettings implements Endpoint {
 
             // get paste
             const result = await db.GetPasteFromURL(name);
-            if (!result) return new _404Page().request(request);
-
-            // paste cannot be from another server (for now)
-            if (result.HostServer) return new _404Page().request(request);
+            if (!result || result.HostServer) return new _404Page().request(request);
 
             // try to fetch custom domain log
             const CustomDomainLog = (

@@ -192,7 +192,12 @@ export async function GetAssociation(
     else {
         // try to get session log
         const log = await EntryDB.Logs.GetLog(session);
-        if (!log[0] || !log[2]) return [false, "Failed to get session log"];
+        if (!log[0] || !log[2])
+            return [
+                // Failed to get session log
+                false,
+                "associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0",
+            ];
 
         // check if session has an association
         const split = log[2].Content.split(";_with;");
@@ -1536,6 +1541,7 @@ export class EditMetadata implements Endpoint {
             paste.Metadata.EmbedColor = Unpacked.EmbedColor;
             paste.Metadata.EmbedImage = Unpacked.EmbedImage;
             paste.Metadata.PrivateSource = Unpacked.PrivateSource;
+            paste.Metadata.EnablePasteList = Unpacked.EnablePasteList;
             paste.Metadata.SocialIcon = Unpacked.SocialIcon;
 
             if (Unpacked.Comments)

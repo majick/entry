@@ -20,6 +20,8 @@ import { ReposNav } from "./Repos";
 
 import { Card, CardWithHeader } from "fusion";
 
+import mime from "mime-types";
+
 /**
  * @export
  * @class ViewPasteMedia
@@ -318,6 +320,10 @@ export class InspectMedia implements Endpoint {
         if (name.split("/").length > 1) FileName = name.split("/").pop()!;
         name = name.split(`/${FileName}`)[0]; // remove file from paste name
 
+        // check file type
+        const Mime = mime.contentType(FileName) || "";
+        const FileType = Mime.includes("image") ? "image" : "binary";
+
         // get paste
         const paste = await db.GetPasteFromURL(name, true);
         if (!paste || paste.HostServer) return new _404Page().request(request);
@@ -505,23 +511,25 @@ export class InspectMedia implements Endpoint {
                                     )}
 
                                 {/* normal stuff */}
-                                <CardWithHeader
-                                    round={true}
-                                    border={true}
-                                    header={<b>Preview</b>}
-                                >
-                                    <div className="flex justify-center">
-                                        <img
-                                            src={`/api/media/file/${name}/${FileName}`}
-                                            alt={FileName}
-                                            style={{
-                                                width: "auto",
-                                                height: "auto",
-                                                maxWidth: "100%",
-                                            }}
-                                        />
-                                    </div>
-                                </CardWithHeader>
+                                {FileType === "image" && (
+                                    <CardWithHeader
+                                        round={true}
+                                        border={true}
+                                        header={<b>Preview</b>}
+                                    >
+                                        <div className="flex justify-center">
+                                            <img
+                                                src={`/api/media/file/${name}/${FileName}`}
+                                                alt={FileName}
+                                                style={{
+                                                    width: "auto",
+                                                    height: "auto",
+                                                    maxWidth: "100%",
+                                                }}
+                                            />
+                                        </div>
+                                    </CardWithHeader>
+                                )}
 
                                 <CardWithHeader
                                     round={true}

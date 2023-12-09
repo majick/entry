@@ -933,30 +933,36 @@ export class ProfileView implements Endpoint {
                         <div class={"flex flex-column g-4 full"}>
                             <ReposNav name={name} current="Home" />
 
-                            <CardWithHeader
-                                border={true}
-                                round={true}
-                                header={<b>Pastes</b>}
-                            >
-                                <div class="flex flex-column g-4">
-                                    {Pastes.map((paste) => (
-                                        <Card
-                                            round={true}
-                                            border={true}
-                                            secondary={true}
-                                            class="flex justify-space-between flex-wrap"
-                                        >
-                                            <a href={`/r/${paste.CustomURL}`}>
-                                                {paste.CustomURL}
-                                            </a>
+                            {result.Metadata &&
+                                result.Metadata.EnablePasteList !== false && (
+                                    <CardWithHeader
+                                        border={true}
+                                        round={true}
+                                        header={<b>Pastes</b>}
+                                    >
+                                        <div class="flex flex-column g-4">
+                                            {Pastes.map((paste) => (
+                                                <Card
+                                                    round={true}
+                                                    border={true}
+                                                    secondary={true}
+                                                    class="flex justify-space-between flex-wrap"
+                                                >
+                                                    <a
+                                                        href={`/r/${paste.CustomURL}`}
+                                                    >
+                                                        {paste.CustomURL}
+                                                    </a>
 
-                                            <span>
-                                                {paste.Content.length} characters
-                                            </span>
-                                        </Card>
-                                    ))}
-                                </div>
-                            </CardWithHeader>
+                                                    <span>
+                                                        {paste.Content.length}{" "}
+                                                        characters
+                                                    </span>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </CardWithHeader>
+                                )}
                         </div>
                     </main>
 
