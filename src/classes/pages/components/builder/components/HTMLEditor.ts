@@ -48,6 +48,18 @@ import {
 import { html } from "@codemirror/lang-html";
 import { tags } from "@lezer/highlight";
 
+import { linter, Diagnostic, lintGutter } from "@codemirror/lint";
+
+// prettier
+// @ts-ignore
+import * as prettier from "prettier/standalone.mjs";
+import type { Options } from "prettier";
+
+import EstreePlugin from "prettier/plugins/estree";
+import BabelParser from "prettier/plugins/babel";
+import CSSParser from "prettier/plugins/postcss";
+import HTMLParser from "prettier/plugins/html";
+
 // create editor theme
 export const EntryCodeHighlight = HighlightStyle.define([
     {
@@ -97,6 +109,49 @@ export const EntryCodeHighlight = HighlightStyle.define([
     },
 ]);
 
+// create lint
+import { HTMLHint } from "htmlhint";
+
+let LastLint = performance.now();
+const HTMLLint = linter((view) => {
+    let diagnostics: Diagnostic[] = [];
+
+    // get hints
+    const hints = HTMLHint.verify(view.state.sliceDoc(0, view.state.doc.length), {
+        "doctype-first": false,
+        // attributes (https://htmlhint.com/docs/user-guide/list-rules#attributes)
+        "attr-lowercase": true,
+        "attr-value-not-empty": true,
+        "attr-value-double-quotes": true,
+        // tags (https://htmlhint.com/docs/user-guide/list-rules#tags)
+        "tag-self-close": true,
+        "tag-pair": true,
+        // id (https://htmlhint.com/docs/user-guide/list-rules#id)
+        "id-unique": true,
+    });
+
+    // turn hints into diagnostics
+    if (hints.length > 0 && performance.now() - LastLint > 100) {
+        LastLint = performance.now(); // can only run lint every 100ms
+
+        // ...
+        for (const hint of hints) {
+            if (hint.line === view.state.doc.lines) hint.line = 1; // do not add an error to the last line (breaks editor)
+            const line = view.state.doc.line(hint.line);
+
+            diagnostics.push({
+                from: line.from + hint.col - 1,
+                to: line.from + hint.col + hint.raw.length - 1,
+                severity: hint.type,
+                message: `${hint.message} (${hint.line}:${hint.col})\n${hint.rule.id}: ${hint.rule.description}`,
+            });
+        }
+    }
+
+    // return
+    return diagnostics;
+});
+
 // create editor function
 export function CreateEditor(
     element: HTMLElement,
@@ -126,6 +181,7 @@ export function CreateEditor(
                 rectangularSelection(),
                 crosshairCursor(),
                 highlightActiveLine(),
+                lintGutter(),
                 EditorView.lineWrapping,
                 EditorView.updateListener.of(async (update) => {
                     if (update.docChanged) {
@@ -133,6 +189,7 @@ export function CreateEditor(
                         if (content === "") return;
 
                         UpdateNode(content); // update node
+                        (globalThis as any).HTMLEditor.Content = content;
                     }
                 }),
                 // keymaps
@@ -198,10 +255,53 @@ export function CreateEditor(
                 ]),
                 // language
                 html({ autoCloseTags: true }),
+                HTMLLint,
             ],
         }),
         parent: element,
     });
+
+    // global functions
+    (globalThis as any).HTMLEditor = {
+        Content: "",
+        Update: (content: string, clear: boolean = false) => {
+            const transaction = view.state.update({
+                changes: {
+                    from: 0,
+                    to: view.state.doc.length,
+                    insert: content,
+                },
+                scrollIntoView: true,
+            });
+
+            if (transaction) {
+                view.dispatch(transaction);
+            }
+        },
+        Format: async () => {
+            try {
+                const formatted = await prettier.format(
+                    (globalThis as any).HTMLEditor.Content,
+                    {
+                        parser: "html",
+                        plugins: [EstreePlugin, BabelParser, HTMLParser, CSSParser],
+                        htmlWhitespaceSensitivity: "ignore",
+                        // all from the project's .prettierrc
+                        useTabs: false,
+                        singleQuote: false,
+                        tabWidth: 4,
+                        trailingComma: "es5",
+                        printWidth: 85,
+                        semi: true,
+                    } as Options
+                );
+
+                (globalThis as any).HTMLEditor.Update(formatted);
+            } catch (err) {
+                alert(err);
+            }
+        },
+    };
 
     // return
     return view;

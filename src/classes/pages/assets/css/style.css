@@ -121,18 +121,16 @@
 
 .builder\:toolbar {
     position: fixed;
-    top: 0.5rem;
-    right: 0.5rem;
-    border-radius: 0.25rem;
-    background: var(--background-surface1);
+    top: var(--u-04);
+    right: var(--u-04);
     display: flex;
     flex-wrap: wrap;
     gap: var(--u-04);
     padding: 0.5rem;
-    border: solid 1px var(--background-surface2a);
     justify-content: center;
     align-items: center;
     height: 3.5rem;
+    width: max-content;
     z-index: 500000000;
 
     animation: FadeIn 0.75s 0s running;
@@ -144,7 +142,6 @@
 }
 
 .builder\:toolbar button {
-    border-radius: 0.25rem;
     background: var(--background-surface1);
     border: solid 1px transparent;
 }

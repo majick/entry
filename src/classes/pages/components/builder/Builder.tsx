@@ -242,10 +242,10 @@ function RenderPage() {
                 id={"_doc"}
             />
 
-            <div className="builder:toolbar verticle">
+            <div className="card round border secondary builder:toolbar verticle">
                 <button
                     aria-label={"Add Element"}
-                    class={"tooltip-wrapper visual-active"}
+                    class={"tooltip-wrapper visual-active round"}
                     id={"entry:button.AddComponent"}
                 >
                     <svg
@@ -264,7 +264,7 @@ function RenderPage() {
 
                 <button
                     aria-label={"Current Page"}
-                    class={"tooltip-wrapper visual-active"}
+                    class={"tooltip-wrapper visual-active round"}
                     onClick={() => {
                         Select(Document.Pages[CurrentPage], Document.Pages);
                     }}
@@ -286,7 +286,7 @@ function RenderPage() {
 
                 <button
                     aria-label={"More"}
-                    class={"tooltip-wrapper visual-active"}
+                    class={"tooltip-wrapper visual-active round"}
                     onClick={() => {
                         SidebarOpen = true;
                         RenderSidebar({
@@ -312,7 +312,7 @@ function RenderPage() {
                 <button
                     id={"entry:button.PublishPaste"}
                     aria-label={"Publish Paste"}
-                    class={"tooltip-wrapper visual-active green-cta"}
+                    class={"tooltip-wrapper visual-active green-cta round border"}
                     onClick={() => {
                         (
                             document.getElementById(
