@@ -2021,44 +2021,46 @@ export class PasteCommentsPage implements Endpoint {
                                                                 </b>
                                                             </li>
 
-                                                            {comment.Associated && (
-                                                                <li
-                                                                    style={{
-                                                                        color: "var(--text-color-faded)",
-                                                                    }}
-                                                                >
-                                                                    posted by{" "}
-                                                                    <a
-                                                                        class={
-                                                                            "chip solid"
-                                                                        }
-                                                                        href={`/${comment.Associated}`}
+                                                            {comment.Associated &&
+                                                                comment.Associated !==
+                                                                    comment.CustomURL && (
+                                                                    <li
                                                                         style={{
-                                                                            color:
-                                                                                // if comment poster is the paste owner, make color yellow
-                                                                                // otherwise if comment poster is current user, make color green
-                                                                                comment.Metadata!
-                                                                                    .Owner ===
-                                                                                result.CustomURL
-                                                                                    ? "var(--yellow)"
-                                                                                    : PostingAs ===
-                                                                                        comment.Associated
-                                                                                      ? "var(--green)"
-                                                                                      : "inherit",
+                                                                            color: "var(--text-color-faded)",
                                                                         }}
-                                                                        title={
-                                                                            PostingAs ===
-                                                                            comment.Associated
-                                                                                ? "You"
-                                                                                : ""
-                                                                        }
                                                                     >
-                                                                        {
-                                                                            comment.Associated
-                                                                        }
-                                                                    </a>
-                                                                </li>
-                                                            )}
+                                                                        posted by{" "}
+                                                                        <a
+                                                                            class={
+                                                                                "chip solid"
+                                                                            }
+                                                                            href={`/${comment.Associated}`}
+                                                                            style={{
+                                                                                color:
+                                                                                    // if comment poster is the paste owner, make color yellow
+                                                                                    // otherwise if comment poster is current user, make color green
+                                                                                    comment.Metadata!
+                                                                                        .Owner ===
+                                                                                    result.CustomURL
+                                                                                        ? "var(--yellow)"
+                                                                                        : PostingAs ===
+                                                                                            comment.Associated
+                                                                                          ? "var(--green)"
+                                                                                          : "inherit",
+                                                                            }}
+                                                                            title={
+                                                                                PostingAs ===
+                                                                                comment.Associated
+                                                                                    ? "You"
+                                                                                    : ""
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                comment.Associated
+                                                                            }
+                                                                        </a>
+                                                                    </li>
+                                                                )}
 
                                                             {comment.IsPM ===
                                                                 "true" && (

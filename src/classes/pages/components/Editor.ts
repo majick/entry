@@ -655,14 +655,20 @@ for (const form of Array.from(document.querySelectorAll("form[action]")!))
         for (const point of data.entries()) body += `&${point[0]}=${point[1]}`;
 
         // send request
-        const res = await fetch((event.target as HTMLFormElement).action, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: body.slice(1),
-        });
+        const res = await fetch(
+            (event as any).submitter.getAttribute("formaction") ||
+                (event.target as HTMLFormElement).action,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: body.slice(1),
+            }
+        );
+
+        const json = await res.json();
 
         // navigate
-        window.location.href = res.url;
+        window.location.href = json.redirect;
     });

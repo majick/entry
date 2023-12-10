@@ -521,12 +521,10 @@ export class CreatePaste implements Endpoint {
         }
 
         // return
-        return new Response(JSON.stringify(result), {
-            status: 302,
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json; charset=utf-8",
-                Location:
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect:
                     result[0] === true
                         ? // if successful, redirect to paste
                           body.CommentOn === ""
@@ -540,10 +538,18 @@ export class CreatePaste implements Endpoint {
                             : `/c/${body.CommentOn}?msg=Comment posted!`
                         : // otherwise, show error message
                           `/?err=${encodeURIComponent(result[1])}`,
-                "X-Entry-Error": result[1],
-                "Set-Cookie": Association[1],
-            },
-        });
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    ...DefaultHeaders,
+                    "Content-Type": "application/json; charset=utf-8",
+                    "X-Entry-Error": result[1],
+                    "Set-Cookie": Association[1],
+                },
+            }
+        );
     }
 }
 
@@ -675,12 +681,10 @@ export class EditPaste implements Endpoint {
         }
 
         // return
-        return new Response(JSON.stringify(result), {
-            status: 302,
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json; charset=utf-8",
-                Location:
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect:
                     result[0] === true
                         ? // if successful, redirect to paste
                           `/${result[2].CustomURL}${
@@ -692,9 +696,17 @@ export class EditPaste implements Endpoint {
                           `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
                               result[2].CustomURL
                           }`,
-                "X-Entry-Error": result[1],
-            },
-        });
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    ...DefaultHeaders,
+                    "Content-Type": "application/json; charset=utf-8",
+                    "X-Entry-Error": result[1],
+                },
+            }
+        );
     }
 }
 
