@@ -151,7 +151,7 @@ export async function Session(request: Request): Promise<string> {
         const ses_log = await EntryDB.Logs.GetLog(session);
 
         // set token to expire if log no longer exists
-        if (!ses_log[0] && !ses_log[2])
+        if (!ses_log[0] || !ses_log[2])
             session =
                 "session-id=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0";
         // otherwise, return nothing (no need to set cookie, it already exists)
@@ -196,7 +196,7 @@ export async function GetAssociation(
             return [
                 // Failed to get session log
                 false,
-                "associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0",
+                "associated=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0",
             ];
 
         // check if session has an association
@@ -242,7 +242,7 @@ export async function GetAssociation(
             // remove association if session does not have an association
             return [
                 true,
-                `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
+                `associated=refresh; SameSite=Strict; Secure; Path=/; Max-Age=0`,
             ];
     }
 

@@ -2317,7 +2317,7 @@ export class UserSettings implements Endpoint {
         else if (name.startsWith("/paste/settings/"))
             name = name.split("/paste/settings/")[1];
 
-        if (!url.pathname.startsWith("/s/") && name !== "s")
+        if (!url.pathname.startsWith("/s/") && name !== "/s")
             return await new GetPasteFromURL().request(request, server);
 
         // get association
@@ -2326,7 +2326,7 @@ export class UserSettings implements Endpoint {
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // if no paste is provided, show global settings
-        if (name === "s") {
+        if (name === "/s") {
             // render
             return new Response(
                 Renderer.Render(
