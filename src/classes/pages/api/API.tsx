@@ -252,73 +252,6 @@ export async function GetAssociation(
 
 /**
  * @export
- * @class WellKnown
- * @implements {Endpoint}
- */
-export class WellKnown implements Endpoint {
-    public async request(request: Request): Promise<Response> {
-        const url = new URL(request.url);
-
-        function ReturnJSON(json: { [key: string]: any }): Response {
-            return new Response(JSON.stringify(json), {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-        }
-
-        // nodeinfo
-        if (url.pathname === "/.well-known/nodeinfo")
-            return ReturnJSON({
-                links: [
-                    {
-                        rel: "http://nodeinfo.diaspora.software/ns/schema/2.0",
-                        href: `${url.origin}/.well-known/nodeinfo/2.0`,
-                    },
-                ],
-            });
-        else if (url.pathname === "/.well-known/nodeinfo/2.0")
-            return ReturnJSON({
-                version: "2.0",
-                software: {
-                    name: "entry",
-                    version: pack.version,
-                },
-                protocols: ["entry"],
-                services: {
-                    outbound: [],
-                    inbound: [],
-                },
-                usage: {
-                    users: {
-                        // we're going to use total to display number of sessions...
-                        total:
-                            (EntryDB.Logs &&
-                                (
-                                    await EntryDB.Logs.QueryLogs(
-                                        "\"Type\" = 'session'"
-                                    )
-                                )[2].length - 1) ||
-                            0,
-                        activeMonth: 0,
-                        activeHalfyear: 0,
-                    },
-                    // this, however, we can supply
-                    localPosts: (
-                        await db.GetAllPastes(true, true, '"CustomURL" IS NOT NULL')
-                    ).length,
-                },
-                openRegistrations: false, // there is no registration at all
-                metadata: {},
-            });
-
-        // default
-        return new _404Page().request(request);
-    }
-}
-
-/**
- * @export
  * @class RobotsTXT
  * @implements {Endpoint}
  */
@@ -1795,7 +1728,6 @@ export default {
     GetAssociation,
     VerifyContentType,
     Session,
-    WellKnown,
     RobotsTXT,
     Favicon,
     WSAS,

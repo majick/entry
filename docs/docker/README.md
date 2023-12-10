@@ -22,7 +22,6 @@ services:
             DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default, only used during first setup
             #                            edit within config file, this value is only used to prefill the value in config.json
             CONFIG_LOCATION: ":cwd/data/config.json" # optional, :cwd/data/config.json is default
-            EDITABLE_BY_DEFAULT: true # optional, sets if pastes are editable by default, true is default
 ```
 
 You can then run `docker-compose up -d` to start Entry locally. Visit the port you configured and you should see the Entry UI.

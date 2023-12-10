@@ -117,22 +117,13 @@ export default class EntryDB {
             });
 
             try {
-                // check if "Metadata" column exists
-                // I don't want to use an SQL if statement because they're stupidly ugly
+                // add "Metadata" column (if it doesn't exist) (COMPATIBILITY)
                 await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
-                    // COMPATIBILITY
-                    // @ts-ignore
-                    db: db,
-                    query: `SELECT "Metadata" FROM "Pastes" LIMIT 1`,
-                });
-            } catch {
-                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
-                    // COMPATIBILITY
                     // @ts-ignore
                     db: db,
                     query: `ALTER TABLE "Pastes" ADD COLUMN "Metadata" varchar(${EntryDB.MaxContentLength})`,
                 });
-            }
+            } catch {}
 
             await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore

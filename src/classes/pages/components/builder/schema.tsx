@@ -598,6 +598,7 @@ export function StarInfoNode(props: {
                 padding: "0",
                 top: "initial",
                 bottom: "0.5rem",
+                borderRadius: "var(--u-04)",
                 ...parser.ParseStyleString(props.node.StyleString || ""),
             }}
         >

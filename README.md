@@ -66,8 +66,6 @@ Entry was originally written as a replacement for [Rentry](https://rentry.co). E
 
 Entry supports extra features that Rentry does not support. They are detailed below.
 
-An instance with all features enable is hosted at [sentrytwo.com](https://sentrytwo.com), and an (almost) 1:1 compatible version (with most extra features disabled) is hosted at [snty.hkau.org](https://snty.hkau.org)!
-
 ## Features
 
 Many features are able to be disabled or enabled through the server configuration file. An example file can be seen [here](https://sentrytwo.com/config). It is the file used in the primary Entry instance.

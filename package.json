@@ -44,7 +44,7 @@
     "format": "prettier src/ --write --config ./.prettierrc",
     "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag codeberg.org/hkau/entry:latest .",
     "build:docker-nopush": "bun run build && docker buildx build --load --tag codeberg.org/hkau/entry:latest .",
-    "start:docker-debug": "docker run  --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 codeberg.org/hkau/entry:latest",
+    "start:docker-debug": "docker run --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 codeberg.org/hkau/entry:latest",
     "build:exec": "bun run build && bun build dist/Executable.js --compile --minify --outfile build/entry"
   },
   "repository": {

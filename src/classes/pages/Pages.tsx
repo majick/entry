@@ -616,7 +616,9 @@ export class GetPasteFromURL implements Endpoint {
                                             result.Metadata.ShowOwnerEnabled !==
                                                 false &&
                                             result.Metadata.Owner !==
-                                                result.CustomURL && (
+                                                result.CustomURL &&
+                                            result.Metadata.Owner !==
+                                                "Sessions are disabled" && (
                                                 <p>
                                                     Owner:{" "}
                                                     <a
@@ -1008,7 +1010,9 @@ export class GetPasteFromURL implements Endpoint {
                                             result.Metadata.ShowOwnerEnabled !==
                                                 false &&
                                             result.Metadata.Owner !==
-                                                result.CustomURL && (
+                                                result.CustomURL &&
+                                            result.Metadata.Owner !==
+                                                "Sessions are disabled" && (
                                                 <span
                                                     class={"flex align-center g-4"}
                                                 >
@@ -2307,11 +2311,11 @@ export class UserSettings implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
-        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        let name = url.pathname.toLowerCase();
 
-        if (name.startsWith("s/")) name = name.split("s/")[1];
-        else if (name.startsWith("paste/settings/"))
-            name = name.split("paste/settings/")[1];
+        if (name.startsWith("/s/")) name = name.split("/s/")[1];
+        else if (name.startsWith("/paste/settings/"))
+            name = name.split("/paste/settings/")[1];
 
         if (!url.pathname.startsWith("/s/") && name !== "s")
             return await new GetPasteFromURL().request(request, server);

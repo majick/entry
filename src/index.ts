@@ -362,14 +362,13 @@ export const ServerConfig: HoneybeeConfig = {
         "/paste/builder": { Page: Builder.Builder },
 
         // GET repos
+        "/c/": { Type: "begins", Page: Pages.PasteCommentsPage },
         "/r/diff/": { Type: "begins", Page: Repos.DiffView },
         "/r/rev/": { Type: "begins", Page: Repos.RevisionsList },
         "/r/": { Type: "begins", Page: Repos.RepoView },
 
         // GET root
-        "/.well-known": { Type: "begins", Page: API.WellKnown },
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
-        "/c/": { Type: "begins", Page: Pages.PasteCommentsPage },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage }, // alias of /c/
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },
