@@ -12,6 +12,8 @@ import { render, hydrate } from "preact";
 
 import PublishModals from "../site/modals/PublishModals";
 import { Modal } from "fusion";
+
+import CodeWorkspace from "./components/CodeWorkspace";
 import Sidebar from "./components/Sidebar";
 import Window from "./components/Window";
 
@@ -185,7 +187,7 @@ export function RestoreState(i: number): void {
 (globalThis as any).History = { SaveStateToHistory, RestoreState, History };
 
 // sidebar
-export function RenderSidebar(props?: { Page: string }) {
+export function RenderSidebar(props?: { Page: string }): void {
     // make sure we're in edit mode
     if (!EditMode) return;
 
@@ -199,6 +201,26 @@ export function RenderSidebar(props?: { Page: string }) {
     return render(
         <Sidebar Page={props !== undefined ? props.Page : undefined} />,
         document.getElementById("builder:sidebar")!
+    );
+}
+
+// ...
+export function RenderCodeWorkspace(): void {
+    // make sure we're in edit mode
+    if (!EditMode) return;
+
+    // make sure we're editing a page or source component
+    if (!Selected || (Selected.Type !== "Page" && Selected.Type !== "Source")) {
+        // show component tree
+        SetSidebar(true);
+        document.getElementById("builder:code-workspace")!.style.display = "none";
+        return RenderSidebar({ Page: "Tree" });
+    }
+
+    // render
+    return render(
+        <CodeWorkspace.Workspace />,
+        document.getElementById("builder:code-workspace")!
     );
 }
 
@@ -241,6 +263,8 @@ function RenderPage() {
                 }
                 id={"_doc"}
             />
+
+            <CodeWorkspace.Toolbar current="render" />
 
             <div className="card round border secondary builder:toolbar verticle">
                 <button
@@ -340,6 +364,19 @@ function RenderPage() {
             </div>
 
             <div id="builder:sidebar" />
+
+            <div
+                id="builder:code-workspace"
+                style={{
+                    top: 0,
+                    width: "100vw",
+                    height: "100vh",
+                    display: "none",
+                    zIndex: "500000000",
+                    position: "absolute",
+                    background: "var(--background-surface)",
+                }}
+            />
 
             {/* modals */}
             <Modal

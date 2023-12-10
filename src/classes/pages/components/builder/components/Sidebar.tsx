@@ -16,10 +16,10 @@ import {
     Delete,
     SelectedParent,
     RenderSidebar,
-    Select,
     CurrentPage,
     RestoreState,
     HistoryCurrent,
+    RenderCodeWorkspace,
 } from "../Builder";
 
 import BaseParser, { TOML } from "../../../../db/helpers/BaseParser";
@@ -253,54 +253,6 @@ export default function Sidebar(props: { Page?: string }): any {
                 </button>
             </div>
 
-            {/* code editor */}
-            {props.Page && props.Page === "HTML" && (
-                <>
-                    <div
-                        id="_editor"
-                        style={{
-                            width: "100%",
-                            height: "95dvh",
-                            maxHeight: "90dvh",
-                        }}
-                    />
-
-                    <div
-                        className="card round border secondary builder:toolbar verticle"
-                        style={{
-                            top: "calc(var(--nav-height) + var(--u-04))",
-                        }}
-                    >
-                        <button
-                            class={"tooltip-wrapper visual-active round"}
-                            onClick={() => {
-                                (globalThis as any).HTMLEditor.Format();
-                            }}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 16 16"
-                                width="16"
-                                height="16"
-                                aria-label={"List Symbol"}
-                            >
-                                <path d="M2 2h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Zm4.655 8.595a.75.75 0 0 1 0 1.06L4.03 14.28a.75.75 0 0 1-1.06 0l-1.5-1.5a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l.97.97 2.095-2.095a.75.75 0 0 1 1.06 0ZM9.75 2.5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm-7.25-9v3h3v-3Z"></path>
-                            </svg>
-
-                            <div className="card secondary round border tooltip left">
-                                Format Code
-                            </div>
-                        </button>
-                    </div>
-
-                    <style
-                        dangerouslySetInnerHTML={{
-                            __html: `.cm-line, .cm-line span { font-family: monospace !important; }`,
-                        }}
-                    />
-                </>
-            )}
-
             {/* main options */}
             <div className="options">
                 {Selected && !props.Page && (
@@ -355,13 +307,16 @@ export default function Sidebar(props: { Page?: string }): any {
                                 )
                                     return;
 
-                                // make sidebar fill screen
-                                document
-                                    .getElementById("main-sidebar")!
-                                    .classList.add("full");
+                                // hide sidebar
+                                SetSidebar(false);
 
-                                // render sidebar
-                                RenderSidebar({ Page: "HTML" });
+                                // render workspace
+                                RenderCodeWorkspace();
+                                document.getElementById(
+                                    "builder:code-workspace"
+                                )!.style.display = "block";
+
+                                document.getElementById("_editor")!.innerHTML = "";
 
                                 // create editor
                                 CurrentEditor = HTMLEditor.CreateEditor(

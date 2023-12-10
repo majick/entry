@@ -1469,7 +1469,13 @@ export default class EntryDB {
                 method,
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
-                    ...(headers || new Headers()).toJSON(),
+                    ...(
+                        headers || {
+                            toJSON() {
+                                return;
+                            },
+                        }
+                    ).toJSON(),
                 },
             }
         );
