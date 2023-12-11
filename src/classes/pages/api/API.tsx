@@ -80,13 +80,21 @@ export function VerifyContentType(
 ): Response | undefined {
     // verify content type
     if (!(request.headers.get("Content-Type") || "").startsWith(expected))
-        return new Response(`Expected ${expected}`, {
-            status: 406,
-            headers: {
-                ...DefaultHeaders,
-                Accept: expected,
-            },
-        });
+        return new Response(
+            JSON.stringify({
+                success: false,
+                redirect: `/?msg=Expected%20${expected}`,
+                result: [false, `Expected ${expected}`],
+            }),
+            {
+                status: 406,
+                headers: {
+                    ...DefaultHeaders,
+                    Accept: expected,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
 
     // return undefined if it is fine
     return undefined;
@@ -455,15 +463,21 @@ export class CreatePaste implements Endpoint {
             EntryDB.config.app.association_required === true &&
             Association[0] === false
         )
-            return new Response("Association required!", {
-                status: 302,
-                headers: {
-                    Location:
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect:
                         "/?err=This server requires a paste association to create new pastes",
-                    "X-Entry-Error":
-                        "This server requires a paste association to create new pastes",
-                },
-            });
+                }),
+                {
+                    status: 302,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Entry-Error":
+                            "This server requires a paste association to create new pastes",
+                    },
+                }
+            );
 
         // create paste
         const result = await db.CreatePaste(body);
@@ -759,12 +773,10 @@ export class DeletePaste implements Endpoint {
         }
 
         // return
-        return new Response(JSON.stringify(result), {
-            status: 302,
-            headers: {
-                ...DefaultHeaders,
-                "Content-Type": "application/json; charset=utf-8",
-                Location:
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect:
                     result[0] === true
                         ? // if successful, redirect to home
                           `/?msg=${encodeURIComponent(result[1])}`
@@ -772,9 +784,17 @@ export class DeletePaste implements Endpoint {
                           `/?err=${encodeURIComponent(result[1])}&mode=edit&OldURL=${
                               result[2].CustomURL
                           }`,
-                "X-Entry-Error": result[1],
-            },
-        });
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    ...DefaultHeaders,
+                    "Content-Type": "application/json; charset=utf-8",
+                    "X-Entry-Error": result[1],
+                },
+            }
+        );
     }
 }
 
@@ -1258,13 +1278,19 @@ export class PasteLogin implements Endpoint {
             paste.EditPassword !== CreateHash(body.EditPassword) &&
             body.EditPassword !== EntryDB.config.admin
         )
-            return new Response("Incorrect password", {
-                status: 302,
-                headers: {
-                    Location: "/?err=Incorrect password",
-                    "X-Entry-Error": "Incorrect password",
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=Incorrect password",
+                }),
+                {
+                    status: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Entry-Error": "Incorrect password",
+                    },
+                }
+            );
 
         // generate association
         await GetAssociation(request, _ip, true, body.CustomURL);
@@ -1287,19 +1313,25 @@ export class PasteLogin implements Endpoint {
             );
 
         // return
-        return new Response(paste.CustomURL, {
-            status: 302,
-            headers: {
-                Location: `/?msg=Associated as ${encodeURIComponent(
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: `/?msg=Associated as ${encodeURIComponent(
                     paste.CustomURL || ""
                 )}`,
-                "Set-Cookie": `associated=${
-                    paste.CustomURL
-                }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
-                    60 * 60 * 24 * 365
-                }`,
-            },
-        });
+                result: {},
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Set-Cookie": `associated=${
+                        paste.CustomURL
+                    }; SameSite=Lax; Secure; Path=/; HostOnly=true; HttpOnly=true; Max-Age=${
+                        60 * 60 * 24 * 365
+                    }`,
+                },
+            }
+        );
     }
 }
 
@@ -1394,15 +1426,21 @@ export class PasteLogout implements Endpoint {
             );
 
         // return
-        return new Response(paste.CustomURL, {
-            status: 302,
-            headers: {
-                Location: `/?msg=Removed association with ${encodeURIComponent(
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: `/?msg=Removed association with ${encodeURIComponent(
                     paste.CustomURL || ""
                 )}`,
-                "Set-Cookie": `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
-            },
-        });
+                result: {},
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Set-Cookie": `associated=refresh; SameSite=Lax; Secure; Path=/; Max-Age=0`,
+                },
+            }
+        );
     }
 }
 
@@ -1600,13 +1638,20 @@ export class UpdateCustomDomain implements Endpoint {
             CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
-            return new Response("Invalid password", {
-                status: 302,
-                headers: {
-                    Location: "/?err=Cannot update domain link: Invalid password!",
-                    "X-Entry-Error": "Cannot update domain link: Invalid password!",
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=Cannot update domain link: Invalid password!",
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Entry-Error":
+                            "Cannot update domain link: Invalid password!",
+                    },
+                }
+            );
 
         // check association
         const association = await GetAssociation(request, null);
@@ -1634,13 +1679,19 @@ export class UpdateCustomDomain implements Endpoint {
         )[2][0];
 
         if (DomainLog)
-            return new Response(body.Domain, {
-                status: 302,
-                headers: {
-                    Location: "/?err=This domain is already in use",
-                    "X-Entry-Error": "This domain is already in use",
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=This domain is already in use",
+                }),
+                {
+                    status: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Entry-Error": "This domain is already in use",
+                    },
+                }
+            );
 
         // get log
         const CustomDomainLog = (
@@ -1657,12 +1708,18 @@ export class UpdateCustomDomain implements Endpoint {
             });
 
             // return
-            return new Response(body.Domain, {
-                status: 302,
-                headers: {
-                    Location: "/?msg=Added domain link!",
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: true,
+                    redirect: "/?msg=Updated domain link!",
+                }),
+                {
+                    status: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
         }
 
         // update log
@@ -1672,12 +1729,18 @@ export class UpdateCustomDomain implements Endpoint {
         );
 
         // return
-        return new Response(body.Domain, {
-            status: 302,
-            headers: {
-                Location: "/?msg=Updated domain link!",
-            },
-        });
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: "/?msg=Updated domain link!",
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
     }
 }
 
@@ -1731,6 +1794,7 @@ export class GetSocialProfile implements Endpoint {
 // ...
 import { GetFile, ListFiles, UploadFile, DeleteFile } from "../repos/Media";
 import { contentType } from "mime-types";
+import { S } from "../../../../dist/Builder";
 
 // default export
 export default {

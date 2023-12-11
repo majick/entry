@@ -347,9 +347,6 @@ function BasicCompletion(context: CompletionContext): any {
     };
 }
 
-// ...
-let EditorContent = "";
-
 /**
  * @function CreateEditor
  *
@@ -379,7 +376,7 @@ export default function CreateEditor(ElementID: string, content: string) {
                 const html = await ParseMarkdown(content, false);
                 window.localStorage.setItem("gen", html);
 
-                EditorContent = content;
+                (window as any).EditorContent = content;
             }
         }),
         EditorState.allowMultipleSelections.of(true),
@@ -496,7 +493,7 @@ export default function CreateEditor(ElementID: string, content: string) {
             )
         );
 
-        EditorContent = content;
+        (window as any).EditorContent = content;
     })();
 
     // add attributes
@@ -509,7 +506,7 @@ export default function CreateEditor(ElementID: string, content: string) {
 
     // set value of contentInput if we have window.sessionStorage.doc
     const doc = window.localStorage.getItem("doc");
-    if (doc) EditorContent = doc;
+    if (doc) (window as any).EditorContent = doc;
 }
 
 // handle tabs
@@ -640,35 +637,3 @@ if (
     window.sessionStorage.removeItem("doc");
     window.sessionStorage.removeItem("gen");
 }
-
-// handle form submit
-for (const form of Array.from(document.querySelectorAll("form[action]")!))
-    form.addEventListener("submit", async (event: Event<HTMLFormElement>) => {
-        event.preventDefault();
-
-        // create formdata
-        const data = new FormData(event.target as HTMLFormElement);
-        data.set("Content", encodeURIComponent(EditorContent)); // set content (not automatically part of the form!)
-
-        // create application/x-www-form-urlencoded from formdata
-        let body = "";
-        for (const point of data.entries()) body += `&${point[0]}=${point[1]}`;
-
-        // send request
-        const res = await fetch(
-            (event as any).submitter.getAttribute("formaction") ||
-                (event.target as HTMLFormElement).action,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: body.slice(1),
-            }
-        );
-
-        const json = await res.json();
-
-        // navigate
-        window.location.href = json.redirect;
-    });

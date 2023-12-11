@@ -221,6 +221,15 @@ export default function Footer(props: {
                 }}
             />
 
+            {/* events */}
+            <script
+                type="module"
+                dangerouslySetInnerHTML={{
+                    __html: `import { RegisterEditorFormListeners } from "/Prefetch.js"; 
+                    RegisterEditorFormListeners();`,
+                }}
+            />
+
             {/* footer extras */}
             {FooterExtras.map((html) => (
                 <div dangerouslySetInnerHTML={{ __html: html }}></div>

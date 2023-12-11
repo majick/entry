@@ -722,16 +722,26 @@ export class UploadFile implements Endpoint {
             });
 
         // upload file
-        const res = await EntryDB.Media.UploadFile(paste.CustomURL as string, _file);
+        const result = await EntryDB.Media.UploadFile(
+            paste.CustomURL as string,
+            _file
+        );
 
         // return
-        return new Response(JSON.stringify(res), {
-            status: 302,
-            headers: {
-                "Content-Type": "application/json",
-                Location: res[0] === true ? `/?msg=${res[1]}` : `/?err=${res[1]}`,
-            },
-        });
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect:
+                    result[0] === true ? `/?msg=${result[1]}` : `/?err=${result[1]}`,
+                result,
+            }),
+            {
+                status: 302,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
     }
 }
 
@@ -784,19 +794,26 @@ export class DeleteFile implements Endpoint {
             });
 
         // delete file
-        const res = await EntryDB.Media.DeleteFile(
+        const result = await EntryDB.Media.DeleteFile(
             paste.CustomURL as string,
             body.File
         );
 
         // return
-        return new Response(JSON.stringify(res), {
-            status: 302,
-            headers: {
-                "Content-Type": "application/json",
-                Location: res[0] === true ? `/?msg=${res[1]}` : `/?err=${res[1]}`,
-            },
-        });
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect:
+                    result[0] === true ? `/?msg=${result[1]}` : `/?err=${result[1]}`,
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
     }
 }
 

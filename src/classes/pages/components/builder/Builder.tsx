@@ -338,13 +338,8 @@ function RenderPage() {
                     aria-label={"Publish Paste"}
                     class={"tooltip-wrapper visual-active green-cta round border"}
                     onClick={() => {
-                        (
-                            document.getElementById(
-                                "contentInput"
-                            ) as HTMLInputElement
-                        ).value = encodeURIComponent(
-                            `_builder:${BaseParser.stringify(Document)}`
-                        );
+                        (window as any).EditorContent =
+                            `_builder:${BaseParser.stringify(Document)}`;
                     }}
                 >
                     <svg

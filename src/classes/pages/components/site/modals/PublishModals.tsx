@@ -422,6 +422,13 @@ export default function PublishModals(props: {
             </div>
 
             <LoadingModal />
+
+            <script
+                type="module"
+                dangerouslySetInnerHTML={{
+                    __html: `import { RegisterEditorFormListeners } from "/Prefetch.js"; RegisterEditorFormListeners();`,
+                }}
+            />
         </Modal>
     );
 }

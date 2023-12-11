@@ -271,3 +271,53 @@ export default class Prefetch {
         }
     }
 }
+
+// handle form submit
+export function RegisterEditorFormListeners(): void {
+    for (const form of Array.from(
+        document.querySelectorAll("form[action]")!
+    ) as HTMLFormElement[]) {
+        const _action = new URL(form.action).pathname;
+        if (!_action.startsWith("/api/")) continue;
+
+        // create event
+        form.addEventListener("submit", async (event: Event<HTMLFormElement>) => {
+            event.preventDefault();
+
+            // create formdata
+            const data = new FormData(event.target as HTMLFormElement);
+
+            if ((window as any).EditorContent)
+                // ...set content (not automatically part of the form!)
+                data.set(
+                    "Content",
+                    encodeURIComponent((window as any).EditorContent)
+                );
+
+            // create application/x-www-form-urlencoded from formdata
+            let body = "";
+
+            if (form.enctype === "application/x-www-form-urlencoded")
+                for (const point of data.entries())
+                    body += `&${point[0]}=${point[1]}`;
+
+            // send request
+            const res = await fetch(
+                (event as any).submitter.getAttribute("formaction") ||
+                    (event.target as HTMLFormElement).action,
+                {
+                    method: "POST",
+                    headers: form.enctype.startsWith("application")
+                        ? { "Content-Type": form.enctype }
+                        : {},
+                    body: body !== "" ? body.slice(1) : data,
+                }
+            );
+
+            const json = await res.json();
+
+            // navigate
+            window.location.href = json.redirect;
+        });
+    }
+}

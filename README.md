@@ -102,6 +102,16 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `GET  /api/owner/{pastes}`, Get all pastes owned by specified paste
 - `GET  /api/media/file/{owner}/{file}`, Get media
 
+Most of the POST endpoints listed return a JSON object similar to this:
+
+```ts
+type APIResponse = {
+    success: boolean;
+    redirect: string; // the expected redirect location after the request is fulfilled
+    result?: [boolean, string, any]; // server function call return value
+}
+```
+
 #### Admin Endpoints
 
 - `POST /admin/api/delete`, Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
