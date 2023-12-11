@@ -376,7 +376,7 @@ You can enable/disable the app name being shown in the footer on all pages using
 
 !!! info This feature is only configurable from the server settings!
 
-You can add an info page that is automatically rendered into a third editor tab named *info*. This tab is only shown if the `info` key exists. This page will be opened whenever the *info* tab is selected. This page is intended for server information and announcements, but it can be used for anything.
+You can add an info page that is linked in the footer as *info*. This link is only shown if the `info` key exists. This page will be opened whenever the *info* link is selected. This page is intended for server information and announcements, but it can be used for anything.
 
 Example:
 
