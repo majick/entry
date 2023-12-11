@@ -287,12 +287,19 @@ export function RegisterEditorFormListeners(): void {
             // create formdata
             const data = new FormData(event.target as HTMLFormElement);
 
-            if ((window as any).EditorContent)
+            if (data.get("Content") !== null || data.get("OldContent") !== null) {
                 // ...set content (not automatically part of the form!)
                 data.set(
                     "Content",
-                    encodeURIComponent((window as any).EditorContent)
+                    encodeURIComponent((window as any).EditorContent || "")
                 );
+
+                if (data.get("OldContent") !== null)
+                    data.set(
+                        "OldContent",
+                        encodeURIComponent((window as any).EditorContent || "")
+                    );
+            }
 
             // create application/x-www-form-urlencoded from formdata
             let body = "";
