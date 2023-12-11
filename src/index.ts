@@ -255,7 +255,10 @@ CreateSocketRoutes(AssetStreamer);
 
 // ...create config
 export const ServerConfig: HoneybeeConfig = {
-    Port: EntryDB.config.port || 8080,
+    Port:
+        process.env.FORCE_PORT !== undefined
+            ? parseInt(process.env.FORCE_PORT)
+            : EntryDB.config.port || 8080,
     AssetsDir: process.env.IMPORT_DIR!,
     NotFoundPage: _404Page({}),
     maxRequestBodySize: parseFloat(process.env.MAX_BODY_SIZE || "52428800"),
