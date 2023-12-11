@@ -81,7 +81,6 @@ export type Config = {
     env?: "production" | "development";
     do_not_cache?: boolean;
     app?: {
-        info?: string;
         how?: string;
         enable_search?: boolean; // true default
         enable_private_pastes?: boolean; // true default
@@ -102,6 +101,7 @@ export type Config = {
             host: string; // needed to connect client drone script
         };
         footer?: {
+            info?: string;
             show_name_on_all_pages?: boolean;
             rows: Array<{
                 [key: string]: string;

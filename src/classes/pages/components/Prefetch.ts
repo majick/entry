@@ -306,7 +306,7 @@ export function RegisterEditorFormListeners(): void {
 
             if (form.enctype === "application/x-www-form-urlencoded")
                 for (const point of data.entries())
-                    body += `&${point[0]}=${point[1]}`;
+                    body += `&${point[0]}=${encodeURIComponent(point[1] as any)}`;
 
             // send request
             const res = await fetch(

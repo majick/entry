@@ -795,8 +795,9 @@ export class GetPasteFromURL implements Endpoint {
                         {result.ViewPassword && <DecryptionForm paste={result} />}
 
                         {EntryDB.config.app &&
-                            EntryDB.config.app.info &&
-                            EntryDB.config.app.info.split("?")[0] ===
+                            EntryDB.config.app.footer &&
+                            EntryDB.config.app.footer.info &&
+                            EntryDB.config.app.footer.info.split("?")[0] ===
                                 result.CustomURL &&
                             InformationPageNote()}
 
@@ -1212,9 +1213,11 @@ export class PasteDocView implements Endpoint {
                             <div class={"sidebar"}>
                                 <div>
                                     {EntryDB.config.app &&
-                                        EntryDB.config.app.info &&
-                                        EntryDB.config.app.info.split("?")[0] ===
-                                            result.CustomURL &&
+                                        EntryDB.config.app.footer &&
+                                        EntryDB.config.app.footer.info &&
+                                        EntryDB.config.app.footer.info.split(
+                                            "?"
+                                        )[0] === result.CustomURL &&
                                         InformationPageNote()}
 
                                     <div
@@ -1231,8 +1234,9 @@ export class PasteDocView implements Endpoint {
                                 <summary>Document</summary>
 
                                 {EntryDB.config.app &&
-                                    EntryDB.config.app.info &&
-                                    EntryDB.config.app.info.split("?")[0] ===
+                                    EntryDB.config.app.footer &&
+                                    EntryDB.config.app.footer.info &&
+                                    EntryDB.config.app.footer.info.split("?")[0] ===
                                         result.CustomURL &&
                                     InformationPageNote()}
 

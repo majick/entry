@@ -80,11 +80,13 @@ export default function Footer(props: {
                         </li>
                     )}
 
-                {EntryDB.config.app && EntryDB.config.app.info && (
-                    <li>
-                        <a href={`/${EntryDB.config.app.info}`}>info</a>
-                    </li>
-                )}
+                {EntryDB.config.app &&
+                    EntryDB.config.app.footer &&
+                    EntryDB.config.app.footer.info && (
+                        <li>
+                            <a href={`/${EntryDB.config.app.footer.info}`}>info</a>
+                        </li>
+                    )}
             </ul>
 
             {EntryDB.config.app &&
