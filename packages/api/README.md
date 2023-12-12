@@ -40,7 +40,7 @@ await client.NewPaste({
     EditPassword: "12345",
     IsEditable: true,
     ViewPassword: "12345",
-    ExpireOn: new Date().toUTCString(),
+    ExpireOn: new Date().getTime(),
     GroupName: "test",
     GroupSubmitPassword: "12345",
 });

@@ -493,7 +493,7 @@ export default function CreateEditor(ElementID: string, content: string) {
             )
         );
 
-        (window as any).EditorContent = content;
+        (window as any).EditorContent = decodeURIComponent(content);
     })();
 
     // add attributes

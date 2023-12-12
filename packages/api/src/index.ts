@@ -4,6 +4,12 @@
  * @license MIT
  */
 
+export type APIResponse = {
+    success: boolean;
+    redirect: string;
+    result?: [boolean, string, any];
+};
+
 /**
  * @export
  * @class Entry
@@ -18,17 +24,6 @@ export class Entry {
      */
     constructor(server: string = "https://sentrytwo.com") {
         this.server = server;
-    }
-
-    /**
-     * @method GetInfo
-     * @description Get general information about the Entry server
-     *
-     * @return {Promise<{ [key: string]: any }>} In the [nodeinfo 2.0](https://nodeinfo.diaspora.software/docson/index.html#/ns/schema/2.0#$$expand) spec
-     * @memberof Entry
-     */
-    public async GetInfo(): Promise<{ [key: string]: any }> {
-        return await (await fetch(`${this.server}/.well-known/nodeinfo/2.0`)).json();
     }
 
     // POST
@@ -46,7 +41,7 @@ export class Entry {
      *         GroupName?: string; // required if GroupSumbmitPassword is provided
      *         GroupSumbmitPassword?: string; // required if GroupName is provided
      *     }} props
-     * @return {Promise<[boolean, string]>} success, message
+     * @return {Promise<APIResponse>}
      * @memberof Entry
      */
     public async NewPaste(props: {
@@ -58,7 +53,7 @@ export class Entry {
         ExpireOn?: string;
         GroupName?: string; // required if GroupSumbmitPassword is provided
         GroupSumbmitPassword?: string; // required if GroupName is provided
-    }): Promise<[boolean, string]> {
+    }): Promise<APIResponse> {
         // fetch
         const res = await fetch(`${this.server}/api/json/new`, {
             method: "POST",
@@ -69,10 +64,7 @@ export class Entry {
         });
 
         // return
-        return [
-            res.status === 200,
-            res.headers.get("X-Entry-Error") || "Paste created",
-        ];
+        return await res.json();
     }
 
     /**
@@ -85,7 +77,7 @@ export class Entry {
      *         NewEditPassword?: string;
      *         NewCustomURL?: string;
      *     }} props
-     * @return {Promise<[boolean, string]>} success, message
+     * @return {Promise<APIResponse>} success, message
      * @memberof Entry
      */
     public async EditPaste(props: {
@@ -94,7 +86,7 @@ export class Entry {
         EditPassword: string;
         NewEditPassword?: string;
         NewCustomURL?: string;
-    }): Promise<[boolean, string]> {
+    }): Promise<APIResponse> {
         // fetch
         const res = await fetch(`${this.server}/api/json/edit`, {
             method: "POST",
@@ -111,10 +103,7 @@ export class Entry {
         });
 
         // return
-        return [
-            res.status === 200,
-            res.headers.get("X-Entry-Error") || "Paste edited",
-        ];
+        return await res.json();
     }
 
     /**
@@ -124,13 +113,13 @@ export class Entry {
      *         CustomURL: string;
      *         EditPassword: string;
      *     }} props
-     * @return {Promise<[boolean, string]>}
+     * @return {Promise<APIResponse>}
      * @memberof Entry
      */
     public async DeletePaste(props: {
         CustomURL: string;
         EditPassword: string;
-    }): Promise<[boolean, string]> {
+    }): Promise<APIResponse> {
         // fetch
         const res = await fetch(`${this.server}/api/json/delete`, {
             method: "POST",
@@ -141,10 +130,7 @@ export class Entry {
         });
 
         // return
-        return [
-            res.status === 200,
-            res.headers.get("X-Entry-Error") || "Paste deleted",
-        ];
+        return await res.json();
     }
 
     /**
@@ -154,13 +140,13 @@ export class Entry {
      *         CustomURL: string;
      *         ViewPassword: string;
      *     }} props
-     * @return {Promise<[boolean, string]>}
+     * @return {Promise<string>}
      * @memberof Entry
      */
     public async DecryptPaste(props: {
         CustomURL: string;
         ViewPassword: string;
-    }): Promise<[boolean, string]> {
+    }): Promise<string> {
         // fetch
         const res = await fetch(`${this.server}/api/json/decrypt`, {
             method: "POST",
@@ -171,10 +157,7 @@ export class Entry {
         });
 
         // return
-        return [
-            res.status === 200,
-            res.headers.get("X-Entry-Error") || (await res.text()),
-        ];
+        return await res.text();
     }
 
     // GET
