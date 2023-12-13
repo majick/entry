@@ -432,6 +432,35 @@ export default function CreateEditor(ElementID: string, content: string) {
                     return true;
                 },
             },
+            {
+                key: "<",
+                run: (): boolean => {
+                    // get current line
+                    const CurrentLine = view.state.doc.lineAt(
+                        view.state.selection.main.head
+                    );
+
+                    // start transaction
+                    const cursor = view.state.selection.main.head;
+                    const transaction = view.state.update({
+                        changes: {
+                            from: cursor,
+                            insert: "<>",
+                        },
+                        selection: {
+                            anchor: cursor + 1,
+                        },
+                        scrollIntoView: true,
+                    });
+
+                    if (transaction) {
+                        view.dispatch(transaction);
+                    }
+
+                    // return
+                    return true;
+                },
+            },
             indentWithTab,
         ]),
         // markdown

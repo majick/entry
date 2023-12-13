@@ -1546,13 +1546,19 @@ export class EditMetadata implements Endpoint {
         });
 
         // return
-        return new Response(JSON.stringify(paste.Metadata), {
-            status: 302,
-            headers: {
-                "Content-Type": "application/json",
-                Location: "/?msg=Metadata updated!",
-            },
-        });
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: "/?msg=Metadata updated!",
+                result: [true, "Metadata updatd!", paste.Metadata],
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
     }
 }
 
