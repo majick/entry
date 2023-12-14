@@ -245,7 +245,7 @@ export class ViewPasteMedia implements Endpoint {
                                         maxLength={
                                             EntryDB.config.app!.media!.max_size || 0
                                         }
-                                        accept={"image/*"}
+                                        accept={"image/*,font/*,text/*"}
                                         required
                                     />
 

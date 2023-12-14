@@ -465,6 +465,50 @@ export class RepoView implements Endpoint {
                                     />
                                 </CardWithHeader>
                             )}
+
+                            {EntryDB.config.app &&
+                                EntryDB.config.app.enable_claim === true && (
+                                    <CardWithHeader
+                                        round={true}
+                                        border={true}
+                                        header={<b>Claim URL</b>}
+                                    >
+                                        <p>
+                                            You can make a claim on this URL to
+                                            repossess this custom URL if it meets the
+                                            following requirements:
+                                        </p>
+                                        <ul>
+                                            <li>
+                                                URL hasn't been edited in over a
+                                                month
+                                            </li>
+                                            <li>
+                                                The paste content is less than 25
+                                                characters long
+                                            </li>
+                                            <li>
+                                                The paste has less than 500 views and
+                                                less than 50 comments
+                                            </li>
+                                        </ul>
+
+                                        <hr />
+
+                                        <form action="/api/claim" method={"POST"}>
+                                            <input
+                                                type="hidden"
+                                                name="CustomURL"
+                                                value={result.CustomURL}
+                                                required
+                                            />
+
+                                            <button className="round border red">
+                                                Claim URL
+                                            </button>
+                                        </form>
+                                    </CardWithHeader>
+                                )}
                         </main>
                     </div>
 
@@ -639,7 +683,7 @@ export class RevisionsList implements Endpoint {
                         paste={result}
                         url={url}
                         isBuilder={false}
-                        title={`${result.CustomURL} (revisions)`}
+                        title={`${name} (revision)`}
                         content="View detailed paste information (historical)"
                     />
                 </>

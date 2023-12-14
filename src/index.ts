@@ -90,6 +90,7 @@ export type Config = {
         enable_paste_settings?: boolean; // true default
         enable_comments?: boolean; // false default
         enable_versioning?: boolean; // false default
+        enable_claim?: boolean; // false default, allows users to "repossess" unused URLs
         association_required?: boolean; // requires an association to create pastes
         auto_tag?: boolean;
         favicon?: string;
@@ -346,6 +347,7 @@ export const ServerConfig: HoneybeeConfig = {
         // ...misc
         "/api/markdown": { Method: "POST", Page: API.RenderMarkdown },
         "/api/domain": { Method: "POST", Page: API.UpdateCustomDomain },
+        "/api/claim": { Type: "begins", Method: "POST", Page: API.CreateURLClaim },
         "/api/json": { Type: "begins", Method: "POST", Page: API.JSONAPI },
 
         // GET search

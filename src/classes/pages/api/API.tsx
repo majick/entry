@@ -1203,10 +1203,22 @@ export class DeleteComment implements Endpoint {
         const association = await GetAssociation(request, null);
 
         if (!association[0])
-            return new Response("You must be associated with a paste to do this", {
-                status: 401,
-            });
-
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=You must be associated with a paste to do this",
+                    result: [
+                        false,
+                        "You must be associated with a paste to do this",
+                    ],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
         if (
             // if paste does not have metadata OR we're not the paste owner, say we can'do that
             !paste.Metadata ||
@@ -1365,9 +1377,22 @@ export class PasteLogout implements Endpoint {
         );
 
         if (!CustomURL)
-            return new Response("You must be associated with a paste to do this", {
-                status: 401,
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=You must be associated with a paste to do this",
+                    result: [
+                        false,
+                        "You must be associated with a paste to do this",
+                    ],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
         // get paste
         const paste = await db.GetPasteFromURL(CustomURL);
@@ -1664,9 +1689,22 @@ export class UpdateCustomDomain implements Endpoint {
         const association = await GetAssociation(request, null);
 
         if (!association[0])
-            return new Response("You must be associated with a paste to do this", {
-                status: 401,
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=You must be associated with a paste to do this",
+                    result: [
+                        false,
+                        "You must be associated with a paste to do this",
+                    ],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
         if (
             // if paste does not have metadata OR we're not the paste owner, say we can'do that
@@ -1798,10 +1836,155 @@ export class GetSocialProfile implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class CreateURLClaim
+ * @implements {Endpoint}
+ */
+export class CreateURLClaim implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // make sure claim is enabled
+        if (!EntryDB.config.app || EntryDB.config.app.enable_claim !== true)
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=Claim is disabled",
+                    result: [false, "Claim is disabled"],
+                }),
+                {
+                    status: 404,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // verify body
+        if (!body.CustomURL) return new _404Page().request(request);
+
+        // if domain is server hostname, return (that's no good!)
+        if (
+            EntryDB.config.app &&
+            EntryDB.config.app.hostname &&
+            body.Domain === EntryDB.config.app.hostname
+        )
+            return new _404Page().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+        if (paste.HostServer) return new _404Page().request(request);
+
+        // check association
+        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        if (!Association[0])
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=You must be associated with a paste to do this",
+                    result: [
+                        false,
+                        "You must be associated with a paste to do this",
+                    ],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+        // check minimum requirements
+        // the minimum requirements to repossess a paste are:
+        //     1. The paste must have not been edited in over a month
+        //     2. The paste content must be less than 25 characters long
+        //     3. The paste must have less than 500 views and 50 comments
+
+        const InvalidResponse = {
+            success: true,
+            redirect:
+                "/?err=URL does not meet the minimum requirements for repossession",
+            result: [
+                true,
+                "URL does not meet the minimum requirements for repossession",
+                Association[1],
+            ],
+        };
+
+        // ...check time (1)
+        const current = new Date().getTime();
+
+        // second, minute, hour, day, week, # of days
+        if (current - paste.EditDate! < 1000 * 60 * 60 * 24 * 7 * 32)
+            return new Response(JSON.stringify(InvalidResponse), {
+                status: 400,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+        // ...check content (2)
+        if (paste.Content!.length > 25)
+            return new Response(JSON.stringify(InvalidResponse), {
+                status: 400,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+        // ...check views and comments (3)
+        if (paste.Views! > 500 || paste.Comments! > 50)
+            return new Response(JSON.stringify(InvalidResponse), {
+                status: 400,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+        // update URL
+        paste.Metadata!.Owner = Association[1];
+
+        await SQL.QueryOBJ({
+            db: db.db,
+            query: 'UPDATE "Pastes" SET ("Metadata", "EditDate") = (?, ?) WHERE "CustomURL" = ?',
+            params: [JSON.stringify(paste.Metadata), current, paste.CustomURL],
+            use: "Prepare",
+        });
+
+        // return
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: "/?msg=URL repossessed",
+                result: [true, "URL repossessed", Association[1]],
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
+}
+
 // ...
 import { GetFile, ListFiles, UploadFile, DeleteFile } from "../repos/Media";
 import { contentType } from "mime-types";
-import { S } from "../../../../dist/Builder";
 
 // default export
 export default {
@@ -1839,4 +2022,5 @@ export default {
     DeleteFile, // supports cloud routing
     UpdateCustomDomain, // supports cloud routing
     GetSocialProfile, // supports cloud routing
+    CreateURLClaim, // supports cloud routing
 };

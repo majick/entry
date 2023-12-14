@@ -54,18 +54,6 @@ Once installed you can start (and build) the server using `bun run start`, to ju
 
 Manually launch once after installing to start the setup prompts. These will allow you to set an admin password and define a different port.
 
-## Compatibility
-
-Entry was originally written as a replacement for [Rentry](https://rentry.co). Entry supports all Rentry features with (almost) 1:1 compatibility. There are a few differences:
-
-| Rentry                                                                                                                       | Entry                                                                                                                                                                                                       |
-|------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| When deleting pastes, Rentry uses `POST /api/edit` with `{ delete: "delete" }`                                               | Entry uses `POST /api/delete`                                                                                                                                                                               |
-| Rentry supports exporting pastes as a pdf, image, or Markdown file                                                           | Entry only supports exporting as a raw Markdown file or a rendered HTML file                                                                                                                                |
-| Rentry uses [Python-Markdown](https://github.com/Python-Markdown/markdown) for Markdown rendering, and renders on the server | Entry uses [Marked](https://marked.js.org/) (with some changes after) and renders an initial render on the server, and then finishes on the client. Entry only renders fully on client for editing previews |
-
-Entry supports extra features that Rentry does not support. They are detailed below.
-
 ## Features
 
 Many features are able to be disabled or enabled through the server configuration file. An example file can be seen [here](https://sentrytwo.com/config). It is the file used in the primary Entry instance.
@@ -93,6 +81,8 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /api/media/delete`, Delete file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string)`
 - `POST /api/domain`, Update paste custom domain, expects FormData with the fields: `CustomURL, EditPassword, Domain`
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
+- `POST /api/claim`, Repossess an unused custom URL, expects form data with the fields: `CustomURL`
+    - Also requires a prior paste association!
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
 - `GET  /api/exists/{paste}`, Check if a paste exists
@@ -535,11 +525,3 @@ Revisions can be enabled through config `app.enable_versioning`.
 ### Tests
 
 You can test your changes like you would a deployed version of Entry. You should also run the included tests before committing your changes. Run `bun test` to run the tests that are included in the repository. These tests test the memory and CPU usage of app usage. All tests should pass before you commit.
-
-## Why
-
-I wanted to self-host a Markdown pastebin, but I noticed every pastebin I could find had too many features or did not support Markdown viewing or custom paste URLs. I eventually found [Rentry](https://rentry.co), but was disappointed to find you could not host it yourself. It support every feature I was looking for, but was closed-source and appeared like it was going to remain that way.
-
-I noticed that on the open-source for the Rentry CLI, there was [an issue](https://github.com/radude/rentry/issues/1) asking for Rentry to publish its source. The creator mentioned that Rentry would go open once the code was cleaned up, but that was four years ago and we haven't gotten a response about it since then.
-
-This is a basic re-creation of Rentry that attempts to look and feel as similar to it as possible.
