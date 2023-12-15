@@ -1910,8 +1910,8 @@ export class CreateURLClaim implements Endpoint {
 
         // check minimum requirements
         // the minimum requirements to repossess a paste are:
-        //     1. The paste must have not been edited in over a month
-        //     2. The paste content must be less than 25 characters long
+        //     1. The paste must have not been edited in over a year
+        //     2. The paste content must have less than 15 words
         //     3. The paste must have less than 500 views and 50 comments
 
         const InvalidResponse = {
@@ -1928,8 +1928,8 @@ export class CreateURLClaim implements Endpoint {
         // ...check time (1)
         const current = new Date().getTime();
 
-        // second, minute, hour, day, week, # of days
-        if (current - paste.EditDate! < 1000 * 60 * 60 * 24 * 7 * 32)
+        // second, minute, hour, hours
+        if (current - paste.EditDate! < 1000 * 60 * 60 * 24 * 365)
             return new Response(JSON.stringify(InvalidResponse), {
                 status: 400,
                 headers: {
@@ -1938,7 +1938,7 @@ export class CreateURLClaim implements Endpoint {
             });
 
         // ...check content (2)
-        if (paste.Content!.length > 25)
+        if (paste.Content!.trim().split(" ").length > 15)
             return new Response(JSON.stringify(InvalidResponse), {
                 status: 400,
                 headers: {
