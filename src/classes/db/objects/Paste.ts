@@ -33,6 +33,7 @@ export type Paste = {
 export type PasteMetadata = {
     Version: 1;
     Owner: string; // the owner of the paste
+    PasteType?: "normal" | "builder" | "package";
     Locked?: boolean; // locked pastes cannot be edited, and the paste cannot be used as an association
     ShowOwnerEnabled?: boolean;
     ShowViewCount?: boolean;
@@ -45,7 +46,7 @@ export type PasteMetadata = {
     EnablePasteList?: boolean;
     SocialIcon?: string; // shown as a "profile picture" in some places
     Badges?: string; // comma separated array of badges, shown under paste
-    PasteType?: "normal" | "builder" | "workshop" | "package";
+    FrontMatter?: { [key: string]: any }; // NORMAL ONLY - markdown front matter (https://docs.github.com/en/contributing/writing-for-github-docs/using-yaml-frontmatter)
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;

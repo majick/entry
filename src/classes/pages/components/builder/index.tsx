@@ -109,10 +109,7 @@ export class Builder implements Endpoint {
             }
 
             // if paste isn't a builder paste, convert it
-            if (
-                !result.Content.startsWith("_builder:") &&
-                result.GroupName !== "components"
-            ) {
+            if (result.Metadata && result.Metadata.PasteType !== "builder") {
                 Document.Pages[0].Children[0] = {
                     Type: "Source",
                     Content: await ParseMarkdown(result.Content),

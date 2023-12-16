@@ -182,6 +182,9 @@ export function ParseMarkdownSync(
         content = content.replaceAll(TOC_Regex, TOC_Content);
     }
 
+    // remove frontmatter
+    content = content.replaceAll(/^(\-{3})F\n(?<CONTENT>.*?)\n(\-{3})F$/gms, "");
+
     // horizontal rule
     content = content.replaceAll(/^\*{3}\s*$/gm, "\n<hr />\n");
     content = content.replaceAll(/^-{3}$/gm, "\n<hr />\n");

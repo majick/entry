@@ -438,7 +438,8 @@ export class GetPasteFromURL implements Endpoint {
 
         // check if paste was created in the builder (starts with _builder:)
         if (
-            result.Content.startsWith("_builder:") &&
+            result.Metadata &&
+            result.Metadata.PasteType === "builder" &&
             search.get("nobuilder") === null
         ) {
             // get parsed content
@@ -500,7 +501,9 @@ export class GetPasteFromURL implements Endpoint {
                                 __html: `import Builder, { Debug } from "/Builder.js";
                                 Builder(\`${BaseParser.stringify(
                                     TrueContent
-                                )}\`, false); window.Debug = Debug;`,
+                                )}\`, false); window.Debug = Debug; window.Metadata = ${JSON.stringify(
+                                    result.Metadata
+                                )}`,
                             }}
                         />
 
@@ -658,61 +661,6 @@ export class GetPasteFromURL implements Endpoint {
                     </>,
                     <>
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
-                        <PasteOpenGraph paste={result} url={url} isBuilder={true} />
-                    </>
-                ),
-                {
-                    headers: {
-                        ...PageHeaders,
-                        "Content-Type": "text/html",
-                    },
-                }
-            );
-        } else if (result.Content.startsWith("_workshop:")) {
-            // get parsed content
-            const TrueContent = result.Content.split("_workshop:")[1].replaceAll(
-                "`",
-                "\\`"
-            );
-
-            // return
-            return new Response(
-                Renderer.Render(
-                    <>
-                        <canvas
-                            id={"game_canvas"}
-                            width={"1024"}
-                            height={"512"}
-                            style={{
-                                background: "white",
-                                height: "100%",
-                                width: "100%",
-                            }}
-                        />
-
-                        <script
-                            type={"module"}
-                            dangerouslySetInnerHTML={{
-                                __html: `import Renderer2D from "/Renderer2D.js";
-                                import WorkshopLib from "/WorkshopLib.js";
-
-                                document.body.style.overflowY = "hidden";
-
-                                // create renderer
-                                const Renderer = new Renderer2D(
-                                    \`${TrueContent}\`,
-                                    document.getElementById("game_canvas")
-                                );
-
-                                window.renderer = Renderer;
-                                window.library = WorkshopLib;
-                                
-                                // start scene
-                                Renderer.BeginDrawing();`,
-                            }}
-                        />
-                    </>,
-                    <>
                         <PasteOpenGraph paste={result} url={url} isBuilder={true} />
                     </>
                 ),
@@ -1106,7 +1054,8 @@ export class GetPasteFromURL implements Endpoint {
                         // P.S. I hate this
                         type="module"
                         dangerouslySetInnerHTML={{
-                            __html: `import fix from "/ClientFixMarkdown.js"; fix();`,
+                            __html: `import fix from "/ClientFixMarkdown.js"; fix();
+                            window.Metadata = ${JSON.stringify(result.Metadata)}`,
                         }}
                     />
                 </>,

@@ -20,7 +20,7 @@ import LogDB from "./LogDB";
 import pack from "../../../package.json";
 import type { Config } from "../..";
 
-import BaseParser from "./helpers/BaseParser";
+import BaseParser, { TOML } from "./helpers/BaseParser";
 import punycode from "node:punycode";
 
 /**
@@ -598,8 +598,36 @@ export default class EntryDB {
                     record.Metadata = JSON.parse(record.Metadata);
 
                 // MAKE SURE paste has an owner value!
-                if (record.Metadata && !record.Metadata.Owner)
+                if (
+                    record.Metadata &&
+                    (!record.Metadata.Owner ||
+                        record.Metadata.Owner.startsWith("associated="))
+                )
                     record.Metadata.Owner = record.CustomURL;
+
+                // fill paste type
+                if (record.Metadata!.PasteType === undefined)
+                    if (record.Content.startsWith("_builder"))
+                        record.Metadata!.PasteType = "builder";
+                    else record.Metadata!.PasteType = "normal";
+
+                // fill front matter
+                if (record.Metadata!.PasteType === "normal") {
+                    const frontmatter =
+                        /^(\-{3})F\n(?<CONTENT>.*?)\n(\-{3})F$/gms.exec(
+                            record.Content
+                        );
+
+                    if (
+                        frontmatter &&
+                        frontmatter.groups &&
+                        frontmatter.groups.CONTENT
+                    )
+                        // add to metadata
+                        record.Metadata!.FrontMatter = TOML.parse(
+                            frontmatter.groups.CONTENT
+                        );
+                }
 
                 // return
                 return resolve(record);

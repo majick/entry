@@ -163,7 +163,9 @@ export class RepoView implements Endpoint {
         }
 
         // detect if paste is a builder paste
-        const BuilderPaste = result.Content.startsWith("_builder:");
+        const BuilderPaste =
+            result.Metadata && result.Metadata.PasteType === "builder";
+
         const BuilderDocument: BuilderDocument = BuilderPaste
             ? BaseParser.parse(
                   result.Content.split("_builder:")[1].split("_metadata:")[0]
@@ -438,8 +440,7 @@ export class RepoView implements Endpoint {
                                     </li>
 
                                     <li>
-                                        <b>Type</b>:{" "}
-                                        {BuilderPaste ? "builder" : "markdown"}
+                                        <b>Type</b>: {result.Metadata!.PasteType}
                                     </li>
 
                                     {RevisionNumber !== 0 && (
@@ -755,7 +756,8 @@ export class DiffView implements Endpoint {
         }
 
         // detect if paste is a builder paste
-        const BuilderPaste = result.Content.startsWith("_builder:");
+        const BuilderPaste =
+            result.Metadata && result.Metadata.PasteType === "builder";
 
         const BuilderDocument1: BuilderDocument = BuilderPaste
             ? BaseParser.parse(
