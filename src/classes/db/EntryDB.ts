@@ -832,12 +832,26 @@ export default class EntryDB {
         }
 
         // make sure a paste does not already exist with this custom URL
-        if (await this.GetPasteFromURL(PasteInfo.CustomURL))
+        if (await this.GetPasteFromURL(PasteInfo.CustomURL, true))
             return [
                 false,
                 "A paste with this custom URL already exists!",
                 PasteInfo,
             ];
+
+        // make sure content is unique if config app.enable_claim is true (prevent CustomURL squatting)
+        if (EntryDB.config.app && EntryDB.config.app.enable_claim === true)
+            if (
+                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // @ts-ignore
+                    db: this.db,
+                    query: 'SELECT * FROM "Pastes" WHERE "Content" = ?',
+                    params: [PasteInfo.Content],
+                    get: true,
+                    use: "Query",
+                })
+            )
+                return [false, "Content must be unique!", PasteInfo];
 
         // encrypt (if needed)
         if (PasteInfo.ViewPassword) {

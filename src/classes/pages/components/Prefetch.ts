@@ -323,6 +323,9 @@ export function RegisterEditorFormListeners(): void {
 
             const json = await res.json();
 
+            // @ts-ignore close loading modal (it's like it never happened)
+            (globalThis as any).modals["entry:modal.Loading"](false);
+
             // navigate
             window.location.href = json.redirect;
         });

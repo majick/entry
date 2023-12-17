@@ -272,6 +272,7 @@ export const ServerConfig: HoneybeeConfig = {
 
         // GET api
         "/api/wsas": { Page: API.WSAS },
+        "/api/ip": { Page: API.WhatIsMyIP },
 
         // ...pastes
         "/api/get": { Type: "begins", Page: API.GetPasteRecord },

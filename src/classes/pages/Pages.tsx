@@ -46,7 +46,13 @@ import { ServerConfig } from "../..";
 
 // ...
 
-export function InformationPageNote() {
+/**
+ * @function InformationPageNote
+ *
+ * @export
+ * @return {*}
+ */
+export function InformationPageNote(): any {
     return (
         <div
             class="mdnote note-info"
@@ -64,7 +70,14 @@ export function InformationPageNote() {
     );
 }
 
-export function Curiosity(props: { Association: [boolean, string] }) {
+/**
+ * @function Curiosity
+ *
+ * @export
+ * @param {{ Association: [boolean, string] }} props
+ * @return {*}
+ */
+export function Curiosity(props: { Association: [boolean, string] }): any {
     return (
         <>
             {EntryDB.config.app &&
@@ -87,6 +100,25 @@ export function Curiosity(props: { Association: [boolean, string] }) {
     );
 }
 
+/**
+ * @function OpenGraph
+ *
+ * @export
+ * @param {{
+ *     url?: string;
+ *     description?: string;
+ *     title?: string;
+ *     icon?: string;
+ *     color?: string;
+ *     largeimage?: string;
+ *     time?: {
+ *         publish: string;
+ *         edit: string;
+ *     };
+ *     author?: string;
+ * }} props
+ * @return {*}
+ */
 export function OpenGraph(props: {
     url?: string;
     description?: string;
@@ -99,7 +131,7 @@ export function OpenGraph(props: {
         edit: string;
     };
     author?: string;
-}) {
+}): any {
     return (
         <>
             <meta name={"theme-color"} value={props.color || "#55a4e0"} />
@@ -143,6 +175,19 @@ export function OpenGraph(props: {
     );
 }
 
+/**
+ * @function PasteOpenGraph
+ *
+ * @export
+ * @param {{
+ *     paste: Paste;
+ *     url: URL;
+ *     isBuilder: boolean;
+ *     title?: string;
+ *     content?: string;
+ * }} props
+ * @return {*}
+ */
 export function PasteOpenGraph(props: {
     paste: Paste;
     url: URL;
@@ -1572,7 +1617,7 @@ export class PasteCommentsPage implements Endpoint {
         // get associated paste
         let PostingAs: string | undefined = undefined;
 
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = API.GetRemoteIP(request, server);
         const _Association = await GetAssociation(request, _ip);
 
         if (
@@ -2276,7 +2321,7 @@ export class UserSettings implements Endpoint {
             return await new GetPasteFromURL().request(request, server);
 
         // get association
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = API.GetRemoteIP(request, server);
         const Association = await GetAssociation(request, _ip);
         if (Association[1].startsWith("associated=")) Association[0] = false;
 

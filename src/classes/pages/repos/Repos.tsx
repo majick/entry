@@ -945,7 +945,7 @@ export class ProfileView implements Endpoint {
                                 </Card>
                             </Card>
 
-                            <Expandable title="Details">
+                            <Expandable title="Details" open={true}>
                                 <div class={"flex flex-column g-4"}>
                                     <div>
                                         <b>Joined</b>:{" "}

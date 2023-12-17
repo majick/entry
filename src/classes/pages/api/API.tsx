@@ -179,7 +179,7 @@ export async function Session(request: Request): Promise<string> {
  */
 export async function GetAssociation(
     request: Request,
-    ip: SocketAddress | null,
+    remote_ip: string | null,
     UpdateOnly: boolean = false,
     SetAssociation?: string,
     Delete: boolean = false
@@ -216,7 +216,7 @@ export async function GetAssociation(
             await EntryDB.Logs.UpdateLog(
                 log[2].ID,
                 `${log[2].Content.split(";_")[0]}${
-                    ip !== null ? `;_ip;${ip.address}` : ""
+                    remote_ip !== null ? `;_ip;${remote_ip}` : ""
                 };_with;${SetAssociation}`
             );
 
@@ -256,6 +256,46 @@ export async function GetAssociation(
 
     // default return
     return [false, ""];
+}
+
+/**
+ * @function GetRemoteIP
+ *
+ * @export
+ * @param {Request} request
+ * @param {Server} server
+ * @return {(string | null)}
+ */
+export function GetRemoteIP(request: Request, server: Server): string | null {
+    const ip = server.requestIP(request);
+    const ip_header = request.headers.get("X-Forwarded-For");
+
+    // return, prefer header
+    return ip_header !== null
+        ? ip_header
+        : ip
+          ? ip.address.split("::ffff:")[1]
+          : null;
+}
+
+// ...
+
+/**
+ * @export
+ * @class WhatIsMyIP
+ * @implements {Endpoint}
+ */
+export class WhatIsMyIP implements Endpoint {
+    async request(request: Request, server: Server): Promise<Response> {
+        const _ip = GetRemoteIP(request, server);
+
+        // return
+        return new Response(_ip, {
+            headers: {
+                "Content-Type": "text/plain",
+            },
+        });
+    }
 }
 
 /**
@@ -430,7 +470,7 @@ export class Distribution implements Endpoint {
  */
 export class CreatePaste implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = GetRemoteIP(request, server);
 
         // verify content type
         const WrongType = VerifyContentType(
@@ -606,7 +646,7 @@ export class GetPasteRecord implements Endpoint {
  */
 export class EditPaste implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = GetRemoteIP(request, server);
         const url = new URL(request.url);
 
         // verify content type
@@ -1264,7 +1304,7 @@ export class DeleteComment implements Endpoint {
  */
 export class PasteLogin implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = GetRemoteIP(request, server);
 
         // verify content type
         const WrongType = VerifyContentType(
@@ -1499,7 +1539,7 @@ export class EditMetadata implements Endpoint {
         if (!paste) return new _404Page().request(request);
 
         // get association
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = GetRemoteIP(request, server);
         const Association = await GetAssociation(request, _ip);
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
@@ -1886,7 +1926,7 @@ export class CreateURLClaim implements Endpoint {
         if (paste.HostServer) return new _404Page().request(request);
 
         // check association
-        const _ip = server !== undefined ? server.requestIP(request) : null;
+        const _ip = GetRemoteIP(request, server);
         const Association = await GetAssociation(request, _ip);
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
@@ -1994,6 +2034,8 @@ export default {
     GetAssociation,
     VerifyContentType,
     Session,
+    GetRemoteIP,
+    WhatIsMyIP,
     RobotsTXT,
     Favicon,
     WSAS,
