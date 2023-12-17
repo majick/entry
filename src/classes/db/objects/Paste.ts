@@ -121,6 +121,11 @@ export default class PasteConnection {
         )
             return await this.Sync();
 
+        // fill paste type
+        if (res.Content.startsWith("_builder"))
+            this._paste.Metadata!.PasteType = "builder";
+        else this._paste.Metadata!.PasteType = "normal";
+
         // return
         return this._paste!;
     }

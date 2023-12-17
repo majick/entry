@@ -11,10 +11,10 @@ import {
 } from "@codemirror/view";
 
 import {
-    HighlightStyle,
-    indentOnInput,
-    indentUnit,
     syntaxHighlighting,
+    indentOnInput,
+    HighlightStyle,
+    indentUnit,
 } from "@codemirror/language";
 
 import {
@@ -28,6 +28,7 @@ import {
     markdownKeymap,
     markdownLanguage,
 } from "@codemirror/lang-markdown";
+
 import { history, indentWithTab } from "@codemirror/commands";
 import { tags } from "@lezer/highlight";
 
@@ -86,8 +87,6 @@ const highlight = HighlightStyle.define([
         color: "var(--blue2)",
     },
 ]);
-
-// language features
 
 /**
  * @function BasicCompletion
