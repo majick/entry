@@ -475,9 +475,9 @@ export class RepoView implements Endpoint {
                                         header={<b>Claim URL</b>}
                                     >
                                         <p>
-                                            You can make a claim on this URL to
-                                            repossess this custom URL if it meets the
-                                            following requirements:
+                                            You can make a claim on this paste to
+                                            repossess it if it meets the following
+                                            requirements:
                                         </p>
                                         <ul>
                                             <li>

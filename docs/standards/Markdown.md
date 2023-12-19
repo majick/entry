@@ -2,8 +2,6 @@
 
 Bundles features a special markdown "flavor" tailored towards increased customization options and ease of use. This document will help to detail this Markdown flavoring, hoping to make it easier for others to implement a compliant Markdown parser.
 
-Most of this information can be found in an end user guide [here](https://sentrytwo.com/pub/markdown).
-
 ## Basics
 
 Bundles Markdown parsers must support all default Markdown options. This includes (but is not limited to) the following:

@@ -84,7 +84,7 @@ export function HandleCustomElements() {
         ) as any as HTMLElement[])
             element.style.animation = "";
 
-    // if entry:user.DisableCustomPasteCSS is true, delete all style elements
+    // if bundles:user.DisableCustomPasteCSS is true, delete all style elements
     const styleElements = Array.from(
         document.querySelectorAll("#editor-tab-preview style")
     );

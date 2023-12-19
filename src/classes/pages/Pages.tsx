@@ -1861,7 +1861,7 @@ export class PasteCommentsPage implements Endpoint {
                                             <>
                                                 <b>{PostingAs}</b> (
                                                 <a
-                                                    href="#entry:logout"
+                                                    href="#bundles:logout"
                                                     class={
                                                         "modal:bundles:button.logout"
                                                     }
@@ -1874,7 +1874,7 @@ export class PasteCommentsPage implements Endpoint {
                                             <>
                                                 <b>anonymous</b> (
                                                 <a
-                                                    href="#entry:login"
+                                                    href="#bundles:login"
                                                     class={
                                                         "modal:bundles:button.login"
                                                     }
