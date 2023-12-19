@@ -363,21 +363,6 @@ export class Favicon implements Endpoint {
     }
 }
 
-/**
- * @export
- * @class WSAS
- * @implements {Endpoint}
- */
-export class WSAS implements Endpoint {
-    async request(request: Request, server: Server): Promise<Response> {
-        const success = server.upgrade(request);
-
-        return success
-            ? new Response("Upgraded")
-            : new Response("WebSocket upgrade error", { status: 400 });
-    }
-}
-
 let HashStore: { [key: string]: string } = {}; // store file hashes BY PATH
 let DistHashStore: { [key: string]: string } = {}; // store distribution file hashes BY PATH
 
@@ -2044,7 +2029,6 @@ export default {
     WhatIsMyIP,
     RobotsTXT,
     Favicon,
-    WSAS,
     HashList,
     Distribution,
     CreatePaste, // supports cloud routing
