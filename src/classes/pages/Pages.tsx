@@ -18,11 +18,11 @@ import _404Page from "./components/404";
 import Home from "./Home";
 
 // create database
-import EntryDB from "../db/EntryDB";
+import BundlesDB from "../db/BundlesDB";
 import type { Paste } from "../db/objects/Paste";
 
-await EntryDB.GetConfig();
-export const db = new EntryDB();
+await BundlesDB.GetConfig();
+export const db = new BundlesDB();
 
 import API, {
     VerifyContentType,
@@ -80,13 +80,13 @@ export function InformationPageNote(): any {
 export function Curiosity(props: { Association: [boolean, string] }): any {
     return (
         <>
-            {EntryDB.config.app &&
-                EntryDB.config.app.curiosity &&
+            {BundlesDB.config.app &&
+                BundlesDB.config.app.curiosity &&
                 props.Association[0] &&
                 props.Association[1] && (
                     <>
                         <script
-                            src={`${EntryDB.config.app.curiosity.host}/drone.js`}
+                            src={`${BundlesDB.config.app.curiosity.host}/drone.js`}
                         />
 
                         <script
@@ -136,7 +136,7 @@ export function OpenGraph(props: {
         <>
             <meta name={"theme-color"} value={props.color || "#55a4e0"} />
             <meta property={"og:type"} value={"website"} />
-            <meta property={"og:site_name"} value={EntryDB.config.name} />
+            <meta property={"og:site_name"} value={BundlesDB.config.name} />
 
             {props.url && (
                 <>
@@ -269,13 +269,13 @@ export async function CheckInstance(
     request: Request,
     server: Server
 ): Promise<Response | undefined> {
-    if (!EntryDB.config.app || !EntryDB.config.app.hostname) return undefined;
+    if (!BundlesDB.config.app || !BundlesDB.config.app.hostname) return undefined;
 
     // get url and check if it's an instance
     const url = new URL(request.url);
 
     // get subdomain
-    const subdomain = url.hostname.split(`.${EntryDB.config.app.hostname}`)[0];
+    const subdomain = url.hostname.split(`.${BundlesDB.config.app.hostname}`)[0];
 
     // handle cloud pages
     if (subdomain.startsWith("ins-") && ServerConfig.Pages["._serve_cloud_instance"])
@@ -287,7 +287,7 @@ export async function CheckInstance(
 
     // ...check against custom domain
     const CustomDomainLog = (
-        await EntryDB.Logs.QueryLogs(
+        await BundlesDB.Logs.QueryLogs(
             `"Type" = \'custom_domain\' AND \"Content\" LIKE \'%;${url.hostname}\'`
         )
     )[2][0];
@@ -297,7 +297,7 @@ export async function CheckInstance(
         const req = new Request(
             `${url.protocol}//ins-${CustomDomainLog.Content.split(";")[0]
                 .replaceAll("/", ".")
-                .replaceAll("ins://", "")}.${EntryDB.config.app.hostname}${
+                .replaceAll("ins://", "")}.${BundlesDB.config.app.hostname}${
                 url.pathname
             }${url.search}${url.hash}`,
             {
@@ -328,7 +328,7 @@ export class GetPasteFromURL implements Endpoint {
         const search = new URLSearchParams(url.search);
 
         // handle executable package
-        if (path.basename(process.execPath).startsWith("entry")) {
+        if (path.basename(process.execPath).startsWith("bundles")) {
             const FilePath = path.resolve(
                 process.env.IMPORT_DIR!,
                 url.pathname.slice(1)
@@ -351,10 +351,10 @@ export class GetPasteFromURL implements Endpoint {
         // check if this is from a wildcard match
         const IsFromWildcard = search.get("_priv_isFromWildcard") === "true";
         const HostnameURL =
-            (EntryDB.config &&
-                EntryDB.config.app &&
-                EntryDB.config.app.hostname &&
-                `https://${EntryDB.config.app.hostname}/`) ||
+            (BundlesDB.config &&
+                BundlesDB.config.app &&
+                BundlesDB.config.app.hostname &&
+                `https://${BundlesDB.config.app.hostname}/`) ||
             "/";
 
         // load doc view if specified
@@ -448,19 +448,19 @@ export class GetPasteFromURL implements Endpoint {
 
             if (
                 SessionCookieValue &&
-                EntryDB.config.log &&
-                EntryDB.config.log.events.includes("view_paste") &&
+                BundlesDB.config.log &&
+                BundlesDB.config.log.events.includes("view_paste") &&
                 // make sure we haven't already added this view
                 // (make sure length of query for log is 0)
                 (
-                    await EntryDB.Logs.QueryLogs(
+                    await BundlesDB.Logs.QueryLogs(
                         `"Content" = '${result.CustomURL};${SessionCookieValue}'`
                     )
                 )[2].length === 0 &&
                 // make sure session id is valid
                 !SessionCookie.startsWith("session-id=refresh;")
             )
-                await EntryDB.Logs.CreateLog({
+                await BundlesDB.Logs.CreateLog({
                     Type: "view_paste",
                     Content: `${result.CustomURL};${SessionCookieValue}`,
                 });
@@ -514,12 +514,12 @@ export class GetPasteFromURL implements Endpoint {
                                     JavaScript access. If you're worried about
                                     privacy and security on this page, I suggest you
                                     look into the NoScript extension and a competent
-                                    ad-blocker. Entry collects no
+                                    ad-blocker. Bundles collects no
                                     personally-identifiable information by default,
                                     and actively works to ensure your privacy and
-                                    safety. Entry is entirely open-source, you can
+                                    safety. Bundles is entirely open-source, you can
                                     view the source{" "}
-                                    <a href="https://codeberg.org/hkau/entry">
+                                    <a href="https://codeberg.org/sentrytwo/bundles">
                                         here
                                     </a>
                                     .
@@ -528,9 +528,9 @@ export class GetPasteFromURL implements Endpoint {
                                 <p>
                                     Builder pastes are rendered on the client using
                                     Preact, a very small (&lt;3kb) React renderer.
-                                    Entry loads very few assets to display this page,
-                                    so there should not be a bandwidth concern when
-                                    viewing this page.
+                                    Bundles loads very few assets to display this
+                                    page, so there should not be a bandwidth concern
+                                    when viewing this page.
                                 </p>
 
                                 <p>Please try again after enabling JavaScript.</p>
@@ -557,9 +557,9 @@ export class GetPasteFromURL implements Endpoint {
 
                         {/* toolbar */}
                         <Modal
-                            buttonid="entry:button.PasteOptions"
-                            modalid="entry:modal.PasteOptions"
-                            noIdMatch={true} // use `window.modals["entry:modal.PasteOptions"](true)` instead
+                            buttonid="bundles:button.PasteOptions"
+                            modalid="bundles:modal.PasteOptions"
+                            noIdMatch={true} // use `window.modals["bundles:modal.PasteOptions"](true)` instead
                             round={true}
                         >
                             <div
@@ -617,8 +617,8 @@ export class GetPasteFromURL implements Endpoint {
                                         More
                                     </a>
 
-                                    {EntryDB.config.app &&
-                                        EntryDB.config.app.enable_comments ===
+                                    {BundlesDB.config.app &&
+                                        BundlesDB.config.app.enable_comments ===
                                             true &&
                                         (!result.Metadata ||
                                             !result.Metadata!.Comments ||
@@ -635,8 +635,8 @@ export class GetPasteFromURL implements Endpoint {
 
                                 <hr />
 
-                                {EntryDB.config.log &&
-                                    EntryDB.config.log.events.includes(
+                                {BundlesDB.config.log &&
+                                    BundlesDB.config.log.events.includes(
                                         "view_paste"
                                     ) &&
                                     (!result.Metadata ||
@@ -756,25 +756,6 @@ export class GetPasteFromURL implements Endpoint {
                             </div>
                         )}
 
-                        {(result.HostServer === "rentry.co" ||
-                            result.HostServer === "text.is") && (
-                            <Expandable
-                                title={`Paste is from an inferior server! (${result.HostServer})`}
-                            >
-                                <Card round={true} border={true} secondary={true}>
-                                    The server this paste is loaded from doesn't
-                                    support modern APIs for features such as
-                                    comments, media hosting, settings, versioning,
-                                    cross-server editing, and many more. Please
-                                    migrate this paste to an{" "}
-                                    <a href="https://codeberg.org/hkau/entry">
-                                        Entry
-                                    </a>{" "}
-                                    instance to gain access to these features!
-                                </Card>
-                            </Expandable>
-                        )}
-
                         {RevisionNumber !== 0 && (
                             <div class={"mdnote note-info"}>
                                 <b class={"mdnote-title"}>Viewing Revision</b>
@@ -787,10 +768,10 @@ export class GetPasteFromURL implements Endpoint {
 
                         {result.ViewPassword && <DecryptionForm paste={result} />}
 
-                        {EntryDB.config.app &&
-                            EntryDB.config.app.footer &&
-                            EntryDB.config.app.footer.info &&
-                            EntryDB.config.app.footer.info.split("?")[0] ===
+                        {BundlesDB.config.app &&
+                            BundlesDB.config.app.footer &&
+                            BundlesDB.config.app.footer.info &&
+                            BundlesDB.config.app.footer.info.split("?")[0] ===
                                 result.CustomURL &&
                             InformationPageNote()}
 
@@ -879,8 +860,8 @@ export class GetPasteFromURL implements Endpoint {
                                     Edit
                                 </a>
 
-                                {EntryDB.config.app &&
-                                    EntryDB.config.app.enable_comments === true &&
+                                {BundlesDB.config.app &&
+                                    BundlesDB.config.app.enable_comments === true &&
                                     (!result.Metadata ||
                                         !result.Metadata.Comments ||
                                         result.Metadata.Comments.Enabled !==
@@ -1038,8 +1019,8 @@ export class GetPasteFromURL implements Endpoint {
                                     </>
                                 )}
 
-                                {EntryDB.config.log &&
-                                    EntryDB.config.log.events.includes(
+                                {BundlesDB.config.log &&
+                                    BundlesDB.config.log.events.includes(
                                         "view_paste"
                                     ) &&
                                     (!result.Metadata ||
@@ -1080,7 +1061,7 @@ export class GetPasteFromURL implements Endpoint {
                                 ShowBottomRow={
                                     (
                                         (
-                                            EntryDB.config.app || {
+                                            BundlesDB.config.app || {
                                                 footer: {
                                                     show_name_on_all_pages: false,
                                                 },
@@ -1177,19 +1158,19 @@ export class PasteDocView implements Endpoint {
 
             if (
                 SessionCookieValue &&
-                EntryDB.config.log &&
-                EntryDB.config.log.events.includes("view_paste") &&
+                BundlesDB.config.log &&
+                BundlesDB.config.log.events.includes("view_paste") &&
                 // make sure we haven't already added this view
                 // (make sure length of query for log is 0)
                 (
-                    await EntryDB.Logs.QueryLogs(
+                    await BundlesDB.Logs.QueryLogs(
                         `"Content" = '${result.CustomURL};${SessionCookieValue}'`
                     )
                 )[2].length === 0 &&
                 // make sure session id is valid
                 !SessionCookie.startsWith("session-id=refresh;")
             )
-                await EntryDB.Logs.CreateLog({
+                await BundlesDB.Logs.CreateLog({
                     Type: "view_paste",
                     Content: `${result.CustomURL};${SessionCookieValue}`,
                 });
@@ -1206,10 +1187,10 @@ export class PasteDocView implements Endpoint {
                         <div class={"sidebar-layout-wrapper"}>
                             <div class={"sidebar"}>
                                 <div>
-                                    {EntryDB.config.app &&
-                                        EntryDB.config.app.footer &&
-                                        EntryDB.config.app.footer.info &&
-                                        EntryDB.config.app.footer.info.split(
+                                    {BundlesDB.config.app &&
+                                        BundlesDB.config.app.footer &&
+                                        BundlesDB.config.app.footer.info &&
+                                        BundlesDB.config.app.footer.info.split(
                                             "?"
                                         )[0] === result.CustomURL &&
                                         InformationPageNote()}
@@ -1227,11 +1208,12 @@ export class PasteDocView implements Endpoint {
                             <details className="sidebar-mobile">
                                 <summary>Document</summary>
 
-                                {EntryDB.config.app &&
-                                    EntryDB.config.app.footer &&
-                                    EntryDB.config.app.footer.info &&
-                                    EntryDB.config.app.footer.info.split("?")[0] ===
-                                        result.CustomURL &&
+                                {BundlesDB.config.app &&
+                                    BundlesDB.config.app.footer &&
+                                    BundlesDB.config.app.footer.info &&
+                                    BundlesDB.config.app.footer.info.split(
+                                        "?"
+                                    )[0] === result.CustomURL &&
                                     InformationPageNote()}
 
                                 <div
@@ -1391,8 +1373,8 @@ export class PastesSearch implements Endpoint {
             // if search is disabled, a value for "group" is required
             // ...if we don't have one, 404!
             if (
-                EntryDB.config.app &&
-                EntryDB.config.app.enable_search === false &&
+                BundlesDB.config.app &&
+                BundlesDB.config.app.enable_search === false &&
                 search.get("group") === null
             )
                 return new _404Page().request(request);
@@ -1424,8 +1406,8 @@ export class PastesSearch implements Endpoint {
                             >
                                 {/* hide the search bar if search is disabled */}
                                 {(!ExploreMode &&
-                                    (!EntryDB.config.app ||
-                                        (EntryDB.config.app.enable_search !==
+                                    (!BundlesDB.config.app ||
+                                        (BundlesDB.config.app.enable_search !==
                                             false && (
                                             <SearchForm
                                                 query={search.get("q") || ""}
@@ -1518,7 +1500,7 @@ export class PastesSearch implements Endpoint {
             );
         } else {
             // return 404 if search is disabled
-            if (EntryDB.config.app && EntryDB.config.app.enable_search === false)
+            if (BundlesDB.config.app && BundlesDB.config.app.enable_search === false)
                 return new _404Page().request(request);
 
             // show search home
@@ -1550,7 +1532,7 @@ export class PastesSearch implements Endpoint {
                     <>
                         <meta
                             name="description"
-                            content={`Search Pastes on ${EntryDB.config.name} - A Markdown Pastebin`}
+                            content={`Search Pastes on ${BundlesDB.config.name}`}
                         ></meta>
 
                         <title>Search Pastes</title>
@@ -1585,14 +1567,14 @@ export class PasteCommentsPage implements Endpoint {
 
         // ...
         const HostnameURL =
-            (EntryDB.config &&
-                EntryDB.config.app &&
-                EntryDB.config.app.hostname &&
-                `https://${EntryDB.config.app.hostname}/`) ||
+            (BundlesDB.config &&
+                BundlesDB.config.app &&
+                BundlesDB.config.app.hostname &&
+                `https://${BundlesDB.config.app.hostname}/`) ||
             "/";
 
         // return 404 if comments are disabled
-        if (!EntryDB.config.app || EntryDB.config.app.enable_comments !== true)
+        if (!BundlesDB.config.app || BundlesDB.config.app.enable_comments !== true)
             return new _404Page().request(request);
 
         // get paste name
@@ -1824,7 +1806,7 @@ export class PasteCommentsPage implements Endpoint {
                                                     <button
                                                         // show logout button if we're already associated with a paste
                                                         class={
-                                                            "button full round border modal:entry:button.logout"
+                                                            "button full round border modal:bundles:button.logout"
                                                         }
                                                     >
                                                         Manage Comments
@@ -1844,7 +1826,7 @@ export class PasteCommentsPage implements Endpoint {
                                             <button
                                                 // show login button if we're not already associated with a paste
                                                 class={
-                                                    "button full round border modal:entry:button.login"
+                                                    "button full round border modal:bundles:button.login"
                                                 }
                                             >
                                                 Manage Comments
@@ -1881,7 +1863,7 @@ export class PasteCommentsPage implements Endpoint {
                                                 <a
                                                     href="#entry:logout"
                                                     class={
-                                                        "modal:entry:button.logout"
+                                                        "modal:bundles:button.logout"
                                                     }
                                                 >
                                                     logout
@@ -1894,7 +1876,7 @@ export class PasteCommentsPage implements Endpoint {
                                                 <a
                                                     href="#entry:login"
                                                     class={
-                                                        "modal:entry:button.login"
+                                                        "modal:bundles:button.login"
                                                     }
                                                 >
                                                     login
@@ -2384,14 +2366,14 @@ export class UserSettings implements Endpoint {
                                         {Association[0] === true ? (
                                             <a
                                                 href={"javascript:"}
-                                                class={"modal:entry:button.logout"}
+                                                class={"modal:bundles:button.logout"}
                                             >
                                                 logout
                                             </a>
                                         ) : (
                                             <a
                                                 href={"javascript:"}
-                                                class={"modal:entry:button.login"}
+                                                class={"modal:bundles:button.login"}
                                             >
                                                 login
                                             </a>
@@ -2434,7 +2416,7 @@ export class UserSettings implements Endpoint {
                         </main>
                     </>,
                     <>
-                        <title>User Settings - {EntryDB.config.name}</title>
+                        <title>User Settings - {BundlesDB.config.name}</title>
                         <link rel="icon" href="/favicon" />
                     </>
                 ),
@@ -2450,8 +2432,8 @@ export class UserSettings implements Endpoint {
 
             // if paste settings page is disabled, return 404
             if (
-                !EntryDB.config.app ||
-                EntryDB.config.app.enable_paste_settings === false
+                !BundlesDB.config.app ||
+                BundlesDB.config.app.enable_paste_settings === false
             )
                 return new _404Page().request(request);
 
@@ -2461,7 +2443,7 @@ export class UserSettings implements Endpoint {
 
             // try to fetch custom domain log
             const CustomDomainLog = (
-                await EntryDB.Logs.QueryLogs(
+                await BundlesDB.Logs.QueryLogs(
                     `"Type" = \'custom_domain\' AND \"Content\" LIKE \'${result.CustomURL};%\'`
                 )
             )[2][0];
@@ -2566,10 +2548,10 @@ export class UserSettings implements Endpoint {
                                                     type="text"
                                                     placeholder={"Edit code"}
                                                     maxLength={
-                                                        EntryDB.MaxPasswordLength
+                                                        BundlesDB.MaxPasswordLength
                                                     }
                                                     minLength={
-                                                        EntryDB.MinPasswordLength
+                                                        BundlesDB.MinPasswordLength
                                                     }
                                                     name={"EditPassword"}
                                                     disabled={
@@ -2600,7 +2582,7 @@ export class UserSettings implements Endpoint {
 
                                             <button
                                                 class={
-                                                    "round green mobile:max modal:entry:button.Loading"
+                                                    "round green mobile:max modal:bundles:button.Loading"
                                                 }
                                             >
                                                 Save
@@ -2624,8 +2606,8 @@ export class UserSettings implements Endpoint {
                                         </noscript>
                                     </div>
 
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
+                                    {BundlesDB.config.log &&
+                                        BundlesDB.config.log.events.includes(
                                             "custom_domain"
                                         ) && (
                                             <>
@@ -2678,10 +2660,10 @@ export class UserSettings implements Endpoint {
                                                             type="text"
                                                             placeholder={"Edit code"}
                                                             maxLength={
-                                                                EntryDB.MaxPasswordLength
+                                                                BundlesDB.MaxPasswordLength
                                                             }
                                                             minLength={
-                                                                EntryDB.MinPasswordLength
+                                                                BundlesDB.MinPasswordLength
                                                             }
                                                             name={"EditPassword"}
                                                             required
@@ -2711,7 +2693,7 @@ export class UserSettings implements Endpoint {
                                                         />
 
                                                         <button
-                                                            className="secondary green round modal:entry:button.Loading"
+                                                            className="secondary green round modal:bundles:button.Loading"
                                                             style={{ width: "100%" }}
                                                         >
                                                             Save
@@ -2728,8 +2710,8 @@ export class UserSettings implements Endpoint {
                                         __html: `import _e from "/MetadataEditor.js";
 
                                         window.ENTRYDB_CONFIG_ENABLE_COMMENTS = ${
-                                            EntryDB.config.app &&
-                                            EntryDB.config.app.enable_comments ===
+                                            BundlesDB.config.app &&
+                                            BundlesDB.config.app.enable_comments ===
                                                 true
                                         }
 
@@ -2742,7 +2724,7 @@ export class UserSettings implements Endpoint {
                         </div>
                     </>,
                     <>
-                        <title>Paste Settings - {EntryDB.config.name}</title>
+                        <title>Paste Settings - {BundlesDB.config.name}</title>
                         <link rel="icon" href="/favicon" />
                     </>
                 ),
@@ -2771,8 +2753,8 @@ export class Notifications implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         if (
-            !EntryDB.config.log ||
-            !EntryDB.config.log.events.includes("notification")
+            !BundlesDB.config.log ||
+            !BundlesDB.config.log.events.includes("notification")
         )
             return new _404Page().request(request);
 
@@ -2784,14 +2766,14 @@ export class Notifications implements Endpoint {
 
         // get notifications
         const Notifications = (
-            await EntryDB.Logs.QueryLogs(
+            await BundlesDB.Logs.QueryLogs(
                 `"Type" = \'notification\' AND \"Content\" LIKE \'%${Association[1]}\'`
             )
         )[2];
 
         // clear notifications
         for (const Notification of Notifications)
-            await EntryDB.Logs.DeleteLog(Notification.ID);
+            await BundlesDB.Logs.DeleteLog(Notification.ID);
 
         // render
         return new Response(
@@ -2876,7 +2858,7 @@ export class Notifications implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>Notifications - {EntryDB.config.name}</title>
+                    <title>Notifications - {BundlesDB.config.name}</title>
                     <link rel="icon" href="/favicon" />
                 </>
             ),

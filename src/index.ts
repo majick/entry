@@ -1,5 +1,5 @@
 /**
- * @file Start Entry server
+ * @file Start Bundles server
  * @name index.ts
  * @license MIT
  */
@@ -7,8 +7,8 @@
 import path from "node:path";
 import fs from "node:fs";
 
-// ...EntryDB
-import EntryDB from "./classes/db/EntryDB";
+// ...BundlesDB
+import BundlesDB from "./classes/db/BundlesDB";
 import type { LogEvent } from "./classes/db/objects/Log";
 
 import API from "./classes/pages/api/API";
@@ -20,9 +20,9 @@ import { ParseMarkdown } from "./classes/pages/components/Markdown";
 import TopNav from "./classes/pages/components/site/TopNav";
 import { Modal } from "fusion";
 
-export type EntryGlobalType = {
+export type BundlesGlobalType = {
     DistDirectory: string;
-    EntryDB: typeof EntryDB;
+    BundlesDB: typeof BundlesDB;
     Config: Config;
     Footer: typeof Footer; // needed for client theme
     TopNav: typeof TopNav;
@@ -43,7 +43,7 @@ export type EntryGlobalType = {
 };
 
 (globalThis as any).DistDirectory = process.env.IMPORT_DIR!;
-(globalThis as any).Config = EntryDB.config;
+(globalThis as any).Config = BundlesDB.config;
 (globalThis as any).Footer = Footer;
 (globalThis as any).TopNav = TopNav;
 (globalThis as any).Modal = Modal;
@@ -63,7 +63,7 @@ export type EntryGlobalType = {
     PublishModals: PublishModals,
 };
 
-(globalThis as any).EntryDB = EntryDB;
+(globalThis as any).BundlesDB = BundlesDB;
 (globalThis as any).API = API;
 
 // includes
@@ -73,6 +73,7 @@ import "./classes/pages/assets/css/style.css";
 export type Config = {
     port: number;
     name: string;
+    tagline?: string;
     admin: string;
     data: string;
     config: string;
@@ -137,7 +138,7 @@ if (!fs.existsSync(process.env.IMPORT_DIR))
     fs.mkdirSync(process.env.IMPORT_DIR, { recursive: true });
 
 // check if database is new or config file does not exist
-if (!(await EntryDB.GetConfig())) {
+if (!(await BundlesDB.GetConfig())) {
     // run setup
     function div() {
         // create divider
@@ -172,11 +173,15 @@ if (!(await EntryDB.GetConfig())) {
     let config: Partial<Config> = {};
 
     div();
-    console.log("\x1b[94mEntry Setup\x1b[0m");
+    console.log("\x1b[94mBundles Setup\x1b[0m");
     div();
 
     config.port = parseInt(optional("\x1b[92mEnter port\x1b[0m", 8080, "PORT"));
-    config.name = optional("\x1b[92mEnter application name\x1b[0m", "Entry", "NAME");
+    config.name = optional(
+        "\x1b[92mEnter application name\x1b[0m",
+        "Bundles",
+        "NAME"
+    );
 
     config.data = optional(
         "\x1b[92mEnter data location\x1b[0m",
@@ -202,12 +207,12 @@ if (!(await EntryDB.GetConfig())) {
     config.log = { clear_on_start: true, events: [] };
 
     // save file
-    await Bun.write(EntryDB.ConfigLocation, JSON.stringify(config, undefined, 4));
-    await EntryDB.GetConfig();
+    await Bun.write(BundlesDB.ConfigLocation, JSON.stringify(config, undefined, 4));
+    await BundlesDB.GetConfig();
 
     // exit
     console.log(
-        "\x1b[92m[exit]\x1b[0m Please restart the Entry server, this is to prevent bugs relating to how fast the disk writes the config file."
+        "\x1b[92m[exit]\x1b[0m Please restart the Bundles server, this is to prevent bugs relating to how fast the disk writes the config file."
     );
 
     process.exit(0);
@@ -215,7 +220,6 @@ if (!(await EntryDB.GetConfig())) {
 
 // create server
 import Honeybee, { HoneybeeConfig } from "honeybee";
-import wsas from "wsas/src";
 
 // ...import endpoints
 import _404, { _404Page } from "./classes/pages/components/404";
@@ -227,10 +231,10 @@ import Pages from "./classes/pages/Pages";
 
 // get plugins
 export let plugins: HoneybeeConfig["Pages"] = {};
-await EntryDB.GetConfig();
+await BundlesDB.GetConfig();
 
-if (EntryDB.config.plugin_file) {
-    const Path = EntryDB.config.plugin_file.replace(":cwd", process.cwd());
+if (BundlesDB.config.plugin_file) {
+    const Path = BundlesDB.config.plugin_file.replace(":cwd", process.cwd());
 
     // if file exists, import file and get default return value
     if (await Bun.file(Path).exists()) {
@@ -245,21 +249,12 @@ if (EntryDB.config.plugin_file) {
 
 await InitFooterExtras(plugins); // load footer pages to the footer
 
-// ...create AssetStreamer
-export const AssetStreamer = new wsas({
-    asset_directory: process.env.IMPORT_DIR!,
-    methods: ["fetch"],
-});
-
-import CreateSocketRoutes from "./classes/pages/api/Socket";
-CreateSocketRoutes(AssetStreamer);
-
 // ...create config
 export const ServerConfig: HoneybeeConfig = {
     Port:
         process.env.FORCE_PORT !== undefined
             ? parseInt(process.env.FORCE_PORT)
-            : EntryDB.config.port || 8080,
+            : BundlesDB.config.port || 8080,
     AssetsDir: process.env.IMPORT_DIR!,
     NotFoundPage: _404Page({}),
     maxRequestBodySize: parseFloat(process.env.MAX_BODY_SIZE || "52428800"),
@@ -391,15 +386,6 @@ export const ServerConfig: HoneybeeConfig = {
             Method: "POST",
             Type: "begins",
             Page: Pages.GetPasteFromURL,
-        },
-    },
-    WebSocket: {
-        message: async (sock, message) => {
-            // resolve
-            const response = await AssetStreamer.resolve(sock, message);
-
-            // send response
-            sock.sendBinary(Buffer.from(response), true);
         },
     },
 };

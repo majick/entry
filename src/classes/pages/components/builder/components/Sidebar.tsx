@@ -261,7 +261,7 @@ export default function Sidebar(props: { Page?: string }): any {
                             if (!Selected.NotRemovable) return Delete(Selected);
                             else
                                 (window as any).modals[
-                                    "entry:modal.ConfirmNotRemovable"
+                                    "bundles:modal.ConfirmNotRemovable"
                                 ](true);
                         }}
                         class={"red"}
@@ -584,7 +584,7 @@ export default function Sidebar(props: { Page?: string }): any {
                                     className="green-cta normal full round justify-space-between"
                                     onClick={() =>
                                         (window as any).modals[
-                                            "entry:modal.AddComponent"
+                                            "bundles:modal.AddComponent"
                                         ](true)
                                     }
                                 >

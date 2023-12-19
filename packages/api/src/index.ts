@@ -1,5 +1,5 @@
 /**
- * @file Handle Entry API
+ * @file Handle Bundles API
  * @name index.ts
  * @license MIT
  */
@@ -12,15 +12,15 @@ export type APIResponse = {
 
 /**
  * @export
- * @class Entry
+ * @class Bundles
  */
-export class Entry {
+export class Bundles {
     private server: string;
 
     /**
-     * Creates an instance of Entry.
+     * Creates an instance of Bundles.
      * @param {string} [server="https://sentrytwo.com"]
-     * @memberof Entry
+     * @memberof Bundles
      */
     constructor(server: string = "https://sentrytwo.com") {
         this.server = server;
@@ -42,7 +42,7 @@ export class Entry {
      *         GroupSumbmitPassword?: string; // required if GroupName is provided
      *     }} props
      * @return {Promise<APIResponse>}
-     * @memberof Entry
+     * @memberof Bundles
      */
     public async NewPaste(props: {
         Content: string;
@@ -78,7 +78,7 @@ export class Entry {
      *         NewCustomURL?: string;
      *     }} props
      * @return {Promise<APIResponse>} success, message
-     * @memberof Entry
+     * @memberof Bundles
      */
     public async EditPaste(props: {
         Content: string;
@@ -114,7 +114,7 @@ export class Entry {
      *         EditPassword: string;
      *     }} props
      * @return {Promise<APIResponse>}
-     * @memberof Entry
+     * @memberof Bundles
      */
     public async DeletePaste(props: {
         CustomURL: string;
@@ -141,7 +141,7 @@ export class Entry {
      *         ViewPassword: string;
      *     }} props
      * @return {Promise<string>}
-     * @memberof Entry
+     * @memberof Bundles
      */
     public async DecryptPaste(props: {
         CustomURL: string;
@@ -167,7 +167,7 @@ export class Entry {
      *
      * @param {string} CustomURL
      * @return {(Promise<{[key: string]: any} | undefined>)}
-     * @memberof Entry
+     * @memberof Bundles
      */
     public async GetPaste(
         CustomURL: string
@@ -184,4 +184,4 @@ export class Entry {
 }
 
 // default export
-export default Entry;
+export default Bundles;

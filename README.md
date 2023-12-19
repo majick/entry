@@ -1,16 +1,16 @@
-# 📝 entry
+# 🧶 bundles
 
 <comment>
-Certain features of this README only work on Entry! You can view this README at https://www.sentrytwo.com/what
+Certain features of this README only work on Bundles! You can view this README at https://www.sentrytwo.com/what
 
 ***
 </comment>
 
-Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features).
+Bundles is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features).
 
-Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Entry also supports using a PostgreSQL database through config `pg`.
+*Bun*dles uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Bundles also supports using a PostgreSQL database through config `pg`.
 
-The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support provided by Entry.
+The official Bundles instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support provided by Bundles.
 
 ## Install
 
@@ -20,13 +20,13 @@ The official Entry instance is hosted at [sentrytwo.com](https://sentrytwo.com),
 - Clone the repository and run `bun install` to install dependencies
 - Start the server with `bun run start`
 
-Entry can also be installed using Docker. Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.
+Bundles can also be installed using Docker. Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.
 
-The main Entry repository also includes the source for Entry related packages. These can be found in the [/packages](https://codeberg.org/hkau/entry/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
+The main Bundles repository also includes the source for Bundles related packages. These can be found in the [/packages](https://codeberg.org/sentrytwo/bundles/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
 
 ### Executable
 
-Entry can be installed through an executable. The executable will automatically install static files the client needs into the directory it is contained in. You can change this install location through the `EXECUTABLE_STATIC_DIR` environment variable. This must be an exact path to the directory you want static files to be contained in.
+Bundles can be installed through an executable. The executable will automatically install static files the client needs into the directory it is contained in. You can change this install location through the `EXECUTABLE_STATIC_DIR` environment variable. This must be an exact path to the directory you want static files to be contained in.
 
 ### PostgreSQL
 
@@ -56,7 +56,7 @@ Manually launch once after installing to start the setup prompts. These will all
 
 ## Features
 
-Many features are able to be disabled or enabled through the server configuration file. An example file can be seen [here](https://sentrytwo.com/config). It is the file used in the primary Entry instance.
+Many features are able to be disabled or enabled through the server configuration file. An example file can be seen [here](https://sentrytwo.com/config). It is the file used in the primary Bundles instance.
 
 If your server is having cache issues you can add `DO_NOT_CACHE=true` to your environment variables. Contrary to what its name suggests, files are still cached! Though they are cache only for a day and in a private cache.
 
@@ -71,7 +71,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
     - Supports `?draft=true` query parameter, saves changes as a new revision instead of publishing
 - `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
 - `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
-- `POST /api/markdown`, Render any markdown to HTML using the Entry renderer (based on [Marked](https://marked.js.org))
+- `POST /api/markdown`, Render any markdown to HTML using the Bundles renderer (based on [Marked](https://marked.js.org))
 - `POST /api/comments/delete`, Delete a comment from a paste, expects FormData with the fields: `CustomURL, EditPassword, CommentURL`
 - `POST /api/associate`, Associate (Login) as a paste, expects FormData with the fields: `CustomURL, EditPassword`
     - Links posted comments with this paste
@@ -122,15 +122,11 @@ type APIResponse = {
 !!! note Encryption
 Decentralization does not work with encrypted pastes.
 
-Entry supports very basic decentralization, meaning you can view and edit pastes from other servers on your server.
+Bundles supports very basic decentralization, meaning you can view and edit pastes from other servers on your server.
 
 To view pastes from other servers, you open them the same way (`example.com/paste`) you normally do, but add an `:` symbol and then the hostname of the other server. Example: `example.com/paste:example2.com`
 
 In this example, we are viewing the paste `paste` from the server `example2.com` on the server `example.com`. Editing and deleting pastes is also available for pastes from a different server. Decentralization **only** supports HTTPS, it is assumed that any secondary server provided is using HTTPS, and the request will fail if it is not.
-
-Pastes cannot normally include any special characters besides `-` and `_`, meaning there should not be any URL conflicts.
-
-Entry servers also export a [nodeinfo](http://nodeinfo.diaspora.software/) file. An example can be seen [here](https://www.sentrytwo.com/.well-known/nodeinfo/2.0). This file details information about the server to other distributed servers, such as the number of pastes created.
 
 ### Encryption
 
@@ -142,7 +138,7 @@ Pastes can be made "private" by encrypting them. This means that only people wit
 Encrypted pastes cannot be decrypted from other servers, and the paste decryption form will not be shown. This is because the values for the decryption process are stored on the server (`IV`, `Key`, `AuthCode`), and it is not safe to send them back through HTTP. These values are only read when the server selects the record based on the `ViewPassword` and the `CustomURL`.
 
 ```typescript
-// GetEncryptionInfo, EntryDB.ts
+// GetEncryptionInfo, BundlesDB.ts
 // get encryption values by view password and customurl
 const record = (await SQL.QueryOBJ({
     db: this.db,
@@ -159,13 +155,13 @@ Can be disabled through the server config. `app.enable_private_pastes`
 
 ### Paste Expiration
 
-When creating a paste, you can set to have your paste expire at a given time and date. When this time comes, your paste will automatically be deleted by Entry. This is useful if you don't set an edit password on your paste and are unable to delete it. Information about expired pastes is not kept after their deletion, and their custom URL because open again once they expire.
+When creating a paste, you can set to have your paste expire at a given time and date. When this time comes, your paste will automatically be deleted by Bundles. This is useful if you don't set an edit password on your paste and are unable to delete it. Information about expired pastes is not kept after their deletion, and their custom URL because open again once they expire.
 
 Can be disabled through the server config. `app.enable_expiry`
 
 ### Admin Panel
 
-Entry provides an admin panel that is locked behind a set password that allows the server owner to manage pastes on their server quickly and easily. The admin password is set on initial configuration, and stored (plain text) in `data/config.json` with the key `admin`.
+Bundles provides an admin panel that is locked behind a set password that allows the server owner to manage pastes on their server quickly and easily. The admin password is set on initial configuration, and stored (plain text) in `data/config.json` with the key `admin`.
 
 #### Logs
 
@@ -213,17 +209,17 @@ An example that doesn't clear logs on server restart could look like this:
 !!! warn Security
     Plugins are given **full access** to your server. Please be sure you trust a plugin before adding it!
 
-Entry servers are able to run plugins that extend the functionality of Entry.
+Bundles servers are able to run plugins that extend the functionality of Bundles.
 
-Plugins only need one dependency, Entry. You can add this through using your locally installed Entry source, and running `bun link` to create a local link. Plugins will install from this directory using the [bun link](https://bun.sh/docs/cli/install#bun-link) system.
+Plugins only need one dependency, Bundles. You can add this through using your locally installed Bundles source, and running `bun link` to create a local link. Plugins will install from this directory using the [bun link](https://bun.sh/docs/cli/install#bun-link) system.
 
-Plugins can access the `EntryDB` class through `global.EntryDB`.
+Plugins can access the `BundlesDB` class through `global.BundlesDB`.
 
 ```typescript
-console.log(global.EntryDB.DataDirectory);
+console.log(global.BundlesDB.DataDirectory);
 ```
 
-An example server plugin can be seen [here](https://codeberg.org/hkau/entry/src/branch/master/docs/plugins/plugin-example)! It is also important to build your server plugin file, as pages are written in JSX. An example build file (using [Bun](#install)) and example plugin load file can be found [here](https://codeberg.org/hkau/entry/src/branch/master/docs/plugins).
+An example server plugin can be seen [here](https://codeberg.org/sentrytwo/bundles/src/branch/master/docs/plugins/plugin-example)! It is also important to build your server plugin file, as pages are written in JSX. An example build file (using [Bun](#install)) and example plugin load file can be found [here](https://codeberg.org/sentrytwo/bundles/src/branch/master/docs/plugins).
 
 Please refer to the example files provided, as they walk you through the steps of creating plugins and adding them to your server through comments. Once you have built your plugin file, it can be added through the `plugin_file` key in your server config.
 
@@ -237,7 +233,7 @@ Please refer to the example files provided, as they walk you through the steps o
 
 The [admin panel](#admin-panel) plugin tab shows the found and loaded plugin pages.
 
-Plugins can load HTML content into the site footer by adding an endpoint beginning with `._footer`, these work the same as normal endpoints (implementing the `Endpoint` class), but their request URL will always be from `entry:footer-load`. The HTML they return is added to the bottom of the footer on all pages the footer is present. This allows plugins to modify existing pages and include their own scripts in the site.
+Plugins can load HTML content into the site footer by adding an endpoint beginning with `._footer`, these work the same as normal endpoints (implementing the `Endpoint` class), but their request URL will always be from `bundles:footer-load`. The HTML they return is added to the bottom of the footer on all pages the footer is present. This allows plugins to modify existing pages and include their own scripts in the site.
 
 If a plugin has an endpoint named `._set_plugin_dir` and the pluginfile supplies it, the endpoint will be called with a request that has the header value of "X-Plugin-Dir" set to the directory of the plugin source.
 
@@ -281,7 +277,7 @@ You can customize the way your pastes are displayed using some custom elements.
 - `&!lt;lit&!gt;`, the lit element allows you to control the lightness of the page when your paste is rendered. It expects a `percentage`.
 - `&!lt;theme&!gt;`, the theme element allows you to force a theme when your paste is rendered, `dark/light/blue/purple`
 
-Entry also supports an easier syntax, allowing you to shorten elements.
+Bundles also supports an easier syntax, allowing you to shorten elements.
 
 ```html
 <&!percnt; theme dark &!percnt;>
@@ -392,11 +388,11 @@ Can be disabled through the server config. `app.enable_groups`
 
 ### Special Markdown
 
-Entry supports some custom Markdown features that aren't included in the Markdown specification. These allow you to create more advanced pastes much quicker. Information about these can be found [here](https://www.sentrytwo.com/pub/markdown)!
+Bundles supports some custom Markdown features that aren't included in the Markdown specification. These allow you to create more advanced pastes much quicker. Information about these can be found [here](https://www.sentrytwo.com/pub/markdown)!
 
 ### Paste Search
 
-Pastes can be searched (by `CustomURL`) in `/search` on an Entry server. Results are limited to 100 results per query and resulting pastes must be public. You can disable the search page by adding the `app.enable_search` key to your server config.
+Pastes can be searched (by `CustomURL`) in `/search` on an Bundles server. Results are limited to 100 results per query and resulting pastes must be public. You can disable the search page by adding the `app.enable_search` key to your server config.
 
 ```json
 {
@@ -430,7 +426,7 @@ A basic introduction to the layout of the builder can be found [here](https://bu
 
 #### Technical
 
-Pastes built in this way follow a basic "schema" that is detailed in the types used for each node. This schema can be viewed [here](https://codeberg.org/hkau/entry/src/branch/master/src/classes/pages/components/builder/schema.tsx).
+Pastes built in this way follow a basic "schema" that is detailed in the types used for each node. This schema can be viewed [here](https://codeberg.org/sentrytwo/bundles/src/branch/master/src/classes/pages/components/builder/schema.tsx).
 
 The paste builder can be disabled using config `app.enable_builder`. It is enabled by default.
 
@@ -471,7 +467,7 @@ Adding a new node is handled similarly:
 
 ### Media Storage
 
-Entry allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accessible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`. Media can only be uploaded by users associated with a paste.
+Bundles allows users to store media (photos) on your server for use within their pastes. Media is ordered by the owner (associated paste) that uploaded it. It is accessible from `/paste/files/{owner}/{file}`. On the server, media is stored in `data/media/{owner}/{file}`. Media can only be uploaded by users associated with a paste.
 
 Media can be enabled through the config key.
 
@@ -516,7 +512,7 @@ Revisions can be enabled through config `app.enable_versioning`.
 ## Development
 
 1. Make sure you have [Bun](https://bun.sh) installed
-2. Clone the repository (`git clone https://codeberg.org/hkau/entry`)
+2. Clone the repository (`git clone https://codeberg.org/sentrytwo/bundles`)
 3. Install all dependencies (`bun i`)
 4. Run `bun run start` to start the server
 5. Before committing changes you should run `bun run format` to format all files
@@ -524,4 +520,4 @@ Revisions can be enabled through config `app.enable_versioning`.
 
 ### Tests
 
-You can test your changes like you would a deployed version of Entry. You should also run the included tests before committing your changes. Run `bun test` to run the tests that are included in the repository. These tests test the memory and CPU usage of app usage. All tests should pass before you commit.
+You can test your changes like you would a deployed version of Bundles. You should also run the included tests before committing your changes. Run `bun test` to run the tests that are included in the repository. These tests test the memory and CPU usage of app usage. All tests should pass before you commit.

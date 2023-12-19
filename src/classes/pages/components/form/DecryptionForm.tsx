@@ -1,4 +1,4 @@
-import EntryDB from "../../../db/EntryDB";
+import BundlesDB from "../../../db/BundlesDB";
 import type { Paste } from "../../../db/objects/Paste";
 
 export default function DecryptionForm(props: {
@@ -42,8 +42,8 @@ export default function DecryptionForm(props: {
                     type="text"
                     name={"ViewPassword"}
                     placeholder={"View password"}
-                    minLength={EntryDB.MinPasswordLength}
-                    maxLength={EntryDB.MaxPasswordLength}
+                    minLength={BundlesDB.MinPasswordLength}
+                    maxLength={BundlesDB.MaxPasswordLength}
                     class={"round"}
                     required
                 />

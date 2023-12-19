@@ -11,7 +11,7 @@ import { CheckInstance, Curiosity, db, PasteOpenGraph } from "../Pages";
 import BaseParser, { TOML } from "../../db/helpers/BaseParser";
 import { GetAssociation, PageHeaders } from "../api/API";
 import { Paste } from "../../db/objects/Paste";
-import EntryDB from "../../db/EntryDB";
+import BundlesDB from "../../db/BundlesDB";
 
 // import components
 import NodeListing from "../components/builder/components/NodeListing";
@@ -53,7 +53,7 @@ export function ReposNav(props: { name: string; current: string }) {
                 Inspect
             </a>
 
-            {EntryDB.config.app && EntryDB.config.app.enable_versioning && (
+            {BundlesDB.config.app && BundlesDB.config.app.enable_versioning && (
                 <a
                     href={`/r/rev/${props.name}`}
                     className={`${
@@ -73,9 +73,9 @@ export function ReposNav(props: { name: string; current: string }) {
                 </a>
             )}
 
-            {EntryDB.config.app &&
-                EntryDB.config.app.media &&
-                EntryDB.config.app.media.enabled === true && (
+            {BundlesDB.config.app &&
+                BundlesDB.config.app.media &&
+                BundlesDB.config.app.media.enabled === true && (
                     <a
                         href={`/paste/media/${props.name}`}
                         className={`${
@@ -95,8 +95,8 @@ export function ReposNav(props: { name: string; current: string }) {
                     </a>
                 )}
 
-            {(!EntryDB.config.app ||
-                EntryDB.config.app.enable_paste_settings !== false) && (
+            {(!BundlesDB.config.app ||
+                BundlesDB.config.app.enable_paste_settings !== false) && (
                 <a
                     href={`/s/${props.name}`}
                     className={`${
@@ -224,8 +224,8 @@ export class RepoView implements Endpoint {
                                         </a>
                                     )}
 
-                                    {EntryDB.config.log &&
-                                        EntryDB.config.log.events.includes(
+                                    {BundlesDB.config.log &&
+                                        BundlesDB.config.log.events.includes(
                                             "report"
                                         ) &&
                                         !result.HostServer &&
@@ -251,8 +251,8 @@ export class RepoView implements Endpoint {
                                             </a>
                                         )}
 
-                                    {EntryDB.config.app &&
-                                        EntryDB.config.app.enable_builder !==
+                                    {BundlesDB.config.app &&
+                                        BundlesDB.config.app.enable_builder !==
                                             false &&
                                         (!BuilderPaste ? (
                                             <a
@@ -467,8 +467,8 @@ export class RepoView implements Endpoint {
                                 </CardWithHeader>
                             )}
 
-                            {EntryDB.config.app &&
-                                EntryDB.config.app.enable_claim === true && (
+                            {BundlesDB.config.app &&
+                                BundlesDB.config.app.enable_claim === true && (
                                     <CardWithHeader
                                         round={true}
                                         border={true}

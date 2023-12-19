@@ -2,7 +2,7 @@ import { BunFile } from "bun";
 import path from "node:path";
 import fs from "node:fs";
 
-import EntryDB from "./EntryDB";
+import BundlesDB from "./BundlesDB";
 
 /**
  * @export
@@ -10,13 +10,13 @@ import EntryDB from "./EntryDB";
  */
 export default class Media {
     public static MediaLocation = "";
-    private readonly db: EntryDB;
+    private readonly db: BundlesDB;
 
     /**
      * Creates an instance of Expiry.
      * @memberof Expiry
      */
-    constructor(db: EntryDB) {
+    constructor(db: BundlesDB) {
         this.db = db;
     }
 
@@ -27,15 +27,15 @@ export default class Media {
      * @memberof Expiry
      */
     public async Initialize(): Promise<void> {
-        Media.MediaLocation = path.resolve(EntryDB.DataDirectory, "media");
+        Media.MediaLocation = path.resolve(BundlesDB.DataDirectory, "media");
 
         // check config
-        if (!EntryDB.config) await EntryDB.GetConfig();
+        if (!BundlesDB.config) await BundlesDB.GetConfig();
 
         if (
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
         )
             return;
 
@@ -92,9 +92,9 @@ export default class Media {
         // ideally, the owner value would be checked for the correct password prior to calling UploadFile
 
         if (
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
         )
             return [false, "Media disabled"];
 
@@ -109,7 +109,7 @@ export default class Media {
             fs.mkdirSync(OwnerFolder, { recursive: true });
 
         // check size
-        if (file.size > (EntryDB.config.app.media.max_size || 52428800))
+        if (file.size > (BundlesDB.config.app.media.max_size || 52428800))
             return [false, "File too large!"];
 
         // ...
@@ -140,9 +140,9 @@ export default class Media {
         // ideally, the owner value would be checked for the correct password prior to calling DeleteFile
 
         if (
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
         )
             return [false, "Media disabled"];
 
@@ -177,9 +177,9 @@ export default class Media {
         // ideally, the owner value would be checked for the correct password prior to calling DeleteOwner
 
         if (
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
         )
             return [false, "Media disabled"];
 
@@ -210,9 +210,9 @@ export default class Media {
         owner: string
     ): Promise<[boolean, string, string[]?]> {
         if (
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
         )
             return [false, "Media disabled"];
 

@@ -41,7 +41,7 @@ export default function ToggleTheme() {
                     function ToggleTheme() {
                         if (
                             window.PASTE_USES_CUSTOM_THEME && 
-                            window.localStorage.getItem("entry:user.ForceClientTheme") !== "true"
+                            window.localStorage.getItem("bundles:user.ForceClientTheme") !== "true"
                         ) return;
                         
                         const current = window.localStorage.getItem("theme");
@@ -101,10 +101,10 @@ export default function ToggleTheme() {
                     /* global css string */
                     if (
                         !window.PASTE_USES_CUSTOM_THEME || 
-                        window.localStorage.getItem("entry:user.ForceClientTheme") === "true"
+                        window.localStorage.getItem("bundles:user.ForceClientTheme") === "true"
                     ) {
                         const style = document.createElement("style");
-                        style.innerHTML = window.localStorage.getItem("entry:user.GlobalCSSString");
+                        style.innerHTML = window.localStorage.getItem("bundles:user.GlobalCSSString");
                         document.body.appendChild(style);
                     }`
                         .replaceAll("\n", "")

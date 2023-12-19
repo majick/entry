@@ -2,7 +2,7 @@ import { Endpoint, Renderer } from "honeybee";
 
 import Footer from "./site/Footer";
 
-import EntryDB from "../../db/EntryDB";
+import BundlesDB from "../../db/BundlesDB";
 import { Config } from "../../..";
 let config: Config;
 
@@ -63,7 +63,7 @@ export default class _404PageEndpoint implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>404 - {EntryDB.config.name}</title>
+                    <title>404 - {BundlesDB.config.name}</title>
                     <link rel="icon" href="/favicon" />
                 </>
             ),

@@ -471,11 +471,11 @@ export default function CreateEditor(ElementID: string, content: string) {
             override: [BasicCompletion],
             activateOnTyping:
                 window.location.search.includes("hints=true") ||
-                window.localStorage.getItem("entry:user.EditorHints") === "true",
+                window.localStorage.getItem("bundles:user.EditorHints") === "true",
         }),
     ];
 
-    if (window.localStorage.getItem("entry:user.ShowLineNumbers") === "true")
+    if (window.localStorage.getItem("bundles:user.ShowLineNumbers") === "true")
         ExtensionsList.push(lineNumbers());
 
     // bad system for testing if we're editing something else

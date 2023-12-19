@@ -1,7 +1,7 @@
 {
-  "name": "entry",
-  "description": "Open Markdown Pastebin",
-  "version": "1.1.14-rev-5",
+  "name": "bundles-md",
+  "description": "🧶 Open Markdown Pastebin",
+  "version": "1.1.15",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -33,8 +33,7 @@
     "htmlhint": "^1.1.4",
     "marked": "^5.1.0",
     "pg": "^8.11.3",
-    "smol-toml": "^1.1.3",
-    "wsas": "https://codeberg.org/api/packages/hkau/npm/wsas/-/1.0.0/wsas-1.0.0.tgz"
+    "smol-toml": "^1.1.3"
   },
   "scripts": {
     "build": "bun run build.ts",
@@ -42,17 +41,22 @@
     "start": "bun run build && bun run start:no-build",
     "start:no-build": "bun run dist/index.js",
     "format": "prettier src/ --write --config ./.prettierrc",
-    "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag codeberg.org/hkau/entry:latest .",
-    "build:docker-nopush": "bun run build && docker buildx build --load --tag codeberg.org/hkau/entry:latest .",
-    "start:docker-debug": "docker run --env PORT=8080 --env NAME=Entry --env ADMIN_PASSWORD=test -p 8080:8080 codeberg.org/hkau/entry:latest",
+    "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag codeberg.org/sentrytwo/bundles:latest .",
+    "build:docker-nopush": "bun run build && docker buildx build --load --tag codeberg.org/sentrytwo/bundles:latest .",
+    "start:docker-debug": "docker run --env PORT=8080 --env NAME=Bundles --env ADMIN_PASSWORD=test -p 8080:8080 codeberg.org/sentrytwo/bundles:latest",
     "build:exec": "bun run build && bun build dist/Executable.js --compile --minify --outfile build/entry"
   },
   "repository": {
     "type": "git",
-    "url": "https://codeberg.org/hkau/entry"
+    "url": "https://codeberg.org/sentrytwo/bundles"
   },
   "bugs": {
-    "url": "https://codeberg.org/hkau/entry/issues"
+    "url": "https://codeberg.org/sentrytwo/bundles/issues"
   },
-  "homepage": "https://sentrytwo.com"
+  "homepage": "https://sentrytwo.com",
+  "author": {
+    "name": "hkau",
+    "url": "https://sentrytwo.com/@hkau",
+    "email": "feedback@sentrytwo.com"
+  }
 }

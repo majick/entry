@@ -11,7 +11,7 @@ import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../../db/helpers/Hash";
 import _404Page from "../components/404";
 
-import EntryDB from "../../db/EntryDB";
+import BundlesDB from "../../db/BundlesDB";
 
 import { Login } from "../Admin";
 import Pages from "../Pages";
@@ -93,7 +93,7 @@ export class APIExport implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get pastes
@@ -161,7 +161,7 @@ export class APIImport implements Endpoint {
         body.pastes = await (body.pastes as Blob).text();
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get pastes
@@ -201,7 +201,7 @@ export class APIImportRaw implements Endpoint {
         const body = (await request.json()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get pastes
@@ -238,18 +238,18 @@ export class APIImportLogsRaw implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // make sure logs are enabled
-        if (!EntryDB.config.log)
+        if (!BundlesDB.config.log)
             return new Response("Logs are disabled!", { status: 400 });
 
         // get request body
         const body = (await request.json()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get pastes
-        const output = await EntryDB.Logs.ImportLogs(body.logs || []);
+        const output = await BundlesDB.Logs.ImportLogs(body.logs || []);
 
         // return
         return new Response(JSON.stringify(output), {
@@ -284,7 +284,7 @@ export class APIMassDelete implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get pastes
@@ -326,7 +326,7 @@ export class APISQL implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // run query
@@ -370,11 +370,11 @@ export class APIExportLogs implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get logs
-        const _export = await EntryDB.Logs.QueryLogs('"ID" IS NOT NULL');
+        const _export = await BundlesDB.Logs.QueryLogs('"ID" IS NOT NULL');
 
         // return
         return new Response(JSON.stringify(_export[2]), {
@@ -410,7 +410,7 @@ export class APIMassDeleteLogs implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // delete logs
@@ -418,7 +418,7 @@ export class APIMassDeleteLogs implements Endpoint {
 
         // build outputs
         for (const id of JSON.parse(body.logs))
-            outputs.push(await EntryDB.Logs.DeleteLog(id));
+            outputs.push(await BundlesDB.Logs.DeleteLog(id));
 
         // return
         return new Response(JSON.stringify(outputs), {
@@ -453,11 +453,11 @@ export class APIExportConfig implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // return
-        return new Response(JSON.stringify(EntryDB.config), {
+        return new Response(JSON.stringify(BundlesDB.config), {
             headers: {
                 ...DefaultHeaders,
                 "Content-Type": "application/json",
@@ -490,12 +490,12 @@ export class APIGetUsers implements Endpoint {
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== EntryDB.config.admin)
+        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
             return new Login().request(request, server);
 
         // get logs
         const _export = (
-            await EntryDB.Logs.QueryLogs(
+            await BundlesDB.Logs.QueryLogs(
                 "\"Type\" = 'session' AND \"Content\" LIKE '%;_with;%'"
             )
         )[2];

@@ -270,7 +270,7 @@ function RenderPage() {
                 <button
                     aria-label={"Add Element"}
                     class={"tooltip-wrapper visual-active round"}
-                    id={"entry:button.AddComponent"}
+                    id={"bundles:button.AddComponent"}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -334,7 +334,7 @@ function RenderPage() {
                 </button>
 
                 <button
-                    id={"entry:button.PublishPaste"}
+                    id={"bundles:button.PublishPaste"}
                     aria-label={"Publish Paste"}
                     class={"tooltip-wrapper visual-active green-cta round border"}
                     onClick={() => {
@@ -375,8 +375,8 @@ function RenderPage() {
 
             {/* modals */}
             <Modal
-                buttonid="entry:button.AddComponent"
-                modalid="entry:modal.AddComponent"
+                buttonid="bundles:button.AddComponent"
+                modalid="bundles:modal.AddComponent"
                 round={true}
             >
                 <div
@@ -479,9 +479,9 @@ function RenderPage() {
             />
 
             <Modal
-                buttonid="entry:button.PasteOptions"
-                modalid="entry:modal.PasteOptions"
-                noIdMatch={true} // use `window.modals["entry:modal.PasteOptions"](true)` instead
+                buttonid="bundles:button.PasteOptions"
+                modalid="bundles:modal.PasteOptions"
+                noIdMatch={true} // use `window.modals["bundles:modal.PasteOptions"](true)` instead
                 round={true}
             >
                 <div
@@ -548,8 +548,8 @@ function RenderPage() {
             </Modal>
 
             <Modal
-                buttonid="entry:button.ConfirmNotRemovable"
-                modalid="entry:modal.ConfirmNotRemovable"
+                buttonid="bundles:button.ConfirmNotRemovable"
+                modalid="bundles:modal.ConfirmNotRemovable"
                 noIdMatch={true}
                 round={true}
             >
@@ -935,7 +935,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                     (target.firstChild as HTMLElement).id === "PageStar") ||
                 (target.parentElement && target.parentElement.id === "PageStar")
             )
-                (window as any).modals["entry:modal.PasteOptions"](true);
+                (window as any).modals["bundles:modal.PasteOptions"](true);
         });
     }
 
@@ -1084,7 +1084,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 (target.firstChild &&
                     (target.firstChild as HTMLElement).id === "PageStar")
             )
-                (window as any).modals["entry:modal.PasteOptions"](true);
+                (window as any).modals["bundles:modal.PasteOptions"](true);
 
             // get node
             const AllNodes = parser.GetNodes();

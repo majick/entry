@@ -11,7 +11,7 @@ import { PageHeaders, GetAssociation, VerifyContentType } from "../api/API";
 import Pages, { CheckInstance, db, Curiosity } from "../Pages";
 import { CreateHash } from "../../db/helpers/Hash";
 import { contentType } from "mime-types";
-import EntryDB from "../../db/EntryDB";
+import BundlesDB from "../../db/BundlesDB";
 
 // import components
 import TopNav from "../components/site/TopNav";
@@ -48,7 +48,9 @@ export class ViewPasteMedia implements Endpoint {
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // get media files
-        const Files = await EntryDB.Media.GetMediaByOwner(paste.CustomURL as string);
+        const Files = await BundlesDB.Media.GetMediaByOwner(
+            paste.CustomURL as string
+        );
 
         // render
         return new Response(
@@ -79,7 +81,7 @@ export class ViewPasteMedia implements Endpoint {
                                     }
                                 >
                                     <button
-                                        id={"entry:button.UploadFile"}
+                                        id={"bundles:button.UploadFile"}
                                         className="border round full"
                                     >
                                         <svg
@@ -205,8 +207,8 @@ export class ViewPasteMedia implements Endpoint {
                             </Card>
 
                             <Modal
-                                modalid="entry:modal.UploadFile"
-                                buttonid="entry:button.UploadFile"
+                                modalid="bundles:modal.UploadFile"
+                                buttonid="bundles:button.UploadFile"
                                 round={true}
                             >
                                 <h1
@@ -241,8 +243,8 @@ export class ViewPasteMedia implements Endpoint {
                                         class={"round"}
                                         type="text"
                                         placeholder={"Edit code"}
-                                        maxLength={EntryDB.MaxPasswordLength}
-                                        minLength={EntryDB.MinPasswordLength}
+                                        maxLength={BundlesDB.MaxPasswordLength}
+                                        minLength={BundlesDB.MinPasswordLength}
                                         name={"EditPassword"}
                                         id={"EditPassword"}
                                         required
@@ -258,7 +260,8 @@ export class ViewPasteMedia implements Endpoint {
                                         name="File"
                                         id={"File"}
                                         maxLength={
-                                            EntryDB.config.app!.media!.max_size || 0
+                                            BundlesDB.config.app!.media!.max_size ||
+                                            0
                                         }
                                         accept={"image/*,font/*,text/*"}
                                         required
@@ -296,7 +299,7 @@ export class ViewPasteMedia implements Endpoint {
                     <Curiosity Association={Association} />
                 </>,
                 <>
-                    <title>Media - {EntryDB.config.name}</title>
+                    <title>Media - {BundlesDB.config.name}</title>
                     <link rel="icon" href="/favicon" />
                 </>
             ),
@@ -356,7 +359,7 @@ export class InspectMedia implements Endpoint {
         const EditMode = url.searchParams.get("edit") === "true";
 
         // get media file
-        const File = await EntryDB.Media.GetFile(name, FileName);
+        const File = await BundlesDB.Media.GetFile(name, FileName);
         if (!File[0] || !File[2]) return new _404Page().request(request);
 
         // render
@@ -450,10 +453,10 @@ export class InspectMedia implements Endpoint {
                                                         type="text"
                                                         placeholder={"Edit code"}
                                                         maxLength={
-                                                            EntryDB.MaxPasswordLength
+                                                            BundlesDB.MaxPasswordLength
                                                         }
                                                         minLength={
-                                                            EntryDB.MinPasswordLength
+                                                            BundlesDB.MinPasswordLength
                                                         }
                                                         name={"EditPassword"}
                                                         id={"EditPassword"}
@@ -586,7 +589,7 @@ export class InspectMedia implements Endpoint {
                 </>,
                 <>
                     <title>
-                        {FileName} - {EntryDB.config.name}
+                        {FileName} - {BundlesDB.config.name}
                     </title>
 
                     <link rel="icon" href="/favicon" />
@@ -633,7 +636,7 @@ export class GetFile implements Endpoint {
         if (!Owner || !File) return new _404Page().request(request);
 
         // get file
-        const file = await EntryDB.Media.GetFile(Owner, File);
+        const file = await BundlesDB.Media.GetFile(Owner, File);
         if (!file[0] && !file[2]) return new _404Page().request(request);
 
         // return
@@ -674,7 +677,7 @@ export class ListFiles implements Endpoint {
         if (!Owner || !File) return new _404Page().request(request);
 
         // get file
-        const files = await EntryDB.Media.GetMediaByOwner(Owner);
+        const files = await BundlesDB.Media.GetMediaByOwner(Owner);
         if (!files[0] && !files[2]) return new _404Page().request(request);
 
         // return
@@ -699,7 +702,7 @@ export class UploadFile implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // make sure media is enabled (and exists)
-        if (!EntryDB.Media) return new _404Page().request(request);
+        if (!BundlesDB.Media) return new _404Page().request(request);
 
         // verify content type
         const WrongType = VerifyContentType(request, "multipart/form-data");
@@ -725,19 +728,19 @@ export class UploadFile implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
             return new Response("Invalid password", {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot upload file: Invalid password!",
-                    "X-Entry-Error": "Cannot upload file: Invalid password!",
+                    "X-Bundles-Error": "Cannot upload file: Invalid password!",
                 },
             });
 
         // upload file
-        const result = await EntryDB.Media.UploadFile(
+        const result = await BundlesDB.Media.UploadFile(
             paste.CustomURL as string,
             _file
         );
@@ -772,7 +775,7 @@ export class DeleteFile implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // make sure media is enabled (and exists)
-        if (!EntryDB.Media) return new _404Page().request(request);
+        if (!BundlesDB.Media) return new _404Page().request(request);
 
         // verify content type
         const WrongType = VerifyContentType(request, "multipart/form-data");
@@ -797,19 +800,19 @@ export class DeleteFile implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
             return new Response("Invalid password", {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot delete file: Invalid password!",
-                    "X-Entry-Error": "Cannot delete file: Invalid password!",
+                    "X-Bundles-Error": "Cannot delete file: Invalid password!",
                 },
             });
 
         // delete file
-        const result = await EntryDB.Media.DeleteFile(
+        const result = await BundlesDB.Media.DeleteFile(
             paste.CustomURL as string,
             body.File
         );

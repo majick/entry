@@ -55,8 +55,8 @@ export default function PublishModals(props: {
     // return
     return (
         <Modal
-            modalid="entry:modal.PublishPaste"
-            buttonid="entry:button.PublishPaste"
+            modalid="bundles:modal.PublishPaste"
+            buttonid="bundles:button.PublishPaste"
             round={true}
         >
             <iframe
@@ -140,7 +140,7 @@ export default function PublishModals(props: {
 
                             <a
                                 href={"javascript:"}
-                                id={"entry:button.PasteExtras"}
+                                id={"bundles:button.PasteExtras"}
                                 title={"More Options"}
                                 class={"button tertiary round full"}
                             >
@@ -156,7 +156,7 @@ export default function PublishModals(props: {
                                 More Options
                             </a>
 
-                            <button className="green-cta round modal:entry:button.Loading full">
+                            <button className="green-cta round modal:bundles:button.Loading full">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 16 16"
@@ -262,7 +262,7 @@ export default function PublishModals(props: {
                                     gap: "0.5rem",
                                 }}
                             >
-                                <button className="green-cta round modal:entry:button.Loading full">
+                                <button className="green-cta round modal:bundles:button.Loading full">
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         viewBox="0 0 16 16"
@@ -279,7 +279,7 @@ export default function PublishModals(props: {
                                 {props.EnableDrafts === true && (
                                     <button
                                         class={"round tertiary full"}
-                                        id={"entry:button.Save"}
+                                        id={"bundles:button.Save"}
                                         formAction={"/api/edit?draft=true"}
                                     >
                                         <svg
@@ -298,7 +298,7 @@ export default function PublishModals(props: {
 
                             <a
                                 className="button red round full"
-                                id={"entry:button.DeletePaste"}
+                                id={"bundles:button.DeletePaste"}
                                 href={"#"}
                             >
                                 Delete
@@ -307,8 +307,8 @@ export default function PublishModals(props: {
 
                         {props.EditingPaste && (
                             <Modal
-                                buttonid="entry:button.DeletePaste"
-                                modalid="entry:modal.DeletePaste"
+                                buttonid="bundles:button.DeletePaste"
+                                modalid="bundles:modal.DeletePaste"
                                 round={true}
                             >
                                 <h4
@@ -395,7 +395,7 @@ export default function PublishModals(props: {
 
                                         <button
                                             class={
-                                                "red round mobile:max modal:entry:button.Loading"
+                                                "red round mobile:max modal:bundles:button.Loading"
                                             }
                                         >
                                             Delete

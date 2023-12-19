@@ -1,6 +1,6 @@
 # entrymd
 
-Node.js API wrapper for [Entry](https://codeberg.org/hkau/entry) instances.
+Node.js API wrapper for [Bundles](https://codeberg.org/sentrytwo/bundles) instances.
 
 Implements API as described [here](https://sentrytwo.com/what#api). Does not implemenet admin endpoints.
 
@@ -13,7 +13,7 @@ npm install entrymd
 ## Usage
 
 ```typescript
-new Entry("https://sentrytwo.com");
+new Bundles("https://sentrytwo.com");
 ```
 
 The constructor takes a `server` input, which determines which server to send requests to. Uses `https://sentrytwo.com` as the default.
@@ -33,7 +33,7 @@ Create a new paste with the specified content.
     - `GroupSumbmitPassword`?: string, group password (required if `GroupName` is provided)
 
 ```typescript
-const client = new Entry();
+const client = new Bundles();
 await client.NewPaste({
     Content: "test paste",
     CustomURL: "test",
@@ -58,7 +58,7 @@ Edit an existing paste.
     - `NewCustomURL`?: string, the path to change the paste path to (path does not change if this is not provided)
 
 ```typescript
-const client = new Entry();
+const client = new Bundles();
 await client.EditPaste({
     Content: "test 1",
     CustomURL: "test",
@@ -77,7 +77,7 @@ Delete an existing paste.
     - `EditPassword`: string, the paste edit password
 
 ```typescript
-const client = new Entry();
+const client = new Bundles();
 await client.DeletePaste({
     CustomURL: "test1",
     EditPassword: "54321",
@@ -91,7 +91,7 @@ Get an existing paste.
 - `CustomURL`: string, the path the paste is saved at
 
 ```typescript
-const client = new Entry();
+const client = new Bundles();
 await client.GetPaste("example");
 ```
 
@@ -104,7 +104,7 @@ Decrypt a private paste.
     - `ViewPassword`: string, the paste view password
 
 ```typescript
-const client = new Entry();
+const client = new Bundles();
 await client.GetPaste({
     CustomURL: "test",
     ViewPassword: "12345",
@@ -115,7 +115,7 @@ await client.GetPaste({
 
 Requires [Bun](https://bun.sh)
 
-- Clone repository (`git clone https://codeberg.org/hkau/entry`)
+- Clone repository (`git clone https://codeberg.org/sentrytwo/bundles`)
 - cd into directory (`cd packages/api`)
 - Install dependencies (`bun i`)
 - Format (`bun run format`)

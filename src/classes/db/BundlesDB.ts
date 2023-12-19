@@ -1,6 +1,6 @@
 /**
- * @file Create Entry DB
- * @name EntryDB.ts
+ * @file Create Bundles DB
+ * @name BundlesDB.ts
  * @license MIT
  */
 
@@ -25,9 +25,9 @@ import punycode from "node:punycode";
 
 /**
  * @export
- * @class EntryDB
+ * @class BundlesDB
  */
-export default class EntryDB {
+export default class BundlesDB {
     public static DataDirectory = (
         process.env.DATA_LOCATION || path.resolve(process.cwd(), "data")
     ).replace(":cwd", process.cwd());
@@ -58,36 +58,36 @@ export default class EntryDB {
     public static StaticInit: boolean = false;
 
     /**
-     * Creates an instance of EntryDB.
-     * @param {string} [dbname="entry"] Set the name of the database file
+     * Creates an instance of BundlesDB.
+     * @param {string} [dbname="bundles"] Set the name of the database file
      * @param {string} [dbdir] Set the parent directory of the database file
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
-    constructor(dbname: string = "entry", dbdir?: string) {
+    constructor(dbname: string = "bundles", dbdir?: string) {
         // set datadirectory based on config file
-        if (fs.existsSync(EntryDB.ConfigLocation))
-            EntryDB.DataDirectory =
+        if (fs.existsSync(BundlesDB.ConfigLocation))
+            BundlesDB.DataDirectory =
                 // if config file doesn't include a data entry, don't change datadirectory at all...
                 // STILL ACCEPTS PROCESS.ENV.DATA_DIRECTORY!!! (just prefers config file version)
                 (
                     (
                         JSON.parse(
-                            fs.readFileSync(EntryDB.ConfigLocation).toString()
+                            fs.readFileSync(BundlesDB.ConfigLocation).toString()
                         ) as Config
-                    ).data || EntryDB.DataDirectory
+                    ).data || BundlesDB.DataDirectory
                 ).replace(":cwd", process.cwd());
 
-        // set dbdir to EntryDB.DataDirectory if it is undefined
-        if (!dbdir) dbdir = EntryDB.DataDirectory;
+        // set dbdir to BundlesDB.DataDirectory if it is undefined
+        if (!dbdir) dbdir = BundlesDB.DataDirectory;
 
         // create db link
-        const [db, isNew] = EntryDB.config.pg
+        const [db, isNew] = BundlesDB.config.pg
             ? [
                   SQL.CreatePostgres(
-                      EntryDB.config.pg.host,
-                      EntryDB.config.pg.user,
-                      EntryDB.config.pg.password,
-                      EntryDB.config.pg.database
+                      BundlesDB.config.pg.host,
+                      BundlesDB.config.pg.user,
+                      BundlesDB.config.pg.password,
+                      BundlesDB.config.pg.database
                   ),
                   false,
               ]
@@ -97,67 +97,67 @@ export default class EntryDB {
         this.db = db;
 
         (async () => {
-            await EntryDB.GetConfig(); // fill config
+            await BundlesDB.GetConfig(); // fill config
 
             // create tables
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: db,
                 query: `CREATE TABLE IF NOT EXISTS "Pastes" (
-                    "Content" varchar(${EntryDB.MaxContentLength}),
-                    "EditPassword" varchar(${EntryDB.MaxPasswordLength}),
-                    "CustomURL" varchar(${EntryDB.MaxCustomURLLength}),
-                    "ViewPassword" varchar(${EntryDB.MaxPasswordLength}),
+                    "Content" varchar(${BundlesDB.MaxContentLength}),
+                    "EditPassword" varchar(${BundlesDB.MaxPasswordLength}),
+                    "CustomURL" varchar(${BundlesDB.MaxCustomURLLength}),
+                    "ViewPassword" varchar(${BundlesDB.MaxPasswordLength}),
                     "PubDate" float,
                     "EditDate" float,
-                    "GroupName" varchar(${EntryDB.MaxCustomURLLength}),
-                    "GroupSubmitPassword" varchar(${EntryDB.MaxPasswordLength}),
-                    "Metadata" varchar(${EntryDB.MaxContentLength})
+                    "GroupName" varchar(${BundlesDB.MaxCustomURLLength}),
+                    "GroupSubmitPassword" varchar(${BundlesDB.MaxPasswordLength}),
+                    "Metadata" varchar(${BundlesDB.MaxContentLength})
                 )`,
             });
 
             try {
                 // add "Metadata" column (if it doesn't exist) (COMPATIBILITY)
-                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: db,
-                    query: `ALTER TABLE "Pastes" ADD COLUMN "Metadata" varchar(${EntryDB.MaxContentLength})`,
+                    query: `ALTER TABLE "Pastes" ADD COLUMN "Metadata" varchar(${BundlesDB.MaxContentLength})`,
                 });
             } catch {}
 
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: db,
                 query: `CREATE TABLE IF NOT EXISTS "Encryption" (
-                    "ViewPassword" varchar(${EntryDB.MaxPasswordLength}),
-                    "CustomURL" varchar(${EntryDB.MaxCustomURLLength}),
+                    "ViewPassword" varchar(${BundlesDB.MaxPasswordLength}),
+                    "CustomURL" varchar(${BundlesDB.MaxCustomURLLength}),
                     "ENC_IV" varchar(24),
                     "ENC_KEY" varchar(64),
                     "ENC_CODE" varchar(32)
                 )`,
             });
 
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: db,
                 query: `CREATE TABLE IF NOT EXISTS "Revisions" (
-                    "CustomURL" varchar(${EntryDB.MaxCustomURLLength}),
-                    "Content" varchar(${EntryDB.MaxContentLength}),
+                    "CustomURL" varchar(${BundlesDB.MaxCustomURLLength}),
+                    "Content" varchar(${BundlesDB.MaxContentLength}),
                     "EditDate" float
                 )`,
             });
 
             // static init
-            if (!EntryDB.StaticInit) {
-                EntryDB.StaticInit = true;
+            if (!BundlesDB.StaticInit) {
+                BundlesDB.StaticInit = true;
 
                 // ...inits
-                await EntryDB.CreateExpiry();
-                await EntryDB.InitLogs();
-                await EntryDB.InitMedia();
+                await BundlesDB.CreateExpiry();
+                await BundlesDB.InitLogs();
+                await BundlesDB.InitMedia();
 
                 // version paste check
-                if (!(await EntryDB.GetConfig())) return;
+                if (!(await BundlesDB.GetConfig())) return;
 
                 // check version
                 let storedVersion = await this.GetPasteFromURL("ver");
@@ -167,7 +167,7 @@ export default class EntryDB {
                     // this is used to check if the server is outdated
                     await this.CreatePaste({
                         CustomURL: "ver",
-                        EditPassword: EntryDB.config.admin,
+                        EditPassword: BundlesDB.config.admin,
                         Content: pack.version,
                         PubDate: new Date().getTime(),
                         EditDate: new Date().getTime(),
@@ -184,14 +184,14 @@ export default class EntryDB {
                     await this.EditPaste(
                         {
                             CustomURL: "ver",
-                            EditPassword: EntryDB.config.admin,
+                            EditPassword: BundlesDB.config.admin,
                             Content: pack.version,
                             PubDate: new Date().getTime(),
                             EditDate: new Date().getTime(),
                         },
                         {
                             CustomURL: "ver",
-                            EditPassword: EntryDB.config.admin,
+                            EditPassword: BundlesDB.config.admin,
                             Content: pack.version,
                             PubDate: new Date().getTime(),
                             EditDate: new Date().getTime(),
@@ -207,24 +207,24 @@ export default class EntryDB {
      *
      * @static
      * @return {Promise<Config>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public static async GetConfig(): Promise<Config | undefined> {
         // make sure config exists
-        if (!(await Bun.file(EntryDB.ConfigLocation).exists())) {
+        if (!(await Bun.file(BundlesDB.ConfigLocation).exists())) {
             // @ts-ignore - (most) values are prefilled when undefined anyways
-            EntryDB.config = { name: "Entry", app: { auto_tag: false } };
+            BundlesDB.config = { name: "Bundles", app: { auto_tag: false } };
             return undefined; // still return undefined so setup runs
         }
 
         // get config
-        const config = await Bun.file(EntryDB.ConfigLocation).json();
+        const config = await Bun.file(BundlesDB.ConfigLocation).json();
 
         // make sure config has a log entry
         if (!config.log) config.log = { clear_on_start: true, events: [] };
 
         // store config
-        EntryDB.config = config;
+        BundlesDB.config = config;
 
         // return config
         return config;
@@ -237,29 +237,30 @@ export default class EntryDB {
      *
      * @static
      * @return {Promise<void>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public static async CreateExpiry(): Promise<void> {
         // check if expiry already exists
-        if (EntryDB.Expiry) return;
+        if (BundlesDB.Expiry) return;
 
         // create expiry
-        EntryDB.Expiry = new Expiry(new this());
+        BundlesDB.Expiry = new Expiry(new this());
 
         // create expiry store
-        await EntryDB.Expiry.Initialize(
-            path.resolve(EntryDB.DataDirectory, "expiry")
+        await BundlesDB.Expiry.Initialize(
+            path.resolve(BundlesDB.DataDirectory, "expiry")
         );
 
         // check if expiry is disabled
         // we're still going to create the expiry store if expiry is disabled,
         // we just won't run any checks on it
-        await EntryDB.GetConfig();
-        if (EntryDB.config.app && EntryDB.config.app.enable_expiry === false) return;
+        await BundlesDB.GetConfig();
+        if (BundlesDB.config.app && BundlesDB.config.app.enable_expiry === false)
+            return;
 
         // run expiry clock
         setInterval(async () => {
-            await EntryDB.Expiry.CheckExpiry();
+            await BundlesDB.Expiry.CheckExpiry();
         }, 1000 * 60); // run every minute
     }
 
@@ -269,21 +270,22 @@ export default class EntryDB {
      *
      * @static
      * @return {Promise<void>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public static async InitLogs(): Promise<void> {
-        // if (!EntryDB.config.log || EntryDB.Logs) return; // LOGS ARE NOW REQUIRED
+        // if (!BundlesDB.config.log || BundlesDB.Logs) return; // LOGS ARE NOW REQUIRED
 
         // init logs
-        EntryDB.Logs = new LogDB();
+        BundlesDB.Logs = new LogDB();
 
         // delete bot sessions
-        if (EntryDB.config.log.events.includes("session")) {
-            const BotSessions = await EntryDB.Logs.QueryLogs(
+        if (BundlesDB.config.log.events.includes("session")) {
+            const BotSessions = await BundlesDB.Logs.QueryLogs(
                 "\"Content\" LIKE '%bot%' OR \"Content\" LIKE '%compatible%'"
             );
 
-            for (const session of BotSessions[2]) EntryDB.Logs.DeleteLog(session.ID);
+            for (const session of BotSessions[2])
+                BundlesDB.Logs.DeleteLog(session.ID);
 
             // log (only if there were multiple bot sessions)
             if (BotSessions[2].length > 1)
@@ -298,7 +300,7 @@ export default class EntryDB {
 
             // ...build query
             for (const log of (
-                await EntryDB.Logs.QueryLogs("\"Type\" = 'session'")
+                await BundlesDB.Logs.QueryLogs("\"Type\" = 'session'")
             )[2]) {
                 // get dates
                 const Created = new Date(log.Timestamp);
@@ -316,11 +318,11 @@ export default class EntryDB {
 
             if (query.includes("AND"))
                 // ...run query
-                await (EntryDB.config.pg && EntryDB.config.pg.logdb
+                await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
                     ? SQL.PostgresQueryOBJ
                     : SQL.QueryOBJ)({
                     // @ts-ignore
-                    db: EntryDB.Logs.db,
+                    db: BundlesDB.Logs.db,
                     query,
                     use: "Prepare",
                     all: true,
@@ -336,23 +338,23 @@ export default class EntryDB {
      *
      * @static
      * @return {Promise<any>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public static async InitMedia(): Promise<any> {
         if (
-            !EntryDB.config ||
-            !EntryDB.config.app ||
-            !EntryDB.config.app.media ||
-            EntryDB.config.app.media.enabled === false
+            !BundlesDB.config ||
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
         )
             return;
 
         // create db
-        EntryDB.Media = new Media(new this());
-        EntryDB.Media.Initialize();
+        BundlesDB.Media = new Media(new this());
+        BundlesDB.Media.Initialize();
 
         // return
-        return EntryDB.Media;
+        return BundlesDB.Media;
     }
 
     // pastes
@@ -365,100 +367,100 @@ export default class EntryDB {
      * @static
      * @param {Paste} PasteInfo
      * @return {[boolean, string]} [okay, reason]
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     private static ValidatePasteLengths(PasteInfo: Paste): [boolean, string] {
         // validate lengths
 
         // check more than maximum
         // ...content
-        if (PasteInfo.Content.length >= EntryDB.MaxContentLength)
+        if (PasteInfo.Content.length >= BundlesDB.MaxContentLength)
             return [
                 false,
-                `Content must be less than ${EntryDB.MaxContentLength} characters!`,
+                `Content must be less than ${BundlesDB.MaxContentLength} characters!`,
             ];
         // ...edit password
-        else if (PasteInfo.EditPassword.length >= EntryDB.MaxPasswordLength)
+        else if (PasteInfo.EditPassword.length >= BundlesDB.MaxPasswordLength)
             return [
                 false,
-                `Edit password must be less than ${EntryDB.MaxPasswordLength} characters!`,
+                `Edit password must be less than ${BundlesDB.MaxPasswordLength} characters!`,
             ];
         // ...custom url
-        else if (PasteInfo.CustomURL.length >= EntryDB.MaxCustomURLLength)
+        else if (PasteInfo.CustomURL.length >= BundlesDB.MaxCustomURLLength)
             return [
                 false,
-                `Custom URL must be less than ${EntryDB.MaxCustomURLLength} characters!`,
+                `Custom URL must be less than ${BundlesDB.MaxCustomURLLength} characters!`,
             ];
         // ...view password
         else if (
             PasteInfo.ViewPassword &&
-            PasteInfo.ViewPassword.length >= EntryDB.MaxPasswordLength
+            PasteInfo.ViewPassword.length >= BundlesDB.MaxPasswordLength
         )
             return [
                 false,
-                `View password must be less than ${EntryDB.MaxPasswordLength} characters!`,
+                `View password must be less than ${BundlesDB.MaxPasswordLength} characters!`,
             ];
         // ...group
         else if (
             PasteInfo.GroupName &&
-            PasteInfo.GroupName.length >= EntryDB.MaxCustomURLLength
+            PasteInfo.GroupName.length >= BundlesDB.MaxCustomURLLength
         )
             return [
                 false,
-                `Group name must be less than ${EntryDB.MaxCustomURLLength} characters!`,
+                `Group name must be less than ${BundlesDB.MaxCustomURLLength} characters!`,
             ];
         else if (
             PasteInfo.GroupSubmitPassword &&
-            PasteInfo.GroupSubmitPassword.length >= EntryDB.MaxPasswordLength
+            PasteInfo.GroupSubmitPassword.length >= BundlesDB.MaxPasswordLength
         )
             return [
                 false,
-                `Group submit password must be less than ${EntryDB.MaxPasswordLength} characters!`,
+                `Group submit password must be less than ${BundlesDB.MaxPasswordLength} characters!`,
             ];
         // check less than minimum
         // ...content
-        else if (PasteInfo.Content.length <= EntryDB.MinContentLength)
+        else if (PasteInfo.Content.length <= BundlesDB.MinContentLength)
             return [
                 false,
-                `Content must be more than ${EntryDB.MinContentLength} characters!`,
+                `Content must be more than ${BundlesDB.MinContentLength} characters!`,
             ];
         // ...edit password
-        else if (PasteInfo.EditPassword.length <= EntryDB.MinPasswordLength)
+        else if (PasteInfo.EditPassword.length <= BundlesDB.MinPasswordLength)
             return [
                 false,
-                `Edit password must be more than ${EntryDB.MinPasswordLength} characters!`,
+                `Edit password must be more than ${BundlesDB.MinPasswordLength} characters!`,
             ];
         // ...custom url
-        else if (PasteInfo.CustomURL.length <= EntryDB.MinCustomURLLength)
+        else if (PasteInfo.CustomURL.length <= BundlesDB.MinCustomURLLength)
             return [
                 false,
-                `Custom URL must be more than ${EntryDB.MinCustomURLLength} characters!`,
+                `Custom URL must be more than ${BundlesDB.MinCustomURLLength} characters!`,
             ];
         // ...view password
         else if (
             PasteInfo.ViewPassword &&
-            PasteInfo.ViewPassword.length <= EntryDB.MinPasswordLength
+            PasteInfo.ViewPassword.length <= BundlesDB.MinPasswordLength
         )
             return [
                 false,
-                `View password must be more than ${EntryDB.MinPasswordLength} characters!`,
+                `View password must be more than ${BundlesDB.MinPasswordLength} characters!`,
             ];
         // ...group
         else if (
             PasteInfo.GroupName &&
-            PasteInfo.GroupName.length <= EntryDB.MinCustomURLLength
+            PasteInfo.GroupName.length <= BundlesDB.MinCustomURLLength
         )
             return [
                 false,
-                `Group name must be more than ${EntryDB.MinCustomURLLength} characters!`,
+                `Group name must be more than ${BundlesDB.MinCustomURLLength} characters!`,
             ];
         else if (
             PasteInfo.GroupSubmitPassword &&
-            PasteInfo.GroupSubmitPassword.length <= EntryDB.MinPasswordLength
+            PasteInfo.GroupSubmitPassword.length <= BundlesDB.MinPasswordLength
         )
             return [
                 false,
-                `Group submit password must be more than ${EntryDB.MinPasswordLength} characters!`,
+                `Group submit password must be more than ${BundlesDB.MinPasswordLength} characters!`,
             ];
 
         return [true, ""];
@@ -471,7 +473,7 @@ export default class EntryDB {
      * @param {boolean} [SkipExtras=false]
      * @param {boolean} [isFromCon=false]
      * @return {(Promise<Paste | undefined>)}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public GetPasteFromURL(
         PasteURL: string,
@@ -491,8 +493,8 @@ export default class EntryDB {
 
                 // check PasteCache for paste!
                 if (isFromCon !== true) {
-                    if (EntryDB.PasteCache[PasteURL.toLowerCase()] === undefined)
-                        EntryDB.PasteCache[PasteURL.toLowerCase()] =
+                    if (BundlesDB.PasteCache[PasteURL.toLowerCase()] === undefined)
+                        BundlesDB.PasteCache[PasteURL.toLowerCase()] =
                             new PasteConnection(
                                 this,
                                 PasteURL.toLowerCase(),
@@ -501,12 +503,12 @@ export default class EntryDB {
 
                     // fetch and return
                     return resolve(
-                        await EntryDB.PasteCache[PasteURL.toLowerCase()].Fetch()
+                        await BundlesDB.PasteCache[PasteURL.toLowerCase()].Fetch()
                     );
                 }
 
                 // get paste from local db
-                const record = (await (EntryDB.config.pg
+                const record = (await (BundlesDB.config.pg
                     ? SQL.PostgresQueryOBJ
                     : SQL.QueryOBJ)({
                     // @ts-ignore
@@ -521,7 +523,7 @@ export default class EntryDB {
 
                 // update encryption values
                 if (record.ViewPassword && !SkipExtras) {
-                    const encryption = await (EntryDB.config.pg
+                    const encryption = await (BundlesDB.config.pg
                         ? SQL.PostgresQueryOBJ
                         : SQL.QueryOBJ)({
                         // @ts-ignore
@@ -538,8 +540,8 @@ export default class EntryDB {
                 }
 
                 // update expiry information
-                if (EntryDB.Expiry && EntryDB.StaticInit && !SkipExtras) {
-                    const expires = await EntryDB.Expiry.GetExpiryDate(
+                if (BundlesDB.Expiry && BundlesDB.StaticInit && !SkipExtras) {
+                    const expires = await BundlesDB.Expiry.GetExpiryDate(
                         record.CustomURL
                     );
 
@@ -548,13 +550,13 @@ export default class EntryDB {
 
                 // count views
                 if (
-                    EntryDB.config.log &&
-                    EntryDB.config.log.events.includes("view_paste") &&
-                    EntryDB.Logs &&
+                    BundlesDB.config.log &&
+                    BundlesDB.config.log.events.includes("view_paste") &&
+                    BundlesDB.Logs &&
                     !SkipExtras
                 )
                     record.Views = (
-                        await EntryDB.Logs.QueryLogs(
+                        await BundlesDB.Logs.QueryLogs(
                             `\"Content\" LIKE '${record.CustomURL.replaceAll(
                                 "_",
                                 "\\_"
@@ -563,8 +565,8 @@ export default class EntryDB {
                     )[2].length;
 
                 // count comments
-                if (EntryDB.Logs) {
-                    const comments = await (EntryDB.config.pg
+                if (BundlesDB.Logs) {
+                    const comments = await (BundlesDB.config.pg
                         ? SQL.PostgresQueryOBJ
                         : SQL.QueryOBJ)({
                         // @ts-ignore
@@ -657,10 +659,7 @@ export default class EntryDB {
                     return resolve(undefined);
 
                 // get body
-                const text =
-                    server !== "rentry.co"
-                        ? await record.text()
-                        : (await record.json()).content;
+                const text = await record.text();
 
                 // return
                 if (record.ok)
@@ -692,7 +691,7 @@ export default class EntryDB {
      * @param {Paste} PasteInfo
      * @param {boolean} SkipHash used for import, skip hashing passwords (useful if they're already hashed)
      * @return {Promise<[boolean, string, Paste]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async CreatePaste(
         PasteInfo: Paste,
@@ -709,7 +708,7 @@ export default class EntryDB {
         if (!SkipHash)
             if (!PasteInfo.EditPassword) {
                 PasteInfo.UnhashedEditPassword = crypto
-                    .randomBytes(EntryDB.MinPasswordLength)
+                    .randomBytes(BundlesDB.MinPasswordLength)
                     .toString("hex");
 
                 PasteInfo.EditPassword = `${PasteInfo.UnhashedEditPassword}`;
@@ -718,18 +717,18 @@ export default class EntryDB {
         else PasteInfo.UnhashedEditPassword = PasteInfo.EditPassword;
 
         // check custom url
-        if (!PasteInfo.CustomURL.match(EntryDB.URLRegex))
+        if (!PasteInfo.CustomURL.match(BundlesDB.URLRegex))
             return [
                 false,
-                `Custom URL does not pass test: ${EntryDB.URLRegex}`,
+                `Custom URL does not pass test: ${BundlesDB.URLRegex}`,
                 PasteInfo,
             ];
 
         // check group name
-        if (PasteInfo.GroupName && !PasteInfo.GroupName.match(EntryDB.URLRegex))
+        if (PasteInfo.GroupName && !PasteInfo.GroupName.match(BundlesDB.URLRegex))
             return [
                 false,
-                `Group name does not pass test: ${EntryDB.URLRegex}`,
+                `Group name does not pass test: ${BundlesDB.URLRegex}`,
                 PasteInfo,
             ];
 
@@ -747,7 +746,7 @@ export default class EntryDB {
         }
 
         // validate lengths
-        const lengthsValid = EntryDB.ValidatePasteLengths(PasteInfo);
+        const lengthsValid = BundlesDB.ValidatePasteLengths(PasteInfo);
         if (!lengthsValid[0]) return [...lengthsValid, PasteInfo];
 
         // if there is a group name, there must be a group password (and vice versa)
@@ -768,7 +767,7 @@ export default class EntryDB {
         // groups don't really have a table for themselves, more of just if a paste
         // with that group name already exists!
         if (PasteInfo.GroupName) {
-            const GroupRecord = (await (EntryDB.config.pg
+            const GroupRecord = (await (BundlesDB.config.pg
                 ? SQL.PostgresQueryOBJ
                 : SQL.QueryOBJ)({
                 // @ts-ignore
@@ -840,9 +839,9 @@ export default class EntryDB {
             ];
 
         // make sure content is unique if config app.enable_claim is true (prevent CustomURL squatting)
-        if (EntryDB.config.app && EntryDB.config.app.enable_claim === true)
+        if (BundlesDB.config.app && BundlesDB.config.app.enable_claim === true)
             if (
-                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: this.db,
                     query: 'SELECT * FROM "Pastes" WHERE "Content" = ?',
@@ -861,7 +860,7 @@ export default class EntryDB {
             PasteInfo.Content = result[0];
 
             // encryption values are stored in a different table
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'INSERT INTO "Encryption" VALUES (?, ?, ?, ?, ?)',
@@ -879,7 +878,7 @@ export default class EntryDB {
 
         // create expiry record if it is needed
         if (PasteInfo.ExpireOn)
-            await EntryDB.Expiry.AddPasteExpiry(
+            await BundlesDB.Expiry.AddPasteExpiry(
                 PasteInfo.CustomURL,
                 PasteInfo.ExpireOn
             );
@@ -960,14 +959,14 @@ export default class EntryDB {
                     // get commenting on paste session
                     // (only create a notification for pastes that somebody is associated with!)
                     const MentionSession = (
-                        await EntryDB.Logs.QueryLogs(
+                        await BundlesDB.Logs.QueryLogs(
                             `"Type" = 'session' AND \"Content\" LIKE \'%;_with;${CommentingOn.Metadata.Owner}\'`
                         )
                     )[2][0];
 
                     if (MentionSession)
                         // create notification
-                        await EntryDB.Logs.CreateLog({
+                        await BundlesDB.Logs.CreateLog({
                             Type: "notification",
                             // notification paste must start with "c/"
                             // so that the notif dashboard understands this is a new comment!
@@ -984,7 +983,7 @@ export default class EntryDB {
             PasteInfo.CustomURL = `reports/${PasteInfo.CustomURL}`;
 
             // create log
-            await EntryDB.Logs.CreateLog({
+            await BundlesDB.Logs.CreateLog({
                 Type: "report",
                 Content: `create;${PasteInfo.ReportOn};${PasteInfo.CustomURL}`,
             });
@@ -992,7 +991,10 @@ export default class EntryDB {
 
         // create notifications for mentioned users
         const Mentioned: string[] = []; // list of mentioned pastes
-        if (EntryDB.config.log && EntryDB.config.log.events.includes("notification"))
+        if (
+            BundlesDB.config.log &&
+            BundlesDB.config.log.events.includes("notification")
+        )
             for (const match of PasteInfo.Content.matchAll(
                 /(\.\/)(?<NAME>.*?)(?<END>\s|\n)/gm
             )) {
@@ -1003,7 +1005,7 @@ export default class EntryDB {
                 // get mentioning paste session
                 // (only create a notification for pastes that somebody is associated with!)
                 const MentionSession = (
-                    await EntryDB.Logs.QueryLogs(
+                    await BundlesDB.Logs.QueryLogs(
                         `"Type" = 'session' AND \"Content\" LIKE \'%;_with;${match.groups.NAME}\'`
                     )
                 )[2][0];
@@ -1011,7 +1013,7 @@ export default class EntryDB {
                 if (!MentionSession) continue;
 
                 // create notification
-                await EntryDB.Logs.CreateLog({
+                await BundlesDB.Logs.CreateLog({
                     Type: "notification",
                     Content: `${PasteInfo.CustomURL};${match.groups.NAME}`,
                 });
@@ -1022,7 +1024,7 @@ export default class EntryDB {
         PasteInfo.Metadata = metadata; // NEW
 
         // create paste
-        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+        await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
             query: 'INSERT INTO "Pastes" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -1042,11 +1044,11 @@ export default class EntryDB {
         });
 
         // get server config
-        const config = (await EntryDB.GetConfig()) as Config;
+        const config = (await BundlesDB.GetConfig()) as Config;
 
         // register event
         if (config.log && config.log.events.includes("create_paste"))
-            await EntryDB.Logs.CreateLog({
+            await BundlesDB.Logs.CreateLog({
                 Content: PasteInfo.CustomURL,
                 Type: "create_paste",
             });
@@ -1066,7 +1068,7 @@ export default class EntryDB {
      * @param {boolean} Force
      * @param {boolean} [OnlyCreateRevision=false]
      * @return {Promise<[boolean, string, Paste]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async EditPaste(
         PasteInfo: Paste,
@@ -1163,11 +1165,11 @@ export default class EntryDB {
             NewPasteInfo.EditPassword = PasteInfo.EditPassword;
 
         // validate lengths
-        const lengthsValid = EntryDB.ValidatePasteLengths(NewPasteInfo);
+        const lengthsValid = BundlesDB.ValidatePasteLengths(NewPasteInfo);
         if (!lengthsValid[0]) return [...lengthsValid, NewPasteInfo];
 
         if (
-            !NewPasteInfo.CustomURL.match(EntryDB.URLRegex) &&
+            !NewPasteInfo.CustomURL.match(BundlesDB.URLRegex) &&
             NewPasteInfo.CustomURL !== PasteInfo.CustomURL // we're doing this so that if
             //                                                the custom url is invalid because
             //                                                of the group name append thing,
@@ -1175,7 +1177,7 @@ export default class EntryDB {
         )
             return [
                 false,
-                `Custom URL does not pass test: ${EntryDB.URLRegex}`,
+                `Custom URL does not pass test: ${BundlesDB.URLRegex}`,
                 PasteInfo,
             ];
 
@@ -1183,7 +1185,7 @@ export default class EntryDB {
         if (
             PasteInfo.EditPassword !== paste.EditPassword &&
             // also accept admin password
-            PasteInfo.EditPassword !== CreateHash(EntryDB.config.admin)
+            PasteInfo.EditPassword !== CreateHash(BundlesDB.config.admin)
         )
             return [false, "Invalid password", NewPasteInfo];
 
@@ -1197,11 +1199,11 @@ export default class EntryDB {
 
         // if the admin password was used, log an "access_admin" log
         if (
-            PasteInfo.EditPassword === CreateHash(EntryDB.config.admin) &&
-            EntryDB.config.log &&
-            EntryDB.config.log.events.includes("access_admin")
+            PasteInfo.EditPassword === CreateHash(BundlesDB.config.admin) &&
+            BundlesDB.config.log &&
+            BundlesDB.config.log.events.includes("access_admin")
         )
-            await EntryDB.Logs.CreateLog({
+            await BundlesDB.Logs.CreateLog({
                 Type: "access_admin",
                 Content: `Paste edit: ${paste.CustomURL}`,
             });
@@ -1227,26 +1229,26 @@ export default class EntryDB {
                 ];
 
             // ALSO... delete all view_paste logs that have to do with the old URL
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
-                db: EntryDB.Logs.db,
+                db: BundlesDB.Logs.db,
                 query: 'DELETE FROM "Logs" WHERE "Type" = \'view_paste\' AND "Content" LIKE ?',
                 params: [`%${paste.CustomURL}%`],
                 use: "Prepare",
             });
 
             // ALSO... free up custom domain
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
-                db: EntryDB.Logs.db,
+                db: BundlesDB.Logs.db,
                 query: 'DELETE FROM "Logs" WHERE "Type" = \'custom_domain\' AND "Content" LIKE ?',
                 params: [`${paste.CustomURL}%`],
                 use: "Prepare",
             });
 
             // ALSO... delete all revisions
-            if (EntryDB.config.app && EntryDB.config.app.enable_versioning)
-                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            if (BundlesDB.config.app && BundlesDB.config.app.enable_versioning)
+                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: this.db,
                     query: 'DELETE FROM "Revisions" WHERE "CustomURL" = ?',
@@ -1265,7 +1267,7 @@ export default class EntryDB {
 
             // update encryption
             // we select by ViewPassword for the Encryption table
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'UPDATE "Encryption" SET ("ENC_IV", "ENC_KEY", "ENC_CODE", "CustomURL") = (?, ?, ?, ?) WHERE "ViewPassword" = ? AND "CustomURL" = ?',
@@ -1282,7 +1284,7 @@ export default class EntryDB {
         }
 
         // create new revision
-        if (EntryDB.config.app && EntryDB.config.app.enable_versioning)
+        if (BundlesDB.config.app && BundlesDB.config.app.enable_versioning)
             await this.CreateRevision({
                 CustomURL: NewPasteInfo.CustomURL,
                 Content: NewPasteInfo.Content,
@@ -1294,7 +1296,7 @@ export default class EntryDB {
 
         // update paste
         if (!OnlyCreateRevision)
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'UPDATE "Pastes" SET ("Content", "EditPassword", "CustomURL", "ViewPassword", "PubDate", "EditDate", "Metadata") = (?, ?, ?, ?, ?, ?, ?) WHERE "CustomURL" = ?',
@@ -1312,11 +1314,11 @@ export default class EntryDB {
             });
 
         // get server config
-        const config = (await EntryDB.GetConfig()) as Config;
+        const config = (await BundlesDB.GetConfig()) as Config;
 
         // register event
         if (config.log && config.log.events.includes("edit_paste"))
-            await EntryDB.Logs.CreateLog({
+            await BundlesDB.Logs.CreateLog({
                 Content: `${PasteInfo.CustomURL}->${NewPasteInfo.CustomURL}`,
                 Type: "edit_paste",
             });
@@ -1331,7 +1333,7 @@ export default class EntryDB {
      * @param {Paste} PasteInfo
      * @param {string} password
      * @return {Promise<[boolean, string, Paste]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async DeletePaste(
         PasteInfo: Partial<Paste>,
@@ -1398,7 +1400,7 @@ export default class EntryDB {
         // ...password can be either the paste EditPassword or the server admin password
         // ...if the custom url is v, then no password can be used (that's the version file, it is required)
         if (
-            (password !== EntryDB.config.admin &&
+            (password !== BundlesDB.config.admin &&
                 CreateHash(password) !== paste.EditPassword) ||
             paste.CustomURL === "v"
         )
@@ -1406,18 +1408,18 @@ export default class EntryDB {
 
         // if the admin password was used, log an "access_admin" log
         if (
-            PasteInfo.EditPassword === CreateHash(EntryDB.config.admin) &&
-            EntryDB.config.log &&
-            EntryDB.config.log.events.includes("access_admin")
+            PasteInfo.EditPassword === CreateHash(BundlesDB.config.admin) &&
+            BundlesDB.config.log &&
+            BundlesDB.config.log.events.includes("access_admin")
         )
-            await EntryDB.Logs.CreateLog({
+            await BundlesDB.Logs.CreateLog({
                 Type: "access_admin",
                 Content: `Paste delete: ${paste.CustomURL}`,
             });
 
         // if paste is encrypted, delete the encryption values too
         if (paste.ViewPassword) {
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'DELETE FROM "Encryption" WHERE "ViewPassword" = ? AND "CustomURL" = ?',
@@ -1427,7 +1429,7 @@ export default class EntryDB {
         }
 
         // delete paste
-        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+        await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
             query: 'DELETE FROM "Pastes" WHERE "CustomURL" = ?',
@@ -1436,15 +1438,15 @@ export default class EntryDB {
         });
 
         // delete from PasteCache
-        if (EntryDB.PasteCache[PasteInfo.CustomURL.toLowerCase()])
-            delete EntryDB.PasteCache[PasteInfo.CustomURL.toLowerCase()];
+        if (BundlesDB.PasteCache[PasteInfo.CustomURL.toLowerCase()])
+            delete BundlesDB.PasteCache[PasteInfo.CustomURL.toLowerCase()];
 
         // delete media
-        if (EntryDB.Media) await EntryDB.Media.DeleteOwner(PasteInfo.CustomURL);
+        if (BundlesDB.Media) await BundlesDB.Media.DeleteOwner(PasteInfo.CustomURL);
 
         // delete all revisions
-        if (EntryDB.config.app && EntryDB.config.app.enable_versioning)
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+        if (BundlesDB.config.app && BundlesDB.config.app.enable_versioning)
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'DELETE FROM "Revisions" WHERE "CustomURL" = ?',
@@ -1453,19 +1455,25 @@ export default class EntryDB {
             });
 
         // register event
-        if (EntryDB.config.log && EntryDB.config.log.events.includes("delete_paste"))
-            await EntryDB.Logs.CreateLog({
+        if (
+            BundlesDB.config.log &&
+            BundlesDB.config.log.events.includes("delete_paste")
+        )
+            await BundlesDB.Logs.CreateLog({
                 Content: PasteInfo.CustomURL,
                 Type: "delete_paste",
             });
 
         // delete all views
-        if (EntryDB.config.log && EntryDB.config.log.events.includes("view_paste")) {
-            const views = await EntryDB.Logs.QueryLogs(
+        if (
+            BundlesDB.config.log &&
+            BundlesDB.config.log.events.includes("view_paste")
+        ) {
+            const views = await BundlesDB.Logs.QueryLogs(
                 `"Type" = 'view_paste' AND \"Content\" LIKE \'${PasteInfo.CustomURL};%\'`
             );
 
-            for (const view of views[2]) await EntryDB.Logs.DeleteLog(view.ID);
+            for (const view of views[2]) await BundlesDB.Logs.DeleteLog(view.ID);
         }
 
         // return
@@ -1484,7 +1492,7 @@ export default class EntryDB {
      * @param {boolean} [https=true]
      * @param {Headers} headers
      * @return {Promise<[boolean, Response]>} [isBad, record]
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async ForwardRequest(
         server: string,
@@ -1534,7 +1542,7 @@ export default class EntryDB {
      * @private
      * @param {Response} response
      * @return {(string | undefined | null)}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     private GetErrorFromResponse(response: Response): string | undefined | null {
         if (response.headers.get("Location")) {
@@ -1563,7 +1571,7 @@ export default class EntryDB {
      *             }
      *         ]
      *     >}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetEncryptionInfo(
         ViewPassword: string,
@@ -1579,7 +1587,7 @@ export default class EntryDB {
         ]
     > {
         // get encryption values by view password and customurl
-        const record = (await (EntryDB.config.pg
+        const record = (await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -1617,7 +1625,7 @@ export default class EntryDB {
      *
      * @param {Paste} paste
      * @return {*}  {Paste}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public CleanPaste(paste: Paste): Paste {
         paste.EditPassword = "";
@@ -1642,7 +1650,7 @@ export default class EntryDB {
      *
      * @static
      * @param {boolean} includePrivate
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetAllPastes(
         includePrivate: boolean = false,
@@ -1650,7 +1658,7 @@ export default class EntryDB {
         sql?: string
     ): Promise<Paste[]> {
         // get pastes
-        const pastes = await (EntryDB.config.pg
+        const pastes = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -1704,7 +1712,7 @@ export default class EntryDB {
      *
      * @param {Paste[]} _export
      * @return {Promise<[boolean, string][]>} Outputs
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async ImportPastes(_export: Paste[]): Promise<[boolean, string][]> {
         let outputs: [boolean, string][] = [];
@@ -1719,7 +1727,7 @@ export default class EntryDB {
                 paste.EditDate = new Date().getTime();
 
             // create paste
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'INSERT INTO "Pastes" VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -1750,7 +1758,7 @@ export default class EntryDB {
      *
      * @param {string} group
      * @return {Promise<Paste[]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetAllPastesInGroup(
         group: string,
@@ -1786,7 +1794,7 @@ export default class EntryDB {
         }
 
         // get pastes
-        const pastes = await (EntryDB.config.pg
+        const pastes = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -1813,10 +1821,10 @@ export default class EntryDB {
      *
      * @param {string} owner
      * @return {Promise<Paste[]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetAllPastesOwnedByPaste(owner: string): Promise<Paste[]> {
-        return await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+        return await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
             query: 'SELECT * FROM "Pastes" WHERE "Metadata" LIKE ?',
@@ -1833,7 +1841,7 @@ export default class EntryDB {
      * @param {string[]} Pastes array of customurls to delete
      * @param {string} password
      * @return {Promise<[boolean, string, Partial<Paste>][]>} success, message, pastes
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async DeletePastes(
         Pastes: string[],
@@ -1865,7 +1873,7 @@ export default class EntryDB {
      * @param {boolean} [all=false]
      * @param {string} password
      * @return {Promise<[boolean, string, any?]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async DirectSQL(
         sql: string,
@@ -1874,7 +1882,7 @@ export default class EntryDB {
         password: string
     ): Promise<[boolean, string, any?]> {
         // verify password
-        if (password !== (await EntryDB.GetConfig())?.admin)
+        if (password !== (await BundlesDB.GetConfig())?.admin)
             return [false, "Invalid password"];
 
         // ...
@@ -1882,7 +1890,7 @@ export default class EntryDB {
         else if (all) get = false;
 
         // run query
-        const result = await (EntryDB.config.pg
+        const result = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -1905,7 +1913,7 @@ export default class EntryDB {
      * @param {number} [offset=0]
      * @param {string} [associated]
      * @return {Promise<[boolean, string, Paste[]]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetPasteComments(
         url: string,
@@ -1913,7 +1921,7 @@ export default class EntryDB {
         associated?: string
     ): Promise<[boolean, string, Paste[]]> {
         // make sure comments are enabled globally
-        if (!EntryDB.config.app || EntryDB.config.app.enable_comments !== true)
+        if (!BundlesDB.config.app || BundlesDB.config.app.enable_comments !== true)
             return [false, "Comments disabled globally", []];
 
         // make sure paste exists
@@ -1955,7 +1963,7 @@ export default class EntryDB {
             return [false, "Paste has comments disabled", []];
 
         // get comments
-        const comments: Paste[] = await (EntryDB.config.pg
+        const comments: Paste[] = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -2010,7 +2018,7 @@ export default class EntryDB {
 
             // count sub comments (replies) (once)
             paste.Comments = (
-                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: this.db,
                     query: 'SELECT "CustomURL" FROM "Pastes" WHERE "CustomURL" LIKE ?',
@@ -2046,7 +2054,7 @@ export default class EntryDB {
      * @param {string} PasteURL
      * @param {number} time
      * @return {Promise<[boolean, string, Revision?]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetRevision(
         PasteURL: string,
@@ -2061,7 +2069,7 @@ export default class EntryDB {
             time = (await this.GetAllPasteRevisions(PasteURL))[2][0].EditDate;
 
         // get revision
-        const revision = await (EntryDB.config.pg
+        const revision = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -2083,7 +2091,7 @@ export default class EntryDB {
      *
      * @param {string} PasteURL
      * @return {Promise<[boolean, string, Revision[]]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async GetAllPasteRevisions(
         PasteURL: string
@@ -2093,7 +2101,7 @@ export default class EntryDB {
         if (!paste) return [false, "Paste does not exist", []];
 
         // get revisions
-        const revisions = await (EntryDB.config.pg
+        const revisions = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             // @ts-ignore
@@ -2114,7 +2122,7 @@ export default class EntryDB {
      *
      * @param {Revision} props
      * @return {Promise<[boolean, string, Revision]>}
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async CreateRevision(
         props: Revision
@@ -2132,7 +2140,7 @@ export default class EntryDB {
         if (AllRevisions[2] && AllRevisions[2].length >= 10) {
             const LastRevision = AllRevisions[2].pop();
             if (LastRevision)
-                await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                     // @ts-ignore
                     db: this.db,
                     query: 'DELETE FROM "Revisions" WHERE "CustomURL" = ? AND "EditDate" = ?',
@@ -2143,7 +2151,7 @@ export default class EntryDB {
         }
 
         // create revision
-        await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+        await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
             query: 'INSERT INTO "Revisions" VALUES (?, ?, ?)',

@@ -16,7 +16,7 @@ body:
     - type: input
       id: "version"
       attributes:
-          label: Entry Version
-          description: This can be found by visiting /ver on your Entry server.
+          label: Bundles Version
+          description: This can be found by visiting /ver on your Bundles server.
       validations:
           required: true

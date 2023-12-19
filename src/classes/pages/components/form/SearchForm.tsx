@@ -1,4 +1,4 @@
-import EntryDB from "../../../db/EntryDB";
+import BundlesDB from "../../../db/BundlesDB";
 
 export default function SearchForm(props: {
     query?: string;
@@ -21,8 +21,8 @@ export default function SearchForm(props: {
                     name={"q"}
                     id={"q"}
                     placeholder={"Search all pastes"}
-                    minLength={EntryDB.MinCustomURLLength}
-                    maxLength={EntryDB.MaxCustomURLLength}
+                    minLength={BundlesDB.MinCustomURLLength}
+                    maxLength={BundlesDB.MaxCustomURLLength}
                     autocomplete={"off"}
                     value={props.query || ""}
                     required

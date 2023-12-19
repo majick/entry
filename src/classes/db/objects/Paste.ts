@@ -1,4 +1,4 @@
-import EntryDB from "../EntryDB";
+import BundlesDB from "../BundlesDB";
 import SQL from "../helpers/SQL";
 
 // types
@@ -71,19 +71,19 @@ export type Revision = {
  * @class PasteConnection
  */
 export default class PasteConnection {
-    public readonly Database: EntryDB;
+    public readonly Database: BundlesDB;
 
     private _paste: Paste | undefined;
     private _name: string;
 
     /**
      * Creates an instance of PasteConnection.
-     * @param {EntryDB} db
+     * @param {BundlesDB} db
      * @param {string} name
      * @param {boolean} [skipInitialFetch=false]
      * @memberof PasteConnection
      */
-    constructor(db: EntryDB, name: string, skipInitialFetch: boolean = false) {
+    constructor(db: BundlesDB, name: string, skipInitialFetch: boolean = false) {
         this.Database = db;
         this._name = name.toLowerCase();
 

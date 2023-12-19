@@ -65,7 +65,11 @@ export function Editor(_metadata: string, id: string): any {
 
             if (ValueType !== "boolean") {
                 Inputs.push(
-                    <Card class="flex justify-space-between align-center flex-wrap g-4">
+                    <Card
+                        round={true}
+                        border={true}
+                        class="flex justify-space-between align-center flex-wrap g-4"
+                    >
                         <label htmlFor={data[0]}>
                             <b>
                                 {(nested || ["root"]).join(".")}.{data[0]}
@@ -77,6 +81,7 @@ export function Editor(_metadata: string, id: string): any {
                             name={data[0]}
                             id={data[0]}
                             value={data[1]}
+                            class={"round"}
                             onBlur={(event: Event<HTMLInputElement>) => {
                                 // update value (handle json nesting too)
                                 let prev = metadata;
@@ -109,7 +114,11 @@ export function Editor(_metadata: string, id: string): any {
                 );
             } else {
                 Inputs.push(
-                    <Card class="flex justify-space-between align-center flex-wrap g-4">
+                    <Card
+                        round={true}
+                        border={true}
+                        class="flex justify-space-between align-center flex-wrap g-4"
+                    >
                         <label htmlFor={data[0]}>
                             <b>
                                 {(nested || ["root"]).join(".")}.{data[0]}
@@ -120,6 +129,7 @@ export function Editor(_metadata: string, id: string): any {
                             name={data[0]}
                             title={`${(nested || ["root"]).join(".")}.${data[0]}`}
                             checked={data[1]}
+                            round={true}
                             changed={(event: Event<HTMLInputElement>) => {
                                 // update value (handle json nesting too)
                                 let prev = metadata;
@@ -157,7 +167,11 @@ export function Editor(_metadata: string, id: string): any {
     // render and return
     return render(
         <div class={"flex flex-column g-4"}>
-            <Card class="flex justify-space-between align-center flex-wrap g-4">
+            <Card
+                round={true}
+                border={true}
+                class="flex justify-space-between align-center flex-wrap g-4"
+            >
                 <b>Key</b>
                 <span>Value</span>
             </Card>

@@ -15,31 +15,12 @@ import { hydrate } from "preact";
  * @export
  */
 export function HandleCustomElements() {
-    // treat rentro.co links as links to federared entry servers
-    for (let anchor of document.body.querySelectorAll(
-        "a"
-    ) as any as HTMLAnchorElement[]) {
-        anchor.href = anchor.href.replace("https://rentry.org", "https://rentry.co");
-        if (!anchor.href.split("https://rentry.co/")[1]) continue;
-        else
-            anchor.href = `/${anchor.href.split("https://rentry.co/")[1]}:rentry.co`;
-    }
-
-    // treat text.is links as links to federared entry servers
-    for (let anchor of document.body.querySelectorAll(
-        "a"
-    ) as any as HTMLAnchorElement[]) {
-        anchor.href = anchor.href.replace("https://rentry.net", "https://text.is");
-        if (!anchor.href.split("https://text.is/")[1]) continue;
-        else anchor.href = `/${anchor.href.split("https://text.is/")[1]}:text.is`;
-    }
-
     // handle style elements
     let style = "";
 
     // ...make sure we can set theme
     const CanSetCustomTheme =
-        window.localStorage.getItem("entry:user.ForceClientTheme") !== "true";
+        window.localStorage.getItem("bundles:user.ForceClientTheme") !== "true";
 
     // ...theme customization
     if (CanSetCustomTheme) {
@@ -90,14 +71,14 @@ export function HandleCustomElements() {
     }
 
     // remove images (if needed)
-    if (window.localStorage.getItem("entry:user.DisableImages") === "true")
+    if (window.localStorage.getItem("bundles:user.DisableImages") === "true")
         for (const image of document.querySelectorAll(
             "img"
         ) as any as HTMLImageElement[])
             image.src = "about:blank"; // this will force just the alt text to show
 
     // disable animations (if needed)
-    if (window.localStorage.getItem("entry:user.DisableAnimations") === "true")
+    if (window.localStorage.getItem("bundles:user.DisableAnimations") === "true")
         for (const element of document.querySelectorAll(
             ".anim"
         ) as any as HTMLElement[])
@@ -108,7 +89,7 @@ export function HandleCustomElements() {
         document.querySelectorAll("#editor-tab-preview style")
     );
 
-    if (window.localStorage.getItem("entry:user.DisableCustomPasteCSS") === "true")
+    if (window.localStorage.getItem("bundles:user.DisableCustomPasteCSS") === "true")
         for (const element of styleElements) element.remove();
 
     // handle Builder Common Schema (parse all .component elements)

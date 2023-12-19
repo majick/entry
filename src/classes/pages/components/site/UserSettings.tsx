@@ -143,13 +143,13 @@ export default function UserSettings(id: string): any {
         true
     );
 
-    AddOption("Force Global Theme", "entry:user.ForceClientTheme");
-    AddOption("Disable Custom Paste CSS", "entry:user.DisableCustomPasteCSS");
-    AddOption("Disable Images", "entry:user.DisableImages");
-    AddOption("Disable Animations", "entry:user.DisableAnimations");
-    AddOption("Editor Hints", "entry:user.EditorHints");
-    AddOption("Show Line Numbers", "entry:user.ShowLineNumbers");
-    AddOption("Global CSS String", "entry:user.GlobalCSSString", "textarea");
+    AddOption("Force Global Theme", "bundles:user.ForceClientTheme");
+    AddOption("Disable Custom Paste CSS", "bundles:user.DisableCustomPasteCSS");
+    AddOption("Disable Images", "bundles:user.DisableImages");
+    AddOption("Disable Animations", "bundles:user.DisableAnimations");
+    AddOption("Editor Hints", "bundles:user.EditorHints");
+    AddOption("Show Line Numbers", "bundles:user.ShowLineNumbers");
+    AddOption("Global CSS String", "bundles:user.GlobalCSSString", "textarea");
 
     // render
     return render(<>{options}</>, document.getElementById(id)!);

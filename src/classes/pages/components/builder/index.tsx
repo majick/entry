@@ -7,7 +7,7 @@
 import { Endpoint, Renderer } from "honeybee";
 
 import type { Paste } from "../../../db/objects/Paste";
-import EntryDB from "../../../db/EntryDB";
+import BundlesDB from "../../../db/BundlesDB";
 
 import { PageHeaders, db, GetAssociation } from "../../api/API";
 import { OpenGraph } from "../../Pages";
@@ -28,9 +28,9 @@ export class Builder implements Endpoint {
 
         // check if builder is enabled
         if (
-            EntryDB.config &&
-            EntryDB.config.app &&
-            EntryDB.config.app.enable_builder === false
+            BundlesDB.config &&
+            BundlesDB.config.app &&
+            BundlesDB.config.app.enable_builder === false
         )
             return new _404Page().request(request);
 
@@ -158,17 +158,17 @@ export class Builder implements Endpoint {
                             __html: `import Builder, { Debug } from "/Builder.js";
                             window.DisablePasswordField = ${DisablePasswordField};
                             window.EnableDrafts = ${
-                                EntryDB.config.app &&
-                                EntryDB.config.app.enable_versioning === true
+                                BundlesDB.config.app &&
+                                BundlesDB.config.app.enable_versioning === true
                             };
                             window.ViewingRevision = ${RevisionNumber !== 0};
                             window.EnableGroups = ${
-                                !EntryDB.config.app ||
-                                EntryDB.config.app.enable_groups !== false
+                                !BundlesDB.config.app ||
+                                BundlesDB.config.app.enable_groups !== false
                             };
                             window.EnableExpiry = ${
-                                !EntryDB.config.app ||
-                                EntryDB.config.app.enable_expiry !== false
+                                !BundlesDB.config.app ||
+                                BundlesDB.config.app.enable_expiry !== false
                             };
                             Builder(\`${stringified}\`, true); window.Debug = Debug;`,
                         }}

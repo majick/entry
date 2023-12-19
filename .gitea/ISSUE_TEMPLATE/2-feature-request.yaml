@@ -5,18 +5,18 @@ body:
     - type: markdown
       attributes:
           value: |
-              Thank you for creating this feature request. Please make sure the feature you are requesting is valid and within the scope of Entry.
+              Thank you for creating this feature request. Please make sure the feature you are requesting is valid and within the scope of Bundles.
     - type: textarea
       id: details
       attributes:
           label: Please explain the feature you are requesting in detail.
-          placeholder: I think it would be good if Entry had/supported...
+          placeholder: I think it would be good if Bundles had/supported...
       validations:
           required: true
     - type: input
       id: "version"
       attributes:
-          label: Entry Version
-          description: This can be found by visiting /ver on your Entry server.
+          label: Bundles Version
+          description: This can be found by visiting /ver on your Bundles server.
       validations:
           required: true

@@ -7,7 +7,7 @@ import Footer from "./components/site/Footer";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import type { Paste } from "../db/objects/Paste";
-import EntryDB from "../db/EntryDB";
+import BundlesDB from "../db/BundlesDB";
 
 import type { Log } from "../db/objects/Log";
 import Pages, { OpenGraph } from "./Pages";
@@ -28,14 +28,14 @@ export default class Home implements Endpoint {
         const search = new URLSearchParams(url.search);
 
         // try to get subdomain, redirect to paste view page if we have one
-        // must be enabled in EntryDB.config!!
+        // must be enabled in BundlesDB.config!!
         if (
-            EntryDB.config.app &&
-            EntryDB.config.app.wildcard &&
-            EntryDB.config.app.hostname
+            BundlesDB.config.app &&
+            BundlesDB.config.app.wildcard &&
+            BundlesDB.config.app.hostname
         ) {
             const subdomain = url.hostname.split(
-                `.${EntryDB.config.app.hostname}`
+                `.${BundlesDB.config.app.hostname}`
             )[0];
 
             // handle cloud pages
@@ -45,14 +45,14 @@ export default class Home implements Endpoint {
             // ...
             if (
                 subdomain &&
-                subdomain !== EntryDB.config.app.hostname &&
+                subdomain !== BundlesDB.config.app.hostname &&
                 subdomain !== "www" &&
-                url.hostname.includes(EntryDB.config.app.hostname) // make sure hostname is actually in the url
+                url.hostname.includes(BundlesDB.config.app.hostname) // make sure hostname is actually in the url
             ) {
                 // forward to paste view
                 // ...create new request
                 const req = new Request(
-                    `${url.protocol}//${EntryDB.config.app.hostname}/${subdomain}?_priv_isFromWildcard=true`
+                    `${url.protocol}//${BundlesDB.config.app.hostname}/${subdomain}?_priv_isFromWildcard=true`
                 );
 
                 // ...return
@@ -61,12 +61,12 @@ export default class Home implements Endpoint {
 
             // if custom domains are enabled, try to match that
             else if (
-                EntryDB.config.log &&
-                EntryDB.config.log.events.includes("custom_domain")
+                BundlesDB.config.log &&
+                BundlesDB.config.log.events.includes("custom_domain")
             ) {
                 // try to fetch log based off hostname
                 const CustomDomainLog = (
-                    await EntryDB.Logs.QueryLogs(
+                    await BundlesDB.Logs.QueryLogs(
                         `"Type" = \'custom_domain\' AND \"Content\" LIKE \'%;${url.hostname}\'`
                     )
                 )[2][0];
@@ -75,7 +75,7 @@ export default class Home implements Endpoint {
                 if (CustomDomainLog) {
                     // ...create new request
                     const req = new Request(
-                        `${url.protocol}//${EntryDB.config.app.hostname}/${
+                        `${url.protocol}//${BundlesDB.config.app.hostname}/${
                             CustomDomainLog.Content.split(";")[0]
                         }?_priv_isFromWildcard=true`
                     );
@@ -86,10 +86,10 @@ export default class Home implements Endpoint {
             }
 
             // check allow domains
-            if (EntryDB.config.allow_access_from) {
+            if (BundlesDB.config.allow_access_from) {
                 let AccessingFrom = "";
 
-                for (const host of EntryDB.config.allow_access_from)
+                for (const host of BundlesDB.config.allow_access_from)
                     if (url.hostname.includes(host)) {
                         AccessingFrom = host;
                         break;
@@ -168,12 +168,12 @@ export default class Home implements Endpoint {
         let Notifications: Log[] = [];
 
         if (
-            EntryDB.config.log &&
-            EntryDB.config.log.events.includes("notification") &&
+            BundlesDB.config.log &&
+            BundlesDB.config.log.events.includes("notification") &&
             Association[0]
         )
             Notifications = (
-                await EntryDB.Logs.QueryLogs(
+                await BundlesDB.Logs.QueryLogs(
                     `"Type" = \'notification\' AND \"Content\" LIKE \'%${Association[1]}\'`
                 )
             )[2];
@@ -353,34 +353,35 @@ export default class Home implements Endpoint {
                             </div>
 
                             <div class={"flex"}>
-                                {EntryDB.config.app && EntryDB.config.app.how && (
-                                    <a
-                                        href={EntryDB.config.app.how}
-                                        class={
-                                            "button secondary normal tooltip-wrapper"
-                                        }
-                                        target={"_blank"}
-                                        title={"How"}
-                                        style={{ padding: "0.75rem" }}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            aria-label={"Info Symbol"}
+                                {BundlesDB.config.app &&
+                                    BundlesDB.config.app.how && (
+                                        <a
+                                            href={BundlesDB.config.app.how}
+                                            class={
+                                                "button secondary normal tooltip-wrapper"
+                                            }
+                                            target={"_blank"}
+                                            title={"How"}
+                                            style={{ padding: "0.75rem" }}
                                         >
-                                            <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
-                                        </svg>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Info Symbol"}
+                                            >
+                                                <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                                            </svg>
 
-                                        <div className="card secondary round border tooltip bottom">
-                                            How
-                                        </div>
-                                    </a>
-                                )}
+                                            <div className="card secondary round border tooltip bottom">
+                                                How
+                                            </div>
+                                        </a>
+                                    )}
 
-                                {EntryDB.config.log &&
-                                    EntryDB.config.log.events.includes(
+                                {BundlesDB.config.log &&
+                                    BundlesDB.config.log.events.includes(
                                         "notification"
                                     ) &&
                                     Association[0] && (
@@ -421,7 +422,7 @@ export default class Home implements Endpoint {
                                         title="Associate Paste"
                                         style={{ padding: "0.75rem" }}
                                         class={
-                                            "modal:entry:button.login tooltip-wrapper"
+                                            "modal:bundles:button.login tooltip-wrapper"
                                         }
                                     >
                                         <svg
@@ -443,7 +444,7 @@ export default class Home implements Endpoint {
                                         title="Disassociate Paste"
                                         style={{ padding: "0.75rem" }}
                                         class={
-                                            "modal:entry:button.logout tooltip-wrapper"
+                                            "modal:bundles:button.logout tooltip-wrapper"
                                         }
                                     >
                                         <svg
@@ -524,7 +525,7 @@ export default class Home implements Endpoint {
                                         >
                                             <button
                                                 class={
-                                                    "round green-cta modal:entry:button.Loading"
+                                                    "round green-cta modal:bundles:button.Loading"
                                                 }
                                                 style={{ fontWeight: "500" }}
                                             >
@@ -543,16 +544,16 @@ export default class Home implements Endpoint {
                                             {
                                                 // show optional section if config doesn't have
                                                 // an "app" entry, or all optional features are enabled
-                                                (!EntryDB.config.app ||
-                                                    (EntryDB.config.app &&
+                                                (!BundlesDB.config.app ||
+                                                    (BundlesDB.config.app &&
                                                         !(
-                                                            EntryDB.config.app
+                                                            BundlesDB.config.app
                                                                 .enable_private_pastes ===
                                                                 false &&
-                                                            EntryDB.config.app
+                                                            BundlesDB.config.app
                                                                 .enable_groups ===
                                                                 false &&
-                                                            EntryDB.config.app
+                                                            BundlesDB.config.app
                                                                 .enable_expiry ===
                                                                 false
                                                         ) &&
@@ -565,7 +566,7 @@ export default class Home implements Endpoint {
                                                         <a
                                                             href={"javascript:"}
                                                             id={
-                                                                "entry:button.PasteExtras"
+                                                                "bundles:button.PasteExtras"
                                                             }
                                                             title={"More Options"}
                                                             class={
@@ -630,10 +631,10 @@ export default class Home implements Endpoint {
                                                     type="text"
                                                     placeholder={"Custom URL"}
                                                     maxLength={
-                                                        EntryDB.MaxCustomURLLength
+                                                        BundlesDB.MaxCustomURLLength
                                                     }
                                                     minLength={
-                                                        EntryDB.MinCustomURLLength
+                                                        BundlesDB.MinCustomURLLength
                                                     }
                                                     name={"CustomURL"}
                                                     id={"CustomURL"}
@@ -672,10 +673,10 @@ export default class Home implements Endpoint {
                                                             "Custom edit code"
                                                         }
                                                         maxLength={
-                                                            EntryDB.MaxPasswordLength
+                                                            BundlesDB.MaxPasswordLength
                                                         }
                                                         minLength={
-                                                            EntryDB.MinPasswordLength
+                                                            BundlesDB.MinPasswordLength
                                                         }
                                                         name={"EditPassword"}
                                                         id={"EditPassword"}
@@ -714,18 +715,18 @@ export default class Home implements Endpoint {
                                     {/* ... */}
                                     <ExtraPasteOptions
                                         EnablePrivate={
-                                            !EntryDB.config.app ||
-                                            EntryDB.config.app
+                                            !BundlesDB.config.app ||
+                                            BundlesDB.config.app
                                                 .enable_private_pastes !== false
                                         }
                                         EnableGroups={
-                                            !EntryDB.config.app ||
-                                            EntryDB.config.app.enable_groups !==
+                                            !BundlesDB.config.app ||
+                                            BundlesDB.config.app.enable_groups !==
                                                 false
                                         }
                                         EnableExpiry={
-                                            !EntryDB.config.app ||
-                                            EntryDB.config.app.enable_expiry !==
+                                            !BundlesDB.config.app ||
+                                            BundlesDB.config.app.enable_expiry !==
                                                 false
                                         }
                                     />
@@ -780,10 +781,10 @@ export default class Home implements Endpoint {
                                                         type="text"
                                                         placeholder={"Edit code"}
                                                         maxLength={
-                                                            EntryDB.MaxPasswordLength
+                                                            BundlesDB.MaxPasswordLength
                                                         }
                                                         minLength={
-                                                            EntryDB.MinPasswordLength
+                                                            BundlesDB.MinPasswordLength
                                                         }
                                                         name={"EditPassword"}
                                                         disabled={
@@ -817,10 +818,10 @@ export default class Home implements Endpoint {
                                                         "Change edit code - optional"
                                                     }
                                                     maxLength={
-                                                        EntryDB.MaxPasswordLength
+                                                        BundlesDB.MaxPasswordLength
                                                     }
                                                     minLength={
-                                                        EntryDB.MinPasswordLength
+                                                        BundlesDB.MinPasswordLength
                                                     }
                                                     name={"NewEditPassword"}
                                                     autoComplete={"off"}
@@ -833,10 +834,10 @@ export default class Home implements Endpoint {
                                                         "Change Custom URL - optional"
                                                     }
                                                     maxLength={
-                                                        EntryDB.MaxCustomURLLength
+                                                        BundlesDB.MaxCustomURLLength
                                                     }
                                                     minLength={
-                                                        EntryDB.MinCustomURLLength
+                                                        BundlesDB.MinCustomURLLength
                                                     }
                                                     disabled={
                                                         // cannot be changed if we're editing a comment
@@ -859,9 +860,9 @@ export default class Home implements Endpoint {
                                                 <div class={"flex g-4"}>
                                                     <button
                                                         class={
-                                                            "round green-cta modal:entry:button.Loading"
+                                                            "round green-cta modal:bundles:button.Loading"
                                                         }
-                                                        id={"entry:button.Publish"}
+                                                        id={"bundles:button.Publish"}
                                                         style={{ fontWeight: "500" }}
                                                     >
                                                         <svg
@@ -879,15 +880,15 @@ export default class Home implements Endpoint {
                                                     </button>
 
                                                     {/* draft button */}
-                                                    {EntryDB.config.app &&
-                                                        EntryDB.config.app
+                                                    {BundlesDB.config.app &&
+                                                        BundlesDB.config.app
                                                             .enable_versioning && (
                                                             <button
                                                                 class={
-                                                                    "round tertiary modal:entry:button.Loading"
+                                                                    "round tertiary modal:bundles:button.Loading"
                                                                 }
                                                                 id={
-                                                                    "entry:button.Save"
+                                                                    "bundles:button.Save"
                                                                 }
                                                                 formAction={
                                                                     "/api/edit?draft=true"
@@ -945,7 +946,7 @@ export default class Home implements Endpoint {
                                 search.get("mode") !== "edit" ||
                                 (
                                     (
-                                        EntryDB.config.app || {
+                                        BundlesDB.config.app || {
                                             footer: {
                                                 show_name_on_all_pages: false,
                                             },
@@ -1073,10 +1074,12 @@ export default class Home implements Endpoint {
                     }
                     <meta
                         name="description"
-                        content="Entry - A Markdown Pastebin"
+                        content={`${BundlesDB.config.name} - ${
+                            BundlesDB.config.tagline || "Markdown Delivery Service"
+                        }`}
                     ></meta>
 
-                    <title>{EntryDB.config.name} - A Markdown Pastebin</title>
+                    <title>{BundlesDB.config.name}</title>
                     <link rel="icon" href="/favicon" />
 
                     <OpenGraph
@@ -1095,7 +1098,7 @@ export default class Home implements Endpoint {
                     "Content-Type": "text/html",
                     "Set-Cookie": SessionCookie,
                     "set-cookie": Association[1],
-                    "X-Entry-Error": search.get("err") || "",
+                    "X-Bundles-Error": search.get("err") || "",
                 },
             }
         );

@@ -61,7 +61,7 @@ import CSSParser from "prettier/plugins/postcss";
 import HTMLParser from "prettier/plugins/html";
 
 // create editor theme
-export const EntryCodeHighlight = HighlightStyle.define([
+export const BundlesCodeHighlight = HighlightStyle.define([
     {
         tag: tags.keyword,
         color: "var(--red3)",
@@ -174,7 +174,7 @@ export function CreateEditor(
                 drawSelection(),
                 dropCursor(),
                 EditorState.allowMultipleSelections.of(true),
-                syntaxHighlighting(EntryCodeHighlight, { fallback: true }),
+                syntaxHighlighting(BundlesCodeHighlight, { fallback: true }),
                 bracketMatching(),
                 closeBrackets(),
                 autocompletion(),
@@ -309,6 +309,6 @@ export function CreateEditor(
 
 // default export
 export default {
-    EntryCodeHighlight,
+    BundlesCodeHighlight,
     CreateEditor,
 };

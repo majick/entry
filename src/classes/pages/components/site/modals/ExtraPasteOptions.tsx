@@ -14,8 +14,8 @@ export default function ExtraPasteOptions(props: {
 }): any {
     return (
         <Modal
-            buttonid="entry:button.PasteExtras"
-            modalid="entry:modal.PasteExtras"
+            buttonid="bundles:button.PasteExtras"
+            modalid="bundles:modal.PasteExtras"
             round={true}
         >
             <div
@@ -39,8 +39,8 @@ export default function ExtraPasteOptions(props: {
                                 class={"round full"}
                                 type="text"
                                 placeholder={"View code - optional"}
-                                minLength={5} // EntryDB.MinPasswordLength
-                                maxLength={256} // EntryDB.MaxPasswordLength
+                                minLength={5} // BundlesDB.MinPasswordLength
+                                maxLength={256} // BundlesDB.MaxPasswordLength
                                 name={"ViewPassword"}
                                 autoComplete={"off"}
                             />
@@ -61,8 +61,8 @@ export default function ExtraPasteOptions(props: {
                                 class={"round full"}
                                 type="text"
                                 placeholder={"Group name - optional"}
-                                minLength={2} // EntryDB.MinCustomURLLength
-                                maxLength={500} // EntryDB.MaxCustomURLLength
+                                minLength={2} // BundlesDB.MinCustomURLLength
+                                maxLength={500} // BundlesDB.MaxCustomURLLength
                                 id={"GroupName"}
                                 name={"GroupName"}
                             />
@@ -71,8 +71,8 @@ export default function ExtraPasteOptions(props: {
                                 class={"round full"}
                                 type="text"
                                 placeholder={"Group post code - optional"}
-                                minLength={5} // EntryDB.MinPasswordLength
-                                maxLength={256} // EntryDB.MaxPasswordLength
+                                minLength={5} // BundlesDB.MinPasswordLength
+                                maxLength={256} // BundlesDB.MaxPasswordLength
                                 name={"GroupSubmitPassword"}
                                 autoComplete={"off"}
                             />
@@ -103,7 +103,7 @@ export default function ExtraPasteOptions(props: {
             <div className="flex justify-center">
                 <a
                     className="button full green round"
-                    href={"javascript:modals['entry:modal.PasteExtras']();"}
+                    href={"javascript:modals['bundles:modal.PasteExtras']();"}
                 >
                     Close
                 </a>

@@ -9,7 +9,7 @@ import { Database } from "bun:sqlite";
 import SQL from "./helpers/SQL";
 
 import LogConnection, { Log } from "./objects/Log";
-import EntryDB from "./EntryDB";
+import BundlesDB from "./BundlesDB";
 
 /**
  * @export
@@ -28,29 +28,29 @@ export default class LogDB {
     constructor() {
         // create db link
         const [db, isNew] =
-            EntryDB.config.pg && EntryDB.config.pg.logdb === true
+            BundlesDB.config.pg && BundlesDB.config.pg.logdb === true
                 ? [
                       SQL.CreatePostgres(
-                          EntryDB.config.pg.host,
-                          EntryDB.config.pg.user,
-                          EntryDB.config.pg.password,
-                          EntryDB.config.pg.database
+                          BundlesDB.config.pg.host,
+                          BundlesDB.config.pg.user,
+                          BundlesDB.config.pg.password,
+                          BundlesDB.config.pg.database
                       ),
                       false,
                   ]
-                : SQL.CreateDB("log", EntryDB.DataDirectory);
+                : SQL.CreateDB("log", BundlesDB.DataDirectory);
 
         LogDB.isNew = isNew;
         this.db = db;
 
         (async () => {
-            await (EntryDB.config.pg && EntryDB.config.pg.logdb
+            await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
                 ? SQL.PostgresQueryOBJ
                 : SQL.QueryOBJ)({
                 // @ts-ignore
                 db,
                 query: `CREATE TABLE IF NOT EXISTS "Logs" (
-                    "Content" varchar(${EntryDB.MaxContentLength}),
+                    "Content" varchar(${BundlesDB.MaxContentLength}),
                     "Timestamp" float,
                     "Type" varchar(255),
                     "ID" varchar(256)
@@ -58,8 +58,8 @@ export default class LogDB {
             });
 
             // clear logs is option is set in config
-            if (EntryDB.config.log && EntryDB.config.log.clear_on_start === true)
-                for (const event of EntryDB.config.log.events) {
+            if (BundlesDB.config.log && BundlesDB.config.log.clear_on_start === true)
+                for (const event of BundlesDB.config.log.events) {
                     // make sure the event isn't something that we shouldn't clear
                     if (
                         // should match the things excluded in the admin log page
@@ -72,7 +72,7 @@ export default class LogDB {
                         continue;
 
                     // delete
-                    await (EntryDB.config.pg && EntryDB.config.pg.logdb
+                    await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
                         ? SQL.PostgresQueryOBJ
                         : SQL.QueryOBJ)({
                         // @ts-ignore
@@ -105,7 +105,7 @@ export default class LogDB {
         // return false if this log already exists (same content, timestamp, type)
         // since sessions are stored as logs, this should prevent duplicated being created
         // at the exact same time from the exact same device
-        const ExistingLog = await (EntryDB.config.pg
+        const ExistingLog = await (BundlesDB.config.pg
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             db: this.db,
@@ -121,7 +121,7 @@ export default class LogDB {
         if (ExistingLog) return [false, "Log exists", ExistingLog];
 
         // create entry
-        await (EntryDB.config.pg && EntryDB.config.pg.logdb
+        await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             db: this.db,
@@ -160,7 +160,7 @@ export default class LogDB {
         }
 
         // attempt to get log
-        const log = await (EntryDB.config.pg && EntryDB.config.pg.logdb
+        const log = await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             db: this.db,
@@ -190,7 +190,7 @@ export default class LogDB {
         if (!log[2]) return log;
 
         // delete log
-        await (EntryDB.config.pg && EntryDB.config.pg.logdb
+        await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             db: this.db,
@@ -219,7 +219,7 @@ export default class LogDB {
         select: string = "*"
     ): Promise<[boolean, string, Log[]]> {
         // query logs
-        const logs = await (EntryDB.config.pg && EntryDB.config.pg.logdb
+        const logs = await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             db: this.db,
@@ -247,7 +247,7 @@ export default class LogDB {
         if (!log[2]) return [false, "Log does not exist"];
 
         // delete log
-        await (EntryDB.config.pg && EntryDB.config.pg.logdb
+        await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
             ? SQL.PostgresQueryOBJ
             : SQL.QueryOBJ)({
             db: this.db,
@@ -265,7 +265,7 @@ export default class LogDB {
      *
      * @param {Log[]} _export
      * @return {Promise<[boolean, string][]>} Outputs
-     * @memberof EntryDB
+     * @memberof BundlesDB
      */
     public async ImportLogs(_export: Log[]): Promise<[boolean, string][]> {
         let outputs: [boolean, string][] = [];
@@ -277,7 +277,7 @@ export default class LogDB {
                 log.Timestamp = new Date().getTime();
 
             // create log
-            await (EntryDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
                 // @ts-ignore
                 db: this.db,
                 query: 'INSERT INTO "Logs" VALUES (?, ?, ?, ?)',

@@ -1,5 +1,5 @@
 import path from "node:path";
-import EntryDB from "./EntryDB";
+import BundlesDB from "./BundlesDB";
 
 /**
  * @export
@@ -7,13 +7,13 @@ import EntryDB from "./EntryDB";
  */
 export default class Expiry {
     public static ExpiryFileLocation = "";
-    private readonly db: EntryDB;
+    private readonly db: BundlesDB;
 
     /**
      * Creates an instance of Expiry.
      * @memberof Expiry
      */
-    constructor(db: EntryDB) {
+    constructor(db: BundlesDB) {
         this.db = db;
     }
 
@@ -27,7 +27,7 @@ export default class Expiry {
         Expiry.ExpiryFileLocation = location;
 
         // read config
-        if (!EntryDB.config) await EntryDB.GetConfig();
+        if (!BundlesDB.config) await BundlesDB.GetConfig();
 
         // check if expiry file exists
         if (!(await Bun.file(Expiry.ExpiryFileLocation).exists()))
@@ -86,7 +86,7 @@ export default class Expiry {
                     {
                         CustomURL,
                     },
-                    EntryDB.config.admin // use admin password
+                    BundlesDB.config.admin // use admin password
                 );
 
                 // remove from ExpiryFile

@@ -8,7 +8,7 @@ import { Database } from "bun:sqlite";
 import path from "node:path";
 import fs from "node:fs";
 
-import EntryDB from "../EntryDB";
+import BundlesDB from "../BundlesDB";
 import pg, { Pool } from "pg";
 
 /**
@@ -63,7 +63,7 @@ export default class SQL {
         password: string,
         database: string
     ): Pool {
-        if (!EntryDB.config.pg) throw new Error("PostgreSQL is not configured!");
+        if (!BundlesDB.config.pg) throw new Error("PostgreSQL is not configured!");
 
         // ...
         if (!host || !user || !password) throw new Error("Missing values!");
@@ -74,7 +74,7 @@ export default class SQL {
             user,
             password,
             database,
-            max: EntryDB.config.pg.max_clients || 10,
+            max: BundlesDB.config.pg.max_clients || 10,
         });
 
         db.connect();

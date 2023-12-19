@@ -1,4 +1,4 @@
-import EntryDB from "../../../db/EntryDB";
+import BundlesDB from "../../../db/BundlesDB";
 import { CreateHash } from "../../../db/helpers/Hash";
 import type { Paste } from "../../../db/objects/Paste";
 
@@ -42,7 +42,7 @@ export default function PasteList(props: {
                                 name={"query"}
                                 placeholder={"Query"}
                                 value={props.Query}
-                                class={"secondary"}
+                                class={"secondary round"}
                                 style={{
                                     width: "20rem",
                                 }}
@@ -56,14 +56,14 @@ export default function PasteList(props: {
                                 maxLength={10000}
                                 name={"limit"}
                                 id={"limit"}
-                                class={"secondary"}
+                                class={"secondary round"}
                                 required
                                 style={{
                                     width: "10rem",
                                 }}
                             />
 
-                            <button class={"secondary"}>Query</button>
+                            <button class={"secondary round"}>Query</button>
                         </form>
                     </>
                 )) || <span></span>}
@@ -72,7 +72,7 @@ export default function PasteList(props: {
                     {props.ShowDelete && props.AdminPassword && (
                         <>
                             <button
-                                className="secondary"
+                                className="secondary round red"
                                 id={"PLDeleteResultsButton"}
                             >
                                 Delete Results
@@ -187,8 +187,8 @@ export default function PasteList(props: {
                             <th>Publish Date</th>
                             <th>Edit Date</th>
 
-                            {!EntryDB.config.app ||
-                                (EntryDB.config.app.enable_private_pastes !==
+                            {!BundlesDB.config.app ||
+                                (BundlesDB.config.app.enable_private_pastes !==
                                     false && <th>Private</th>)}
 
                             <th>Editable</th>
@@ -231,9 +231,9 @@ export default function PasteList(props: {
                                         {new Date(paste.EditDate || 0).toUTCString()}
                                     </td>
 
-                                    {!EntryDB.config.app ||
-                                        (EntryDB.config.app.enable_private_pastes !==
-                                            false && (
+                                    {!BundlesDB.config.app ||
+                                        (BundlesDB.config.app
+                                            .enable_private_pastes !== false && (
                                             <td>
                                                 {paste.ViewPassword !== ""
                                                     ? "yes"
@@ -278,7 +278,7 @@ export default function PasteList(props: {
                                                 />
 
                                                 <button
-                                                    class={"secondary"}
+                                                    class={"secondary round red"}
                                                     title={"Delete Paste"}
                                                     style={{
                                                         margin: "auto",

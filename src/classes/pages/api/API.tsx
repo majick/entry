@@ -19,10 +19,10 @@ import { CreateHash, Decrypt } from "../../db/helpers/Hash";
 import BaseParser from "../../db/helpers/BaseParser";
 
 import type { Paste, PasteMetadata } from "../../db/objects/Paste";
-import EntryDB from "../../db/EntryDB";
+import BundlesDB from "../../db/BundlesDB";
 
-await EntryDB.GetConfig();
-export const db = new EntryDB();
+await BundlesDB.GetConfig();
+export const db = new BundlesDB();
 
 import pack from "../../../../package.json";
 import { Config } from "../../..";
@@ -56,7 +56,7 @@ export const DefaultHeaders = {
             "upgrade-insecure-requests",
             "connect-src *",
         ].join("; "),
-    "X-Entry-Version": pack.version,
+    "X-Bundles-Version": pack.version,
     "X-Frame-Options": "SAMEORIGIN",
     "Referrer-Policy": "same-origin",
 };
@@ -123,7 +123,7 @@ export function GetCookie(cookie: string, key: string): string | undefined {
  * @return {Promise<string>}
  */
 export async function Session(request: Request): Promise<string> {
-    const config = (await EntryDB.GetConfig()) as Config;
+    const config = (await BundlesDB.GetConfig()) as Config;
     if (!config.log || !config.log.events.includes("session")) return ""; // sessions are disabled
 
     // generate session if it doesn't exist
@@ -142,7 +142,7 @@ export async function Session(request: Request): Promise<string> {
             return (session = "");
 
         // create log
-        const ses_log = await EntryDB.Logs.CreateLog({
+        const ses_log = await BundlesDB.Logs.CreateLog({
             Content: UA,
             Type: "session",
         });
@@ -156,7 +156,7 @@ export async function Session(request: Request): Promise<string> {
         }`;
     } else {
         // validate session
-        const ses_log = await EntryDB.Logs.GetLog(session);
+        const ses_log = await BundlesDB.Logs.GetLog(session);
 
         // set token to expire if log no longer exists
         if (!ses_log[0] || !ses_log[2])
@@ -184,7 +184,7 @@ export async function GetAssociation(
     SetAssociation?: string,
     Delete: boolean = false
 ): Promise<[boolean, string]> {
-    const config = (await EntryDB.GetConfig()) as Config;
+    const config = (await BundlesDB.GetConfig()) as Config;
     if (!config.log || !config.log.events.includes("session"))
         return [false, "Sessions are disabled"];
 
@@ -199,7 +199,7 @@ export async function GetAssociation(
     if (!session) return [false, "Session does not exist"];
     else {
         // try to get session log
-        const log = await EntryDB.Logs.GetLog(session);
+        const log = await BundlesDB.Logs.GetLog(session);
         if (!log[0] || !log[2])
             return [
                 // Failed to get session log
@@ -213,7 +213,7 @@ export async function GetAssociation(
         // update only...
         if (UpdateOnly) {
             // update log
-            await EntryDB.Logs.UpdateLog(
+            await BundlesDB.Logs.UpdateLog(
                 log[2].ID,
                 `${log[2].Content.split(";_")[0]}${
                     remote_ip !== null ? `;_ip;${remote_ip}` : ""
@@ -228,7 +228,7 @@ export async function GetAssociation(
             ];
         } else if (Delete) {
             // update log to remove association
-            await EntryDB.Logs.UpdateLog(log[2].ID, log[2].Content.split(";_")[0]);
+            await BundlesDB.Logs.UpdateLog(log[2].ID, log[2].Content.split(";_")[0]);
             return [true, ""];
         }
 
@@ -309,17 +309,17 @@ export class RobotsTXT implements Endpoint {
 
         // check if this is from a wildcard match
         if (
-            EntryDB.config.app &&
-            EntryDB.config.app.wildcard &&
-            EntryDB.config.app.hostname
+            BundlesDB.config.app &&
+            BundlesDB.config.app.wildcard &&
+            BundlesDB.config.app.hostname
         ) {
             const subdomain = url.hostname.split(
-                `.${EntryDB.config.app.hostname}`
+                `.${BundlesDB.config.app.hostname}`
             )[0];
 
             const IsFromWildcard =
                 subdomain &&
-                subdomain !== EntryDB.config.app.hostname &&
+                subdomain !== BundlesDB.config.app.hostname &&
                 subdomain !== "www";
 
             // return disallow all if from wildcard
@@ -355,11 +355,11 @@ export class RobotsTXT implements Endpoint {
  */
 export class Favicon implements Endpoint {
     async request(request: Request): Promise<Response> {
-        if (!EntryDB.config.app || !EntryDB.config.app.favicon)
+        if (!BundlesDB.config.app || !BundlesDB.config.app.favicon)
             return new _404Page().request(request);
 
         // return
-        return new Response(Bun.file(EntryDB.config.app.favicon));
+        return new Response(Bun.file(BundlesDB.config.app.favicon));
     }
 }
 
@@ -499,8 +499,8 @@ export class CreatePaste implements Endpoint {
 
         // if servers requires an association, make sure we have one
         if (
-            EntryDB.config.app &&
-            EntryDB.config.app.association_required === true &&
+            BundlesDB.config.app &&
+            BundlesDB.config.app.association_required === true &&
             Association[0] === false
         )
             return new Response(
@@ -513,7 +513,7 @@ export class CreatePaste implements Endpoint {
                     status: 302,
                     headers: {
                         "Content-Type": "application/json",
-                        "X-Entry-Error":
+                        "X-Bundles-Error":
                             "This server requires a paste association to create new pastes",
                     },
                 }
@@ -535,7 +535,7 @@ export class CreatePaste implements Endpoint {
             !body.CommentOn &&
             !body.ReportOn &&
             // make sure auto_tag is enabled
-            (!EntryDB.config.app || EntryDB.config.app.auto_tag !== false)
+            (!BundlesDB.config.app || BundlesDB.config.app.auto_tag !== false)
         ) {
             // update association with this paste
             const UpdateResult = await GetAssociation(
@@ -548,13 +548,13 @@ export class CreatePaste implements Endpoint {
             if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
 
             // update curiosity
-            if (EntryDB.config.app && EntryDB.config.app.curiosity)
+            if (BundlesDB.config.app && BundlesDB.config.app.curiosity)
                 await fetch(
-                    `${EntryDB.config.app.curiosity.host}/api/profiles/create?c=json`,
+                    `${BundlesDB.config.app.curiosity.host}/api/profiles/create?c=json`,
                     {
                         method: "POST",
                         body: JSON.stringify({
-                            APIKey: EntryDB.config.app.curiosity.api_key,
+                            APIKey: BundlesDB.config.app.curiosity.api_key,
                             ID: body.CustomURL,
                             Type: "entry_paste_user",
                         }),
@@ -599,7 +599,7 @@ export class CreatePaste implements Endpoint {
                 headers: {
                     ...DefaultHeaders,
                     "Content-Type": "application/json; charset=utf-8",
-                    "X-Entry-Error": result[1],
+                    "X-Bundles-Error": result[1],
                     "Set-Cookie": Association[1],
                 },
             }
@@ -685,7 +685,7 @@ export class EditPaste implements Endpoint {
         if (
             (!body.NewEditPassword ||
                 // if NewEditPassword is less than the expected length, set it to the old edit password
-                body.NewEditPassword.length < EntryDB.MinPasswordLength) &&
+                body.NewEditPassword.length < BundlesDB.MinPasswordLength) &&
             // verify this supplied EditPassword
             CreateHash(body.EditPassword) === paste.EditPassword
         )
@@ -722,14 +722,14 @@ export class EditPaste implements Endpoint {
             body.NewEditPassword !== body.EditPassword &&
             result[0]
         ) {
-            const Sessions = await EntryDB.Logs.QueryLogs(
+            const Sessions = await BundlesDB.Logs.QueryLogs(
                 `"Type" = \'session\' AND \"Content\" LIKE \'%;_with;${paste.CustomURL}\'`
             );
 
             if (Sessions[2])
                 // remove association
                 for (const session of Sessions[2])
-                    await EntryDB.Logs.UpdateLog(
+                    await BundlesDB.Logs.UpdateLog(
                         session.ID,
                         session.Content.split(";_")[0]
                     );
@@ -758,7 +758,7 @@ export class EditPaste implements Endpoint {
                 headers: {
                     ...DefaultHeaders,
                     "Content-Type": "application/json; charset=utf-8",
-                    "X-Entry-Error": result[1],
+                    "X-Bundles-Error": result[1],
                 },
             }
         );
@@ -800,14 +800,14 @@ export class DeletePaste implements Endpoint {
 
         // remove association from all associated sessions if the password has changed
         if (body.NewEditPassword && result[0]) {
-            const Sessions = await EntryDB.Logs.QueryLogs(
+            const Sessions = await BundlesDB.Logs.QueryLogs(
                 `"Type" = \'session\' AND \"Content\" LIKE \'%;_with;${body.CustomURL}\'`
             );
 
             if (Sessions[2])
                 // remove association
                 for (const session of Sessions[2])
-                    await EntryDB.Logs.UpdateLog(
+                    await BundlesDB.Logs.UpdateLog(
                         session.ID,
                         session.Content.split(";_")[0]
                     );
@@ -832,7 +832,7 @@ export class DeletePaste implements Endpoint {
                 headers: {
                     ...DefaultHeaders,
                     "Content-Type": "application/json; charset=utf-8",
-                    "X-Entry-Error": result[1],
+                    "X-Bundles-Error": result[1],
                 },
             }
         );
@@ -894,7 +894,7 @@ export class DecryptPaste implements Endpoint {
             return new Response("Failed to decrypt", {
                 status: 400,
                 headers: {
-                    "X-Entry-Error": "Failed to decrypt",
+                    "X-Bundles-Error": "Failed to decrypt",
                 },
             });
 
@@ -1280,20 +1280,26 @@ export class DeleteComment implements Endpoint {
             {
                 CustomURL: body.CommentURL,
             },
-            EntryDB.config.admin // delete using admin password
+            BundlesDB.config.admin // delete using admin password
         );
 
         // return
-        return new Response(JSON.stringify(result), {
-            status: 302,
-            headers: {
-                "Content-Type": "application/json; charset=utf-8",
-                Location: `/c/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
-                "Set-Cookie": association[1].startsWith("associated")
-                    ? association[1]
-                    : "",
-            },
-        });
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: `/c/${paste.CustomURL}?edit=true&UnhashedEditPassword=${body.EditPassword}&msg=Comment deleted!`,
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Set-Cookie": association[1].startsWith("associated")
+                        ? association[1]
+                        : "",
+                },
+            }
+        );
     }
 }
 
@@ -1329,7 +1335,7 @@ export class PasteLogin implements Endpoint {
         // check edit password
         if (
             paste.EditPassword !== CreateHash(body.EditPassword) &&
-            body.EditPassword !== EntryDB.config.admin
+            body.EditPassword !== BundlesDB.config.admin
         )
             return new Response(
                 JSON.stringify({
@@ -1340,7 +1346,7 @@ export class PasteLogin implements Endpoint {
                     status: 200,
                     headers: {
                         "Content-Type": "application/json",
-                        "X-Entry-Error": "Incorrect password",
+                        "X-Bundles-Error": "Incorrect password",
                     },
                 }
             );
@@ -1349,13 +1355,13 @@ export class PasteLogin implements Endpoint {
         await GetAssociation(request, _ip, true, body.CustomURL);
 
         // create profile
-        if (EntryDB.config.app && EntryDB.config.app.curiosity)
+        if (BundlesDB.config.app && BundlesDB.config.app.curiosity)
             await fetch(
-                `${EntryDB.config.app.curiosity.host}/api/profiles/create?c=json`,
+                `${BundlesDB.config.app.curiosity.host}/api/profiles/create?c=json`,
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        APIKey: EntryDB.config.app.curiosity.api_key,
+                        APIKey: BundlesDB.config.app.curiosity.api_key,
                         ID: body.CustomURL,
                         Type: "entry_paste_user",
                     }),
@@ -1466,7 +1472,7 @@ export class PasteLogout implements Endpoint {
                     headers: {
                         Location:
                             "/?err=Cannot remove association with this paste while it is locked.",
-                        "X-Entry-Erorr":
+                        "X-Bundles-Erorr":
                             "Cannot remove association with this paste while it is locked.",
                     },
                 }
@@ -1476,13 +1482,13 @@ export class PasteLogout implements Endpoint {
         await GetAssociation(request, null, false, "", true);
 
         // delete profile
-        if (EntryDB.config.app && EntryDB.config.app.curiosity)
+        if (BundlesDB.config.app && BundlesDB.config.app.curiosity)
             await fetch(
-                `${EntryDB.config.app.curiosity.host}/api/profiles/delete?c=json`,
+                `${BundlesDB.config.app.curiosity.host}/api/profiles/delete?c=json`,
                 {
                     method: "POST",
                     body: JSON.stringify({
-                        APIKey: EntryDB.config.app.curiosity.api_key,
+                        APIKey: BundlesDB.config.app.curiosity.api_key,
                         ID: paste.CustomURL,
                     }),
                     headers: {
@@ -1545,7 +1551,7 @@ export class EditMetadata implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (
             // if we used the wrong password
@@ -1561,7 +1567,7 @@ export class EditMetadata implements Endpoint {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot edit metadata: Invalid password!",
-                    "X-Entry-Error": "Cannot edit metadata: Invalid password!",
+                    "X-Bundles-Error": "Cannot edit metadata: Invalid password!",
                 },
             });
 
@@ -1571,7 +1577,7 @@ export class EditMetadata implements Endpoint {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot edit metadata: Paste is locked",
-                    "X-Entry-Error": "Cannot edit metadata: Paste is locked",
+                    "X-Bundles-Error": "Cannot edit metadata: Paste is locked",
                 },
             });
 
@@ -1672,8 +1678,8 @@ export class UpdateCustomDomain implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         if (
-            !EntryDB.config.log ||
-            !EntryDB.config.log.events.includes("custom_domain")
+            !BundlesDB.config.log ||
+            !BundlesDB.config.log.events.includes("custom_domain")
         )
             return new _404Page().request(request);
 
@@ -1694,9 +1700,9 @@ export class UpdateCustomDomain implements Endpoint {
 
         // if domain is server hostname, return (that's no good!)
         if (
-            EntryDB.config.app &&
-            EntryDB.config.app.hostname &&
-            body.Domain === EntryDB.config.app.hostname
+            BundlesDB.config.app &&
+            BundlesDB.config.app.hostname &&
+            body.Domain === BundlesDB.config.app.hostname
         )
             return new _404Page().request(request);
 
@@ -1707,7 +1713,7 @@ export class UpdateCustomDomain implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(EntryDB.config.admin);
+            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
             return new Response(
@@ -1719,7 +1725,7 @@ export class UpdateCustomDomain implements Endpoint {
                     status: 401,
                     headers: {
                         "Content-Type": "application/json",
-                        "X-Entry-Error":
+                        "X-Bundles-Error":
                             "Cannot update domain link: Invalid password!",
                     },
                 }
@@ -1758,7 +1764,7 @@ export class UpdateCustomDomain implements Endpoint {
 
         // make sure a log with that domain doesn't already exist
         const DomainLog = (
-            await EntryDB.Logs.QueryLogs(
+            await BundlesDB.Logs.QueryLogs(
                 `"Type" = \'custom_domain\' AND \"Content\" LIKE \'%;${body.Domain}\'`
             )
         )[2][0];
@@ -1773,21 +1779,21 @@ export class UpdateCustomDomain implements Endpoint {
                     status: 400,
                     headers: {
                         "Content-Type": "application/json",
-                        "X-Entry-Error": "This domain is already in use",
+                        "X-Bundles-Error": "This domain is already in use",
                     },
                 }
             );
 
         // get log
         const CustomDomainLog = (
-            await EntryDB.Logs.QueryLogs(
+            await BundlesDB.Logs.QueryLogs(
                 `"Type" = \'custom_domain\' AND \"Content\" LIKE \'${paste.CustomURL};%\'`
             )
         )[2][0];
 
         if (!CustomDomainLog) {
             // create log
-            await EntryDB.Logs.CreateLog({
+            await BundlesDB.Logs.CreateLog({
                 Type: "custom_domain",
                 Content: `${paste.CustomURL};${body.Domain}`,
             });
@@ -1808,7 +1814,7 @@ export class UpdateCustomDomain implements Endpoint {
         }
 
         // update log
-        await EntryDB.Logs.UpdateLog(
+        await BundlesDB.Logs.UpdateLog(
             CustomDomainLog.ID,
             `${paste.CustomURL};${body.Domain}`
         );
@@ -1848,16 +1854,16 @@ export class GetSocialProfile implements Endpoint {
             "/api/social/get/".length,
             url.pathname.length
         );
-        if (!name || !EntryDB.config.app || !EntryDB.config.app.curiosity)
+        if (!name || !BundlesDB.config.app || !BundlesDB.config.app.curiosity)
             return new _404Page().request(request);
 
         // fetch
         const res = await fetch(
-            `${EntryDB.config.app.curiosity.host}/api/profiles/get?c=json`,
+            `${BundlesDB.config.app.curiosity.host}/api/profiles/get?c=json`,
             {
                 method: "POST",
                 body: JSON.stringify({
-                    APIKey: EntryDB.config.app.curiosity.api_key,
+                    APIKey: BundlesDB.config.app.curiosity.api_key,
                     ID: name,
                 }),
                 headers: {
@@ -1891,7 +1897,7 @@ export class CreateURLClaim implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // make sure claim is enabled
-        if (!EntryDB.config.app || EntryDB.config.app.enable_claim !== true)
+        if (!BundlesDB.config.app || BundlesDB.config.app.enable_claim !== true)
             return new Response(
                 JSON.stringify({
                     success: false,
@@ -1914,9 +1920,9 @@ export class CreateURLClaim implements Endpoint {
 
         // if domain is server hostname, return (that's no good!)
         if (
-            EntryDB.config.app &&
-            EntryDB.config.app.hostname &&
-            body.Domain === EntryDB.config.app.hostname
+            BundlesDB.config.app &&
+            BundlesDB.config.app.hostname &&
+            body.Domain === BundlesDB.config.app.hostname
         )
             return new _404Page().request(request);
 

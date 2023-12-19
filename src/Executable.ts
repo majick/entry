@@ -78,7 +78,7 @@ try {
                     onExit: () => {
                         // exit
                         console.log(
-                            "\x1b[30;42m info \x1b[0m Entry executable updated!"
+                            "\x1b[30;42m info \x1b[0m Bundles executable updated!"
                         );
 
                         process.exit();
@@ -97,7 +97,7 @@ try {
 if (!NeedsExecutableUpdate) {
     // update assets
     try {
-        if (path.basename(process.execPath).startsWith("entry")) {
+        if (path.basename(process.execPath).startsWith("bundles")) {
             // download files
             const RequiredFiles = await (
                 await fetch("https://sentrytwo.com/api/hashes")
@@ -106,7 +106,7 @@ if (!NeedsExecutableUpdate) {
             // ...check current files (remove unneeded)
             for (const file of fs.readdirSync(process.env.IMPORT_DIR!))
                 if (!RequiredFiles[file]) {
-                    if (file.startsWith("entry")) continue;
+                    if (file.startsWith("bundles")) continue;
 
                     // ...delete file
                     fs.rmSync(path.resolve(process.env.IMPORT_DIR!, file));

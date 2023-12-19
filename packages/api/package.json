@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://codeberg.org/hkau/entry",
+    "url": "https://codeberg.org/sentrytwo/bundles",
     "directory": "packages/api"
   },
   "scripts": {

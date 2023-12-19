@@ -1,7 +1,7 @@
 import ToggleTheme from "./ToggleTheme";
 import { Modal } from "fusion";
 
-import EntryDB from "../../../db/EntryDB";
+import BundlesDB from "../../../db/BundlesDB";
 import { HoneybeeConfig } from "honeybee";
 
 import pack from "../../../../../package.json";
@@ -20,7 +20,9 @@ export async function InitFooterExtras(plugins: HoneybeeConfig["Pages"]) {
         FooterExtras.push(
             // load plugin using fake request and then push the text output
             `<!-- ${plugin[0]} -->${await (
-                await new plugin[1].Page().request(new Request("entry:footer-load"))
+                await new plugin[1].Page().request(
+                    new Request("bundles:footer-load")
+                )
             ).text()}`
         );
     }
@@ -32,10 +34,10 @@ export default function Footer(props: {
     IncludeLoading?: boolean;
 }) {
     const homepageLink =
-        (EntryDB.config &&
-            EntryDB.config.app &&
-            EntryDB.config.app.hostname &&
-            `https://${EntryDB.config.app.hostname}/`) ||
+        (BundlesDB.config &&
+            BundlesDB.config.app &&
+            BundlesDB.config.app.hostname &&
+            `https://${BundlesDB.config.app.hostname}/`) ||
         "/";
 
     // return
@@ -58,11 +60,11 @@ export default function Footer(props: {
                 }}
             >
                 <li>
-                    {!EntryDB.config.app ||
-                        (EntryDB.config.app.enable_builder !== false && (
+                    {!BundlesDB.config.app ||
+                        (BundlesDB.config.app.enable_builder !== false && (
                             <a
                                 href="javascript:"
-                                class={"modal:entry:button.NewPaste"}
+                                class={"modal:bundles:button.NewPaste"}
                             >
                                 new
                             </a>
@@ -73,28 +75,28 @@ export default function Footer(props: {
                     <a href="/s">settings</a>
                 </li>
 
-                {EntryDB.config.app &&
-                    EntryDB.config.app.enable_search !== false && (
+                {BundlesDB.config.app &&
+                    BundlesDB.config.app.enable_search !== false && (
                         <li>
                             <a href="/search">search</a>
                         </li>
                     )}
 
-                {EntryDB.config.app &&
-                    EntryDB.config.app.footer &&
-                    EntryDB.config.app.footer.info && (
+                {BundlesDB.config.app &&
+                    BundlesDB.config.app.footer &&
+                    BundlesDB.config.app.footer.info && (
                         <li>
-                            <a href={`/${EntryDB.config.app.footer.info}`}>info</a>
+                            <a href={`/${BundlesDB.config.app.footer.info}`}>info</a>
                         </li>
                     )}
             </ul>
 
-            {EntryDB.config.app &&
-                EntryDB.config.app.footer &&
-                EntryDB.config.app.footer.rows && (
+            {BundlesDB.config.app &&
+                BundlesDB.config.app.footer &&
+                BundlesDB.config.app.footer.rows && (
                     <>
                         {/* custom footer rows */}
-                        {EntryDB.config.app.footer.rows.map((row) => (
+                        {BundlesDB.config.app.footer.rows.map((row) => (
                             <ul
                                 class={"__footernav flex"}
                                 style={{
@@ -121,17 +123,19 @@ export default function Footer(props: {
                     }}
                 >
                     <a
-                        href="https://codeberg.org/hkau/entry"
-                        title={`Powered by Entry${pack ? ` v${pack.version}` : ""}`}
+                        href="https://codeberg.org/sentrytwo/bundles"
+                        title={`Powered by Bundles${
+                            pack ? ` v${pack.version}` : ""
+                        }`}
                     >
-                        {EntryDB.config.name || "Entry"}
+                        {BundlesDB.config.name || "Bundles"}
                     </a>{" "}
                     <span
                         style={{
                             color: "var(--text-color-faded)",
                         }}
                     >
-                        - A Markdown Pastebin
+                        - {BundlesDB.config.tagline || "Markdown Delivery Service"}
                     </span>
                 </p>
             )}
@@ -205,24 +209,6 @@ export default function Footer(props: {
                 }}
             />
 
-            {/* wsas */}
-            <script
-                data-state="save"
-                type={"module"}
-                dangerouslySetInnerHTML={{
-                    __html: `import WSAS_Client from "/WSAS_Client.js"; window.wsas = new WSAS_Client(
-                        \`\${window.location.protocol === "http:" ? "ws:" : "wss:"}//\${window.location.host}/api/wsas\`
-                    );
-                    
-                    // subscribe
-                    window.wsas.fetch({
-                        method: "send",
-                        path: "api/subscribe",
-                        body: JSON.stringify({ channel: window.location.pathname }),
-                    })`,
-                }}
-            />
-
             {/* events */}
             <script
                 type="module"
@@ -239,8 +225,8 @@ export default function Footer(props: {
 
             {/* modals */}
             <Modal
-                buttonid="entry:button.NewPaste"
-                modalid="entry:modal.NewPaste"
+                buttonid="bundles:button.NewPaste"
+                modalid="bundles:modal.NewPaste"
                 noIdMatch={true}
                 round={true}
             >
@@ -265,8 +251,8 @@ export default function Footer(props: {
                         <b>Normal</b>
                     </a>
 
-                    {EntryDB.config.app &&
-                        EntryDB.config.app.enable_builder !== false && (
+                    {BundlesDB.config.app &&
+                        BundlesDB.config.app.enable_builder !== false && (
                             <a
                                 href={`${homepageLink}paste/builder`}
                                 class={"button border dashed __footer_cardbtn"}

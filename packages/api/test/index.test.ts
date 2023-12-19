@@ -1,7 +1,7 @@
-import Entry from "../";
+import Bundles from "../";
 
 // create client
-const client = new Entry("http://localhost:8080");
+const client = new Bundles("http://localhost:8080");
 
 // get nodeinfo
 console.log(await client.GetInfo());

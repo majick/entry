@@ -4,17 +4,17 @@
  */
 
 // ...
-import type { EntryGlobalType } from "entry/src";
+import type { BundlesGlobalType } from "entry/src";
 import type _404Page from "entry/src/classes/pages/components/404";
 
 // import honeybee
 import { Renderer, Endpoint, HoneybeeConfig } from "honeybee";
 
 // create global
-const EntryGlobal = globalThis as unknown as EntryGlobalType;
+const BundlesGlobal = globalThis as unknown as BundlesGlobalType;
 
 // create page...
-const _Footer = EntryGlobal.Footer;
+const _Footer = BundlesGlobal.Footer;
 export class HelloWorld implements Endpoint {
     async request(request: Request): Promise<Response> {
         return new Response(

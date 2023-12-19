@@ -459,7 +459,7 @@ export async function ParseMarkdown(
     content = content.replaceAll("</p><p>", "");
 
     // return
-    return `<!-- Entry Markdown - report bugs at https://codeberg.org/hkau/entry -->\n${content}`;
+    return `<!-- Bundles Markdown - report bugs at https://codeberg.org/sentrytwo/bundles -->\n${content}`;
 }
 
 // default export

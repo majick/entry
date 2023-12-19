@@ -9,8 +9,8 @@ import { Modal, Expandable } from "fusion";
 export default function LoadingModal(): any {
     return (
         <Modal
-            modalid="entry:modal.Loading"
-            buttonid="entry:button.Loading"
+            modalid="bundles:modal.Loading"
+            buttonid="bundles:button.Loading"
             noIdMatch={true}
             round={true}
         >
@@ -80,7 +80,7 @@ export default function LoadingModal(): any {
                     <Expandable title="Bug?">
                         <span>
                             If you think this could be caused by a bug, you can{" "}
-                            <a href="https://codeberg.org/hkau/entry">
+                            <a href="https://codeberg.org/sentrytwo/bundles">
                                 attempt to contribute a fix
                             </a>
                             !

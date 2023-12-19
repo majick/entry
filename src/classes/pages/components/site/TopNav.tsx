@@ -1,4 +1,4 @@
-import EntryDB from "../../../db/EntryDB";
+import BundlesDB from "../../../db/BundlesDB";
 import { TopNav } from "fusion";
 import Footer from "./Footer";
 
@@ -12,7 +12,7 @@ export default function _TopNav(props: {
     return (
         <TopNav
             {...props}
-            name={EntryDB.config.name || "entry"}
+            name={BundlesDB.config.name || "bundles"}
             FooterComponent={() => (
                 <Footer IncludeLoading={props.IncludeLoading || true} />
             )}

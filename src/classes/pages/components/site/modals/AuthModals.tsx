@@ -1,4 +1,4 @@
-import EntryDB from "../../../../db/EntryDB";
+import BundlesDB from "../../../../db/BundlesDB";
 import LoadingModal from "./Loading";
 import { Modal } from "fusion";
 
@@ -34,8 +34,8 @@ export function AuthModals(props: { use: "login" | "logout" }) {
 
             {props.use === "login" && (
                 <Modal
-                    buttonid="entry:button.login"
-                    modalid="entry:modal.login"
+                    buttonid="bundles:button.login"
+                    modalid="bundles:modal.login"
                     noIdMatch={true}
                     round={true}
                 >
@@ -59,8 +59,8 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                         <input
                             type="text"
                             placeholder={"Paste URL"}
-                            maxLength={EntryDB.MaxCustomURLLength}
-                            minLength={EntryDB.MinCustomURLLength}
+                            maxLength={BundlesDB.MaxCustomURLLength}
+                            minLength={BundlesDB.MinCustomURLLength}
                             name={"CustomURL"}
                             id={"CustomURL"}
                             autoComplete={"off"}
@@ -71,8 +71,8 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                         <input
                             type="text"
                             placeholder={"Paste Edit Password"}
-                            maxLength={EntryDB.MaxPasswordLength}
-                            minLength={EntryDB.MinPasswordLength}
+                            maxLength={BundlesDB.MaxPasswordLength}
+                            minLength={BundlesDB.MinPasswordLength}
                             name={"EditPassword"}
                             id={"EditPassword"}
                             autoComplete={"off"}
@@ -81,7 +81,7 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                         />
 
                         <button
-                            class={"round modal:entry:button.Loading"}
+                            class={"round modal:bundles:button.Loading"}
                             style={{
                                 width: "100%",
                             }}
@@ -107,8 +107,8 @@ export function AuthModals(props: { use: "login" | "logout" }) {
 
             {props.use === "logout" && (
                 <Modal
-                    buttonid="entry:button.logout"
-                    modalid="entry:modal.logout"
+                    buttonid="bundles:button.logout"
+                    modalid="bundles:modal.logout"
                     noIdMatch={true}
                     round={true}
                 >
@@ -154,7 +154,9 @@ export function AuthModals(props: { use: "login" | "logout" }) {
                             }}
                         >
                             <button
-                                class={"red round round modal:entry:button.Loading"}
+                                class={
+                                    "red round round modal:bundles:button.Loading"
+                                }
                                 style={{
                                     width: "100%",
                                 }}

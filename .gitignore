@@ -172,6 +172,7 @@ dist
 
 data/
 bun.lockb
+package-lock.json
 
 # favicon
 
