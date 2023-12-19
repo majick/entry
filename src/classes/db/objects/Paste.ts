@@ -47,6 +47,7 @@ export type PasteMetadata = {
     SocialIcon?: string; // shown as a "profile picture" in some places
     Badges?: string; // comma separated array of badges, shown under paste
     FrontMatter?: { [key: string]: any }; // NORMAL ONLY - markdown front matter (https://docs.github.com/en/contributing/writing-for-github-docs/using-yaml-frontmatter)
+    ClaimAllowed?: boolean; // true default, details if paste can be claimed by users
     // comments/reports stuff
     Comments?: {
         IsCommentOn?: string;

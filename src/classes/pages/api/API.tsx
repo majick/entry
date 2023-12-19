@@ -1916,6 +1916,22 @@ export class CreateURLClaim implements Endpoint {
         if (!paste) return new _404Page().request(request);
         if (paste.HostServer) return new _404Page().request(request);
 
+        // make sure url can be claimed
+        if (paste.Metadata && paste.Metadata.ClaimAllowed === false)
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=URL cannot be claimed",
+                    result: [false, "URL cannot be claimed"],
+                }),
+                {
+                    status: 400,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
         // check association
         const _ip = GetRemoteIP(request, server);
         const Association = await GetAssociation(request, _ip);

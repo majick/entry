@@ -332,7 +332,7 @@ export class InspectMedia implements Endpoint {
         if (name.startsWith("paste/file/")) name = name.split("paste/file/")[1];
         else if (name.startsWith("api/media/file/"))
             name = name.split("api/media/file/")[1];
-        else if (name.startsWith("f/")) name = name.split("f/")[1];
+        else if (name.startsWith("f/")) name = name.slice(2);
 
         let FileName = url.pathname.slice(1, url.pathname.length).toLowerCase();
         if (name.split("/").length > 1) FileName = name.split("/").pop()!;

@@ -44,6 +44,7 @@ export function Editor(_metadata: string, id: string): any {
     if (metadata.root.Badges === undefined) metadata.root.Badges = "";
     if (metadata.root.PrivateSource === undefined)
         metadata.root.PrivateSource = false;
+    if (metadata.root.ClaimAllowed === undefined) metadata.root.ClaimAllowed = true;
 
     // ...
     function UpdateMetadata() {

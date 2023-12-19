@@ -5,6 +5,7 @@
  */
 
 import { Endpoint, Renderer } from "honeybee";
+import punycode from "node:punycode";
 import { Server } from "bun";
 
 import { CheckInstance, Curiosity, db, PasteOpenGraph } from "../Pages";
@@ -468,7 +469,9 @@ export class RepoView implements Endpoint {
                             )}
 
                             {BundlesDB.config.app &&
-                                BundlesDB.config.app.enable_claim === true && (
+                                BundlesDB.config.app.enable_claim === true &&
+                                result.Metadata &&
+                                result.Metadata.ClaimAllowed !== false && (
                                     <CardWithHeader
                                         round={true}
                                         border={true}
@@ -932,7 +935,7 @@ export class ProfileView implements Endpoint {
                                             maxWidth: "100%",
                                         }}
                                     >
-                                        {result.CustomURL}
+                                        {punycode.toUnicode(result.CustomURL)}
                                     </h2>
 
                                     <Button
@@ -993,7 +996,9 @@ export class ProfileView implements Endpoint {
                                                     <a
                                                         href={`/r/${paste.CustomURL}`}
                                                     >
-                                                        {paste.CustomURL}
+                                                        {punycode.toUnicode(
+                                                            paste.CustomURL
+                                                        )}
                                                     </a>
 
                                                     <span>
