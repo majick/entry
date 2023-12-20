@@ -983,7 +983,18 @@ export class ProfileView implements Endpoint {
                                     <CardWithHeader
                                         border={true}
                                         round={true}
-                                        header={<b>Pastes</b>}
+                                        header={
+                                            <div
+                                                class={
+                                                    "full flex justify-space-between"
+                                                }
+                                            >
+                                                <b>Pastes</b>
+                                                <span class={"chip badge"}>
+                                                    {Pastes.length}
+                                                </span>
+                                            </div>
+                                        }
                                     >
                                         <div class="flex flex-column g-4">
                                             {Pastes.map((paste) => (
