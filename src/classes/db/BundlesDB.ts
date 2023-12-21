@@ -1133,22 +1133,25 @@ export default class BundlesDB {
         NewPasteInfo.CustomURL = punycode.toASCII(NewPasteInfo.CustomURL);
 
         // make sure content is unique if config app.enable_claim is true (prevent CustomURL squatting)
-        if (BundlesDB.config.app && BundlesDB.config.app.enable_claim === true)
-            if (
-                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
-                    // @ts-ignore
-                    db: this.db,
-                    query: 'SELECT * FROM "Pastes" WHERE "Content" = ?',
-                    params: [NewPasteInfo.Content],
-                    get: true,
-                    use: "Query",
-                })
-            )
+        if (BundlesDB.config.app && BundlesDB.config.app.enable_claim === true) {
+            const ContentPaste = await (BundlesDB.config.pg
+                ? SQL.PostgresQueryOBJ
+                : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: this.db,
+                query: 'SELECT * FROM "Pastes" WHERE "Content" = ?',
+                params: [NewPasteInfo.Content],
+                get: true,
+                use: "Query",
+            });
+
+            if (ContentPaste && ContentPaste.CustomURL !== PasteInfo.CustomURL)
                 return [
                     false,
                     translations.English.error_unique_content,
                     NewPasteInfo,
                 ];
+        }
 
         // we're not allowing users to change ViewPasswords currently
 
