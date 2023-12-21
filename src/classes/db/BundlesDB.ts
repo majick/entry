@@ -640,11 +640,7 @@ export default class BundlesDB {
                 // just send a /api/get request to the other server
                 if (server.startsWith("%")) return resolve(undefined);
                 const request = fetch(
-                    server !== "text.is"
-                        ? // everything
-                          `https://${server}/api/raw/${PasteURL.split(":")[0]}`
-                        : // text.is (terrible api)
-                          `https://${server}/${PasteURL.split(":")[0]}/raw`
+                    `https://${server}/api/get/${PasteURL.split(":")[0]}`
                 );
 
                 // handle bad
@@ -656,17 +652,19 @@ export default class BundlesDB {
                 const record = await request;
 
                 // handle bad (again)
-                if (!record.headers.get("Content-Type")!.includes("text/plain"))
+                if (
+                    !record.headers.get("Content-Type")!.includes("application/json")
+                )
                     return resolve(undefined);
 
                 // get body
-                const text = await record.text();
+                const json = await record.json();
 
                 // return
                 if (record.ok)
                     return resolve({
                         CustomURL: PasteURL,
-                        Content: text,
+                        Content: json.Content,
                         PubDate: parseFloat(
                             (await request).headers.get("X-Paste-PubDate") ||
                                 new Date().getTime().toString()
@@ -678,8 +676,9 @@ export default class BundlesDB {
                         GroupName:
                             (await request).headers.get("X-Paste-GroupName") || "",
                         HostServer: server,
-                        Views: 0,
-                        Metadata: { Version: 1, Owner: PasteURL },
+                        Views: json.Views || 0,
+                        Comments: json.Comments || 0,
+                        Metadata: json.Metadata || { Version: 1, Owner: PasteURL },
                     });
                 else return resolve(undefined);
             }

@@ -33,7 +33,7 @@ import { Button } from "fusion";
  */
 function AdminNav(props: { active: string; pass: string }): any {
     return (
-        <>
+        <div class="content">
             <h1
                 style={{
                     display: "flex",
@@ -267,7 +267,7 @@ function AdminNav(props: { active: string; pass: string }): any {
                     <a href={process.env.ENTRY_CLOUD_LOCATION}>Manage</a>
                 </p>
             )}
-        </>
+        </div>
     );
 }
 
@@ -281,11 +281,6 @@ function AdminLayout(props: { children: any; body: any; page: string }) {
 
                 <Footer />
             </div>
-
-            <details className="sidebar-mobile">
-                <summary>Menu</summary>
-                <AdminNav active={props.page} pass={props.body.AdminPassword} />
-            </details>
 
             <div className="tab-container editor-tab page-content">
                 {props.children}

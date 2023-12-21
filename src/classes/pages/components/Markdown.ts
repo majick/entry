@@ -285,7 +285,13 @@ export function ParseMarkdownSync(
     // text color thing
     content = content.replaceAll(
         /\%(?<COLOR>.*?)\%(?!>)\s*(?<CONTENT>.*?)\s*(\%\%)/gm,
-        '<span style="color: $<COLOR>;">$<CONTENT></span>'
+        '<span style="color: $<COLOR>;" role="custom-color">$<CONTENT></span>'
+    );
+
+    // spoiler
+    content = content.replaceAll(
+        /(\|\|)\s*(?<CONTENT>.*?)\s*(\|\|)/gm,
+        '<span role="spoiler">$<CONTENT></span>'
     );
 
     // admonitions

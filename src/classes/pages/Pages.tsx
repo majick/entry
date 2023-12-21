@@ -35,11 +35,11 @@ import API, {
 } from "./api/API";
 
 // ...
+import { Card, Modal, StaticCode, Expandable, SidebarLayout, Button } from "fusion";
 import { Node, PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import MessageDisplays from "./components/site/MessageDisplays";
 import LoadingModal from "./components/site/modals/Loading";
-import { Card, Modal, StaticCode, Expandable } from "fusion";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
 import { ProfileView, ReposNav } from "./repos/Repos";
@@ -153,7 +153,10 @@ export function OpenGraph(props: {
             )}
 
             {props.title && <meta property={"og:title"} value={props.title} />}
-            {props.icon && <meta property={"og:image"} value={props.icon} />}
+
+            {props.icon && !props.largeimage && (
+                <meta property={"og:image"} value={props.icon} />
+            )}
 
             {props.largeimage && (
                 <meta property={"og:image"} value={props.largeimage} />
@@ -236,7 +239,7 @@ export function PasteOpenGraph(props: {
                         : props.title
                 }
                 icon={
-                    paste.Metadata && paste.Metadata.Favicon
+                    paste.Metadata && paste.Metadata.EmbedImage
                         ? paste.Metadata.Favicon
                         : undefined
                 }
@@ -1134,6 +1137,7 @@ export class PasteDocView implements Endpoint {
         // get paste name
         let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
         if (name.startsWith("paste/doc/")) name = name.split("paste/doc/")[1];
+        if (name.startsWith("d/")) name = name.slice(2);
 
         // return home if name === ""
         if (name === "") return new Home().request(request, server);
@@ -1189,9 +1193,20 @@ export class PasteDocView implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <div class={"sidebar-layout-wrapper"}>
-                            <div class={"sidebar"}>
-                                <div>
+                        <SidebarLayout
+                            nav={
+                                <TopNav breadcrumbs={[result.CustomURL]}>
+                                    <Button
+                                        type="border"
+                                        round={true}
+                                        href={`/${name}`}
+                                    >
+                                        Exit Docs
+                                    </Button>
+                                </TopNav>
+                            }
+                            sidebar={
+                                <>
                                     {BundlesDB.config.app &&
                                         BundlesDB.config.app.footer &&
                                         BundlesDB.config.app.footer.info &&
@@ -1205,92 +1220,21 @@ export class PasteDocView implements Endpoint {
                                             __html: TableOfContents,
                                         }}
                                     />
-                                </div>
-
-                                <Footer />
-                            </div>
-
-                            <details className="sidebar-mobile">
-                                <summary>Document</summary>
-
-                                {BundlesDB.config.app &&
-                                    BundlesDB.config.app.footer &&
-                                    BundlesDB.config.app.footer.info &&
-                                    BundlesDB.config.app.footer.info.split(
-                                        "?"
-                                    )[0] === result.CustomURL &&
-                                    InformationPageNote()}
-
-                                <div
-                                    dangerouslySetInnerHTML={{
-                                        __html: TableOfContents,
-                                    }}
-                                />
-                            </details>
-
-                            <div class={"tab-container editor-tab page-content"}>
-                                <div
-                                    id="editor-tab-preview"
-                                    class="editor-tab"
-                                    style={{
-                                        height: "max-content",
-                                        paddingBottom: "1rem",
-                                    }}
-                                    dangerouslySetInnerHTML={{
-                                        __html: Rendered,
-                                    }}
-                                />
-
-                                <hr />
-
-                                <ul
-                                    class={"__footernav"}
-                                    style={{
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        flexWrap: "wrap",
-                                        padding: "0",
-                                    }}
-                                >
-                                    <li>
-                                        <a href={`/${name}`}>
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                            >
-                                                <path d="M11.134 1.535c.7-.509 1.416-.942 2.076-1.155.649-.21 1.463-.267 2.069.34.603.601.568 1.411.368 2.07-.202.668-.624 1.39-1.125 2.096-1.011 1.424-2.496 2.987-3.775 4.249-1.098 1.084-2.132 1.839-3.04 2.3a3.744 3.744 0 0 1-1.055 3.217c-.431.431-1.065.691-1.657.861-.614.177-1.294.287-1.914.357A21.151 21.151 0 0 1 .797 16H.743l.007-.75H.749L.742 16a.75.75 0 0 1-.743-.742l.743-.008-.742.007v-.054a21.25 21.25 0 0 1 .13-2.284c.067-.647.187-1.287.358-1.914.17-.591.43-1.226.86-1.657a3.746 3.746 0 0 1 3.227-1.054c.466-.893 1.225-1.907 2.314-2.982 1.271-1.255 2.833-2.75 4.245-3.777ZM1.62 13.089c-.051.464-.086.929-.104 1.395.466-.018.932-.053 1.396-.104a10.511 10.511 0 0 0 1.668-.309c.526-.151.856-.325 1.011-.48a2.25 2.25 0 1 0-3.182-3.182c-.155.155-.329.485-.48 1.01a10.515 10.515 0 0 0-.309 1.67Zm10.396-10.34c-1.224.89-2.605 2.189-3.822 3.384l1.718 1.718c1.21-1.205 2.51-2.597 3.387-3.833.47-.662.78-1.227.912-1.662.134-.444.032-.551.009-.575h-.001V1.78c-.014-.014-.113-.113-.548.027-.432.14-.995.462-1.655.942Zm-4.832 7.266-.001.001a9.859 9.859 0 0 0 1.63-1.142L7.155 7.216a9.7 9.7 0 0 0-1.161 1.607c.482.302.889.71 1.19 1.192Z"></path>
-                                            </svg>{" "}
-                                            normal view
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a
-                                            href={`/?mode=edit&OldURL=${
-                                                result.CustomURL.split(":")[0]
-                                            }${
-                                                // add host server (if it exists)
-                                                result.HostServer
-                                                    ? `&server=${result.HostServer}`
-                                                    : ""
-                                            }`}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                            >
-                                                <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
-                                            </svg>{" "}
-                                            edit
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
+                                </>
+                            }
+                        >
+                            <div
+                                id="editor-tab-preview"
+                                class="editor-tab"
+                                style={{
+                                    height: "max-content",
+                                    paddingBottom: "1rem",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                    __html: Rendered,
+                                }}
+                            />
+                        </SidebarLayout>
 
                         <script
                             type="module"

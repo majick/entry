@@ -668,7 +668,6 @@ export class GetFile implements Endpoint {
 
         // get file
         const file = await BundlesDB.Media.GetFile(Owner, File);
-        console.log(Owner, File);
         if (!file[0] && !file[2]) return new _404Page().request(request);
 
         // return

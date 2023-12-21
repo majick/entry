@@ -1610,7 +1610,7 @@ export class EditMetadata implements Endpoint {
         return new Response(
             JSON.stringify({
                 success: true,
-                redirect: "/?msg=Metadata updated!",
+                redirect: `/${paste.CustomURL}?msg=${translations.English.metadata_updated}`,
                 result: [
                     true,
                     translations.English.metadata_updated,

@@ -369,6 +369,7 @@ export const ServerConfig: HoneybeeConfig = {
 
         // GET root
         "/paste/doc/": { Type: "begins", Page: Pages.PasteDocView },
+        "/d/": { Type: "begins", Page: Pages.PasteDocView },
         "/paste/comments/": { Type: "begins", Page: Pages.PasteCommentsPage }, // alias of /c/
         "/robots.txt": { Page: API.RobotsTXT },
         "/favicon": { Page: API.Favicon },
