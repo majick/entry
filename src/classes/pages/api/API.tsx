@@ -52,6 +52,7 @@ export const DefaultHeaders = {
             "default-src 'self' blob:",
             "img-src * data:",
             "font-src *",
+            "media-src *",
             "style-src 'unsafe-inline' 'self' blob: *",
             "script-src 'self' 'unsafe-inline' blob:",
             "object-src 'self' blob:",
@@ -1966,7 +1967,7 @@ export class CreateURLClaim implements Endpoint {
         // check minimum requirements
         // the minimum requirements to repossess a paste are:
         //     1. The paste must have not been edited in over 9 months
-        //     2. The paste content must have less than 15 words
+        //     2. The paste content must have less than 150 characters
         //     3. The paste must have less than 500 views and 50 comments
 
         const InvalidResponse = {
@@ -1993,7 +1994,7 @@ export class CreateURLClaim implements Endpoint {
             });
 
         // ...check content (2)
-        if (paste.Content!.trim().split(" ").length > 15)
+        if (paste.Content!.trim().length > 150)
             return new Response(JSON.stringify(InvalidResponse), {
                 status: 400,
                 headers: {

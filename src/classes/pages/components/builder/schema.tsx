@@ -597,7 +597,7 @@ export function StarInfoNode(props: {
             style={{
                 padding: "0",
                 top: "initial",
-                bottom: "0.5rem",
+                bottom: "var(--u-04)",
                 borderRadius: "var(--u-04)",
                 ...parser.ParseStyleString(props.node.StyleString || ""),
             }}
@@ -605,7 +605,7 @@ export function StarInfoNode(props: {
             <button
                 id={props.node.ID}
                 aria-label={"Paste Options"}
-                class={"round tooltip-wrapper visual-active"}
+                class={"round border tooltip-wrapper visual-active"}
                 style={{
                     background:
                         props.node.Source !== ""

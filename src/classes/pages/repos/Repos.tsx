@@ -486,7 +486,10 @@ export class RepoView implements Endpoint {
                                             <li>
                                                 URL hasn't been edited in over a year
                                             </li>
-                                            <li>The paste has less than 15 words</li>
+                                            <li>
+                                                The paste has less than 150
+                                                characters
+                                            </li>
                                             <li>
                                                 The paste has less than 500 views and
                                                 less than 50 comments

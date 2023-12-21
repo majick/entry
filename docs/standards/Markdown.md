@@ -41,3 +41,13 @@ Below is a list of the current standardized special elements (and their argument
     - **classes**: `string`, accepts 1-infinite
 - id
     - **id**: `string`, accepts only 1 argument
+- music
+    - **src**: `string`
+    - **loop**: `boolean`
+    - **autostart**: `boolean`
+    - **visible**: `boolean`
+- html (open html)
+    - **tag**: `string`
+    - **attributes**: `string[]`, list of HTML attributes (ex: `id="test" class="test"`)
+- chtml (close html)
+    - **tag**: `string`

@@ -264,7 +264,7 @@ export class ViewPasteMedia implements Endpoint {
                                             BundlesDB.config.app!.media!.max_size ||
                                             0
                                         }
-                                        accept={"image/*,font/*,text/*"}
+                                        accept={"image/*,font/*,text/*,audio/*"}
                                         required
                                     />
 
@@ -328,29 +328,28 @@ export class InspectMedia implements Endpoint {
         if (IncorrectInstance) return IncorrectInstance;
 
         // get paste name
-        let name = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        let name = url.pathname.slice(1, url.pathname.length);
 
         if (name.startsWith("paste/file/")) name = name.split("paste/file/")[1];
         else if (name.startsWith("api/media/file/"))
             name = name.split("api/media/file/")[1];
         else if (name.startsWith("f/")) name = name.slice(2);
 
-        let FileName = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        let FileName = url.pathname.slice(1, url.pathname.length);
         if (name.split("/").length > 1) FileName = name.split("/").pop()!;
-        name = name.split(`/${FileName}`)[0]; // remove file from paste name
+        name = name.split(`/${FileName}`)[0].toLowerCase(); // remove file from paste name
 
         // check file type
         const Mime = mime.contentType(FileName) || "";
-        const FileType = Mime.includes("image") ? "image" : "binary";
+        const FileType = Mime.includes("image")
+            ? "image"
+            : Mime.includes("audio")
+              ? "audio"
+              : "binary";
 
         // get paste
         const paste = await db.GetPasteFromURL(name, true);
         if (!paste || paste.HostServer) return new _404Page().request(request);
-
-        // if request.headers.Accept does not include "text/html", just return the file!
-        // (this means it was sent from an img element or similar)
-        if (request.headers.get("Sec-Fetch-Dest") === "image")
-            return new GetFile().request(request, server);
 
         // get association
         const Association = await GetAssociation(request, null);
@@ -364,245 +363,276 @@ export class InspectMedia implements Endpoint {
         if (!File[0] || !File[2]) return new _404Page().request(request);
 
         // render
-        return new Response(
-            Renderer.Render(
-                <>
-                    <TopNav breadcrumbs={["f", name, FileName]} margin={false} />
+        if (request.headers.get("Sec-Fetch-Dest") === "document")
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <TopNav breadcrumbs={["f", name, FileName]} margin={false} />
 
-                    <div className="flex flex-column g-8">
-                        <div
-                            className="card secondary flex justify-center"
-                            style={{
-                                padding: "calc(var(--u-12) * 4) var(--u-12)",
-                            }}
-                        >
-                            <h1 class={"no-margin"}>{name}</h1>
-                        </div>
+                        <div className="flex flex-column g-8">
+                            <div
+                                className="card secondary flex justify-center"
+                                style={{
+                                    padding: "calc(var(--u-12) * 4) var(--u-12)",
+                                }}
+                            >
+                                <h1 class={"no-margin"}>{name}</h1>
+                            </div>
 
-                        <main class={"small flex flex-column g-4"}>
-                            <ReposNav name={name} current="Media" />
+                            <main class={"small flex flex-column g-4"}>
+                                <ReposNav name={name} current="Media" />
 
-                            <div className="flex flex-column g-4">
-                                <div className="card border round secondary flex mobile\:flex-column justify-center align-center g-4">
-                                    <a
-                                        href={`/paste/media/${name}`}
-                                        class={"button border round full"}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 24 24"
-                                            width="16"
-                                            height="16"
-                                            aria-label={"Picture Symbol"}
-                                        >
-                                            <path d="M21.75 21.5H2.25A1.75 1.75 0 0 1 .5 19.75V4.25c0-.966.784-1.75 1.75-1.75h19.5c.966 0 1.75.784 1.75 1.75v15.5a1.75 1.75 0 0 1-1.75 1.75ZM2.25 4a.25.25 0 0 0-.25.25v15.5c0 .138.112.25.25.25h3.178L14 10.977a1.749 1.749 0 0 1 2.506-.032L22 16.44V4.25a.25.25 0 0 0-.25-.25ZM22 19.75v-1.19l-6.555-6.554a.248.248 0 0 0-.18-.073.247.247 0 0 0-.178.077L7.497 20H21.75a.25.25 0 0 0 .25-.25ZM10.5 9.25a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0Zm-1.5 0a1.75 1.75 0 1 0-3.501.001A1.75 1.75 0 0 0 9 9.25Z"></path>
-                                        </svg>
-                                        More Media
-                                    </a>
-
-                                    {(EditMode && (
+                                <div className="flex flex-column g-4">
+                                    <div className="card border round secondary flex mobile\:flex-column justify-center align-center g-4">
                                         <a
-                                            href={"?"}
+                                            href={`/paste/media/${name}`}
                                             class={"button border round full"}
                                         >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="18"
-                                                height="18"
-                                                aria-label={"X Symbol"}
-                                            >
-                                                <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
-                                            </svg>
-                                            Stop Editing
-                                        </a>
-                                    )) || (
-                                        <a
-                                            href={"?edit=true"}
-                                            class={"button border round full"}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
+                                                viewBox="0 0 24 24"
                                                 width="16"
                                                 height="16"
-                                                aria-label={"Pencil Symbol"}
+                                                aria-label={"Picture Symbol"}
                                             >
-                                                <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                                <path d="M21.75 21.5H2.25A1.75 1.75 0 0 1 .5 19.75V4.25c0-.966.784-1.75 1.75-1.75h19.5c.966 0 1.75.784 1.75 1.75v15.5a1.75 1.75 0 0 1-1.75 1.75ZM2.25 4a.25.25 0 0 0-.25.25v15.5c0 .138.112.25.25.25h3.178L14 10.977a1.749 1.749 0 0 1 2.506-.032L22 16.44V4.25a.25.25 0 0 0-.25-.25ZM22 19.75v-1.19l-6.555-6.554a.248.248 0 0 0-.18-.073.247.247 0 0 0-.178.077L7.497 20H21.75a.25.25 0 0 0 .25-.25ZM10.5 9.25a3.25 3.25 0 1 1-6.5 0 3.25 3.25 0 0 1 6.5 0Zm-1.5 0a1.75 1.75 0 1 0-3.501.001A1.75 1.75 0 0 0 9 9.25Z"></path>
                                             </svg>
-                                            Edit
+                                            More Media
                                         </a>
-                                    )}
-                                </div>
 
-                                {/* edit mode stuff */}
-                                {!url.searchParams.get("EditPassword") &&
-                                    EditMode && (
-                                        <CardWithHeader
-                                            round={true}
-                                            border={true}
-                                            header={<b>Enter Edit Mode</b>}
-                                        >
-                                            <div className="flex justify-center">
-                                                <form
-                                                    class={
-                                                        "flex g-4 justify-center flex-wrap"
-                                                    }
+                                        {(EditMode && (
+                                            <a
+                                                href={"?"}
+                                                class={"button border round full"}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="18"
+                                                    height="18"
+                                                    aria-label={"X Symbol"}
                                                 >
-                                                    <input
-                                                        class={"round mobile:max"}
-                                                        type="text"
-                                                        placeholder={"Edit code"}
-                                                        maxLength={
-                                                            BundlesDB.MaxPasswordLength
-                                                        }
-                                                        minLength={
-                                                            BundlesDB.MinPasswordLength
-                                                        }
-                                                        name={"EditPassword"}
-                                                        id={"EditPassword"}
-                                                        required
-                                                    />
+                                                    <path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
+                                                </svg>
+                                                Stop Editing
+                                            </a>
+                                        )) || (
+                                            <a
+                                                href={"?edit=true"}
+                                                class={"button border round full"}
+                                            >
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 16 16"
+                                                    width="16"
+                                                    height="16"
+                                                    aria-label={"Pencil Symbol"}
+                                                >
+                                                    <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                                </svg>
+                                                Edit
+                                            </a>
+                                        )}
+                                    </div>
 
-                                                    <input
-                                                        type="hidden"
-                                                        name="edit"
-                                                        value={"true"}
-                                                        required
-                                                    />
-
-                                                    <button
+                                    {/* edit mode stuff */}
+                                    {!url.searchParams.get("EditPassword") &&
+                                        EditMode && (
+                                            <CardWithHeader
+                                                round={true}
+                                                border={true}
+                                                header={<b>Enter Edit Mode</b>}
+                                            >
+                                                <div className="flex justify-center">
+                                                    <form
                                                         class={
-                                                            "round green mobile:max"
+                                                            "flex g-4 justify-center flex-wrap"
                                                         }
                                                     >
-                                                        Continue
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </CardWithHeader>
-                                    )}
+                                                        <input
+                                                            class={
+                                                                "round mobile:max"
+                                                            }
+                                                            type="text"
+                                                            placeholder={"Edit code"}
+                                                            maxLength={
+                                                                BundlesDB.MaxPasswordLength
+                                                            }
+                                                            minLength={
+                                                                BundlesDB.MinPasswordLength
+                                                            }
+                                                            name={"EditPassword"}
+                                                            id={"EditPassword"}
+                                                            required
+                                                        />
 
-                                {url.searchParams.get("EditPassword") &&
-                                    EditMode && (
+                                                        <input
+                                                            type="hidden"
+                                                            name="edit"
+                                                            value={"true"}
+                                                            required
+                                                        />
+
+                                                        <button
+                                                            class={
+                                                                "round green mobile:max"
+                                                            }
+                                                        >
+                                                            Continue
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </CardWithHeader>
+                                        )}
+
+                                    {url.searchParams.get("EditPassword") &&
+                                        EditMode && (
+                                            <CardWithHeader
+                                                round={true}
+                                                border={true}
+                                                header={<b>Actions</b>}
+                                            >
+                                                <div className="flex flex-wrap g-4">
+                                                    <form
+                                                        action="/api/media/delete"
+                                                        encType={
+                                                            "multipart/form-data"
+                                                        }
+                                                        method={"POST"}
+                                                    >
+                                                        <input
+                                                            type="hidden"
+                                                            name="CustomURL"
+                                                            value={paste.CustomURL}
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="EditPassword"
+                                                            value={
+                                                                url.searchParams.get(
+                                                                    "EditPassword"
+                                                                ) || ""
+                                                            }
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="File"
+                                                            value={FileName}
+                                                            required
+                                                        />
+
+                                                        <button className="round red">
+                                                            Delete File
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </CardWithHeader>
+                                        )}
+
+                                    {/* normal stuff */}
+                                    {(FileType === "image" && (
                                         <CardWithHeader
                                             round={true}
                                             border={true}
-                                            header={<b>Actions</b>}
+                                            header={<b>Preview</b>}
                                         >
-                                            <div className="flex flex-wrap g-4">
-                                                <form
-                                                    action="/api/media/delete"
-                                                    encType={"multipart/form-data"}
-                                                    method={"POST"}
-                                                >
-                                                    <input
-                                                        type="hidden"
-                                                        name="CustomURL"
-                                                        value={paste.CustomURL}
-                                                        required
-                                                    />
-
-                                                    <input
-                                                        type="hidden"
-                                                        name="EditPassword"
-                                                        value={
-                                                            url.searchParams.get(
-                                                                "EditPassword"
-                                                            ) || ""
-                                                        }
-                                                        required
-                                                    />
-
-                                                    <input
-                                                        type="hidden"
-                                                        name="File"
-                                                        value={FileName}
-                                                        required
-                                                    />
-
-                                                    <button className="round red">
-                                                        Delete File
-                                                    </button>
-                                                </form>
+                                            <div className="flex justify-center">
+                                                <img
+                                                    src={`/api/media/file/${name}/${FileName}`}
+                                                    alt={FileName}
+                                                    style={{
+                                                        width: "auto",
+                                                        height: "auto",
+                                                        maxWidth: "100%",
+                                                    }}
+                                                />
                                             </div>
                                         </CardWithHeader>
-                                    )}
+                                    )) ||
+                                        (FileType === "audio" && (
+                                            <CardWithHeader
+                                                round={true}
+                                                border={true}
+                                                header={<b>Preview</b>}
+                                            >
+                                                <div className="flex justify-center">
+                                                    <audio
+                                                        src={`/api/media/file/${name}/${FileName}`}
+                                                        alt={FileName}
+                                                        controls={true}
+                                                        style={{
+                                                            width: "auto",
+                                                            height: "auto",
+                                                            maxWidth: "100%",
+                                                        }}
+                                                    />
+                                                </div>
+                                            </CardWithHeader>
+                                        ))}
 
-                                {/* normal stuff */}
-                                {FileType === "image" && (
                                     <CardWithHeader
                                         round={true}
                                         border={true}
-                                        header={<b>Preview</b>}
+                                        header={<b>Information</b>}
                                     >
-                                        <div className="flex justify-center">
-                                            <img
-                                                src={`/api/media/file/${name}/${FileName}`}
-                                                alt={FileName}
-                                                style={{
-                                                    width: "auto",
-                                                    height: "auto",
-                                                    maxWidth: "100%",
-                                                }}
-                                            />
-                                        </div>
+                                        <ul style={{ margin: 0 }}>
+                                            <li>
+                                                <b>File Size</b>: {File[2].size}{" "}
+                                                bytes
+                                            </li>
+
+                                            <li>
+                                                <b>File Name</b>: {FileName}
+                                            </li>
+
+                                            <li>
+                                                <b>Link</b>:{" "}
+                                                <a
+                                                    href={url.href.replace(
+                                                        "http:",
+                                                        "https:"
+                                                    )}
+                                                >
+                                                    {url.href.replace(
+                                                        "http:",
+                                                        "https:"
+                                                    )}
+                                                </a>
+                                            </li>
+
+                                            <li>
+                                                <b>Tags</b>: N/A
+                                            </li>
+                                        </ul>
                                     </CardWithHeader>
-                                )}
+                                </div>
+                            </main>
+                        </div>
 
-                                <CardWithHeader
-                                    round={true}
-                                    border={true}
-                                    header={<b>Information</b>}
-                                >
-                                    <ul style={{ margin: 0 }}>
-                                        <li>
-                                            <b>File Size</b>: {File[2].size} bytes
-                                        </li>
+                        {/* curiosity */}
+                        <Curiosity Association={Association} />
+                    </>,
+                    <>
+                        <title>
+                            {FileName} - {BundlesDB.config.name}
+                        </title>
 
-                                        <li>
-                                            <b>File Name</b>: {FileName}
-                                        </li>
-
-                                        <li>
-                                            <b>Link</b>:{" "}
-                                            <a
-                                                href={url.href.replace(
-                                                    "http:",
-                                                    "https:"
-                                                )}
-                                            >
-                                                {url.href.replace("http:", "https:")}
-                                            </a>
-                                        </li>
-
-                                        <li>
-                                            <b>Tags</b>: N/A
-                                        </li>
-                                    </ul>
-                                </CardWithHeader>
-                            </div>
-                        </main>
-                    </div>
-
-                    {/* curiosity */}
-                    <Curiosity Association={Association} />
-                </>,
-                <>
-                    <title>
-                        {FileName} - {BundlesDB.config.name}
-                    </title>
-
-                    <link rel="icon" href="/favicon" />
-                </>
-            ),
-            {
-                headers: {
-                    ...PageHeaders,
-                    "Content-Type": "text/html",
-                },
-            }
-        );
+                        <link rel="icon" href="/favicon" />
+                    </>
+                ),
+                {
+                    headers: {
+                        ...PageHeaders,
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        // just return file
+        else return new GetFile().request(request, server);
     }
 }
 
@@ -624,20 +654,21 @@ export class GetFile implements Endpoint {
         // don't check if media is disabled, as files should still be viewable even with media disabled!
 
         // get owner name and file name
-        let Owner = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        let Owner = url.pathname.slice(1, url.pathname.length);
 
         if (Owner.startsWith("api/media/file/"))
             Owner = Owner.split("api/media/file/")[1];
         else if (Owner.startsWith("f/")) Owner = Owner.split("f/")[1];
 
-        let File = url.pathname.slice(1, url.pathname.length).toLowerCase();
+        let File = url.pathname.slice(1, url.pathname.length);
         if (Owner.split("/").length > 1) File = Owner.split("/").pop()!;
-        Owner = Owner.split(`/${File}`)[0]; // remove file from paste name
+        Owner = Owner.split(`/${File}`)[0].toLowerCase(); // remove file from paste name
 
         if (!Owner || !File) return new _404Page().request(request);
 
         // get file
         const file = await BundlesDB.Media.GetFile(Owner, File);
+        console.log(Owner, File);
         if (!file[0] && !file[2]) return new _404Page().request(request);
 
         // return

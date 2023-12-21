@@ -262,6 +262,16 @@ export function ParseMarkdownSync(
                 result = `<span class="${attributes.join(" ")}">`;
             // id block
             else if (_class === "id") result = `<span id="${attributes[0]}">`;
+            // music block
+            else if (_class === "music")
+                result = `<audio src="${attributes[0]}" loop="${attributes[1]}" autoplay="${attributes[2]}" controls="${attributes[3]}"></audio>`;
+            // html/chtml block
+            else if (_class === "html") {
+                const tag = attributes[0] || "span";
+                attributes.shift();
+
+                result = `<${tag} ${attributes.join(" ")}>`;
+            } else if (_class === "chtml") result = `</${attributes[0] || "span"}>`;
             // include block
             else if (_class === "include" && attributes[0] !== CurrentPaste)
                 // set temp result
@@ -270,6 +280,12 @@ export function ParseMarkdownSync(
             // return
             return result;
         }
+    );
+
+    // text color thing
+    content = content.replaceAll(
+        /\%(?<COLOR>.*?)\%(?!>)\s*(?<CONTENT>.*?)\s*(\%\%)/gm,
+        '<span style="color: $<COLOR>;">$<CONTENT></span>'
     );
 
     // admonitions
