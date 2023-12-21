@@ -23,6 +23,8 @@ import type { Config } from "../..";
 import BaseParser, { TOML } from "./helpers/BaseParser";
 import punycode from "node:punycode";
 
+import translations from "./objects/translations.json";
+
 /**
  * @export
  * @class BundlesDB
@@ -608,10 +610,9 @@ export default class BundlesDB {
                     record.Metadata.Owner = record.CustomURL;
 
                 // fill paste type
-                if (record.Metadata!.PasteType === undefined)
-                    if (record.Content.startsWith("_builder"))
-                        record.Metadata!.PasteType = "builder";
-                    else record.Metadata!.PasteType = "normal";
+                if (record.Content.startsWith("_builder:"))
+                    record.Metadata!.PasteType = "builder";
+                else record.Metadata!.PasteType = "normal";
 
                 // fill front matter
                 if (record.Metadata!.PasteType === "normal") {
@@ -850,12 +851,13 @@ export default class BundlesDB {
                     use: "Query",
                 })
             )
-                return [false, "Content must be unique!", PasteInfo];
+                return [false, translations.English.error_unique_content, PasteInfo];
 
         // encrypt (if needed)
         if (PasteInfo.ViewPassword) {
             const result = Encrypt(PasteInfo.Content.split("_metadata:")[0]);
-            if (!result) return [false, "Encryption error!", PasteInfo];
+            if (!result)
+                return [false, translations.English.error_encryption, PasteInfo];
 
             PasteInfo.Content = result[0];
 
@@ -1057,7 +1059,7 @@ export default class BundlesDB {
         Bun.gc(true);
 
         // return
-        return [true, "Paste created!", PasteInfo];
+        return [true, translations.English.paste_created, PasteInfo];
     }
 
     /**
@@ -1103,7 +1105,12 @@ export default class BundlesDB {
             );
 
             // check if promise rejected
-            if (isBad) return [false, "Connection failed", NewPasteInfo];
+            if (isBad)
+                return [
+                    false,
+                    translations.English.error_database_connection,
+                    NewPasteInfo,
+                ];
 
             // add host back to custom url
             NewPasteInfo.CustomURL = `${NewPasteInfo.CustomURL}:${server}`;
@@ -1125,11 +1132,31 @@ export default class BundlesDB {
         PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
         NewPasteInfo.CustomURL = punycode.toASCII(NewPasteInfo.CustomURL);
 
+        // make sure content is unique if config app.enable_claim is true (prevent CustomURL squatting)
+        if (BundlesDB.config.app && BundlesDB.config.app.enable_claim === true)
+            if (
+                await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                    // @ts-ignore
+                    db: this.db,
+                    query: 'SELECT * FROM "Pastes" WHERE "Content" = ?',
+                    params: [NewPasteInfo.Content],
+                    get: true,
+                    use: "Query",
+                })
+            )
+                return [
+                    false,
+                    translations.English.error_unique_content,
+                    NewPasteInfo,
+                ];
+
         // we're not allowing users to change ViewPasswords currently
 
         // make sure a paste exists
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
-        if (!paste) return [false, "This paste does not exist!", NewPasteInfo];
+
+        if (!paste)
+            return [false, translations.English.error_paste_not_found, NewPasteInfo];
 
         // hash passwords
 
@@ -1187,15 +1214,15 @@ export default class BundlesDB {
             // also accept admin password
             PasteInfo.EditPassword !== CreateHash(BundlesDB.config.admin)
         )
-            return [false, "Invalid password", NewPasteInfo];
+            return [
+                false,
+                translations.English.error_invalid_password,
+                NewPasteInfo,
+            ];
 
         // make sure paste isn't locked
         if (paste.Metadata && paste.Metadata.Locked === true && Force === false)
-            return [
-                false,
-                "This paste has been locked by a server administrator.",
-                NewPasteInfo,
-            ];
+            return [false, translations.English.error_locked, NewPasteInfo];
 
         // if the admin password was used, log an "access_admin" log
         if (
@@ -1262,7 +1289,10 @@ export default class BundlesDB {
             // using NewPasteInfo for all of these values because PasteInfo doesn't actually
             // really matter for this, as the content is only defined in NewPasteInfo
             const result = Encrypt(NewPasteInfo.Content.split("_metadata:")[0]);
-            if (!result) return [false, "Encryption error!", NewPasteInfo];
+
+            if (!result)
+                return [false, translations.English.error_encryption, NewPasteInfo];
+
             NewPasteInfo.Content = result[0];
 
             // update encryption
@@ -1324,7 +1354,7 @@ export default class BundlesDB {
             });
 
         // return
-        return [true, "Paste updated!", NewPasteInfo];
+        return [true, translations.English.paste_updated, NewPasteInfo];
     }
 
     /**
@@ -1339,7 +1369,8 @@ export default class BundlesDB {
         PasteInfo: Partial<Paste>,
         password: string
     ): Promise<[boolean, string, Partial<Paste>]> {
-        if (!PasteInfo.CustomURL) return [false, "Missing CustomURL", PasteInfo];
+        if (!PasteInfo.CustomURL)
+            return [false, translations.English.error_invalid_body, PasteInfo];
 
         // check if paste is from another server
         const server = PasteInfo.CustomURL.split(":")[1];
@@ -1361,7 +1392,12 @@ export default class BundlesDB {
             );
 
             // check if promise rejected
-            if (isBad) return [false, "Connection failed", PasteInfo];
+            if (isBad)
+                return [
+                    false,
+                    translations.English.error_database_connection,
+                    PasteInfo,
+                ];
 
             // return
             const err = this.GetErrorFromResponse(record);
@@ -1382,19 +1418,12 @@ export default class BundlesDB {
         const paste = await this.GetPasteFromURL(PasteInfo.CustomURL);
 
         // make sure a paste exists
-        if (!paste) return [false, "This paste does not exist!", PasteInfo];
+        if (!paste)
+            return [false, translations.English.error_paste_not_found, PasteInfo];
 
         // make sure paste isn't locked
         if (paste.Metadata && paste.Metadata.Locked === true)
-            return [
-                false,
-                "This paste has been locked by a server administrator.",
-                PasteInfo,
-            ];
-
-        // make sure paste is not "v" (version paste)
-        if (paste.CustomURL === "v")
-            return [false, "Cannot delete version paste!", PasteInfo];
+            return [false, translations.English.error_locked, PasteInfo];
 
         // validate password
         // ...password can be either the paste EditPassword or the server admin password
@@ -1404,7 +1433,7 @@ export default class BundlesDB {
                 CreateHash(password) !== paste.EditPassword) ||
             paste.CustomURL === "v"
         )
-            return [false, "Invalid password!", PasteInfo];
+            return [false, translations.English.error_invalid_password, PasteInfo];
 
         // if the admin password was used, log an "access_admin" log
         if (
@@ -1477,7 +1506,7 @@ export default class BundlesDB {
         }
 
         // return
-        return [true, "Paste deleted!", PasteInfo];
+        return [true, translations.English.paste_deleted, PasteInfo];
     }
 
     /**
@@ -1746,7 +1775,7 @@ export default class BundlesDB {
             });
 
             // create paste
-            outputs.push([true, "Paste created!"]);
+            outputs.push([true, translations.English.paste_created]);
         }
 
         // return
@@ -1883,7 +1912,7 @@ export default class BundlesDB {
     ): Promise<[boolean, string, any?]> {
         // verify password
         if (password !== (await BundlesDB.GetConfig())?.admin)
-            return [false, "Invalid password"];
+            return [false, translations.English.error_invalid_password];
 
         // ...
         if (get) all = false;
@@ -1922,11 +1951,11 @@ export default class BundlesDB {
     ): Promise<[boolean, string, Paste[]]> {
         // make sure comments are enabled globally
         if (!BundlesDB.config.app || BundlesDB.config.app.enable_comments !== true)
-            return [false, "Comments disabled globally", []];
+            return [false, translations.English.error_configuration, []];
 
         // make sure paste exists
         const result = (await this.GetPasteFromURL(url)) as Paste;
-        if (!result) return [false, "Paste does not exist", []];
+        if (!result) return [false, translations.English.error_paste_not_found, []];
 
         // check if paste is from another server
         if (result.HostServer) {
@@ -1942,7 +1971,8 @@ export default class BundlesDB {
             );
 
             // check if promise rejected
-            if (isBad) return [false, "Connection failed", []];
+            if (isBad)
+                return [false, translations.English.error_database_connection, []];
 
             // return
             const err = this.GetErrorFromResponse(record);
@@ -1951,7 +1981,7 @@ export default class BundlesDB {
             if (body) return body;
             else if (err) return [false, err, []];
 
-            return [false, "Unknown", []];
+            return [false, translations.English.unknown, []];
         }
 
         // return false if page does not allow comments
@@ -1960,7 +1990,7 @@ export default class BundlesDB {
             result.Metadata.Comments &&
             result.Metadata.Comments.Enabled === false
         )
-            return [false, "Paste has comments disabled", []];
+            return [false, translations.English.error_paste_settings, []];
 
         // get comments
         const comments: Paste[] = await (BundlesDB.config.pg
@@ -2062,7 +2092,7 @@ export default class BundlesDB {
     ): Promise<[boolean, string, Revision?]> {
         // make sure paste exists
         const paste = await this.GetPasteFromURL(PasteURL, true);
-        if (!paste) return [false, "Paste does not exist"];
+        if (!paste) return [false, translations.English.error_paste_not_found];
 
         // handle "latest" revision
         if (Number.isNaN(time))
@@ -2082,8 +2112,8 @@ export default class BundlesDB {
         });
 
         // return
-        if (!revision) return [false, "Revision does not exist"];
-        return [true, "Found revision", revision];
+        if (!revision) return [false, translations.English.error_revision_not_found];
+        return [true, translations.English.revision_found, revision];
     }
 
     /**
@@ -2098,7 +2128,7 @@ export default class BundlesDB {
     ): Promise<[boolean, string, Revision[]]> {
         // make sure paste exists
         const paste = await this.GetPasteFromURL(PasteURL, true);
-        if (!paste) return [false, "Paste does not exist", []];
+        if (!paste) return [false, translations.English.error_paste_not_found, []];
 
         // get revisions
         const revisions = await (BundlesDB.config.pg
@@ -2114,7 +2144,7 @@ export default class BundlesDB {
         });
 
         // return
-        return [true, "Found revisions", revisions];
+        return [true, translations.English.revision_found, revisions];
     }
 
     /**
@@ -2129,11 +2159,15 @@ export default class BundlesDB {
     ): Promise<[boolean, string, Revision]> {
         // make sure paste exists
         const paste = await this.GetPasteFromURL(props.CustomURL, true);
-        if (!paste) return [false, "Paste does not exist", props];
+
+        if (!paste)
+            return [false, translations.English.error_paste_not_found, props];
 
         // make sure revision doesn't already exist
         const revision = await this.GetRevision(props.CustomURL, props.EditDate);
-        if (revision[0]) return [false, "Revision already exists at time", props];
+
+        if (revision[0])
+            return [false, translations.English.error_unique_content, props];
 
         // get all paste revisions, if there are already 5... delete one!
         const AllRevisions = await this.GetAllPasteRevisions(props.CustomURL);
@@ -2161,6 +2195,6 @@ export default class BundlesDB {
         });
 
         // return
-        return [true, "Revision created", props];
+        return [true, translations.English.revision_created, props];
     }
 }

@@ -1,9 +1,10 @@
 import { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
+import MessageDisplays from "./components/site/MessageDisplays";
 import DecryptionForm from "./components/form/DecryptionForm";
-import { Modal } from "fusion";
 import Footer from "./components/site/Footer";
+import { Modal } from "fusion";
 
 import { DecryptPaste, db, PageHeaders, Session, GetAssociation } from "./api/API";
 import type { Paste } from "../db/objects/Paste";
@@ -206,28 +207,7 @@ export default class Home implements Endpoint {
                             height: "calc(100% - 1rem)",
                         }}
                     >
-                        {(search.get("err") && (
-                            <div
-                                class={"mdnote note-error"}
-                                style={{
-                                    marginBottom: "0.5rem",
-                                }}
-                            >
-                                <b class={"mdnote-title"}>Application Error</b>
-                                <p>{decodeURIComponent(search.get("err")!)}</p>
-                            </div>
-                        )) ||
-                            (search.get("msg") && (
-                                <div
-                                    class={"mdnote note-note"}
-                                    style={{
-                                        marginBottom: "0.5rem",
-                                    }}
-                                >
-                                    <b class={"mdnote-title"}>Application Message</b>
-                                    <p>{decodeURIComponent(search.get("msg")!)}</p>
-                                </div>
-                            ))}
+                        <MessageDisplays search={search} />
 
                         {paste && paste.ViewPassword && (
                             <DecryptionForm

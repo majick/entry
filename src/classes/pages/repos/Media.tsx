@@ -20,6 +20,7 @@ import { ReposNav } from "./Repos";
 
 import { Card, CardWithHeader } from "fusion";
 
+import translations from "../../db/objects/translations.json";
 import mime from "mime-types";
 
 /**
@@ -731,7 +732,7 @@ export class UploadFile implements Endpoint {
             CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
-            return new Response("Invalid password", {
+            return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot upload file: Invalid password!",
@@ -803,7 +804,7 @@ export class DeleteFile implements Endpoint {
             CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
-            return new Response("Invalid password", {
+            return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot delete file: Invalid password!",

@@ -2,6 +2,7 @@ import { BunFile } from "bun";
 import path from "node:path";
 import fs from "node:fs";
 
+import translations from "./objects/translations.json";
 import BundlesDB from "./BundlesDB";
 
 /**
@@ -67,17 +68,19 @@ export default class Media {
         );
 
         // return false if OwnerFolder doesn't exist
-        if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
+        if (!fs.existsSync(OwnerFolder))
+            return [false, translations.English.error_no_files];
 
         // make sure file exists
         const FilePath = path.resolve(OwnerFolder, name);
-        if (!fs.existsSync(FilePath)) return [false, "File does not exist!"];
+        if (!fs.existsSync(FilePath))
+            return [false, translations.English.error_file_not_found];
 
         // get file
         const file = Bun.file(FilePath);
 
         // return
-        return [true, "File exists", file];
+        return [true, translations.English.file_exists, file];
     }
 
     /**
@@ -96,7 +99,7 @@ export default class Media {
             !BundlesDB.config.app.media ||
             BundlesDB.config.app.media.enabled === false
         )
-            return [false, "Media disabled"];
+            return [false, translations.English.error_configuration];
 
         // ...
         const OwnerFolder = path.resolve(
@@ -110,19 +113,20 @@ export default class Media {
 
         // check size
         if (file.size > (BundlesDB.config.app.media.max_size || 52428800))
-            return [false, "File too large!"];
+            return [false, translations.English.error_too_large];
 
         // ...
         const FilePath = path.resolve(OwnerFolder, file.name.replaceAll(" ", "_"));
 
         // make sure file doesn't already exist
-        if (fs.existsSync(FilePath)) return [false, "File already exists"];
+        if (fs.existsSync(FilePath))
+            return [false, translations.English.error_file_exists];
 
         // upload file
         await Bun.write(FilePath, file);
 
         // return
-        return [true, "File uploaded"];
+        return [true, translations.English.file_created];
     }
 
     /**
@@ -144,7 +148,7 @@ export default class Media {
             !BundlesDB.config.app.media ||
             BundlesDB.config.app.media.enabled === false
         )
-            return [false, "Media disabled"];
+            return [false, translations.English.error_configuration];
 
         // ...
         const OwnerFolder = path.resolve(
@@ -153,17 +157,19 @@ export default class Media {
         );
 
         // return false if OwnerFolder doesn't exist
-        if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
+        if (!fs.existsSync(OwnerFolder))
+            return [false, translations.English.error_no_files];
 
         // make sure file exists
         const FilePath = path.resolve(OwnerFolder, name);
-        if (!fs.existsSync(FilePath)) return [false, "File does not exist!"];
+        if (!fs.existsSync(FilePath))
+            return [false, translations.English.error_file_not_found];
 
         // delete file
         fs.rmSync(FilePath);
 
         // return
-        return [true, "File deleted"];
+        return [true, translations.English.file_deleted];
     }
 
     /**
@@ -181,7 +187,7 @@ export default class Media {
             !BundlesDB.config.app.media ||
             BundlesDB.config.app.media.enabled === false
         )
-            return [false, "Media disabled"];
+            return [false, translations.English.error_configuration];
 
         // ...
         const OwnerFolder = path.resolve(
@@ -190,13 +196,14 @@ export default class Media {
         );
 
         // return false if OwnerFolder doesn't exist
-        if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
+        if (!fs.existsSync(OwnerFolder))
+            return [false, translations.English.error_no_files];
 
         // delete directory
         fs.rmdirSync(OwnerFolder);
 
         // return
-        return [true, "File deleted"];
+        return [true, translations.English.file_deleted];
     }
 
     /**
@@ -214,7 +221,7 @@ export default class Media {
             !BundlesDB.config.app.media ||
             BundlesDB.config.app.media.enabled === false
         )
-            return [false, "Media disabled"];
+            return [false, translations.English.error_configuration];
 
         // ...
         const OwnerFolder = path.resolve(
@@ -223,7 +230,8 @@ export default class Media {
         );
 
         // return false if OwnerFolder doesn't exist
-        if (!fs.existsSync(OwnerFolder)) return [false, "Owner has no files"];
+        if (!fs.existsSync(OwnerFolder))
+            return [false, translations.English.error_no_files];
 
         // get all files
         const files = fs.readdirSync(OwnerFolder);

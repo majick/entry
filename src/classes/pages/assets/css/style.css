@@ -144,7 +144,7 @@
     border: solid 1px transparent;
 }
 
-.builder\:toolbar button:hover {
+.builder\:toolbar button:not(#PageStar):hover {
     background: var(--background-surface1-5a);
     border-color: var(--background-surface2a);
 }

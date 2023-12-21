@@ -1,0 +1,44 @@
+{
+    "English": {
+        "paste_updated": "Paste updated!",
+        "paste_created": "Paste created!",
+        "paste_deleted": "Paste deleted!",
+        "metadata_updated": "Metadata updated!",
+        "url_repossessed": "URL repossessed!",
+
+        "log_updated": "Log updated!",
+        "log_created": "Log created!",
+        "log_deleted": "Log deleted!",
+
+        "file_updated": "File updated!",
+        "file_created": "File created!",
+        "file_deleted": "File deleted!",
+        "file_exists": "File exists!",
+
+        "revision_found": "Found revision",
+        "revision_created": "Created revision!",
+
+        "error_database_connection": "Connection failed",
+        "error_unique_content": "Content must be unique!",
+        "error_encryption": "Encryption error!",
+
+        "error_paste_not_found": "This paste does not exist!",
+        "error_revision_not_found": "This revision does not exist!",
+        "error_log_not_found": "This log does not exist!",
+        "error_file_not_found": "File does not exist!",
+
+        "error_invalid_password": "Invalid password",
+        "error_locked": "This paste has been locked by a server administrator.",
+        "error_invalid_body": "Body inputs invalid, missing 1 or more required parameters!",
+        "error_cannot_claim": "URL cannot be repossessed!",
+
+        "error_configuration": "Server configuration has disabled this function!",
+        "error_paste_settings": "Paste configuration has disabled this function!",
+
+        "error_no_files": "Owner has no files!",
+        "error_too_large": "Upload too large!",
+        "error_file_exists": "A file with this name already exists!",
+
+        "unknown": "unknown"
+    }
+}

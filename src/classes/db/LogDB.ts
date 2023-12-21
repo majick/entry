@@ -11,6 +11,8 @@ import SQL from "./helpers/SQL";
 import LogConnection, { Log } from "./objects/Log";
 import BundlesDB from "./BundlesDB";
 
+import translations from "./objects/translations.json";
+
 /**
  * @export
  * @class LogDB
@@ -118,7 +120,8 @@ export default class LogDB {
 
         // return false so two different users with the exact same user-agent don't end up
         // sharing the same session, one of them just has to try again later
-        if (ExistingLog) return [false, "Log exists", ExistingLog];
+        if (ExistingLog)
+            return [false, translations.English.error_unique_content, ExistingLog];
 
         // create entry
         await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
@@ -131,7 +134,7 @@ export default class LogDB {
         });
 
         // return
-        return [true, "Log created", _log];
+        return [true, translations.English.log_created, _log];
     }
 
     /**
@@ -171,7 +174,7 @@ export default class LogDB {
             use: "Query",
         });
 
-        if (!log) return [false, "Log does not exist"];
+        if (!log) return [false, translations.English.error_log_not_found];
 
         // return
         return [true, id, log];
@@ -203,7 +206,7 @@ export default class LogDB {
         if (LogDB.LogCache[id]) delete LogDB.LogCache[id];
 
         // return
-        return [true, "Log deleted", log[2]];
+        return [true, translations.English.log_deleted, log[2]];
     }
 
     /**
@@ -244,7 +247,7 @@ export default class LogDB {
     public async UpdateLog(id: string, content: string): Promise<[boolean, string]> {
         // make sure log exists
         const log = await this.GetLog(id);
-        if (!log[2]) return [false, "Log does not exist"];
+        if (!log[2]) return [false, translations.English.error_log_not_found];
 
         // delete log
         await (BundlesDB.config.pg && BundlesDB.config.pg.logdb
@@ -257,7 +260,7 @@ export default class LogDB {
         });
 
         // return
-        return [true, "Log updated"];
+        return [true, translations.English.log_updated];
     }
 
     /**
@@ -287,7 +290,7 @@ export default class LogDB {
             });
 
             // create paste
-            outputs.push([true, "Paste created!"]);
+            outputs.push([true, translations.English.log_created]);
         }
 
         // return

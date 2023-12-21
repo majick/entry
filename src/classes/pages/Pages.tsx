@@ -37,11 +37,14 @@ import API, {
 // ...
 import { Node, PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
+import MessageDisplays from "./components/site/MessageDisplays";
+import LoadingModal from "./components/site/modals/Loading";
+import { Card, Modal, StaticCode, Expandable } from "fusion";
 import { ParseMarkdown } from "./components/Markdown";
 import SearchForm from "./components/form/SearchForm";
-import BaseParser from "../db/helpers/BaseParser";
 import { ProfileView, ReposNav } from "./repos/Repos";
-import { Card, Modal } from "fusion";
+import BaseParser from "../db/helpers/BaseParser";
+
 import { ServerConfig } from "../..";
 
 // ...
@@ -765,6 +768,8 @@ export class GetPasteFromURL implements Endpoint {
                                 </p>
                             </div>
                         )}
+
+                        <MessageDisplays search={search} />
 
                         {result.ViewPassword && <DecryptionForm paste={result} />}
 
@@ -1908,38 +1913,7 @@ export class PasteCommentsPage implements Endpoint {
                             </div>
 
                             <div class={"flex flex-column g-4"}>
-                                {(search.get("err") && (
-                                    <div
-                                        class={"mdnote note-error"}
-                                        style={{
-                                            marginBottom: "0.5rem",
-                                        }}
-                                    >
-                                        <b class={"mdnote-title"}>
-                                            Application Error
-                                        </b>
-                                        <p>
-                                            {decodeURIComponent(search.get("err")!)}
-                                        </p>
-                                    </div>
-                                )) ||
-                                    (search.get("msg") && (
-                                        <div
-                                            class={"mdnote note-note"}
-                                            style={{
-                                                marginBottom: "0.5rem",
-                                            }}
-                                        >
-                                            <b class={"mdnote-title"}>
-                                                Application Message
-                                            </b>
-                                            <p>
-                                                {decodeURIComponent(
-                                                    search.get("msg")!
-                                                )}
-                                            </p>
-                                        </div>
-                                    ))}
+                                <MessageDisplays search={search} />
 
                                 {result.Comments === 0 && (
                                     <div
@@ -2875,9 +2849,6 @@ export class Notifications implements Endpoint {
 // ...
 import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
-
-import LoadingModal from "./components/site/modals/Loading";
-import { StaticCode, Expandable } from "fusion";
 
 // default export
 export default {

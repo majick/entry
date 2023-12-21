@@ -605,7 +605,7 @@ export function StarInfoNode(props: {
             <button
                 id={props.node.ID}
                 aria-label={"Paste Options"}
-                class={"tooltip-wrapper visual-active"}
+                class={"round tooltip-wrapper visual-active"}
                 style={{
                     background:
                         props.node.Source !== ""

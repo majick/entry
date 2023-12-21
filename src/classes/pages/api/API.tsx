@@ -31,6 +31,8 @@ import { Config } from "../../..";
 import { ParseMarkdown } from "../components/Markdown";
 import SQL from "../../db/helpers/SQL";
 
+import translations from "../../db/objects/translations.json";
+
 // headers
 export const DefaultHeaders = {
     "Cache-Control":
@@ -186,7 +188,7 @@ export async function GetAssociation(
 ): Promise<[boolean, string]> {
     const config = (await BundlesDB.GetConfig()) as Config;
     if (!config.log || !config.log.events.includes("session"))
-        return [false, "Sessions are disabled"];
+        return [false, translations.English.error_configuration];
 
     // encode SetAssociation with punycode
     if (SetAssociation) SetAssociation = punycode.toASCII(SetAssociation);
@@ -196,7 +198,7 @@ export async function GetAssociation(
     const association = GetCookie(request.headers.get("Cookie") || "", "associated");
 
     // make sure session exists
-    if (!session) return [false, "Session does not exist"];
+    if (!session) return [false, translations.English.error_log_not_found];
     else {
         // try to get session log
         const log = await BundlesDB.Logs.GetLog(session);
@@ -727,9 +729,11 @@ export class EditPaste implements Endpoint {
                 redirect:
                     result[0] === true
                         ? // if successful, redirect to paste
-                          `/${result[2].CustomURL}${
+                          `/${result[2].CustomURL}?msg=${encodeURIComponent(
+                              result[1]
+                          )}${
                               url.searchParams.get("draft") === "true"
-                                  ? "?r=latest"
+                                  ? "&r=latest"
                                   : ""
                           }`
                         : // otherwise, show error message
@@ -1548,7 +1552,7 @@ export class EditMetadata implements Endpoint {
                 !paste.Metadata ||
                 Association[1] !== paste.Metadata!.Owner)
         )
-            return new Response("Invalid password", {
+            return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot edit metadata: Invalid password!",
@@ -1558,7 +1562,7 @@ export class EditMetadata implements Endpoint {
 
         // make sure paste isn't locked... as long EditPassword isn't the edit password!
         if (!admin && paste.Metadata && paste.Metadata.Locked === true)
-            return new Response("Invalid password", {
+            return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
                     Location: "/?err=Cannot edit metadata: Paste is locked",
@@ -1606,7 +1610,11 @@ export class EditMetadata implements Endpoint {
             JSON.stringify({
                 success: true,
                 redirect: "/?msg=Metadata updated!",
-                result: [true, "Metadata updatd!", paste.Metadata],
+                result: [
+                    true,
+                    translations.English.metadata_updated,
+                    paste.Metadata,
+                ],
             }),
             {
                 status: 200,
@@ -1887,7 +1895,7 @@ export class CreateURLClaim implements Endpoint {
                 JSON.stringify({
                     success: false,
                     redirect: "/?err=Claim is disabled",
-                    result: [false, "Claim is disabled"],
+                    result: [false, translations.English.error_configuration],
                 }),
                 {
                     status: 404,
@@ -1922,7 +1930,7 @@ export class CreateURLClaim implements Endpoint {
                 JSON.stringify({
                     success: false,
                     redirect: "/?err=URL cannot be claimed",
-                    result: [false, "URL cannot be claimed"],
+                    result: [false, translations.English.error_cannot_claim],
                 }),
                 {
                     status: 400,
@@ -2017,7 +2025,7 @@ export class CreateURLClaim implements Endpoint {
             JSON.stringify({
                 success: true,
                 redirect: "/?msg=URL repossessed",
-                result: [true, "URL repossessed", Association[1]],
+                result: [true, translations.English.url_repossessed, Association[1]],
             }),
             {
                 status: 200,
