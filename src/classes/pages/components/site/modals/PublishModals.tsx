@@ -12,6 +12,9 @@ import { Modal } from "fusion";
  *     DisablePassword?: boolean;
  *     EnableDrafts?: boolean;
  *     ViewingRevision?: boolean;
+ *     EnablePrivate?: boolean;
+ *     EnableGroups?: boolean;
+ *     EnableExpiry?: boolean;
  *     Endpoints: {
  *         new: string;
  *         edit: string;
@@ -26,6 +29,9 @@ export default function PublishModals(props: {
     DisablePassword?: boolean;
     EnableDrafts?: boolean;
     ViewingRevision?: boolean;
+    EnablePrivate?: boolean;
+    EnableGroups?: boolean;
+    EnableExpiry?: boolean;
     Endpoints: {
         new: string;
         edit: string;
@@ -134,13 +140,6 @@ export default function PublishModals(props: {
 
                             <hr style={{ margin: "0" }} />
 
-                            <ExtraPasteOptions
-                                // configured for builder! idealy, PublishModals would accept these in props as well!
-                                EnablePrivate={false}
-                                EnableGroups={(window as any).EnableGroups}
-                                EnableExpiry={(window as any).EnableExpiry}
-                            />
-
                             <a
                                 href={"javascript:"}
                                 id={"bundles:button.PasteExtras"}
@@ -172,6 +171,13 @@ export default function PublishModals(props: {
                                 Publish
                             </button>
                         </form>
+
+                        <ExtraPasteOptions
+                            // configured for builder! idealy, PublishModals would accept these in props as well!
+                            EnablePrivate={props.EnablePrivate}
+                            EnableGroups={props.EnableGroups}
+                            EnableExpiry={props.EnableExpiry}
+                        />
                     </>
                 )) || (
                     <>

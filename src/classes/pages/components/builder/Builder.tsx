@@ -473,6 +473,9 @@ function RenderPage() {
 
             <PublishModals
                 EditingPaste={EditingPaste || undefined}
+                EnablePrivate={false}
+                EnableGroups={(window as any).EnableGroups}
+                EnableExpiry={(window as any).EnableExpiry}
                 DisablePassword={(window as any).DisablePasswordField}
                 EnableDrafts={(window as any).EnableDrafts}
                 ViewingRevision={(window as any).ViewingRevision}

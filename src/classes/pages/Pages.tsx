@@ -2867,6 +2867,16 @@ export class Writer implements Endpoint {
             }
         }
 
+        // check PrivateSource value
+        if (
+            paste &&
+            paste.Metadata &&
+            paste.Metadata.PrivateSource === true &&
+            paste.Metadata.Owner &&
+            paste.Metadata.Owner !== Association[1]
+        )
+            return new _404Page().request(request);
+
         // get all pastes by current user
         const AllPastes =
             Association[0] === true
@@ -2880,7 +2890,10 @@ export class Writer implements Endpoint {
                     <SidebarLayout
                         sidebar={
                             <>
-                                <TopNav margin={false}>
+                                <TopNav
+                                    breadcrumbs={["paste", "writer"]}
+                                    margin={false}
+                                >
                                     <Button
                                         round={true}
                                         class="modal:bundles\:button.PublishPaste green-cta"
@@ -3036,6 +3049,18 @@ export class Writer implements Endpoint {
                         EnableDrafts={
                             BundlesDB.config.app &&
                             BundlesDB.config.app.enable_versioning === true
+                        }
+                        EnablePrivate={
+                            BundlesDB.config.app &&
+                            BundlesDB.config.app.enable_private_pastes !== false
+                        }
+                        EnableGroups={
+                            BundlesDB.config.app &&
+                            BundlesDB.config.app.enable_groups !== false
+                        }
+                        EnableExpiry={
+                            BundlesDB.config.app &&
+                            BundlesDB.config.app.enable_expiry !== false
                         }
                         ViewingRevision={RevisionNumber !== 0}
                         Endpoints={{
