@@ -5,6 +5,8 @@ import fs from "node:fs";
 import translations from "./objects/translations.json";
 import BundlesDB from "./BundlesDB";
 
+import mime from "mime-types";
+
 /**
  * @export
  * @class Media
@@ -238,5 +240,66 @@ export default class Media {
 
         // return files
         return [true, `${files.length} files`, files];
+    }
+
+    /**
+     * @method EditFile
+     *
+     * @param {string} owner
+     * @param {string} name
+     * @param {string} content
+     * @return {Promise<[boolean, string]>}
+     * @memberof Media
+     */
+    public async EditFile(
+        owner: string,
+        name: string,
+        content: string
+    ): Promise<[boolean, string]> {
+        if (
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
+        )
+            return [false, translations.English.error_configuration];
+
+        // ...
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
+
+        // return false if OwnerFolder doesn't exist
+        if (!fs.existsSync(OwnerFolder))
+            return [false, translations.English.error_no_files];
+
+        // make sure file exists
+        const FilePath = path.resolve(OwnerFolder, name);
+        if (!fs.existsSync(FilePath))
+            return [false, translations.English.error_file_not_found];
+
+        // update file
+        await Bun.write(FilePath, content);
+
+        // return
+        return [true, translations.English.file_updated];
+    }
+
+    /**
+     * @method GetFileType
+     *
+     * @static
+     * @param {string} name
+     * @return {string}
+     * @memberof Media
+     */
+    public static GetFileType(name: string): string {
+        const Mime = mime.contentType(name) || "";
+
+        if (Mime.startsWith("image/")) return "image";
+        else if (Mime.startsWith("audio/")) return "audio";
+        else if (Mime.startsWith("text/")) return "text";
+
+        return "binary";
     }
 }

@@ -66,20 +66,21 @@ You can define a custom [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/
 
 All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded` unless otherwise specified, but the server can convert JSON to `application/x-www-form-urlencoded` if you use `/api/json/{endpoint}` instead.
 
-- `POST /api/new`, Create a new paste, expects FormData with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
-- `POST /api/edit`, Edit an existing paste, expects FormData with the fields: `OldContent, OldURL, EditPassword, Content, NewURL, NewEditPassword`
+- `POST /api/new`, Create a new paste, expects `application/x-www-form-urlencoded` with the fields: `Content, CustomURL, EditPassword, IsEditable, ViewPassword, ExpireOn, GroupName, GroupSubmitPassword`
+- `POST /api/edit`, Edit an existing paste, expects `application/x-www-form-urlencoded` with the fields: `OldContent, OldURL, EditPassword, Content, NewURL, NewEditPassword`
     - Supports `?draft=true` query parameter, saves changes as a new revision instead of publishing
-- `POST /api/delete`, Delete an existing paste, expects FormData with the fields: `CustomURL, EditPassword`
-- `POST /api/decrypt`, Decrypt an encrypted paste, expects FormData with the fields: `ViewPassword, CustomURL`
+- `POST /api/delete`, Delete an existing paste, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword`
+- `POST /api/decrypt`, Decrypt an encrypted paste, expects `application/x-www-form-urlencoded` with the fields: `ViewPassword, CustomURL`
 - `POST /api/markdown`, Render any markdown to HTML using the Bundles renderer (based on [Marked](https://marked.js.org))
-- `POST /api/comments/delete`, Delete a comment from a paste, expects FormData with the fields: `CustomURL, EditPassword, CommentURL`
-- `POST /api/associate`, Associate (Login) as a paste, expects FormData with the fields: `CustomURL, EditPassword`
+- `POST /api/comments/delete`, Delete a comment from a paste, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, CommentURL`
+- `POST /api/associate`, Associate (Login) as a paste, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword`
     - Links posted comments with this paste
-- `POST /api/metadata`, Update paste metadata, expects FormData with the fields: `CustomURL, EditPassword, metadata`
+- `POST /api/metadata`, Update paste metadata, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, metadata`
     - The `metadata` field is JSON stringified, URI encoded and base64 encoded **ON CLIENT**
 - `POST /api/media/upload`, Upload file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(binary)`
 - `POST /api/media/delete`, Delete file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string)`
-- `POST /api/domain`, Update paste custom domain, expects FormData with the fields: `CustomURL, EditPassword, Domain`
+- `POST /api/media/edit`, Edit text file contents, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string), FileContent`
+- `POST /api/domain`, Update paste custom domain, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, Domain`
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
 - `POST /api/claim`, Repossess an unused custom URL, expects form data with the fields: `CustomURL`
     - Also requires a prior paste association!
@@ -104,7 +105,7 @@ type APIResponse = {
 
 #### Admin Endpoints
 
-- `POST /admin/api/delete`, Delete paste, expects FormData with the fields: `AdminPassword, CustomURL`
+- `POST /admin/api/delete`, Delete paste, expects `application/x-www-form-urlencoded` with the fields: `AdminPassword, CustomURL`
 - `POST /admin/api/export`, Get JSON of all pastes in server (decrypted): `AdminPassword`
 - `POST /admin/api/import`, Import pastes JSON: `AdminPassword, pastes` (with `pastes` being the JSON export from `/admin/api/export`) (`multipart/form-data`)
 - `POST /admin/api/import/json`, Import pastes JSON: `AdminPassword, pastes` (`application/json`)

@@ -2020,7 +2020,14 @@ export class CreateURLClaim implements Endpoint {
 }
 
 // ...
-import { GetFile, ListFiles, UploadFile, DeleteFile } from "../repos/Media";
+import {
+    GetFile,
+    ListFiles,
+    UploadFile,
+    DeleteFile,
+    EditFile,
+} from "../repos/Media";
+
 import { contentType } from "mime-types";
 
 // default export
@@ -2058,6 +2065,7 @@ export default {
     ListFiles, // supports cloud routing
     UploadFile, // supports cloud routing
     DeleteFile, // supports cloud routing
+    EditFile, // supports cloud routing
     UpdateCustomDomain, // supports cloud routing
     GetSocialProfile, // supports cloud routing
     CreateURLClaim, // supports cloud routing

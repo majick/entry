@@ -4,14 +4,16 @@
  * @license MIT
  */
 
-import { Endpoint, Renderer } from "honeybee";
+import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
 import { PageHeaders, GetAssociation, VerifyContentType } from "../api/API";
 import Pages, { CheckInstance, db, Curiosity } from "../Pages";
 import { CreateHash } from "../../db/helpers/Hash";
 import { contentType } from "mime-types";
+
 import BundlesDB from "../../db/BundlesDB";
+import Media from "../../db/MediaDB";
 
 // import components
 import TopNav from "../components/site/TopNav";
@@ -136,13 +138,8 @@ export class ViewPasteMedia implements Endpoint {
                                         {Files[2] &&
                                             Files[2].map((file) => {
                                                 // check file type
-                                                const Mime =
-                                                    mime.contentType(file) || "";
-                                                const FileType = Mime.includes(
-                                                    "image"
-                                                )
-                                                    ? "image"
-                                                    : "binary";
+                                                const FileType =
+                                                    Media.GetFileType(file);
 
                                                 // return
                                                 return (
@@ -264,7 +261,9 @@ export class ViewPasteMedia implements Endpoint {
                                             BundlesDB.config.app!.media!.max_size ||
                                             0
                                         }
-                                        accept={"image/*,font/*,text/*,audio/*"}
+                                        accept={
+                                            "image/*,text/*,audio/*,.ttf,.woff2,.css,.js,.ts,.html"
+                                        }
                                         required
                                     />
 
@@ -340,12 +339,7 @@ export class InspectMedia implements Endpoint {
         name = name.split(`/${FileName}`)[0].toLowerCase(); // remove file from paste name
 
         // check file type
-        const Mime = mime.contentType(FileName) || "";
-        const FileType = Mime.includes("image")
-            ? "image"
-            : Mime.includes("audio")
-              ? "audio"
-              : "binary";
+        const FileType = Media.GetFileType(FileName);
 
         // get paste
         const paste = await db.GetPasteFromURL(name, true);
@@ -572,7 +566,82 @@ export class InspectMedia implements Endpoint {
                                                     />
                                                 </div>
                                             </CardWithHeader>
-                                        ))}
+                                        )) ||
+                                        (FileType === "text" &&
+                                            url.searchParams.get("EditPassword") &&
+                                            EditMode && (
+                                                <CardWithHeader
+                                                    round={true}
+                                                    border={true}
+                                                    header={<b>Edit File</b>}
+                                                >
+                                                    <form
+                                                        className="flex flex-column g-4"
+                                                        action={"/api/media/edit"}
+                                                        method={"POST"}
+                                                    >
+                                                        <input
+                                                            type="hidden"
+                                                            name="CustomURL"
+                                                            value={paste.CustomURL}
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="EditPassword"
+                                                            value={
+                                                                url.searchParams.get(
+                                                                    "EditPassword"
+                                                                ) || ""
+                                                            }
+                                                            required
+                                                        />
+
+                                                        <input
+                                                            type="hidden"
+                                                            name="File"
+                                                            value={FileName}
+                                                            required
+                                                        />
+
+                                                        <textarea
+                                                            id={"FileContent"}
+                                                            name={"FileContent"}
+                                                            class={"round"}
+                                                            value={await File[2].text()}
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "500px",
+                                                            }}
+                                                        />
+
+                                                        <button
+                                                            class={"green-cta round"}
+                                                        >
+                                                            Save Content
+                                                        </button>
+                                                    </form>
+                                                </CardWithHeader>
+                                            )) || (
+                                            <CardWithHeader
+                                                round={true}
+                                                border={true}
+                                                header={<b>Preview</b>}
+                                            >
+                                                <textarea
+                                                    class={"round"}
+                                                    value={await File[2].text()}
+                                                    disabled
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "500px",
+                                                        opacity: "100%",
+                                                        filter: "none",
+                                                    }}
+                                                />
+                                            </CardWithHeader>
+                                        )}
 
                                     <CardWithHeader
                                         round={true}
@@ -592,15 +661,23 @@ export class InspectMedia implements Endpoint {
                                             <li>
                                                 <b>Link</b>:{" "}
                                                 <a
-                                                    href={url.href.replace(
-                                                        "http:",
-                                                        "https:"
-                                                    )}
+                                                    href={
+                                                        url.href
+                                                            .replace(
+                                                                "http:",
+                                                                "https:"
+                                                            )
+                                                            .split("?")[0]
+                                                    }
                                                 >
-                                                    {url.href.replace(
-                                                        "http:",
-                                                        "https:"
-                                                    )}
+                                                    {
+                                                        url.href
+                                                            .replace(
+                                                                "http:",
+                                                                "https:"
+                                                            )
+                                                            .split("?")[0]
+                                                    }
                                                 </a>
                                             </li>
 
@@ -765,8 +842,8 @@ export class UploadFile implements Endpoint {
             return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
-                    Location: "/?err=Cannot upload file: Invalid password!",
-                    "X-Bundles-Error": "Cannot upload file: Invalid password!",
+                    Location: `/?err=${translations.English.error_invalid_password}`,
+                    "X-Bundles-Error": translations.English.error_invalid_password,
                 },
             });
 
@@ -779,7 +856,7 @@ export class UploadFile implements Endpoint {
         // return
         return new Response(
             JSON.stringify({
-                success: true,
+                success: result[0],
                 redirect:
                     result[0] === true ? `/?msg=${result[1]}` : `/?err=${result[1]}`,
                 result,
@@ -837,8 +914,8 @@ export class DeleteFile implements Endpoint {
             return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
-                    Location: "/?err=Cannot delete file: Invalid password!",
-                    "X-Bundles-Error": "Cannot delete file: Invalid password!",
+                    Location: `/?err=${translations.English.error_invalid_password}`,
+                    "X-Bundles-Error": translations.English.error_invalid_password,
                 },
             });
 
@@ -851,7 +928,77 @@ export class DeleteFile implements Endpoint {
         // return
         return new Response(
             JSON.stringify({
-                success: true,
+                success: result[0],
+                redirect:
+                    result[0] === true ? `/?msg=${result[1]}` : `/?err=${result[1]}`,
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
+}
+
+/**
+ * @export
+ * @class EditFile
+ * @implements {Endpoint}
+ */
+export class EditFile implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // make sure media is enabled (and exists)
+        if (!BundlesDB.Media) return new _404Page().request(request);
+
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        if (!body.CustomURL || !body.EditPassword || !body.File || !body.FileContent)
+            return new _404Page().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+
+        // validate password
+        const admin =
+            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+
+        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+            return new Response(translations.English.error_invalid_password, {
+                status: 302,
+                headers: {
+                    Location: `/?err=${translations.English.error_invalid_password}`,
+                    "X-Bundles-Error": translations.English.error_invalid_password,
+                },
+            });
+
+        // edit file
+        const result = await BundlesDB.Media.EditFile(
+            paste.CustomURL as string,
+            body.File,
+            body.FileContent
+        );
+
+        // return
+        return new Response(
+            JSON.stringify({
+                success: result[0],
                 redirect:
                     result[0] === true ? `/?msg=${result[1]}` : `/?err=${result[1]}`,
                 result,
@@ -875,4 +1022,5 @@ export default {
     GetFile,
     UploadFile,
     DeleteFile,
+    EditFile,
 };
