@@ -358,8 +358,9 @@ export const ServerConfig: HoneybeeConfig = {
         "/f/": { Type: "begins", Page: Pages.InspectMedia }, // view file
         "/paste/notifications": { Page: Pages.Notifications },
 
-        // GET builder
+        // GET editors
         "/paste/builder": { Page: Builder.Builder },
+        "/paste/writer": { Page: Pages.Writer },
 
         // GET repos
         "/c/": { Type: "begins", Page: Pages.PasteCommentsPage },

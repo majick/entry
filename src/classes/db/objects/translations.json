@@ -21,6 +21,7 @@
         "error_database_connection": "Connection failed",
         "error_unique_content": "Content must be unique!",
         "error_encryption": "Encryption error!",
+        "error_repossession": "URL does not meet the minimum requirements for repossession!",
 
         "error_paste_not_found": "This paste does not exist!",
         "error_revision_not_found": "This revision does not exist!",

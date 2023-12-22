@@ -1199,9 +1199,18 @@ export class PasteDocView implements Endpoint {
                                     <Button
                                         type="border"
                                         round={true}
-                                        href={`/${name}`}
+                                        href={`/paste/writer?edit=${name}`}
                                     >
-                                        Exit Docs
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Pencil Symbol"}
+                                        >
+                                            <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                        </svg>
+                                        Edit
                                     </Button>
                                 </TopNav>
                             }
@@ -1234,6 +1243,30 @@ export class PasteDocView implements Endpoint {
                                     __html: Rendered,
                                 }}
                             />
+
+                            <hr />
+
+                            <div style={{ opacity: "75%" }}>
+                                <ul>
+                                    <li>
+                                        Published:{" "}
+                                        <span class={"utc-date-to-localize"}>
+                                            {new Date(result.PubDate).toUTCString()}
+                                        </span>
+                                    </li>
+                                    <li>
+                                        Updated:{" "}
+                                        <span class={"utc-date-to-localize"}>
+                                            {new Date(result.EditDate).toUTCString()}
+                                        </span>
+                                    </li>
+                                    <li>
+                                        <a href={`/r/${result.CustomURL}`}>
+                                            More Info
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </SidebarLayout>
 
                         <script
@@ -2790,9 +2823,250 @@ export class Notifications implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class Writer
+ * @implements {Endpoint}
+ */
+export class Writer implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.searchParams);
+
+        // handle cloud pages
+        const IncorrectInstance = await CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        if (!Association[0]) return new _404Page().request(request);
+
+        // get paste if search.edit is not null
+        let paste: Partial<Paste> | undefined;
+        let RevisionNumber = 0;
+
+        if (search.get("edit")) {
+            paste = await db.GetPasteFromURL(search.get("edit")!);
+
+            // get revision
+            if (search.get("r") && paste) {
+                const revision = await db.GetRevision(
+                    search.get("edit")!,
+                    parseFloat(search.get("r")!)
+                );
+
+                if (!revision[0] || !revision[2])
+                    return new _404Page().request(request);
+
+                // ...update result
+                paste.Content = revision[2].Content.split("_metadata:")[0];
+                paste.EditDate = revision[2].EditDate;
+                RevisionNumber = revision[2].EditDate;
+            }
+        }
+
+        // get all pastes by current user
+        const AllPastes =
+            Association[0] === true
+                ? await db.GetAllPastesOwnedByPaste(Association[1])
+                : undefined;
+
+        // render
+        return new Response(
+            Renderer.Render(
+                <>
+                    <SidebarLayout
+                        sidebar={
+                            <>
+                                <TopNav margin={false}>
+                                    <Button
+                                        round={true}
+                                        class="modal:bundles\:button.PublishPaste green-cta"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Check Mark Symbol"}
+                                        >
+                                            <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"></path>
+                                        </svg>
+                                        Save
+                                    </Button>
+                                </TopNav>
+
+                                <div class="content flex flex-column g-4">
+                                    {AllPastes &&
+                                        AllPastes.map((_paste) => (
+                                            <Button
+                                                href={
+                                                    !_paste.Content.startsWith(
+                                                        "_builder:"
+                                                    )
+                                                        ? `/paste/writer?edit=${_paste.CustomURL}`
+                                                        : `/paste/builder?edit=${_paste.CustomURL}`
+                                                }
+                                                round={true}
+                                                class={`full justify-start${
+                                                    paste &&
+                                                    _paste.CustomURL ===
+                                                        paste.CustomURL
+                                                        ? " active"
+                                                        : ""
+                                                }`}
+                                            >
+                                                {(!_paste.Content.startsWith(
+                                                    "_builder:"
+                                                ) && (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={
+                                                            "Markdown Symbol"
+                                                        }
+                                                    >
+                                                        <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
+                                                    </svg>
+                                                )) || (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 16 16"
+                                                        width="16"
+                                                        height="16"
+                                                        aria-label={
+                                                            "Binary File Symbol"
+                                                        }
+                                                    >
+                                                        <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                    </svg>
+                                                )}
+
+                                                {_paste.CustomURL}
+                                            </Button>
+                                        ))}
+                                </div>
+                            </>
+                        }
+                    >
+                        <div
+                            class={"tabbar flex g-4 card border"}
+                            style={{
+                                width: "calc(100% + 1.5rem * 2)",
+                                margin: "-1.5rem 0 1rem -1.5rem", // offset the padding of .tab-container
+                                background: "var(--background-surface0-5)",
+                                border: "none",
+                                borderBottom:
+                                    "solid 1px var(--background-surface2a)",
+                            }}
+                        >
+                            <button
+                                id={"editor-open-tab-text"}
+                                style={{
+                                    borderRadius: "var(--u-04)",
+                                }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Pencil Symbol"}
+                                >
+                                    <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                </svg>
+                                Text
+                            </button>
+
+                            <button
+                                class={"secondary"}
+                                id={"editor-open-tab-preview"}
+                                style={{
+                                    borderRadius: "var(--u-04)",
+                                }}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"File Symbol"}
+                                >
+                                    <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                </svg>
+                                Preview
+                            </button>
+                        </div>
+
+                        <div id={"-editor"}>
+                            <div
+                                id={"editor-tab-text"}
+                                class={"active editor-tab -editor"}
+                            />
+
+                            <div
+                                id={"editor-tab-preview"}
+                                class={"editor-tab -editor"}
+                            />
+                        </div>
+
+                        <script
+                            type="module"
+                            dangerouslySetInnerHTML={{
+                                __html: `import CreateEditor from "/Editor.js";
+                                CreateEditor("editor-tab-text", \`${encodeURIComponent(
+                                    (paste || { Content: "" })!.Content!
+                                )}\`);`,
+                            }}
+                        />
+                    </SidebarLayout>
+
+                    <PublishModals
+                        MatchID={false}
+                        EditingPaste={paste ? paste.CustomURL : undefined}
+                        DisablePassword={
+                            paste &&
+                            paste.Metadata &&
+                            paste.Metadata.Owner === Association[1]
+                        }
+                        EnableDrafts={
+                            BundlesDB.config.app &&
+                            BundlesDB.config.app.enable_versioning === true
+                        }
+                        ViewingRevision={RevisionNumber !== 0}
+                        Endpoints={{
+                            new: "/api/new",
+                            edit: "/api/edit",
+                            delete: "/api/delete",
+                        }}
+                    />
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
+                </>,
+                <>
+                    <title>Writer - {BundlesDB.config.name}</title>
+                    <link rel="icon" href="/favicon" />
+                </>
+            ),
+            {
+                headers: {
+                    ...PageHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
+}
+
 // ...
 import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
+import PublishModals from "./components/site/modals/PublishModals";
 
 // default export
 export default {
@@ -2809,4 +3083,5 @@ export default {
     ViewPasteMedia,
     InspectMedia,
     Notifications,
+    Writer,
 };

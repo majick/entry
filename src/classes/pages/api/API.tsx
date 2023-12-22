@@ -1972,13 +1972,8 @@ export class CreateURLClaim implements Endpoint {
 
         const InvalidResponse = {
             success: true,
-            redirect:
-                "/?err=URL does not meet the minimum requirements for repossession",
-            result: [
-                true,
-                "URL does not meet the minimum requirements for repossession",
-                Association[1],
-            ],
+            redirect: `/?err=${translations.English.error_repossession}`,
+            result: [true, translations.English.error_repossession, Association[1]],
         };
 
         // ...check time (1)

@@ -7,6 +7,7 @@ import { Modal } from "fusion";
  *
  * @export
  * @param {{
+ *     MatchID?: boolean;
  *     EditingPaste?: string;
  *     DisablePassword?: boolean;
  *     EnableDrafts?: boolean;
@@ -20,6 +21,7 @@ import { Modal } from "fusion";
  * @return {*}
  */
 export default function PublishModals(props: {
+    MatchID?: boolean;
     EditingPaste?: string;
     DisablePassword?: boolean;
     EnableDrafts?: boolean;
@@ -58,6 +60,7 @@ export default function PublishModals(props: {
             modalid="bundles:modal.PublishPaste"
             buttonid="bundles:button.PublishPaste"
             round={true}
+            noIdMatch={props.MatchID === false}
         >
             <iframe
                 name={"publish_frame"}
