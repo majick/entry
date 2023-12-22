@@ -22,6 +22,8 @@
         "error_unique_content": "Content must be unique!",
         "error_encryption": "Encryption error!",
         "error_repossession": "URL does not meet the minimum requirements for repossession!",
+        "error_association_required": "You must be associated with a paste to do this!",
+        "error_filter": "Comment violates this paste's comment filter!",
 
         "error_paste_not_found": "This paste does not exist!",
         "error_revision_not_found": "This revision does not exist!",

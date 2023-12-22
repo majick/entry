@@ -401,6 +401,12 @@ export function ClientEditor(_metadata: string, id: string): any {
                     metadata.root.Comments.Filter || "",
                     'Comma separated list of banned words, comments containing these words will not be posted (ex: "bad,words")',
                 ],
+                AllowAnonymous: [
+                    metadata.root.Comments.AllowAnonymous === undefined
+                        ? true
+                        : metadata.root.Comments.AllowAnonymous,
+                    "Allow comments from users without an association",
+                ],
             },
             ["Comments"]
         );

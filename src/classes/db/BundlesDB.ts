@@ -942,9 +942,21 @@ export default class BundlesDB {
                         if (PasteInfo.Content.includes(BadWord))
                             return [
                                 false,
-                                "Comment violates paste's comment filter!",
+                                translations.English.error_filter,
                                 PasteInfo,
                             ];
+
+                // check AllowAnonymous
+                if (
+                    CommentingOn.Metadata &&
+                    CommentingOn.Metadata.Comments &&
+                    CommentingOn.Metadata.Comments.AllowAnonymous === false
+                )
+                    return [
+                        false,
+                        translations.English.error_association_required,
+                        PasteInfo,
+                    ];
 
                 // create notification for CommentingOn.Metadata.Owner
                 if (PasteInfo.Associated && PasteInfo.Associated.startsWith(";"))

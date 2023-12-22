@@ -10,8 +10,8 @@ import type { Paste } from "../../../db/objects/Paste";
 import BundlesDB from "../../../db/BundlesDB";
 
 import { PageHeaders, db, GetAssociation } from "../../api/API";
+import _404Page, { _401PageEndpoint } from "../40x";
 import { OpenGraph } from "../../Pages";
-import _404Page from "../404";
 
 import parser from "../../../db/helpers/BaseParser";
 import { BuilderDocument } from "./schema";
@@ -89,7 +89,7 @@ export class Builder implements Endpoint {
                 result.Metadata.Owner &&
                 result.Metadata.Owner !== Association[1]
             )
-                return new _404Page().request(request);
+                return new _401PageEndpoint().request(request);
 
             // get revision
             if (search.get("r") && result) {

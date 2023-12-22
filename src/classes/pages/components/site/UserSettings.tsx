@@ -4,8 +4,9 @@
  * @license MIT
  */
 
-import { render } from "preact";
 import Checkbox from "../form/Checkbox";
+import { render } from "preact";
+import { Card } from "fusion";
 
 /**
  * @function UserSettings
@@ -26,17 +27,11 @@ export default function UserSettings(id: string): any {
         refresh: boolean = false
     ) {
         options.push(
-            <div
-                class={"builder:card"}
-                style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: "0.4rem",
-                    alignItems: "center",
-                    background: "var(--background-surface)",
-                    borderRadius: "0.4rem",
-                    width: "100%",
-                }}
+            <Card
+                round={true}
+                border={true}
+                secondary={true}
+                class="flex justify-space-between align-center g-04"
             >
                 <label htmlFor={key} title={key}>
                     <b>{label}</b>
@@ -47,6 +42,7 @@ export default function UserSettings(id: string): any {
                         name={key}
                         checked={window.localStorage.getItem(key) === "true"}
                         round={true}
+                        secondary={true}
                         changed={(event) => {
                             const target = event.target as HTMLInputElement;
 
@@ -61,7 +57,7 @@ export default function UserSettings(id: string): any {
                         <select
                             name={key}
                             id={key}
-                            class={"mobile:max round"}
+                            class={"mobile:max round secondary"}
                             style={{
                                 width: "20rem",
                             }}
@@ -93,7 +89,7 @@ export default function UserSettings(id: string): any {
                         <textarea
                             name={key}
                             id={key}
-                            class={"round"}
+                            class={"round secondary"}
                             value={window.localStorage.getItem(key) || ""}
                             onBlur={(event: Event<HTMLInputElement>) => {
                                 const target = event.target as HTMLInputElement;
@@ -105,7 +101,7 @@ export default function UserSettings(id: string): any {
                             }}
                         />
                     ))}
-            </div>
+            </Card>
         );
     }
 

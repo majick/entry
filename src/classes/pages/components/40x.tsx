@@ -31,13 +31,70 @@ export function _404Page(props: { pathname?: string }): any {
                         marginTop: "0",
                     }}
                 >
-                    404 not found
+                    404 Not Found
                 </h5>
             </div>
 
             <Footer />
         </main>
     );
+}
+
+/**
+ * @export
+ * @class _401Page
+ * @implements {Endpoint}
+ */
+export class _401PageEndpoint implements Endpoint {
+    public async request(request: Request): Promise<Response> {
+        const url = new URL(request.url);
+
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        // return
+        return new Response(
+            Renderer.Render(
+                <>
+                    <main>
+                        <div
+                            class={"flex flex-column g-4 align-center"}
+                            style={{
+                                margin: "3rem 0 3rem 0",
+                            }}
+                        >
+                            <h4>Error</h4>
+                            <h5
+                                style={{
+                                    fontWeight: "normal",
+                                    marginTop: "0",
+                                }}
+                            >
+                                401 Unauthorized
+                            </h5>
+                        </div>
+
+                        <Footer />
+                    </main>
+
+                    {/* curiosity */}
+                    <Curiosity Association={Association} />
+                </>,
+                <>
+                    <title>401 - {BundlesDB.config.name}</title>
+                    <link rel="icon" href="/favicon" />
+                </>
+            ),
+            {
+                status: 401,
+                headers: {
+                    ...DefaultHeaders,
+                    "Content-Type": "text/html",
+                },
+            }
+        );
+    }
 }
 
 /**

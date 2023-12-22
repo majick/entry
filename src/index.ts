@@ -222,7 +222,7 @@ if (!(await BundlesDB.GetConfig())) {
 import Honeybee, { HoneybeeConfig } from "honeybee";
 
 // ...import endpoints
-import _404, { _404Page } from "./classes/pages/components/404";
+import _404, { _404Page } from "./classes/pages/components/40x";
 import Builder from "./classes/pages/components/builder";
 import AdminAPI from "./classes/pages/api/AdminAPI";
 import Repos from "./classes/pages/repos/Repos";

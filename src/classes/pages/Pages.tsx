@@ -12,9 +12,9 @@ import fs from "node:fs";
 
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
+import _404Page, { _401PageEndpoint } from "./components/40x";
 import TopNav from "./components/site/TopNav";
 import Footer from "./components/site/Footer";
-import _404Page from "./components/404";
 import Home from "./Home";
 
 // create database
@@ -35,7 +35,15 @@ import API, {
 } from "./api/API";
 
 // ...
-import { Card, Modal, StaticCode, Expandable, SidebarLayout, Button } from "fusion";
+import {
+    Card,
+    Modal,
+    StaticCode,
+    Expandable,
+    SidebarLayout,
+    Button,
+    CardWithHeader,
+} from "fusion";
 import { Node, PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import MessageDisplays from "./components/site/MessageDisplays";
@@ -2266,93 +2274,79 @@ export class UserSettings implements Endpoint {
                     <>
                         <TopNav breadcrumbs={["s"]} />
 
-                        <main>
-                            <div
-                                style={{
-                                    padding: "0.5rem",
-                                }}
-                            >
-                                <div
-                                    className="builder\:card"
-                                    style={{
-                                        width: "100%",
-                                        borderRadius: "0.4rem",
-                                    }}
+                        <main class={"small flex flex-column align-center g-4"}>
+                            <h4 style={{ marginTop: 0 }}>User Settings</h4>
+
+                            <Card round={true} border={true}>
+                                <CardWithHeader
+                                    round={true}
+                                    border={true}
+                                    secondary={true}
+                                    header={<b>User Account</b>}
                                 >
-                                    <div
-                                        class={
-                                            "flex g-4 align-center justify-space-between"
-                                        }
-                                        style={{
-                                            margin: "2rem 0 1rem 0",
-                                        }}
-                                    >
-                                        <h4 class={"no-margin"}>User Settings</h4>
-                                        <a
-                                            href={"javascript:window.history.back()"}
-                                            class={"button secondary round"}
-                                        >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                viewBox="0 0 16 16"
-                                                width="16"
-                                                height="16"
-                                                aria-label={"Undo Symbol"}
-                                                style={{ userSelect: "none" }}
-                                            >
-                                                <path d="M1.22 6.28a.749.749 0 0 1 0-1.06l3.5-3.5a.749.749 0 1 1 1.06 1.06L3.561 5h7.188l.001.007L10.749 5c.058 0 .116.007.171.019A4.501 4.501 0 0 1 10.5 14H8.796a.75.75 0 0 1 0-1.5H10.5a3 3 0 1 0 0-6H3.561L5.78 8.72a.749.749 0 1 1-1.06 1.06l-3.5-3.5Z"></path>
-                                            </svg>
-                                            Back
-                                        </a>
+                                    <div class="flex justify-space-between align-center full flex-wrap">
+                                        <span>
+                                            <b>Associated With:</b>{" "}
+                                            {Association[0] === true
+                                                ? Association[1]
+                                                : "anonymous"}{" "}
+                                        </span>
+
+                                        <div className="flex g-4 flex-wrap">
+                                            {Association[0] === true && (
+                                                <Button
+                                                    type="secondary"
+                                                    round={true}
+                                                    href={`/s/${Association[1]}`}
+                                                >
+                                                    Account Settings
+                                                </Button>
+                                            )}
+
+                                            {Association[0] === true ? (
+                                                <Button
+                                                    type="border"
+                                                    round={true}
+                                                    href={"javascript:"}
+                                                    class={
+                                                        "modal:bundles:button.logout"
+                                                    }
+                                                >
+                                                    Logout
+                                                </Button>
+                                            ) : (
+                                                <Button
+                                                    type="border"
+                                                    round={true}
+                                                    href={"javascript:"}
+                                                    class={
+                                                        "modal:bundles:button.login"
+                                                    }
+                                                >
+                                                    Login
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
+                                </CardWithHeader>
 
-                                    <hr />
+                                <AuthModals
+                                    use={
+                                        Association[0] === true ? "logout" : "login"
+                                    }
+                                />
 
-                                    <p>
-                                        <b>Associated With:</b>{" "}
-                                        {Association[0] === true
-                                            ? Association[1]
-                                            : "anonymous"}{" "}
-                                        (
-                                        {Association[0] === true ? (
-                                            <a
-                                                href={"javascript:"}
-                                                class={"modal:bundles:button.logout"}
-                                            >
-                                                logout
-                                            </a>
-                                        ) : (
-                                            <a
-                                                href={"javascript:"}
-                                                class={"modal:bundles:button.login"}
-                                            >
-                                                login
-                                            </a>
-                                        )}
-                                        )
-                                    </p>
+                                <hr />
 
-                                    <AuthModals
-                                        use={
-                                            Association[0] === true
-                                                ? "logout"
-                                                : "login"
-                                        }
-                                    />
-
-                                    <hr />
-
-                                    <div id="_doc" class={"flex flex-column g-4"}>
-                                        <noscript>
-                                            Unable to render user settings options
-                                            without JavaScript enabled! The user
-                                            settings are rendered client-side using
-                                            Preact, and saved to the browser's
-                                            localStorage.
-                                        </noscript>
-                                    </div>
+                                <div id="_doc" class={"flex flex-column g-4"}>
+                                    <noscript>
+                                        Unable to render user settings options
+                                        without JavaScript enabled! The user settings
+                                        are rendered client-side using Preact, and
+                                        saved to the browser's localStorage.
+                                    </noscript>
                                 </div>
-                            </div>
+                            </Card>
 
                             <script
                                 type={"module"}
@@ -2713,7 +2707,7 @@ export class Notifications implements Endpoint {
         const Association = await GetAssociation(request, null);
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
-        if (!Association[0]) return new _404Page().request(request);
+        if (!Association[0]) return new _401PageEndpoint().request(request);
 
         // get notifications
         const Notifications = (
@@ -2841,7 +2835,7 @@ export class Writer implements Endpoint {
         const Association = await GetAssociation(request, null);
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
-        if (!Association[0]) return new _404Page().request(request);
+        if (!Association[0]) return new _401PageEndpoint().request(request);
 
         // get paste if search.edit is not null
         let paste: Partial<Paste> | undefined;
@@ -2875,12 +2869,14 @@ export class Writer implements Endpoint {
             paste.Metadata.Owner &&
             paste.Metadata.Owner !== Association[1]
         )
-            return new _404Page().request(request);
+            return new _401PageEndpoint().request(request);
 
         // get all pastes by current user
         const AllPastes =
             Association[0] === true
-                ? await db.GetAllPastesOwnedByPaste(Association[1])
+                ? (await db.GetAllPastesOwnedByPaste(Association[1])).sort(
+                      (a, b) => b.EditDate - a.EditDate
+                  )
                 : undefined;
 
         // render

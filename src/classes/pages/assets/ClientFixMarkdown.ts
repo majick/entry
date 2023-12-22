@@ -89,8 +89,17 @@ export function HandleCustomElements() {
         document.querySelectorAll("#editor-tab-preview style")
     );
 
-    if (window.localStorage.getItem("bundles:user.DisableCustomPasteCSS") === "true")
+    if (
+        window.localStorage.getItem("bundles:user.DisableCustomPasteCSS") === "true"
+    ) {
         for (const element of styleElements) element.remove();
+
+        // disable custom-color
+        for (const element of Array.from(
+            document.querySelectorAll('#editor-tab-preview [role="custom-color"]')
+        ))
+            (element as HTMLElement).style.color = "";
+    }
 
     // handle Builder Common Schema (parse all .component elements)
     const ComponentElements = Array.from(document.querySelectorAll(".component"));

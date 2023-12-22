@@ -113,7 +113,7 @@ export const BundlesCodeHighlight = HighlightStyle.define([
 import { HTMLHint } from "htmlhint";
 
 let LastLint = performance.now();
-const HTMLLint = linter((view) => {
+export const HTMLLint = linter((view) => {
     let diagnostics: Diagnostic[] = [];
 
     // get hints

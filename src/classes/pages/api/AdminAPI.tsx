@@ -9,7 +9,7 @@ import { Server } from "bun";
 
 import { VerifyContentType, db, DefaultHeaders } from "./API";
 import { Decrypt } from "../../db/helpers/Hash";
-import _404Page from "../components/404";
+import _404Page from "../components/40x";
 
 import BundlesDB from "../../db/BundlesDB";
 

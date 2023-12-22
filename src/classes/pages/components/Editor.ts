@@ -35,6 +35,8 @@ import { tags } from "@lezer/highlight";
 import { HandleCustomElements } from "../assets/ClientFixMarkdown";
 import { ParseMarkdown } from "./Markdown";
 
+import { HTMLLint } from "./builder/components/HTMLEditor";
+
 // create theme
 const highlight = HighlightStyle.define([
     { tag: tags.heading1, fontWeight: "700" },
@@ -473,6 +475,7 @@ export default function CreateEditor(ElementID: string, content: string) {
                 window.location.search.includes("hints=true") ||
                 window.localStorage.getItem("bundles:user.EditorHints") === "true",
         }),
+        HTMLLint,
     ];
 
     if (window.localStorage.getItem("bundles:user.ShowLineNumbers") === "true")

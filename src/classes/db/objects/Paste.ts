@@ -55,6 +55,7 @@ export type PasteMetadata = {
         IsPrivateMessage?: boolean;
         Enabled: boolean;
         Filter?: string;
+        AllowAnonymous?: boolean;
         ReportsEnabled?: boolean;
     };
 };

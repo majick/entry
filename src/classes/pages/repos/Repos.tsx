@@ -17,8 +17,8 @@ import BundlesDB from "../../db/BundlesDB";
 // import components
 import NodeListing from "../components/builder/components/NodeListing";
 import { BuilderDocument } from "../components/builder/schema";
+import _404Page, { _401PageEndpoint } from "../components/40x";
 import TopNav from "../components/site/TopNav";
-import _404Page from "../components/404";
 
 import { Button, Card, CardWithHeader, Expandable, StaticCode } from "fusion";
 
@@ -735,7 +735,7 @@ export class DiffView implements Endpoint {
             result.Metadata.PrivateSource === true &&
             Association[1] !== result.Metadata.Owner
         )
-            return new _404Page().request(request);
+            return new _401PageEndpoint().request(request);
 
         // attempt to get revision(s)
         const RevisionNumber = search.get("to");

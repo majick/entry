@@ -22,7 +22,7 @@ import { plugins } from "../..";
 import TopNav from "./components/site/TopNav";
 import Checkbox from "./components/form/Checkbox";
 import { ParseMarkdownSync } from "./components/Markdown";
-import _404Page from "./components/404";
+import _404Page from "./components/40x";
 import { Button } from "fusion";
 
 /**

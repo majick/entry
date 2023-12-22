@@ -11,7 +11,7 @@ import path from "node:path";
 import fs from "node:fs";
 
 // import components
-import _404Page from "../components/404";
+import _404Page, { _401PageEndpoint } from "../components/40x";
 import Pages from "../Pages";
 
 // create database
@@ -135,13 +135,9 @@ export async function Session(request: Request): Promise<string> {
     if (!session) {
         const UA = request.headers.get("User-Agent") || "?";
 
-        // UA must start with "Mozilla/5.0" and must NOT start with "Mozilla/5.0 (compatible"
+        // UA must NOT start with "Mozilla/5.0 (compatible"
         // if something doesn't match these rules, it is likely a bot and shouldn't be given a session
-        if (
-            !UA.startsWith("Mozilla/5.0") ||
-            UA.startsWith("Mozilla/5.0 (compatible") ||
-            UA.includes("bot")
-        )
+        if (UA.startsWith("Mozilla/5.0 (compatible") || UA.includes("bot"))
             return (session = "");
 
         // create log
@@ -996,7 +992,7 @@ export class GetRawPaste implements Endpoint {
             result.Metadata.Owner &&
             result.Metadata.Owner !== Association[1]
         )
-            return new _404Page().request(request);
+            return new _401PageEndpoint().request(request);
 
         // return
         return new Response(result!.Content, {
@@ -1124,7 +1120,7 @@ export class GetPasteHTML implements Endpoint {
             result.Metadata.Owner &&
             result.Metadata.Owner !== Association[1]
         )
-            return new _404Page().request(request);
+            return new _401PageEndpoint().request(request);
 
         // render
         const rendered = Renderer.Render(
@@ -1236,11 +1232,8 @@ export class DeleteComment implements Endpoint {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    redirect: "/?err=You must be associated with a paste to do this",
-                    result: [
-                        false,
-                        "You must be associated with a paste to do this",
-                    ],
+                    redirect: `/?err=${translations.English.error_association_required}`,
+                    result: [false, translations.English.error_association_required],
                 }),
                 {
                     status: 401,
@@ -1416,11 +1409,8 @@ export class PasteLogout implements Endpoint {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    redirect: "/?err=You must be associated with a paste to do this",
-                    result: [
-                        false,
-                        "You must be associated with a paste to do this",
-                    ],
+                    redirect: `/?err=${translations.English.error_association_required}`,
+                    result: [false, translations.English.error_association_required],
                 }),
                 {
                     status: 401,
@@ -1595,6 +1585,8 @@ export class EditMetadata implements Endpoint {
                 else {
                     paste.Metadata.Comments.Enabled = Unpacked.Comments!.Enabled;
                     paste.Metadata.Comments.Filter = Unpacked.Comments!.Filter;
+                    paste.Metadata.Comments.AllowAnonymous =
+                        Unpacked.Comments!.AllowAnonymous;
                 }
         } else paste.Metadata = Unpacked;
 
@@ -1732,11 +1724,8 @@ export class UpdateCustomDomain implements Endpoint {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    redirect: "/?err=You must be associated with a paste to do this",
-                    result: [
-                        false,
-                        "You must be associated with a paste to do this",
-                    ],
+                    redirect: `/?err=${translations.English.error_association_required}`,
+                    result: [false, translations.English.error_association_required],
                 }),
                 {
                     status: 401,
@@ -1950,11 +1939,8 @@ export class CreateURLClaim implements Endpoint {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    redirect: "/?err=You must be associated with a paste to do this",
-                    result: [
-                        false,
-                        "You must be associated with a paste to do this",
-                    ],
+                    redirect: `/?err=${translations.English.error_association_required}`,
+                    result: [false, translations.English.error_association_required],
                 }),
                 {
                     status: 401,

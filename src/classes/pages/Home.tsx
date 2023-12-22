@@ -16,7 +16,7 @@ import Pages, { OpenGraph } from "./Pages";
 import ExtraPasteOptions from "./components/site/modals/ExtraPasteOptions";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import LoadingModal from "./components/site/modals/Loading";
-import _404Page from "./components/404";
+import _404Page, { _401PageEndpoint } from "./components/40x";
 
 /**
  * @export
@@ -187,7 +187,7 @@ export default class Home implements Endpoint {
             paste.Metadata.Owner &&
             paste.Metadata.Owner !== Association[1]
         )
-            return new _404Page().request(request);
+            return new _401PageEndpoint().request(request);
 
         // manage session
         const SessionCookie = await Session(request);

@@ -15,7 +15,7 @@ import BundlesDB from "../../db/BundlesDB";
 
 // import components
 import TopNav from "../components/site/TopNav";
-import _404Page from "../components/404";
+import _404Page from "../components/40x";
 import { ReposNav } from "./Repos";
 
 import { Card, CardWithHeader } from "fusion";
