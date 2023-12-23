@@ -18,6 +18,8 @@ import { AuthModals } from "./components/site/modals/AuthModals";
 import LoadingModal from "./components/site/modals/Loading";
 import _404Page, { _401PageEndpoint } from "./components/40x";
 
+import pack from "../../../package.json";
+
 /**
  * @export
  * @class Home
@@ -1035,7 +1037,9 @@ export default class Home implements Endpoint {
                     <script
                         type="module"
                         dangerouslySetInnerHTML={{
-                            __html: `import CreateEditor from "/Editor.js";
+                            __html: `import CreateEditor from "/Editor.js?v=${
+                                pack.version
+                            }";
                             CreateEditor("editor-tab-text", \`${encodeURIComponent(
                                 (paste || { Content: "" })!.Content!
                             )}\`);`,

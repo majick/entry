@@ -15,9 +15,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "jsxImportSource": "preact",
-    "types": [
-      "bun-types" // add Bun global
-    ],
     "paths": {
       "react": ["./node_modules/preact/"],
       "react/*": ["./node_modules/preact/*"],

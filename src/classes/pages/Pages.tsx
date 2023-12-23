@@ -10,6 +10,8 @@ import { Server } from "bun";
 import path from "node:path";
 import fs from "node:fs";
 
+import pack from "../../../package.json";
+
 // import components
 import DecryptionForm from "./components/form/DecryptionForm";
 import _404Page, { _401PageEndpoint } from "./components/40x";
@@ -1330,16 +1332,26 @@ export class PastesSearch implements Endpoint {
 
         // ...
         if (search.get("q") || search.get("owner")) {
+            let Query = search.get("q");
+            const SearchBy = search.get("by") || "CustomURL";
+            const Offset = parseInt(search.get("offset") || "0");
+
             // build query
-            let query = `\"CustomURL\" LIKE \'%${(search.get("q") || "")
+            let query = `\"${SearchBy}\" LIKE \'%${(Query || "")
                 .toLowerCase()
-                .replaceAll('"', "'")}%' LIMIT 100`;
+                .replaceAll(
+                    '"',
+                    '\\"'
+                )}%' ORDER BY "CustomURL" ASC LIMIT 100 OFFSET ${Offset}`;
 
             // if q does not exist (or is "explore"), set explore mode
             let ExploreMode = false;
-            if (!search.get("q") || search.get("q") === "explore") {
+            if (!Query || Query === "explore") {
                 query = `"CustomURL" IS NOT NULL ORDER BY cast(\"EditDate\" as float) DESC LIMIT 100`;
+
                 search.set("q", "explore");
+                Query = "explore";
+
                 ExploreMode = true;
             }
 
@@ -1385,98 +1397,84 @@ export class PastesSearch implements Endpoint {
                             )}
                         </TopNav>
 
-                        <main>
-                            <div
-                                class={
-                                    "flex flex-wrap justify-space-between mobile:justify-center align-center card border round"
-                                }
-                                style={{
-                                    marginBottom: "0.5rem",
-                                }}
-                            >
-                                {/* hide the search bar if search is disabled */}
-                                {(!ExploreMode &&
-                                    (!BundlesDB.config.app ||
-                                        (BundlesDB.config.app.enable_search !==
-                                            false && (
-                                            <SearchForm
-                                                query={search.get("q") || ""}
-                                            />
-                                        )))) || (
-                                    <div>
-                                        Explore pastes{" "}
-                                        {search.get("owner") &&
-                                            `by ${search.get("owner")}`}
-                                        , sorted by edit date
-                                    </div>
-                                )}
+                        <main class={"small flex flex-column g-8"}>
+                            <div class="flex full justify-space-between align-center flex-wrap mobile:justify-center">
+                                <SearchForm query={Query} by={SearchBy} />
 
-                                <span class={"mobile:center"}>
-                                    <b>{pastes.length}</b> result
+                                <span>
+                                    <b>{pastes.length + Offset}</b> result
                                     {pastes.length > 1 || pastes.length === 0
                                         ? "s"
-                                        : ""}
+                                        : ""}{" "}
+                                    indexed
                                 </span>
                             </div>
 
-                            <div
-                                className="card secondary round flex flex-column g-4"
-                                style={{
-                                    maxHeight: "max-content",
-                                    height: "max-content",
-                                }}
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Results</b>}
                             >
-                                {pastes.map((paste) => (
-                                    <div class={"search-result card round border"}>
-                                        <a
-                                            href={`/${
-                                                paste.CustomURL.startsWith("/")
-                                                    ? paste.CustomURL.slice(1)
-                                                    : paste.CustomURL
-                                            }`}
+                                <div className="flex flex-column g-4">
+                                    {pastes.map((paste) => (
+                                        <Card
+                                            round={true}
+                                            border={true}
+                                            secondary={true}
                                         >
-                                            {paste.CustomURL}
-                                        </a>
+                                            <a href={`/r/${paste.CustomURL}`}>
+                                                {paste.CustomURL}
+                                            </a>
+                                        </Card>
+                                    ))}
+                                </div>
+                            </CardWithHeader>
 
-                                        <p
-                                            style={{
-                                                marginBottom: 0,
-                                                color: "var(--text-color-faded)",
-                                            }}
+                            <div class="flex full justify-center flex-wrap g-4">
+                                {Offset > 0 && (
+                                    <Button
+                                        round={true}
+                                        href={`?q=${Query}&by=${SearchBy}&offset=${
+                                            Offset - 100
+                                        }`}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Chevron Left"}
                                         >
-                                            Created:{" "}
-                                            <span
-                                                class={"utc-date-to-localize"}
-                                                title={new Date(
-                                                    paste.PubDate
-                                                ).toUTCString()}
-                                            >
-                                                {new Date(
-                                                    paste.PubDate
-                                                ).toUTCString()}
-                                            </span>{" "}
-                                            · Content length:{" "}
-                                            {
-                                                paste.Content.split("_metadata:")[0]
-                                                    .length
-                                            }{" "}
-                                            Characters
-                                        </p>
-                                    </div>
-                                ))}
+                                            <path d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06Z"></path>
+                                        </svg>
+                                        Previous Page
+                                    </Button>
+                                )}
+
+                                {pastes.length >= 100 && (
+                                    <Button
+                                        round={true}
+                                        href={`?q=${Query}&by=${SearchBy}&offset=${
+                                            Offset + pastes.length
+                                        }`}
+                                    >
+                                        Next Page
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Chevron Right"}
+                                        >
+                                            <path d="M6.22 3.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L9.94 8 6.22 4.28a.75.75 0 0 1 0-1.06Z"></path>
+                                        </svg>
+                                    </Button>
+                                )}
                             </div>
-
-                            <style
-                                dangerouslySetInnerHTML={{
-                                    __html: `.search-result:hover {
-                                        background: var(--background-surface1);
-                                    }`,
-                                }}
-                            />
                         </main>
                     </>,
                     <>
-                        <title>Results for "{search.get("q")}"</title>
+                        <title>Results for "{Query}"</title>
                         <link rel="icon" href="/favicon" />
                     </>
                 ),
@@ -1497,27 +1495,33 @@ export class PastesSearch implements Endpoint {
             return new Response(
                 Renderer.Render(
                     <>
-                        <div
-                            style={{
-                                width: "100vw",
-                                height: "100vh",
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                flexDirection: "column",
-                            }}
-                        >
-                            <main
-                                class={
-                                    "small flex g-4 flex-column justify-center align-center"
-                                }
-                            >
-                                <h1 class={"no-margin"}>Search</h1>
-                                <SearchForm alwaysCenter={true} />
-                            </main>
+                        <TopNav />
 
-                            <Footer />
-                        </div>
+                        <main class={"small flex g-4 flex-column"}>
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Search by URL</b>}
+                            >
+                                <SearchForm alwaysCenter={true} />
+                            </CardWithHeader>
+
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Search by Content</b>}
+                            >
+                                <SearchForm by="Content" alwaysCenter={true} />
+                            </CardWithHeader>
+
+                            <CardWithHeader
+                                round={true}
+                                border={true}
+                                header={<b>Search by Group</b>}
+                            >
+                                <SearchForm by="GroupName" alwaysCenter={true} />
+                            </CardWithHeader>
+                        </main>
                     </>,
                     <>
                         <meta
@@ -3026,7 +3030,9 @@ export class Writer implements Endpoint {
                         <script
                             type="module"
                             dangerouslySetInnerHTML={{
-                                __html: `import CreateEditor from "/Editor.js";
+                                __html: `import CreateEditor from "/Editor.js?v=${
+                                    pack.version
+                                }";
                                 CreateEditor("editor-tab-text", \`${encodeURIComponent(
                                     (paste || { Content: "" })!.Content!
                                 )}\`);`,

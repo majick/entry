@@ -1,7 +1,7 @@
 {
   "name": "bundles-md",
   "description": "🧶 Open Markdown Pastebin",
-  "version": "1.1.15-rev-3",
+  "version": "1.1.15-rev-4",
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
@@ -11,7 +11,6 @@
     "@types/marked": "^5.0.0",
     "@types/mime-types": "^2.1.2",
     "@types/pg": "^8.10.9",
-    "bun-types": "latest",
     "prettier": "^3.0.0"
   },
   "peerDependencies": {
@@ -26,6 +25,7 @@
     "@codemirror/state": "latest",
     "@codemirror/view": "latest",
     "@lezer/highlight": "^1.1.6",
+    "@types/bun": "latest",
     "diff": "^5.1.0",
     "fusion": "https://codeberg.org/api/packages/hkau/npm/fusion/-/1.0.9/fusion-1.0.9.tgz",
     "highlight.js": "^11.8.0",

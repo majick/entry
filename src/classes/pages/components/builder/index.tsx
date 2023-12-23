@@ -16,6 +16,8 @@ import { OpenGraph } from "../../Pages";
 import parser from "../../../db/helpers/BaseParser";
 import { BuilderDocument } from "./schema";
 
+import pack from "../../../../../package.json";
+
 /**
  * @export
  * @class Builder
@@ -155,7 +157,9 @@ export class Builder implements Endpoint {
                     <script
                         type={"module"}
                         dangerouslySetInnerHTML={{
-                            __html: `import Builder, { Debug } from "/Builder.js";
+                            __html: `import Builder, { Debug } from "/Builder.js?v=${
+                                pack.version
+                            }";
                             window.DisablePasswordField = ${DisablePasswordField};
                             window.EnableDrafts = ${
                                 BundlesDB.config.app &&
