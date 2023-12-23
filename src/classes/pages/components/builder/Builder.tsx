@@ -312,30 +312,83 @@ function RenderPage() {
                     id="canvas-scale"
                     class={"device:desktop builder:stat"}
                     onClick={() => {
-                        const PageElement = RenderElement.firstChild as  // should always be the first child!
-                            | HTMLElement
-                            | undefined;
-
-                        if (!PageElement) return;
-
-                        // ...ask for percentage
-                        const scale = prompt("Enter new scale percentage:");
-                        if (!scale) return;
-
-                        // ...scale
-                        PageScale = Math.min(
-                            Math.max(0.25, parseInt(scale) / 100),
-                            4
-                        );
-                        PageElement.style.transform = `scale(${PageScale})`;
-
-                        // ...update scale display
-                        document.getElementById("canvas-scale")!.innerText =
-                            `${scale}%`;
+                        (window as any).modals["bundles:modal.CanvasScale"](true);
                     }}
                 >
                     100%
                 </span>
+
+                <Modal
+                    buttonid="bundles:button.CanvasScale"
+                    modalid="bundles:modal.CanvasScale"
+                    noIdMatch={true}
+                    round={true}
+                >
+                    <div
+                        class={"flex flex-column align-center g-4"}
+                        style={{
+                            width: "25rem",
+                            maxWidth: "100%",
+                        }}
+                    >
+                        <form
+                            class={"flex flex-column g-4 full"}
+                            onSubmit={(event) => {
+                                event.preventDefault();
+
+                                const PageElement = RenderElement.firstChild as  // should always be the first child!
+                                    | HTMLElement
+                                    | undefined;
+
+                                if (!PageElement) return;
+
+                                // ...get percentage
+                                const scale = (event.target as any).scale.value;
+                                if (!scale) return;
+
+                                // ...scale
+                                PageScale = Math.min(
+                                    Math.max(0.25, parseInt(scale) / 100),
+                                    4
+                                );
+
+                                PageElement.style.transform = `scale(${PageScale})`;
+
+                                // ...update scale display
+                                document.getElementById("canvas-scale")!.innerText =
+                                    `${scale}%`;
+
+                                // close modal
+                                (window as any).modals["bundles:modal.CanvasScale"](
+                                    false
+                                );
+                            }}
+                        >
+                            <label htmlFor={"scale"}>
+                                <b>Scale (percentage)</b>
+                            </label>
+
+                            <input
+                                id={"scale"}
+                                name={"scale"}
+                                type="number"
+                                min={0}
+                                max={200}
+                                step={10}
+                                value={100}
+                                className="round"
+                            />
+
+                            <button className="green round full">Submit</button>
+                        </form>
+                    </div>
+
+                    <hr />
+
+                    <form method="dialog">
+                        <button className="full round red">Close</button>
+                    </form>
+                </Modal>
 
                 {/* device preview */}
                 <span className="builder:stat" id={"bundles:button.DeviceSizing"}>
@@ -367,21 +420,44 @@ function RenderPage() {
                             class={"round full"}
                             onClick={() => RenderDevice(375, 812)}
                         >
-                            iPhone 11 Pro iOS 14.6
+                            iPhone 11 Pro iOS 14.6 (375x812)
                         </button>
 
                         <button
                             class={"round full"}
                             onClick={() => RenderDevice(390, 844)}
                         >
-                            iPhone 12/13 Pro iOS 14.6
+                            iPhone 12/13 Pro iOS 14.6 (390x844)
                         </button>
 
                         <button
                             class={"round full"}
                             onClick={() => RenderDevice(375, 667)}
                         >
-                            iPhone SE 2nd gen iOS 14.6
+                            iPhone SE 2nd gen iOS 14.6 (375)
+                        </button>
+
+                        <button
+                            class={"round full"}
+                            onClick={() => RenderDevice(1920, 934)}
+                        >
+                            Desktop (1920x934)
+                        </button>
+
+                        <button
+                            class={"red round full"}
+                            onClick={() => {
+                                const PageElement = RenderElement.firstChild as  // should always be the first child!
+                                    | HTMLElement
+                                    | undefined;
+
+                                if (!PageElement) return;
+
+                                PageElement.style.width = "100dvw";
+                                PageElement.style.height = "100dvh";
+                            }}
+                        >
+                            Reset
                         </button>
                     </div>
 
@@ -426,14 +502,14 @@ function RenderPage() {
                                 )
                             }
                         >
-                            Center (Mobile Devices)
+                            Center (Mobile Sizes)
                         </button>
 
                         <button
                             class={"round full"}
                             onClick={() => MoveCanvas(0, 0)}
                         >
-                            0,0 (Desktop Devices)
+                            0,0 (Desktop Sizes)
                         </button>
 
                         <button
@@ -441,6 +517,23 @@ function RenderPage() {
                             onClick={() => MoveCanvas(100, 100)}
                         >
                             100,100
+                        </button>
+
+                        <button
+                            class={"red round full"}
+                            onClick={() => {
+                                const PageElement = RenderElement.firstChild as  // should always be the first child!
+                                    | HTMLElement
+                                    | undefined;
+
+                                if (!PageElement) return;
+
+                                PageElement.style.top = "0";
+                                PageElement.style.left = "0";
+                                PageElement.style.position = "relative";
+                            }}
+                        >
+                            Reset
                         </button>
                     </div>
 
@@ -488,6 +581,7 @@ function RenderPage() {
                 style={{
                     position: "absolute",
                     zIndex: 3,
+                    top: 0,
                 }}
             />
 

@@ -550,6 +550,38 @@ export default function Sidebar(props: { Page?: string }): any {
 
                                 <hr />
 
+                                <button
+                                    onClick={() => {
+                                        (window as any).modals[
+                                            "bundles:modal.CanvasScale"
+                                        ](true);
+                                    }}
+                                >
+                                    Canvas Zoom
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        (window as any).modals[
+                                            "bundles:modal.DeviceSizing"
+                                        ](true);
+                                    }}
+                                >
+                                    Device Preview
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        (window as any).modals[
+                                            "bundles:modal.CanvasPosition"
+                                        ](true);
+                                    }}
+                                >
+                                    Canvas Position
+                                </button>
+
+                                <hr />
+
                                 <Expandable title={"Extras"}>
                                     <button
                                         onClick={() => {
