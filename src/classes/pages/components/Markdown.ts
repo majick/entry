@@ -294,6 +294,12 @@ export function ParseMarkdownSync(
         '<span role="spoiler">$<CONTENT></span>'
     );
 
+    // ...compatibility
+    content = content.replaceAll(
+        /(\!\&gt;)\s*(?<CONTENT>.*?)($|\s\s)/gm,
+        '<span role="spoiler">$<CONTENT></span>'
+    );
+
     // admonitions
     content = content.replaceAll(
         // title and content

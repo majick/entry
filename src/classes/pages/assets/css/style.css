@@ -44,6 +44,8 @@
     flex-direction: column;
     align-items: var(--AlignX);
     justify-content: var(--AlignY);
+
+    box-shadow: 0 0 4px hsla(0, 0%, 0%, 75%);
 }
 
 .builder\:text {
@@ -282,7 +284,12 @@
 
 .component.hover,
 .component.active {
-    box-shadow: 0 0 0 2px var(--blue2);
+    --blue2a: hsla(208, 98%, 35%, 25%);
+    box-shadow: 0 0 0 4px var(--blue2a);
+    outline: solid 2px var(--blue2);
+    transition:
+        box-shadow 0.15s,
+        outline 0.15s;
 }
 
 .component h1 {
@@ -304,6 +311,19 @@
 
 .builder\:toolbar.always-absolute {
     height: max-content !important;
+}
+
+.builder\:stat {
+    background: hsla(0, 0%, 0%, 75%);
+    color: white;
+    padding: 0.25rem;
+    border-radius: var(--u-04);
+    user-select: none;
+    cursor: pointer;
+    padding: var(--u-02) var(--u-08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 @media screen and (max-width: 900px) {

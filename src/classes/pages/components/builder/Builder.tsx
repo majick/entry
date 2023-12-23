@@ -112,6 +112,9 @@ let NeedsUpdate: boolean = false;
 export let EditMode: boolean = true;
 export let RenderCycles: number = 0;
 
+export let RenderElement: HTMLElement | ShadowRoot;
+export let PageScale = 1;
+
 // state functions
 export function Select(node: Node, parent: Node[]) {
     Selected = node;
@@ -157,6 +160,60 @@ export function Delete(node: Node) {
     RenderSidebar();
 
     return Update();
+}
+
+export function RenderDevice(x: number, y: number): void {
+    const PageElement = RenderElement.firstChild as HTMLElement | undefined; // should always be the first child!
+    if (!PageElement) return;
+
+    // set scale
+    PageElement.style.width = `${x}px`;
+    PageElement.style.height = `${y}px`;
+
+    // return
+    return undefined;
+}
+
+export function MoveCanvas(x: number, y: number): void {
+    const PageElement = RenderElement.firstChild as HTMLElement | undefined; // should always be the first child!
+    if (!PageElement) return;
+
+    // get current width/height
+    const CurrentWidth = parseInt((PageElement.style.width || "0px").split("px")[0]);
+    const CurrentHeight = parseInt(
+        (PageElement.style.height || "0px").split("px")[0]
+    );
+
+    // set scale
+    PageElement.style.position = "absolute";
+    PageElement.style.left = `${x - CurrentWidth / 2}px`;
+    PageElement.style.top = `${y - CurrentHeight / 2}px`;
+
+    // return
+    return undefined;
+}
+
+export function RenderElementLabel(element: HTMLElement): void {
+    // add canvas-label
+    const Label = document.getElementById("canvas-label");
+    if (!Label || !element.getAttribute("data-component")) return;
+
+    // ...get component
+    const component = parser.AllNodes.find((n) => n.ID === element.id);
+
+    // ...
+    const boundingbox = element.getBoundingClientRect();
+    Label.style.top = `${boundingbox.top - 35}px`; // subtract 35 so it's slightly above component!
+    Label.style.left = `${boundingbox.left}px`;
+
+    Label.innerText = `${
+        component
+            ? component.Nickname || component.Type
+            : element.getAttribute("data-component")
+    } • ${element.offsetWidth}x${element.offsetHeight}`;
+
+    // return
+    return undefined;
 }
 
 // history functions
@@ -242,31 +299,196 @@ function RenderPage() {
     return render(
         <>
             <div
+                class={"flex g-4"}
                 style={{
-                    display: "contents",
+                    position: "absolute",
+                    left: "var(--u-04)",
+                    top: "var(--u-04)",
+                    zIndex: 2,
+                }}
+            >
+                {/* canvas scale */}
+                <span
+                    id="canvas-scale"
+                    class={"device:desktop builder:stat"}
+                    onClick={() => {
+                        const PageElement = RenderElement.firstChild as  // should always be the first child!
+                            | HTMLElement
+                            | undefined;
+
+                        if (!PageElement) return;
+
+                        // ...ask for percentage
+                        const scale = prompt("Enter new scale percentage:");
+                        if (!scale) return;
+
+                        // ...scale
+                        PageScale = Math.min(
+                            Math.max(0.25, parseInt(scale) / 100),
+                            4
+                        );
+                        PageElement.style.transform = `scale(${PageScale})`;
+
+                        // ...update scale display
+                        document.getElementById("canvas-scale")!.innerText =
+                            `${scale}%`;
+                    }}
+                >
+                    100%
+                </span>
+
+                {/* device preview */}
+                <span className="builder:stat" id={"bundles:button.DeviceSizing"}>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Devices Symbol"}
+                    >
+                        <path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75V5a.75.75 0 0 1-1.5 0V2.75a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25H7A.75.75 0 0 1 7 12h-.268a5.712 5.712 0 0 1-.765 2.5H7A.75.75 0 0 1 7 16H4.5a.75.75 0 0 1-.565-1.243c.772-.885 1.193-1.716 1.292-2.757H1.75A1.75 1.75 0 0 1 0 10.25v-7.5Z"></path>
+                        <path d="M10.75 7h3.5c.967 0 1.75.784 1.75 1.75v5.5A1.75 1.75 0 0 1 14.25 16h-3.5A1.75 1.75 0 0 1 9 14.25v-5.5C9 7.784 9.783 7 10.75 7Zm-.25 1.75v5.5c0 .138.112.25.25.25h3.5a.25.25 0 0 0 .25-.25v-5.5a.25.25 0 0 0-.25-.25h-3.5a.25.25 0 0 0-.25.25Z"></path>
+                    </svg>
+                </span>
+
+                <Modal
+                    buttonid="bundles:button.DeviceSizing"
+                    modalid="bundles:modal.DeviceSizing"
+                    round={true}
+                >
+                    <div
+                        class={"flex flex-column align-center g-4"}
+                        style={{
+                            width: "25rem",
+                            maxWidth: "100%",
+                        }}
+                    >
+                        <button
+                            class={"round full"}
+                            onClick={() => RenderDevice(375, 812)}
+                        >
+                            iPhone 11 Pro iOS 14.6
+                        </button>
+
+                        <button
+                            class={"round full"}
+                            onClick={() => RenderDevice(390, 844)}
+                        >
+                            iPhone 12/13 Pro iOS 14.6
+                        </button>
+
+                        <button
+                            class={"round full"}
+                            onClick={() => RenderDevice(375, 667)}
+                        >
+                            iPhone SE 2nd gen iOS 14.6
+                        </button>
+                    </div>
+
+                    <hr />
+
+                    <form method="dialog">
+                        <button className="full round red">Close</button>
+                    </form>
+                </Modal>
+
+                {/* canvas position */}
+                <span className="builder:stat" id={"bundles:button.CanvasPosition"}>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        width="16"
+                        height="16"
+                        aria-label={"Position Symbol"}
+                    >
+                        <path d="m12.596 11.596-3.535 3.536a1.5 1.5 0 0 1-2.122 0l-3.535-3.536a6.5 6.5 0 1 1 9.192-9.193 6.5 6.5 0 0 1 0 9.193Zm-1.06-8.132v-.001a5 5 0 1 0-7.072 7.072L8 14.07l3.536-3.534a5 5 0 0 0 0-7.072ZM8 9a2 2 0 1 1-.001-3.999A2 2 0 0 1 8 9Z"></path>
+                    </svg>
+                </span>
+
+                <Modal
+                    buttonid="bundles:button.CanvasPosition"
+                    modalid="bundles:modal.CanvasPosition"
+                    round={true}
+                >
+                    <div
+                        class={"flex flex-column align-center g-4"}
+                        style={{
+                            width: "25rem",
+                            maxWidth: "100%",
+                        }}
+                    >
+                        <button
+                            class={"round full"}
+                            onClick={() =>
+                                MoveCanvas(
+                                    window.innerWidth / 2,
+                                    window.innerHeight / 2
+                                )
+                            }
+                        >
+                            Center (Mobile Devices)
+                        </button>
+
+                        <button
+                            class={"round full"}
+                            onClick={() => MoveCanvas(0, 0)}
+                        >
+                            0,0 (Desktop Devices)
+                        </button>
+
+                        <button
+                            class={"round full"}
+                            onClick={() => MoveCanvas(100, 100)}
+                        >
+                            100,100
+                        </button>
+                    </div>
+
+                    <hr />
+
+                    <form method="dialog">
+                        <button className="full round red">Close</button>
+                    </form>
+                </Modal>
+            </div>
+
+            <div
+                style={{
+                    // display: "contents",
                     position: "relative",
                     userSelect: "none",
+                    background: "var(--background-surface1)",
+                    height: "100vh",
                 }}
-                onMouseOver={
-                    !EditMode
-                        ? (event) => {
-                              let target: HTMLElement = event.target as HTMLElement;
+                onWheel={(event) => {
+                    PageScale += (event.deltaY * -0.01) / 50;
 
-                              if (!target.classList.contains("component"))
-                                  if (
-                                      target.parentElement &&
-                                      target.parentElement.classList.contains(
-                                          "component"
-                                      )
-                                  )
-                                      target = target.parentElement;
-                                  else return;
+                    // restrict scale
+                    PageScale = Math.min(Math.max(0.25, PageScale), 4);
 
-                              Hovered = target;
-                          }
-                        : undefined
-                }
+                    // scale
+                    const PageElement = RenderElement.firstChild as  // should always be the first child!
+                        | HTMLElement
+                        | undefined;
+
+                    if (!PageElement) return;
+
+                    PageElement.style.transform = `scale(${PageScale})`;
+
+                    // ...update scale display
+                    document.getElementById("canvas-scale")!.innerText =
+                        `${Math.floor(PageScale * 100)}%`;
+                }}
                 id={"_doc"}
+            />
+
+            <span
+                id={"canvas-label"}
+                class={"builder:stat"}
+                style={{
+                    position: "absolute",
+                    zIndex: 3,
+                }}
             />
 
             <CodeWorkspace.Toolbar current="render" />
@@ -786,6 +1008,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         _page = _page.shadowRoot!;
         _page.innerHTML += `<style>@import url("/style.css");</style>`;
 
+        RenderElement = _page;
+
         // ...globally expose some builder variables for scripts
         (window as any).Builder = {
             Document, // page JSON
@@ -959,6 +1183,8 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         _page = _page.shadowRoot!;
         _page.innerHTML = `<style>@import url("/style.css");</style>${_page.innerHTML}`;
 
+        RenderElement = _page;
+
         (window as any).Builder = {
             Page: {
                 Element: _page,
@@ -1033,6 +1259,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
             target.classList.add("hover");
 
             Hovered = target;
+            RenderElementLabel(target);
         });
 
         // ...click
@@ -1080,6 +1307,40 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 // return
                 return EditOrder(false);
             }
+
+            // ...keydown
+            document.addEventListener("keydown", (event) => {
+                // pan with arrows
+                const PageElement = RenderElement.firstChild as
+                    | HTMLElement
+                    | undefined; // should always be the first child!
+
+                if (!PageElement) return;
+
+                // make sure PageElement is position: absolute
+                PageElement.style.position = "absolute";
+
+                // get current values
+                const CurrentTop = parseInt(
+                    (PageElement.style.top || "0px").split("px")[0]
+                );
+
+                const CurrentLeft = parseInt(
+                    (PageElement.style.left || "0px").split("px")[0]
+                );
+
+                const MoveBy = 10;
+
+                // move element
+                if (event.key === "ArrowUp")
+                    PageElement.style.top = `${CurrentTop - MoveBy}px`;
+                else if (event.key === "ArrowLeft")
+                    PageElement.style.left = `${CurrentLeft - MoveBy}px`;
+                else if (event.key === "ArrowDown")
+                    PageElement.style.top = `${CurrentTop + MoveBy}px`;
+                else if (event.key === "ArrowRight")
+                    PageElement.style.left = `${CurrentLeft + MoveBy}px`;
+            });
 
             // ...
 

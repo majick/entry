@@ -1,4 +1,4 @@
-import { Select, Document, CurrentPage } from "../Builder";
+import { Select, Document, CurrentPage, RenderElementLabel } from "../Builder";
 import { Node } from "../schema";
 import parser from "../parser";
 
@@ -50,6 +50,9 @@ export default function NodeListing(props: {
                     window as any
                 ).Builder.Page.Element.querySelectorAll("component"))
                     element.classList.remove("hover");
+
+                // render label
+                RenderElementLabel(rendered);
 
                 // add hover
                 return rendered.classList.add("hover");

@@ -2355,7 +2355,7 @@ export class UserSettings implements Endpoint {
                             <script
                                 type={"module"}
                                 dangerouslySetInnerHTML={{
-                                    __html: `import UserSettings from "/UserSettings.js";
+                                    __html: `import UserSettings from "/UserSettings.js?v=${pack.version}";
                                     UserSettings("_doc");`,
                                 }}
                             />
@@ -2656,7 +2656,9 @@ export class UserSettings implements Endpoint {
                                 <script
                                     type={"module"}
                                     dangerouslySetInnerHTML={{
-                                        __html: `import _e from "/MetadataEditor.js";
+                                        __html: `import _e from "/MetadataEditor.js?v=${
+                                            pack.version
+                                        }";
 
                                         window.ENTRYDB_CONFIG_ENABLE_COMMENTS = ${
                                             BundlesDB.config.app &&
