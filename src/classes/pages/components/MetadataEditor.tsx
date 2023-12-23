@@ -363,6 +363,12 @@ export function ClientEditor(_metadata: string, id: string): any {
                 : metadata.root.EnablePasteList,
             "Toggle paste profile paste list",
         ],
+        IncludeInSearch: [
+            metadata.root.IncludeInSearch === undefined
+                ? true
+                : metadata.root.IncludeInSearch,
+            "If paste is included in results from /search",
+        ],
         ShowOwnerEnabled: [
             metadata.root.ShowOwnerEnabled === undefined
                 ? true

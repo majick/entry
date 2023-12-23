@@ -1721,16 +1721,7 @@ export default class BundlesDB {
                 paste = this.CleanPaste(paste);
 
                 // get paste metadata
-                const [RealContent, _Metadata] = paste.Content.split("_metadata:");
-
-                paste.Content = RealContent;
-
-                if (_Metadata) paste.Metadata = BaseParser.parse(_Metadata) as any;
-                else
-                    paste.Metadata = {
-                        Version: 1,
-                        Owner: paste.CustomURL,
-                    };
+                paste.Metadata = JSON.parse(paste.Metadata as any);
 
                 // replace paste
                 pastes[pastes.indexOf(paste)] = paste;

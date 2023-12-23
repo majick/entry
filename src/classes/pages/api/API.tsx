@@ -1577,6 +1577,7 @@ export class EditMetadata implements Endpoint {
             paste.Metadata.EmbedImage = Unpacked.EmbedImage;
             paste.Metadata.PrivateSource = Unpacked.PrivateSource;
             paste.Metadata.EnablePasteList = Unpacked.EnablePasteList;
+            paste.Metadata.IncludeInSearch = Unpacked.IncludeInSearch;
             paste.Metadata.SocialIcon = Unpacked.SocialIcon;
 
             if (Unpacked.Comments)

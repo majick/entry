@@ -1342,7 +1342,7 @@ export class PastesSearch implements Endpoint {
                 .replaceAll(
                     '"',
                     '\\"'
-                )}%' ORDER BY "CustomURL" ASC LIMIT 100 OFFSET ${Offset}`;
+                )}%' AND "Metadata" NOT LIKE '%"IncludeInSearch":false%' ORDER BY "CustomURL" ASC LIMIT 100 OFFSET ${Offset}`;
 
             // if q does not exist (or is "explore"), set explore mode
             let ExploreMode = false;

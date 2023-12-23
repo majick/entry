@@ -42,8 +42,9 @@ export type PasteMetadata = {
     Description?: string; // description shown on paste (opengraph)
     EmbedColor?: string; // color shown in opengraph embeds
     EmbedImage?: string; // large image shown in opengraph embeds
-    PrivateSource?: boolean;
-    EnablePasteList?: boolean;
+    PrivateSource?: boolean; // default: false
+    EnablePasteList?: boolean; // if paste has a paste list ("/~paste"), default: true
+    IncludeInSearch?: boolean; // if paste can be shown in search results, default: true
     SocialIcon?: string; // shown as a "profile picture" in some places
     Badges?: string; // comma separated array of badges, shown under paste
     FrontMatter?: { [key: string]: any }; // NORMAL ONLY - markdown front matter (https://docs.github.com/en/contributing/writing-for-github-docs/using-yaml-frontmatter)
