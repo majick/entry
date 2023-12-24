@@ -518,6 +518,7 @@ export class CreatePaste implements Endpoint {
             // can't (shouldn't) set association with a comment
             !body.CommentOn &&
             !body.ReportOn &&
+            result[0] && // make sure action succeeded
             // make sure auto_tag is enabled
             (!BundlesDB.config.app || BundlesDB.config.app.auto_tag !== false)
         ) {
@@ -547,15 +548,6 @@ export class CreatePaste implements Endpoint {
                         },
                     }
                 );
-        }
-
-        // if result[0] IS NOT TRUE, set association to nothing!!! this makes sure
-        // people don't get associated with a paste that is already taken...
-        if (result[0] !== true) {
-            Association[1] = ""; // clear association
-
-            // remove from session
-            GetAssociation(request, _ip, false, undefined, true);
         }
 
         // return
@@ -1630,6 +1622,11 @@ export class EditMetadata implements Endpoint {
                     paste.Metadata.Comments.AllowAnonymous =
                         Unpacked.Comments!.AllowAnonymous;
                 }
+
+            // staff only updates
+            if (IsStaff === true) {
+                paste.Metadata.Locked = Unpacked.Locked;
+            }
         } else paste.Metadata = Unpacked; // admin only updates
 
         // update paste

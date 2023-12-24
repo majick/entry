@@ -1804,7 +1804,12 @@ export class MetadataEditor implements Endpoint {
                 : ([false, "", []] as any[]);
 
         // delete sensitive values from result for staff
-        if (UserType === "staff" && result && result.Metadata) {
+        if (
+            UserType === "staff" &&
+            result &&
+            result.Metadata &&
+            body.AdminPassword !== BundlesDB.config.admin
+        ) {
             // hide user ip for staff (still visible to admin)
             session = [false, "", []];
 
