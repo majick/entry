@@ -565,8 +565,8 @@ export class CreatePaste implements Endpoint {
                 redirect:
                     result[0] === true
                         ? // if successful, redirect to paste
-                          body.CommentOn === ""
-                            ? body.ReportOn === ""
+                          body.CommentOn === "" || body.CommentOn === undefined
+                            ? body.ReportOn === "" || body.ReportOn === undefined
                                 ? `/${
                                       result[2].CustomURL
                                   }?UnhashedEditPassword=${punycode.toASCII(

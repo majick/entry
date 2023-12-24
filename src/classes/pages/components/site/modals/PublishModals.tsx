@@ -123,8 +123,9 @@ export default function PublishModals(props: {
                                 placeholder={"Custom URL"}
                                 class={"round"}
                                 autocomplete={"off"}
-                                required
+                                // required
                             />
+
                             <label htmlFor="EditPassword">Edit Password</label>
                             <input
                                 type="text"
@@ -135,7 +136,7 @@ export default function PublishModals(props: {
                                 placeholder={"Custom edit password"}
                                 class={"round full"}
                                 autocomplete={"off"}
-                                required
+                                // required
                             />
 
                             <hr style={{ margin: "0" }} />
