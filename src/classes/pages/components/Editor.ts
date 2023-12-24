@@ -8,6 +8,7 @@ import {
     drawSelection,
     rectangularSelection,
     lineNumbers,
+    placeholder,
 } from "@codemirror/view";
 
 import {
@@ -37,26 +38,35 @@ import { ParseMarkdown } from "./Markdown";
 
 // create theme
 const highlight = HighlightStyle.define([
-    { tag: tags.heading1, fontWeight: "700" },
+    {
+        tag: tags.heading1,
+        fontWeight: "700",
+        fontSize: "2.5rem",
+    },
     {
         tag: tags.heading2,
         fontWeight: "700",
+        fontSize: "2rem",
     },
     {
         tag: tags.heading3,
         fontWeight: "700",
+        fontSize: "1.75rem",
     },
     {
         tag: tags.heading4,
         fontWeight: "700",
+        fontSize: "1.5rem",
     },
     {
         tag: tags.heading5,
         fontWeight: "700",
+        fontSize: "1.25rem",
     },
     {
         tag: tags.heading6,
         fontWeight: "700",
+        fontSize: "1rem",
     },
     {
         tag: tags.strong,
@@ -364,6 +374,7 @@ export default function CreateEditor(ElementID: string, content: string) {
         EditorView.lineWrapping,
         closeBrackets(),
         history(),
+        placeholder(`# ${new Date().toLocaleDateString()}`),
         EditorView.updateListener.of(async (update) => {
             if (update.docChanged) {
                 const content = update.state.doc.toString();
@@ -376,6 +387,19 @@ export default function CreateEditor(ElementID: string, content: string) {
                 window.localStorage.setItem("gen", html);
 
                 (window as any).EditorContent = content;
+
+                // update TOC
+                const TOCElement = document.getElementById("_toc_area");
+
+                if (TOCElement) {
+                    const TableOfContents = (
+                        await ParseMarkdown(
+                            `[TOC]\n{{@TABLE_OF_CONTENTS}}\n${content}`
+                        )
+                    ).split("{{@TABLE_OF_CONTENTS}}")[0];
+
+                    TOCElement.innerHTML = TableOfContents;
+                }
             }
         }),
         EditorState.allowMultipleSelections.of(true),

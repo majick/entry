@@ -114,6 +114,7 @@ export let RenderCycles: number = 0;
 
 export let RenderElement: HTMLElement | ShadowRoot;
 export let PageScale = 1;
+export let AllowScrollZoom = true;
 
 // state functions
 export function Select(node: Node, parent: Node[]) {
@@ -385,6 +386,15 @@ function RenderPage() {
 
                     <hr />
 
+                    <button
+                        className="round full"
+                        onClick={() => (AllowScrollZoom = !AllowScrollZoom)}
+                    >
+                        Toggle Scroll Zoom
+                    </button>
+
+                    <hr />
+
                     <form method="dialog">
                         <button className="full round red">Close</button>
                     </form>
@@ -434,7 +444,7 @@ function RenderPage() {
                             class={"round full"}
                             onClick={() => RenderDevice(375, 667)}
                         >
-                            iPhone SE 2nd gen iOS 14.6 (375)
+                            iPhone SE 2nd gen iOS 14.6 (375x667)
                         </button>
 
                         <button
@@ -554,6 +564,7 @@ function RenderPage() {
                     height: "100vh",
                 }}
                 onWheel={(event) => {
+                    if (AllowScrollZoom === false) return;
                     PageScale += (event.deltaY * -0.01) / 50;
 
                     // restrict scale

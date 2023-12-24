@@ -1226,19 +1226,35 @@ export class PasteDocView implements Endpoint {
                             }
                             sidebar={
                                 <>
-                                    {BundlesDB.config.app &&
-                                        BundlesDB.config.app.footer &&
-                                        BundlesDB.config.app.footer.info &&
-                                        BundlesDB.config.app.footer.info.split(
-                                            "?"
-                                        )[0] === result.CustomURL &&
-                                        InformationPageNote()}
-
-                                    <div
-                                        dangerouslySetInnerHTML={{
-                                            __html: TableOfContents,
+                                    <Card
+                                        style={{
+                                            borderBottom:
+                                                "solid 1px var(--background-surface2a)",
+                                            background: "transparent",
                                         }}
-                                    />
+                                    >
+                                        {BundlesDB.config.app &&
+                                            BundlesDB.config.app.footer &&
+                                            BundlesDB.config.app.footer.info &&
+                                            BundlesDB.config.app.footer.info.split(
+                                                "?"
+                                            )[0] === result.CustomURL &&
+                                            InformationPageNote()}
+                                    </Card>
+
+                                    <Card
+                                        secondary={true}
+                                        style={{
+                                            borderBottom:
+                                                "solid 1px var(--background-surface2a)",
+                                        }}
+                                    >
+                                        <div
+                                            dangerouslySetInnerHTML={{
+                                                __html: TableOfContents,
+                                            }}
+                                        />
+                                    </Card>
                                 </>
                             }
                         >
@@ -2913,63 +2929,88 @@ export class Writer implements Endpoint {
                                     </Button>
                                 </TopNav>
 
-                                <div class="content flex flex-column g-4">
-                                    {AllPastes &&
-                                        AllPastes.map((_paste) => (
-                                            <Button
-                                                href={
-                                                    !_paste.Content.startsWith(
-                                                        "_builder:"
-                                                    )
-                                                        ? `/paste/writer?edit=${_paste.CustomURL}`
-                                                        : `/paste/builder?edit=${_paste.CustomURL}`
-                                                }
-                                                round={true}
-                                                class={`full justify-start${
-                                                    paste &&
-                                                    _paste.CustomURL ===
-                                                        paste.CustomURL
-                                                        ? " active"
-                                                        : ""
-                                                }`}
-                                            >
-                                                {(!_paste.Content.startsWith(
-                                                    "_builder:"
-                                                ) && (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        height="16"
-                                                        aria-label={
-                                                            "Markdown Symbol"
-                                                        }
-                                                    >
-                                                        <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
-                                                    </svg>
-                                                )) || (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        height="16"
-                                                        aria-label={
-                                                            "Binary File Symbol"
-                                                        }
-                                                    >
-                                                        <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
-                                                    </svg>
-                                                )}
+                                <Card
+                                    secondary={true}
+                                    class="flex flex-column g-4"
+                                    style={{
+                                        borderBottom:
+                                            "solid 1px var(--background-surface2a)",
+                                    }}
+                                >
+                                    <Expandable title="Table of Contents">
+                                        <div id="_toc_area" />
+                                    </Expandable>
+                                </Card>
 
-                                                {_paste.CustomURL}
-                                            </Button>
-                                        ))}
-                                </div>
+                                <Card
+                                    class="flex flex-column g-4"
+                                    style={{
+                                        borderBottom:
+                                            "solid 1px var(--background-surface2a)",
+                                        background: "transparent",
+                                    }}
+                                >
+                                    <Expandable title="Your Pastes">
+                                        {AllPastes &&
+                                            AllPastes.map((_paste) => (
+                                                <Button
+                                                    href={
+                                                        !_paste.Content.startsWith(
+                                                            "_builder:"
+                                                        )
+                                                            ? `/paste/writer?edit=${_paste.CustomURL}`
+                                                            : `/paste/builder?edit=${_paste.CustomURL}`
+                                                    }
+                                                    type="border"
+                                                    round={true}
+                                                    class={`full justify-start${
+                                                        paste &&
+                                                        _paste.CustomURL ===
+                                                            paste.CustomURL
+                                                            ? " active"
+                                                            : ""
+                                                    }`}
+                                                >
+                                                    {(!_paste.Content.startsWith(
+                                                        "_builder:"
+                                                    ) && (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Markdown Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M14.85 3c.63 0 1.15.52 1.14 1.15v7.7c0 .63-.51 1.15-1.15 1.15H1.15C.52 13 0 12.48 0 11.84V4.15C0 3.52.52 3 1.15 3ZM9 11V5H7L5.5 7 4 5H2v6h2V8l1.5 1.92L7 8v3Zm2.99.5L14.5 8H13V5h-2v3H9.5Z"></path>
+                                                        </svg>
+                                                    )) || (
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 16 16"
+                                                            width="16"
+                                                            height="16"
+                                                            aria-label={
+                                                                "Binary File Symbol"
+                                                            }
+                                                        >
+                                                            <path d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2a.75.75 0 0 1-1.5 0Zm-4 6C0 6.784.784 6 1.75 6h1.5C4.216 6 5 6.784 5 7.75v2.5A1.75 1.75 0 0 1 3.25 12h-1.5A1.75 1.75 0 0 1 0 10.25ZM6.75 6h1.5a.75.75 0 0 1 .75.75v3.75h.75a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5h.75v-3h-.75a.75.75 0 0 1 0-1.5Zm-5 1.5a.25.25 0 0 0-.25.25v2.5c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25v-2.5a.25.25 0 0 0-.25-.25Zm9.75-5.938V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                                        </svg>
+                                                    )}
+
+                                                    {_paste.CustomURL}
+                                                </Button>
+                                            ))}
+                                    </Expandable>
+                                </Card>
                             </>
                         }
                     >
                         <div
-                            class={"tabbar flex g-4 card border"}
+                            class={
+                                "tabbar flex g-4 card border justify-space-between mobile:flex-column align-center"
+                            }
                             style={{
                                 width: "calc(100% + 1.5rem * 2)",
                                 margin: "-1.5rem 0 1rem -1.5rem", // offset the padding of .tab-container
@@ -2977,44 +3018,165 @@ export class Writer implements Endpoint {
                                 border: "none",
                                 borderBottom:
                                     "solid 1px var(--background-surface2a)",
+                                overflow: "auto hidden",
                             }}
                         >
-                            <button
-                                id={"editor-open-tab-text"}
-                                style={{
-                                    borderRadius: "var(--u-04)",
-                                }}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    height="16"
-                                    aria-label={"Pencil Symbol"}
+                            <div className="flex g-4">
+                                <button
+                                    id={"editor-open-tab-text"}
+                                    style={{
+                                        borderRadius: "var(--u-04)",
+                                    }}
                                 >
-                                    <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
-                                </svg>
-                                Text
-                            </button>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"Pencil Symbol"}
+                                    >
+                                        <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                    </svg>
+                                    Write
+                                </button>
 
-                            <button
-                                class={"secondary"}
-                                id={"editor-open-tab-preview"}
-                                style={{
-                                    borderRadius: "var(--u-04)",
-                                }}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    height="16"
-                                    aria-label={"File Symbol"}
+                                <button
+                                    class={"secondary"}
+                                    id={"editor-open-tab-preview"}
+                                    style={{
+                                        borderRadius: "var(--u-04)",
+                                    }}
                                 >
-                                    <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
-                                </svg>
-                                Preview
-                            </button>
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        height="16"
+                                        aria-label={"File Symbol"}
+                                    >
+                                        <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+                                    </svg>
+                                    Preview
+                                </button>
+                            </div>
+
+                            <div class={"flex flex-wrap g-4"}>
+                                {BundlesDB.config.app &&
+                                    BundlesDB.config.app.how && (
+                                        <a
+                                            href={BundlesDB.config.app.how}
+                                            class={
+                                                "button secondary normal tooltip-wrapper"
+                                            }
+                                            target={"_blank"}
+                                            title={"How"}
+                                            style={{
+                                                borderRadius: "var(--u-04)",
+                                            }}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Info Symbol"}
+                                            >
+                                                <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                                            </svg>
+
+                                            <div className="card secondary round border tooltip left">
+                                                How
+                                            </div>
+                                        </a>
+                                    )}
+
+                                {BundlesDB.config.log &&
+                                    BundlesDB.config.log.events.includes(
+                                        "notification"
+                                    ) &&
+                                    Association[0] && (
+                                        <a
+                                            href="/paste/notifications"
+                                            className="button secondary normal tooltip-wrapper"
+                                            style={{
+                                                color:
+                                                    Notifications.length > 0
+                                                        ? "var(--red3)"
+                                                        : "",
+                                                borderRadius: "var(--u-04)",
+                                            }}
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Bell Symbol"}
+                                            >
+                                                <path d="M8 16a2 2 0 0 0 1.985-1.75c.017-.137-.097-.25-.235-.25h-3.5c-.138 0-.252.113-.235.25A2 2 0 0 0 8 16ZM3 5a5 5 0 0 1 10 0v2.947c0 .05.015.098.042.139l1.703 2.555A1.519 1.519 0 0 1 13.482 13H2.518a1.516 1.516 0 0 1-1.263-2.36l1.703-2.554A.255.255 0 0 0 3 7.947Zm5-3.5A3.5 3.5 0 0 0 4.5 5v2.947c0 .346-.102.683-.294.97l-1.703 2.556a.017.017 0 0 0-.003.01l.001.006c0 .002.002.004.004.006l.006.004.007.001h10.964l.007-.001.006-.004.004-.006.001-.007a.017.017 0 0 0-.003-.01l-1.703-2.554a1.745 1.745 0 0 1-.294-.97V5A3.5 3.5 0 0 0 8 1.5Z"></path>
+                                            </svg>
+
+                                            <div className="card secondary round border tooltip left">
+                                                View {Notifications.length}{" "}
+                                                notification
+                                                {Notifications.length > 1 ||
+                                                Notifications.length === 0
+                                                    ? "s"
+                                                    : ""}
+                                            </div>
+                                        </a>
+                                    )}
+
+                                {(!Association[0] && (
+                                    <button
+                                        title="Associate Paste"
+                                        class={
+                                            "modal:bundles:button.login tooltip-wrapper"
+                                        }
+                                        style={{
+                                            borderRadius: "var(--u-04)",
+                                        }}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Sign In Symbol"}
+                                        >
+                                            <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm6.56 4.5h5.69a.75.75 0 0 1 0 1.5H8.56l1.97 1.97a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L6.22 8.53a.75.75 0 0 1 0-1.06l3.25-3.25a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734Z"></path>
+                                        </svg>
+
+                                        <div className="card secondary round border tooltip left">
+                                            Associate Paste
+                                        </div>
+                                    </button>
+                                )) || (
+                                    <button
+                                        title="Disassociate Paste"
+                                        class={
+                                            "modal:bundles:button.logout tooltip-wrapper"
+                                        }
+                                        style={{
+                                            borderRadius: "var(--u-04)",
+                                        }}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Sign Out Symbol"}
+                                        >
+                                            <path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 4.5-1.97-1.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"></path>
+                                        </svg>
+
+                                        <div className="card secondary round border tooltip left">
+                                            Disassociate Paste
+                                        </div>
+                                    </button>
+                                )}
+                            </div>
                         </div>
 
                         <div id={"-editor"}>
@@ -3073,6 +3235,8 @@ export class Writer implements Endpoint {
                             delete: "/api/delete",
                         }}
                     />
+
+                    <AuthModals use={Association[0] === true ? "logout" : "login"} />
 
                     {/* curiosity */}
                     <Curiosity Association={Association} />

@@ -7,8 +7,6 @@ import { HoneybeeConfig } from "honeybee";
 import pack from "../../../../../package.json";
 import LoadingModal from "./modals/Loading";
 
-import { TOML } from "../../../db/helpers/BaseParser";
-
 // plugin footer load
 const FooterExtras: string[] = [];
 
@@ -178,7 +176,7 @@ export default function Footer(props: {
                     }
                     
                     .__footer_cardbtn {
-                        width: calc(50% - 0.25rem);
+                        width: calc(33% - 0.25rem);
                         height: 10rem !important;
                         display: flex;
                         flex-direction: column;
@@ -249,6 +247,22 @@ export default function Footer(props: {
                             <path d="M3 3a2 2 0 0 1 2-2h9.982a2 2 0 0 1 1.414.586l4.018 4.018A2 2 0 0 1 21 7.018V21a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Zm2-.5a.5.5 0 0 0-.5.5v18a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5V8.5h-4a2 2 0 0 1-2-2v-4Zm10 0v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0-.146-.336l-4.018-4.018A.5.5 0 0 0 15 2.5Z"></path>
                         </svg>
                         <b>Normal</b>
+                    </a>
+
+                    <a
+                        href={`${homepageLink}paste/writer`}
+                        class={"button border dashed __footer_cardbtn"}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 16 16"
+                            width="24"
+                            height="24"
+                            aria-label={"Pencil Symbol"}
+                        >
+                            <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                        </svg>
+                        <b>Writer</b>
                     </a>
 
                     {BundlesDB.config.app &&

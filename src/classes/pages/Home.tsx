@@ -203,7 +203,7 @@ export default class Home implements Endpoint {
         // return
         return new Response(
             Renderer.Render(
-                <div class="builder:page">
+                <div class="flex flex-column g-4">
                     <main
                         style={{
                             height: "calc(100% - 1rem)",
@@ -922,23 +922,7 @@ export default class Home implements Endpoint {
                                 ))}
                         </div>
 
-                        <Footer
-                            IncludeLoading={false}
-                            ShowBottomRow={
-                                search.get("mode") !== "edit" ||
-                                (
-                                    (
-                                        BundlesDB.config.app || {
-                                            footer: {
-                                                show_name_on_all_pages: false,
-                                            },
-                                        }
-                                    ).footer || { show_name_on_all_pages: false }
-                                ).show_name_on_all_pages === true
-                            }
-                        />
-
-                        <LoadingModal />
+                        <Footer />
                     </main>
 
                     {paste && (
