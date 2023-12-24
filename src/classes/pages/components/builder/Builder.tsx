@@ -591,7 +591,7 @@ function RenderPage() {
                 class={"builder:stat"}
                 style={{
                     position: "absolute",
-                    zIndex: 3,
+                    zIndex: 100,
                     top: 0,
                 }}
             />
@@ -670,6 +670,11 @@ function RenderPage() {
                     aria-label={"Publish Paste"}
                     class={"tooltip-wrapper visual-active green-cta round border"}
                     onClick={() => {
+                        // remove Children form all source components
+                        for (const component of parser.GetNodes())
+                            if (component.Type === "Source") component.Children = [];
+
+                        // ...
                         (window as any).EditorContent =
                             `_builder:${BaseParser.stringify(Document)}`;
                     }}

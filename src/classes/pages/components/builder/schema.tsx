@@ -79,15 +79,16 @@ export interface EmbedNode extends BaseNode {
 }
 
 export interface SourceNode extends BaseNode {
-    Type: "Source";
+    Type: "Source" | "HTMLEntity";
     Content: string;
     UseContentBox?: string; // use "display: contents;" if "true"
+    Children?: Node[];
+    Attributes?: { [key: string]: string };
 }
 
-export interface HTMLEntityNode extends BaseNode {
+export interface HTMLEntityNode extends SourceNode {
     // represents HTML elements defined inside a SourceNode
     Type: "HTMLEntity";
-    Content: string;
     NotRemovable: true;
 }
 
@@ -552,6 +553,12 @@ export function SourceNode(props: {
 }): any {
     if (!props.node.ID) props.node.ID = crypto.randomUUID();
 
+    const parse_res = parser.ParseSourceNode(props);
+
+    props.node = parse_res[0];
+    const parsed = parse_res[1];
+
+    // return
     return (
         <DragZones
             visible={props.node.EditMode}
@@ -569,7 +576,7 @@ export function SourceNode(props: {
                 data-component={props.node.Type}
                 data-edit={props.node.EditMode}
                 draggable={props.node.EditMode}
-                dangerouslySetInnerHTML={{ __html: props.node.Content }}
+                dangerouslySetInnerHTML={{ __html: parsed.body.innerHTML }}
             />
         </DragZones>
     );

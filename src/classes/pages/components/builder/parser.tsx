@@ -4,7 +4,7 @@
  * @license MIT
  */
 
-import schema, { Node, PageNode } from "./schema";
+import schema, { Node, PageNode, SourceNode } from "./schema";
 import { VNode } from "preact";
 
 // ...
@@ -144,6 +144,70 @@ export function ParseStyleString(style: string): { [key: string]: string } {
     return result;
 }
 
+/**
+ * @function ParseSourceNode
+ *
+ * @export
+ * @param {{ node: SourceNode }} props
+ * @return {Document}
+ */
+export function ParseSourceNode(props: {
+    node: SourceNode;
+}): [SourceNode, Document] {
+    // build props.node.children
+    const parsed = new DOMParser().parseFromString(
+        `<body>${props.node.Content}</body>`,
+        "text/html"
+    );
+
+    function ParseNodeContent(node: SourceNode, children: HTMLElement[]): void {
+        node.Children = [];
+        for (const element of children) {
+            const element_id =
+                element.id || `figurative-${props.node.ID}-${crypto.randomUUID()}`;
+
+            element.id = element_id;
+
+            element.classList.add("component");
+            element.setAttribute(
+                "data-component",
+                `${element.nodeName.toLowerCase()} (figurative)` // we're playing loose with this attribute here
+            );
+
+            // ...parse attributes
+            const Attributes: { [key: string]: string } = {};
+
+            for (const attribute of Object.entries(element.attributes || {}))
+                Attributes[attribute[1].nodeName] = attribute[1].textContent || "";
+
+            // ...create node
+            const _node = {
+                NotRemovable: true,
+                ID: element_id,
+                Type: "Source",
+                Nickname: element.getAttribute("data-component"),
+                Content: element.innerHTML,
+                Children: [],
+                Attributes,
+            } as SourceNode;
+
+            // ...parse node
+            ParseNodeContent(
+                _node as SourceNode,
+                Array.from(element.children) as HTMLElement[]
+            );
+
+            // ...add node
+            node.Children.push(_node);
+        }
+    }
+
+    ParseNodeContent(props.node, Array.from(parsed.body.children) as HTMLElement[]);
+
+    // return
+    return [props.node, parsed];
+}
+
 // default export
 export default {
     AllNodes,
@@ -152,4 +216,5 @@ export default {
     ParseNodes,
     ParsePage,
     ParseStyleString,
+    ParseSourceNode,
 };

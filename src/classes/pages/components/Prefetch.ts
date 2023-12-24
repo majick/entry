@@ -291,13 +291,15 @@ export function RegisterEditorFormListeners(): void {
                 // ...set content (not automatically part of the form!)
                 data.set(
                     "Content",
-                    encodeURIComponent((window as any).EditorContent || "")
+                    encodeURIComponent(((window as any).EditorContent || "").trim())
                 );
 
                 if (data.get("OldContent") !== null)
                     data.set(
                         "OldContent",
-                        encodeURIComponent((window as any).EditorContent || "")
+                        encodeURIComponent(
+                            ((window as any).EditorContent || "").trim()
+                        )
                     );
             }
 
