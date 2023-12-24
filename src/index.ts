@@ -264,6 +264,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/admin/": { Page: Admin.Login },
         "/admin/login": { Page: Admin.Login },
         "/admin/login/": { Page: Admin.Login },
+        "/admin/staff/metadata": { Page: Admin.MetadataEditor },
 
         // GET api
         "/api/ip": { Page: API.WhatIsMyIP },

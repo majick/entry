@@ -1498,7 +1498,7 @@ export class PasteLogout implements Endpoint {
 
 /**
  * @export
- * @class APIEditMetadata
+ * @class EditMetadata
  * @implements {Endpoint}
  */
 export class EditMetadata implements Endpoint {
@@ -1518,16 +1518,40 @@ export class EditMetadata implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
-        if (!body.Metadata) return new Response("You changed nothing!");
-
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL, false, true); // do not fetch from cache!
         if (!paste) return new _404Page().request(request);
+
+        if (!body.Metadata)
+            return new Response(
+                JSON.stringify({
+                    success: true,
+                    redirect: `/${paste.CustomURL}?msg=${translations.English.metadata_updated}`,
+                    result: [
+                        true,
+                        translations.English.metadata_updated,
+                        paste.Metadata,
+                    ],
+                }),
+                {
+                    status: 200,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
         // get association
         const _ip = GetRemoteIP(request, server);
         const Association = await GetAssociation(request, _ip);
         if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        const AssociatedPaste = await db.GetPasteFromURL(Association[1]);
+        const IsStaff =
+            AssociatedPaste &&
+            AssociatedPaste.Metadata &&
+            AssociatedPaste.Metadata.Badges &&
+            AssociatedPaste.Metadata.Badges.includes("staff");
 
         // validate password
         const admin =
@@ -1541,25 +1565,42 @@ export class EditMetadata implements Endpoint {
             // ...and we're not the owner of the paste
             (!Association[0] ||
                 !paste.Metadata ||
-                Association[1] !== paste.Metadata!.Owner)
+                Association[1] !== paste.Metadata!.Owner) &&
+            // ...and we're not staff
+            IsStaff !== true
         )
-            return new Response(translations.English.error_invalid_password, {
-                status: 302,
-                headers: {
-                    Location: "/?err=Cannot edit metadata: Invalid password!",
-                    "X-Bundles-Error": "Cannot edit metadata: Invalid password!",
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: `/${paste.CustomURL}?err=${translations.English.error_invalid_password}`,
+                    result: [false, translations.English.error_invalid_password],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Bundles-Error":
+                            translations.English.error_invalid_password,
+                    },
+                }
+            );
 
         // make sure paste isn't locked... as long EditPassword isn't the edit password!
         if (!admin && paste.Metadata && paste.Metadata.Locked === true)
-            return new Response(translations.English.error_invalid_password, {
-                status: 302,
-                headers: {
-                    Location: "/?err=Cannot edit metadata: Paste is locked",
-                    "X-Bundles-Error": "Cannot edit metadata: Paste is locked",
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: `/${paste.CustomURL}?err=${translations.English.error_locked}`,
+                    result: [false, translations.English.error_locked],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Bundles-Error": translations.English.error_locked,
+                    },
+                }
+            );
 
         // unpack metadata
         const Unpacked = BaseParser.parse(body.Metadata) as PasteMetadata;
@@ -1589,7 +1630,7 @@ export class EditMetadata implements Endpoint {
                     paste.Metadata.Comments.AllowAnonymous =
                         Unpacked.Comments!.AllowAnonymous;
                 }
-        } else paste.Metadata = Unpacked;
+        } else paste.Metadata = Unpacked; // admin only updates
 
         // update paste
         await SQL.QueryOBJ({

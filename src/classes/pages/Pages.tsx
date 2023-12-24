@@ -2857,8 +2857,6 @@ export class Writer implements Endpoint {
         const Association = await GetAssociation(request, null);
         if (Association[1].startsWith("associated=")) Association[0] = false;
 
-        if (!Association[0]) return new _401PageEndpoint().request(request);
-
         // get paste if search.edit is not null
         let paste: Partial<Paste> | undefined;
         let RevisionNumber = 0;

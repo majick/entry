@@ -7,7 +7,14 @@
 import Honeybee, { Endpoint, Renderer } from "honeybee";
 import { Server } from "bun";
 
-import { VerifyContentType, db, DefaultHeaders, PageHeaders } from "./api/API";
+import {
+    VerifyContentType,
+    db,
+    DefaultHeaders,
+    PageHeaders,
+    GetAssociation,
+} from "./api/API";
+
 import BaseParser from "../db/helpers/BaseParser";
 import type { Paste } from "../db/objects/Paste";
 import BundlesDB from "../db/BundlesDB";
@@ -19,11 +26,11 @@ import Pages from "./Pages";
 
 import { plugins } from "../..";
 
+import _404Page, { _401PageEndpoint } from "./components/40x";
 import TopNav from "./components/site/TopNav";
+import { Button, SidebarLayout } from "fusion";
 import Checkbox from "./components/form/Checkbox";
 import { ParseMarkdownSync } from "./components/Markdown";
-import _404Page from "./components/40x";
-import { Button } from "fusion";
 
 /**
  * @function AdminNav
@@ -34,42 +41,8 @@ import { Button } from "fusion";
 function AdminNav(props: { active: string; pass: string }): any {
     return (
         <div class="content">
-            <h1
-                style={{
-                    display: "flex",
-                    gap: "1rem",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    flexWrap: "wrap",
-                    width: "100%",
-                }}
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    width="48"
-                    height="48"
-                    aria-label={"Server Symbol"}
-                >
-                    <path d="M10.75 6.5a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5ZM6 7.25a.75.75 0 0 1 .75-.75h.5a.75.75 0 0 1 0 1.5h-.5A.75.75 0 0 1 6 7.25Zm4 9a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Zm-3.25-.75a.75.75 0 0 0 0 1.5h.5a.75.75 0 0 0 0-1.5h-.5Z"></path>
-                    <path d="M3.25 2h17.5c.966 0 1.75.784 1.75 1.75v7c0 .372-.116.716-.314 1 .198.284.314.628.314 1v7a1.75 1.75 0 0 1-1.75 1.75H3.25a1.75 1.75 0 0 1-1.75-1.75v-7c0-.358.109-.707.314-1a1.741 1.741 0 0 1-.314-1v-7C1.5 2.784 2.284 2 3.25 2Zm0 10.5a.25.25 0 0 0-.25.25v7c0 .138.112.25.25.25h17.5a.25.25 0 0 0 .25-.25v-7a.25.25 0 0 0-.25-.25Zm0-1.5h17.5a.25.25 0 0 0 .25-.25v-7a.25.25 0 0 0-.25-.25H3.25a.25.25 0 0 0-.25.25v7c0 .138.112.25.25.25Z"></path>
-                </svg>
-
-                <span>{BundlesDB.config.name} Admin</span>
-            </h1>
-
-            <hr />
-
-            <div
-                style={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    flexWrap: "wrap",
-                }}
-            >
+            <div class={"full flex justify-center align-center g-4 flex-wrap"}>
+                {/* private, requires admin password */}
                 <form action="/admin/manage-pastes" method="POST">
                     <input
                         type="hidden"
@@ -243,12 +216,6 @@ function AdminNav(props: { active: string; pass: string }): any {
                 </Button>
             </div>
 
-            <style
-                dangerouslySetInnerHTML={{
-                    __html: "button.active { box-shadow: 0 0 1px var(--blue2); color: var(--blue2); }",
-                }}
-            />
-
             <hr />
 
             {/* performance display */}
@@ -273,19 +240,21 @@ function AdminNav(props: { active: string; pass: string }): any {
 
 function AdminLayout(props: { children: any; body: any; page: string }) {
     return (
-        <div class="sidebar-layout-wrapper">
-            <div className="sidebar">
-                <div>
+        <SidebarLayout
+            sidebar={
+                <>
+                    <TopNav breadcrumbs={["admin"]}>
+                        <Button href="/admin" round={true}>
+                            Logout
+                        </Button>
+                    </TopNav>
+
                     <AdminNav active={props.page} pass={props.body.AdminPassword} />
-                </div>
-
-                <Footer />
-            </div>
-
-            <div className="tab-container editor-tab page-content">
-                {props.children}
-            </div>
-        </div>
+                </>
+            }
+        >
+            {props.children}
+        </SidebarLayout>
     );
 }
 
@@ -1783,24 +1752,40 @@ export class ViewReport implements Endpoint {
  */
 export class MetadataEditor implements Endpoint {
     public async request(request: Request, server: Server): Promise<Response> {
-        // verify content type
-        const WrongType = VerifyContentType(
-            request,
-            "application/x-www-form-urlencoded"
-        );
-
-        if (WrongType) return WrongType;
-
         // handle cloud pages
         const IncorrectInstance = await Pages.CheckInstance(request, server);
         if (IncorrectInstance) return IncorrectInstance;
 
+        // get association
+        const Association = await GetAssociation(request, null);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        if (!Association[0]) return new _401PageEndpoint().request(request);
+
+        // get associated paste
+        const AssociatedPaste = await db.GetPasteFromURL(Association[1]);
+
         // get request body
-        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+        const body =
+            request.headers.get("Content-Type") ===
+            "application/x-www-form-urlencoded"
+                ? (Honeybee.FormDataToJSON(await request.formData()) as any)
+                : {};
+
+        const UserType =
+            // if user used admin password, return "admin"
+            body.AdminPassword === BundlesDB.config.admin
+                ? "admin"
+                : // if user has "staff" badge, return "staff"
+                  AssociatedPaste &&
+                    AssociatedPaste.Metadata &&
+                    AssociatedPaste.Metadata.Badges &&
+                    AssociatedPaste.Metadata.Badges.includes("staff")
+                  ? "staff"
+                  : "guest"; // otherwise, return "guest"
 
         // validate password
-        if (!body.AdminPassword || body.AdminPassword !== BundlesDB.config.admin)
-            return new Login().request(request, server);
+        if (UserType === "guest") return new _401PageEndpoint().request(request);
 
         // get paste
         const result = await db.GetPasteFromURL(
@@ -1811,12 +1796,25 @@ export class MetadataEditor implements Endpoint {
             return new _404Page().request(request);
 
         // try to fetch paste associated session
-        const session =
+        let session =
             body.paste_customurl !== undefined
                 ? await BundlesDB.Logs.QueryLogs(
                       `\"Content\" LIKE \'%;_with;${result!.CustomURL}\'`
                   )
                 : ([false, "", []] as any[]);
+
+        // delete sensitive values from result for staff
+        if (UserType === "staff" && result && result.Metadata) {
+            // hide user ip for staff (still visible to admin)
+            session = [false, "", []];
+
+            // staff cannot edit themselves or other staff
+            if (
+                result.CustomURL === Association[1] ||
+                (result.Metadata.Badges && result.Metadata.Badges.includes("staff"))
+            )
+                return new _401PageEndpoint().request(request);
+        }
 
         // return
         return new Response(
