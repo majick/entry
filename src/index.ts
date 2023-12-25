@@ -101,6 +101,10 @@ export type Config = {
             // https://codeberg.org/hkau/curiosity/src/branch/master/README.md
             api_key: string; // needed to create profiles from server
             host: string; // needed to connect client drone script
+            use_other?: {
+                // use another analytics platform, HTML embed
+                html: string;
+            };
         };
         footer?: {
             info?: string;

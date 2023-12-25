@@ -46,6 +46,7 @@ import {
     Button,
     CardWithHeader,
 } from "fusion";
+
 import { Node, PageNode, StarInfoNode } from "./components/builder/schema";
 import { AuthModals } from "./components/site/modals/AuthModals";
 import MessageDisplays from "./components/site/MessageDisplays";
@@ -96,7 +97,8 @@ export function Curiosity(props: { Association: [boolean, string] }): any {
             {BundlesDB.config.app &&
                 BundlesDB.config.app.curiosity &&
                 props.Association[0] &&
-                props.Association[1] && (
+                props.Association[1] &&
+                !BundlesDB.config.app.curiosity.use_other && (
                     <>
                         <script
                             src={`${BundlesDB.config.app.curiosity.host}/drone.js`}
@@ -108,6 +110,16 @@ export function Curiosity(props: { Association: [boolean, string] }): any {
                             }}
                         />
                     </>
+                )}
+
+            {BundlesDB.config.app &&
+                BundlesDB.config.app.curiosity &&
+                BundlesDB.config.app.curiosity.use_other && (
+                    <div
+                        dangerouslySetInnerHTML={{
+                            __html: BundlesDB.config.app.curiosity.use_other.html,
+                        }}
+                    />
                 )}
         </>
     );

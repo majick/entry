@@ -286,6 +286,43 @@ export default class Media {
     }
 
     /**
+     * @method CreateFolder
+     *
+     * @param {string} owner
+     * @param {string} _path
+     * @return {Promise<[boolean, string]>}
+     * @memberof Media
+     */
+    public async CreateFolder(
+        owner: string,
+        _path: string
+    ): Promise<[boolean, string]> {
+        if (
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.media ||
+            BundlesDB.config.app.media.enabled === false
+        )
+            return [false, translations.English.error_configuration];
+
+        // ...
+        const OwnerFolder = path.resolve(
+            Media.MediaLocation,
+            owner.replaceAll("/", ":sl:")
+        );
+
+        // make sure path doesn't already exist
+        const Path = path.resolve(OwnerFolder, _path);
+        if (!fs.existsSync(Path))
+            return [false, translations.English.error_file_not_found];
+
+        // create folder
+        fs.mkdirSync(Path, { recursive: true });
+
+        // return
+        return [true, translations.English.file_created];
+    }
+
+    /**
      * @method GetFileType
      *
      * @static
