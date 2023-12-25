@@ -533,7 +533,11 @@ export class CreatePaste implements Endpoint {
             if (UpdateResult[0] === true) Association[1] = UpdateResult[1];
 
             // update curiosity
-            if (BundlesDB.config.app && BundlesDB.config.app.curiosity)
+            if (
+                BundlesDB.config.app &&
+                BundlesDB.config.app.curiosity &&
+                !BundlesDB.config.app.curiosity.use_other
+            )
                 await fetch(
                     `${BundlesDB.config.app.curiosity.host}/api/profiles/create?c=json`,
                     {
@@ -1330,7 +1334,11 @@ export class PasteLogin implements Endpoint {
         await GetAssociation(request, _ip, true, body.CustomURL);
 
         // create profile
-        if (BundlesDB.config.app && BundlesDB.config.app.curiosity)
+        if (
+            BundlesDB.config.app &&
+            BundlesDB.config.app.curiosity &&
+            !BundlesDB.config.app.curiosity.use_other
+        )
             await fetch(
                 `${BundlesDB.config.app.curiosity.host}/api/profiles/create?c=json`,
                 {
@@ -1454,7 +1462,11 @@ export class PasteLogout implements Endpoint {
         await GetAssociation(request, null, false, "", true);
 
         // delete profile
-        if (BundlesDB.config.app && BundlesDB.config.app.curiosity)
+        if (
+            BundlesDB.config.app &&
+            BundlesDB.config.app.curiosity &&
+            !BundlesDB.config.app.curiosity.use_other
+        )
             await fetch(
                 `${BundlesDB.config.app.curiosity.host}/api/profiles/delete?c=json`,
                 {
@@ -1876,7 +1888,12 @@ export class GetSocialProfile implements Endpoint {
             "/api/social/get/".length,
             url.pathname.length
         );
-        if (!name || !BundlesDB.config.app || !BundlesDB.config.app.curiosity)
+        if (
+            !name ||
+            !BundlesDB.config.app ||
+            !BundlesDB.config.app.curiosity ||
+            BundlesDB.config.app.curiosity.use_other
+        )
             return new _404Page().request(request);
 
         // fetch
