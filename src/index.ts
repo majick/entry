@@ -280,6 +280,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/api/comments": { Type: "begins", Page: API.GetPasteComments },
         // ...media
         "/api/media/file/": { Type: "begins", Page: Pages.InspectMedia }, // alias of /f
+        "/api/media/list/": { Type: "begins", Method: "GET", Page: API.ListFiles },
         // ...social
         "/api/social/get/": { Type: "begins", Page: API.GetSocialProfile },
         // ...dist
@@ -326,6 +327,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/api/edit": { Method: "POST", Page: API.EditPaste },
         "/api/delete": { Method: "POST", Page: API.DeletePaste },
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
+        "/api/search": { Method: "POST", Page: Pages.PastesSearch },
         // ...comments
         "/api/comments/delete": {
             Type: "begins",

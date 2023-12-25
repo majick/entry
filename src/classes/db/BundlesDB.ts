@@ -589,17 +589,14 @@ export default class BundlesDB {
                 const [RealContent, _Metadata] = record.Content.split("_metadata:");
                 record.Content = RealContent;
 
-                if (_Metadata) record.Metadata = BaseParser.parse(_Metadata) as any;
-                else if (!record.Metadata)
-                    // fill default values
+                if (typeof record.Metadata === "string")
+                    record.Metadata = JSON.parse(record.Metadata);
+
+                if (!record.Metadata)
                     record.Metadata = {
                         Version: 1,
                         Owner: record.CustomURL,
-                        Comments: { Enabled: true },
                     };
-
-                if (typeof record.Metadata === "string")
-                    record.Metadata = JSON.parse(record.Metadata);
 
                 // MAKE SURE paste has an owner value!
                 if (

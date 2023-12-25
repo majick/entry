@@ -1379,14 +1379,17 @@ export class PastesSearch implements Endpoint {
                     : // search within group
                       await db.GetAllPastesInGroup(search.get("group") as string);
 
-            // if "owner" is set, filter out pastes not owned by value
-            if (search.get("owner"))
-                for (const paste of pastes)
-                    if (
-                        paste.Metadata &&
-                        paste.Metadata!.Owner !== search.get("owner")
-                    )
-                        pastes.splice(pastes.indexOf(paste), 1);
+            // if method === "POST", return pastes json
+            if (request.method === "POST")
+                return new Response(
+                    JSON.stringify([true, `${pastes.length} results`, pastes]),
+                    {
+                        status: 200,
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
 
             // if search is disabled, a value for "group" is required
             // ...if we don't have one, 404!
@@ -1596,7 +1599,7 @@ export class PasteCommentsPage implements Endpoint {
 
         // attempt to get paste
         const result = (await db.GetPasteFromURL(name)) as Paste;
-        if (!result || result.HostServer) return new _404Page().request(request);
+        if (!result) return new _404Page().request(request);
 
         // return 404 if page does not allow comments
         if (
@@ -1655,14 +1658,6 @@ export class PasteCommentsPage implements Endpoint {
             }
         ).IsCommentOn;
 
-        // make sure paste has an owner
-        if (search.get("edit") === "true" && result.Metadata!.Owner === "")
-            return new Response(
-                "This paste does not have an owner, so we cannot verify if you have permission to manage its comments." +
-                    "\nPlease associate with a paste and edit this paste to add ownership to it.",
-                { status: 401 }
-            );
-
         // if edit mode is enabled, but we aren't associated with this paste... return 404
         if (
             search.get("edit") === "true" &&
@@ -1679,8 +1674,7 @@ export class PasteCommentsPage implements Endpoint {
                 <>
                     <TopNav
                         breadcrumbs={[
-                            "paste",
-                            "comments",
+                            "c",
                             (result.GroupName === "comments" &&
                                 result.Metadata &&
                                 result.Metadata.Comments &&
@@ -1763,7 +1757,12 @@ export class PasteCommentsPage implements Endpoint {
                                 padding: "calc(var(--u-12) * 4) var(--u-12)",
                             }}
                         >
-                            <h1 class={"no-margin"}>{name}</h1>
+                            <h1 class={"no-margin"}>
+                                {(result.Metadata &&
+                                    result.Metadata.Comments &&
+                                    result.Metadata.Comments.IsCommentOn) ||
+                                    result.CustomURL}
+                            </h1>
                         </div>
 
                         <main class={"small flex flex-column g-4"}>
@@ -2207,7 +2206,13 @@ export class PasteCommentsPage implements Endpoint {
                                                     </div>
 
                                                     <a
-                                                        href={`/c/${comment.CustomURL}`}
+                                                        href={`/c/${
+                                                            comment.CustomURL
+                                                        }${
+                                                            result.HostServer
+                                                                ? `:${result.HostServer}`
+                                                                : ""
+                                                        }`}
                                                     >
                                                         View{" "}
                                                         <b>{comment.Comments}</b>{" "}

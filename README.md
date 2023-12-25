@@ -92,6 +92,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `GET  /api/group/{group}`, Get all pastes in specified group
 - `GET  /api/owner/{pastes}`, Get all pastes owned by specified paste
 - `GET  /api/media/file/{owner}/{file}`, Get media
+- `GET  /api/media/list/{owner}`, List files under paste
 
 Most of the POST endpoints listed return a JSON object similar to this:
 

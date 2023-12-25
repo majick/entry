@@ -771,18 +771,11 @@ export class ListFiles implements Endpoint {
         const IncorrectInstance = await Pages.CheckInstance(request, server);
         if (IncorrectInstance) return IncorrectInstance;
 
-        // don't check if media is disabled, as files should still be viewable even with media disabled!
+        // get owner name
+        let Owner = url.pathname.slice(1, url.pathname.length);
 
-        // get owner name and ifle name
-        const name = url.pathname.slice(
-            "/api/media/list/".length,
-            url.pathname.length
-        );
-
-        const Owner = name.split("/")[0];
-        const File = name.split("/")[1];
-
-        if (!Owner || !File) return new _404Page().request(request);
+        if (Owner.startsWith("api/media/list/"))
+            Owner = Owner.split("api/media/list/")[1];
 
         // get file
         const files = await BundlesDB.Media.GetMediaByOwner(Owner);
