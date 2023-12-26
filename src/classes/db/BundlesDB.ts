@@ -1851,14 +1851,20 @@ export default class BundlesDB {
      * @method GetAllPastesOwnedByPaste
      *
      * @param {string} owner
+     * @param {number | undefined} limit
      * @return {Promise<Paste[]>}
      * @memberof BundlesDB
      */
-    public async GetAllPastesOwnedByPaste(owner: string): Promise<Paste[]> {
+    public async GetAllPastesOwnedByPaste(
+        owner: string,
+        limit?: number
+    ): Promise<Paste[]> {
         return await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
             // @ts-ignore
             db: this.db,
-            query: 'SELECT * FROM "Pastes" WHERE "Metadata" LIKE ?',
+            query: `SELECT * FROM "Pastes" WHERE "Metadata" LIKE ?${
+                limit !== undefined ? ` LIMIT ${limit}` : ""
+            }`,
             params: [`%"Owner":"${owner}"%`],
             all: true,
             transaction: true,

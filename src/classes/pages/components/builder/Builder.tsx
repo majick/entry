@@ -819,9 +819,9 @@ function RenderPage() {
             />
 
             <Modal
-                buttonid="bundles:button.PasteOptions"
-                modalid="bundles:modal.PasteOptions"
-                noIdMatch={true} // use `window.modals["bundles:modal.PasteOptions"](true)` instead
+                buttonid="bundles:button.PasteStats"
+                modalid="bundles:modal.PasteStats"
+                noIdMatch={true} // use `window.modals["bundles:modal.PasteStats"](true)` instead
                 round={true}
             >
                 <div
@@ -1277,7 +1277,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                     (target.firstChild as HTMLElement).id === "PageStar") ||
                 (target.parentElement && target.parentElement.id === "PageStar")
             )
-                (window as any).modals["bundles:modal.PasteOptions"](true);
+                (window as any).modals["bundles:modal.PasteStats"](true);
         });
     }
 
@@ -1463,7 +1463,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
                 (target.firstChild &&
                     (target.firstChild as HTMLElement).id === "PageStar")
             )
-                (window as any).modals["bundles:modal.PasteOptions"](true);
+                (window as any).modals["bundles:modal.PasteStats"](true);
 
             // get node
             const AllNodes = parser.GetNodes();

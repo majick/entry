@@ -152,7 +152,7 @@ export function ParseMarkdownSync(
                     .replaceAll(/[^A-Za-z0-9-]/g, "")}${suffix}`,
             };
 
-            TOC.push(heading);
+            if (HeadingType <= 6) TOC.push(heading);
 
             // return
             return `<h${heading.Type} id="${heading.ID}">
@@ -349,6 +349,11 @@ export function ParseMarkdownSync(
     // paste mentions (autolink)
     content = content.replaceAll(
         /(\.\/)(?<NAME>.*?)(?<END>\s|\n)/gm,
+        '<a href="/$<NAME>" class="chip badge mention" role="mention">./$<NAME></a>$<END>'
+    );
+
+    content = content.replaceAll(
+        /(\[{2})(?<NAME>.*?)(\]{2})/gm,
         '<a href="/$<NAME>" class="chip badge mention" role="mention">./$<NAME></a>$<END>'
     );
 

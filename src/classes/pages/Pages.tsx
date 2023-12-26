@@ -13,6 +13,8 @@ import fs from "node:fs";
 import pack from "../../../package.json";
 
 // import components
+import PublishModals from "./components/site/modals/PublishModals";
+import PasteStatsModal from "./components/site/modals/PasteStats";
 import DecryptionForm from "./components/form/DecryptionForm";
 import _404Page, { _401PageEndpoint } from "./components/40x";
 import TopNav from "./components/site/TopNav";
@@ -584,153 +586,11 @@ export class GetPasteFromURL implements Endpoint {
                         <Curiosity Association={Association} />
 
                         {/* toolbar */}
-                        <Modal
-                            buttonid="bundles:button.PasteOptions"
-                            modalid="bundles:modal.PasteOptions"
-                            noIdMatch={true} // use `window.modals["bundles:modal.PasteOptions"](true)` instead
-                            round={true}
-                        >
-                            <div
-                                style={{
-                                    width: "25rem",
-                                    maxWidth: "100%",
-                                }}
-                            >
-                                <h4 style={{ textAlign: "center", width: "100%" }}>
-                                    {result.CustomURL.split(":")[0]}
-                                </h4>
-
-                                <hr />
-
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        flexWrap: "wrap",
-                                        gap: "0.5rem",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}
-                                >
-                                    <a
-                                        href={`${HostnameURL}paste/builder?edit=${
-                                            result.CustomURL
-                                        }${
-                                            RevisionNumber !== 0
-                                                ? `&r=${RevisionNumber}`
-                                                : ""
-                                        }`}
-                                        className="button round"
-                                        disabled={HideSource}
-                                    >
-                                        Edit
-                                    </a>
-
-                                    <a
-                                        href={`${HostnameURL}r/${result.CustomURL}`}
-                                        class={"button round"}
-                                        title={"Inspect Paste"}
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 16 16"
-                                            width="16"
-                                            height="16"
-                                            style={{
-                                                marginTop: "2px",
-                                            }}
-                                            aria-label={"Repo Symbol"}
-                                        >
-                                            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
-                                        </svg>
-                                        More
-                                    </a>
-
-                                    {BundlesDB.config.app &&
-                                        BundlesDB.config.app.enable_comments ===
-                                            true &&
-                                        (!result.Metadata ||
-                                            !result.Metadata!.Comments ||
-                                            result.Metadata!.Comments.Enabled !==
-                                                false) && (
-                                            <a
-                                                href={`${HostnameURL}c/${result.CustomURL}`}
-                                                className="button round"
-                                            >
-                                                Comments ({result.Comments || 0})
-                                            </a>
-                                        )}
-                                </div>
-
-                                <hr />
-
-                                {BundlesDB.config.log &&
-                                    BundlesDB.config.log.events.includes(
-                                        "view_paste"
-                                    ) &&
-                                    (!result.Metadata ||
-                                        result.Metadata.ShowViewCount !== false) && (
-                                        <p>Views: {result.Views}</p>
-                                    )}
-
-                                <p>
-                                    Publish:{" "}
-                                    <span class={"utc-date-to-localize"}>
-                                        {new Date(result.PubDate).toUTCString()}
-                                    </span>
-                                </p>
-
-                                <p>
-                                    Edit:{" "}
-                                    <span class={"utc-date-to-localize"}>
-                                        {new Date(result.EditDate).toUTCString()}
-                                    </span>
-                                </p>
-
-                                {result.Metadata && (
-                                    <>
-                                        {result.Metadata.Owner &&
-                                            result.Metadata.ShowOwnerEnabled !==
-                                                false &&
-                                            result.Metadata.Owner !==
-                                                result.CustomURL &&
-                                            result.Metadata.Owner !==
-                                                "Sessions are disabled" && (
-                                                <p>
-                                                    Owner:{" "}
-                                                    <a
-                                                        href={`${HostnameURL}~${result.Metadata.Owner}`}
-                                                    >
-                                                        {result.Metadata.Owner
-                                                            .length > 25
-                                                            ? `${result.Metadata.Owner}...`
-                                                            : result.Metadata.Owner}
-                                                    </a>
-                                                </p>
-                                            )}
-                                    </>
-                                )}
-
-                                <hr />
-
-                                <form
-                                    method={"dialog"}
-                                    style={{
-                                        width: "100%",
-                                    }}
-                                >
-                                    <button
-                                        className="green round"
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                    >
-                                        Close
-                                    </button>
-                                </form>
-
-                                <Footer />
-                            </div>
-                        </Modal>
+                        <PasteStatsModal
+                            paste={result}
+                            includeFooter={true}
+                            noIdMatch={true}
+                        />
                     </>,
                     <>
                         <link rel="icon" href={Star ? Star.Source : "/favicon"} />
@@ -828,15 +688,9 @@ export class GetPasteFromURL implements Endpoint {
                             />
                         </Card>
 
-                        <div
-                            class={
-                                "flex mobile:flex-column justify-space-between g-4 full"
-                            }
-                        >
+                        <div class={"flex justify-space-between g-4 full"}>
                             <div
-                                class={
-                                    "mobile:center flex flex-wrap justify-center g-4"
-                                }
+                                class={"flex flex-wrap justify-center g-4"}
                                 style={{
                                     width: "max-content",
                                     height: "max-content",
@@ -914,176 +768,26 @@ export class GetPasteFromURL implements Endpoint {
                                             <span>{result.Comments}</span>
                                         </a>
                                     )}
-
-                                <a
-                                    href={`${HostnameURL}r/${result.CustomURL}`}
-                                    class={"button border round"}
-                                    title={"Inspect Paste"}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        style={{
-                                            marginTop: "2px",
-                                        }}
-                                        aria-label={"Repo Symbol"}
-                                    >
-                                        <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
-                                    </svg>
-                                    More
-                                </a>
                             </div>
 
-                            <div
-                                class={"mobile:justify-center text-right"}
-                                style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    justifyContent: "center",
-                                    alignItems: "flex-end",
-                                    color: "var(--text-color-faded)",
-                                }}
+                            <button
+                                id={"bundles:button.PasteStats"}
+                                class={"round tooltip-wrapper"}
                             >
-                                {result.Metadata &&
-                                    result.Metadata.Badges &&
-                                    result.Metadata.Badges.split(",").length > 0 && (
-                                        <div class={"flex flex-wrap g-4"}>
-                                            {result.Metadata.Badges.split(",").map(
-                                                (badge) => (
-                                                    <span class={"chip badge"}>
-                                                        {badge}
-                                                    </span>
-                                                )
-                                            )}
-                                        </div>
-                                    )}
-
-                                {result.ExpireOn !== undefined && (
-                                    <span>Expires: {result.ExpireOn}</span>
-                                )}
-
-                                <span
-                                    class={"flex align-center g-4"}
-                                    title={new Date(result.PubDate).toUTCString()}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Sparkle Symbol"}
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        aria-label={"Calendar Symbol"}
-                                    >
-                                        <path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"></path>
-                                    </svg>
-                                    <span>
-                                        Pub:{" "}
-                                        <span className="utc-date-to-localize">
-                                            {new Date(result.PubDate).toUTCString()}
-                                        </span>
-                                    </span>
-                                </span>
+                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
+                                </svg>
 
-                                <span
-                                    class={"flex align-center g-4"}
-                                    title={new Date(result.EditDate).toUTCString()}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        aria-label={"Calendar Symbol"}
-                                    >
-                                        <path d="M4.75 0a.75.75 0 0 1 .75.75V2h5V.75a.75.75 0 0 1 1.5 0V2h1.25c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25V3.75C1 2.784 1.784 2 2.75 2H4V.75A.75.75 0 0 1 4.75 0ZM2.5 7.5v6.75c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25V7.5Zm10.75-4H2.75a.25.25 0 0 0-.25.25V6h11V3.75a.25.25 0 0 0-.25-.25Z"></path>
-                                    </svg>
-                                    <span>
-                                        Edit:{" "}
-                                        <span className="utc-date-to-localize">
-                                            {new Date(result.EditDate).toUTCString()}
-                                        </span>
-                                    </span>
-                                </span>
-
-                                {result.Metadata && (
-                                    <>
-                                        {result.Metadata.Owner &&
-                                            !result.Content.includes(
-                                                "<% disable show_owner %>"
-                                            ) &&
-                                            result.Metadata.ShowOwnerEnabled !==
-                                                false &&
-                                            result.Metadata.Owner !==
-                                                result.CustomURL &&
-                                            result.Metadata.Owner !==
-                                                "Sessions are disabled" && (
-                                                <span
-                                                    class={"flex align-center g-4"}
-                                                >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 16 16"
-                                                        width="16"
-                                                        height="16"
-                                                        aria-label={
-                                                            "Shield Lock Symbol"
-                                                        }
-                                                    >
-                                                        <path d="m8.533.133 5.25 1.68A1.75 1.75 0 0 1 15 3.48V7c0 1.566-.32 3.182-1.303 4.682-.983 1.498-2.585 2.813-5.032 3.855a1.697 1.697 0 0 1-1.33 0c-2.447-1.042-4.049-2.357-5.032-3.855C1.32 10.182 1 8.566 1 7V3.48a1.75 1.75 0 0 1 1.217-1.667l5.25-1.68a1.748 1.748 0 0 1 1.066 0Zm-.61 1.429.001.001-5.25 1.68a.251.251 0 0 0-.174.237V7c0 1.36.275 2.666 1.057 3.859.784 1.194 2.121 2.342 4.366 3.298a.196.196 0 0 0 .154 0c2.245-.957 3.582-2.103 4.366-3.297C13.225 9.666 13.5 8.358 13.5 7V3.48a.25.25 0 0 0-.174-.238l-5.25-1.68a.25.25 0 0 0-.153 0ZM9.5 6.5c0 .536-.286 1.032-.75 1.3v2.45a.75.75 0 0 1-1.5 0V7.8A1.5 1.5 0 1 1 9.5 6.5Z"></path>
-                                                    </svg>
-                                                    <span>
-                                                        Owner:{" "}
-                                                        <a
-                                                            href={`${HostnameURL}~${result.Metadata.Owner}`}
-                                                        >
-                                                            {result.Metadata.Owner
-                                                                .length > 25
-                                                                ? `${result.Metadata.Owner}...`
-                                                                : result.Metadata
-                                                                      .Owner}
-                                                        </a>
-                                                    </span>
-                                                </span>
-                                            )}
-                                    </>
-                                )}
-
-                                {BundlesDB.config.log &&
-                                    BundlesDB.config.log.events.includes(
-                                        "view_paste"
-                                    ) &&
-                                    (!result.Metadata ||
-                                        result.Metadata.ShowViewCount !== false) && (
-                                        <span
-                                            style={{
-                                                display: "flex",
-                                                justifyContent: "right",
-                                                alignItems: "center",
-                                                gap: "0.25rem",
-                                                width: "max-content",
-                                            }}
-                                            title={
-                                                Viewed === true
-                                                    ? "Paste Viewed Before"
-                                                    : "Pasted Viewed Just Now"
-                                            }
-                                        >
-                                            {Viewed === true && (
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 16 16"
-                                                    width="16"
-                                                    height="16"
-                                                    aria-label={"Sparkle Symbol"}
-                                                >
-                                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
-                                                </svg>
-                                            )}
-                                            Views: {result.Views}
-                                        </span>
-                                    )}
-                            </div>
+                                <div className="card secondary round border tooltip bottom">
+                                    Paste Options
+                                </div>
+                            </button>
                         </div>
 
                         {!IsFromWildcard && (
@@ -1101,6 +805,8 @@ export class GetPasteFromURL implements Endpoint {
                                 }
                             />
                         )}
+
+                        <PasteStatsModal paste={result} />
 
                         {/* curiosity */}
                         <Curiosity Association={Association} />
@@ -2911,7 +2617,7 @@ export class Writer implements Endpoint {
         // get all pastes by current user
         const AllPastes =
             Association[0] === true
-                ? (await db.GetAllPastesOwnedByPaste(Association[1])).sort(
+                ? (await db.GetAllPastesOwnedByPaste(Association[1], 15)).sort(
                       (a, b) => b.EditDate - a.EditDate
                   )
                 : undefined;
@@ -2953,7 +2659,14 @@ export class Writer implements Endpoint {
                                     }}
                                 >
                                     <Expandable title="Table of Contents">
-                                        <div id="_toc_area" />
+                                        <div
+                                            id="_toc_area"
+                                            style={{
+                                                minWidth: "100%",
+                                                width: "max-content",
+                                                overflow: "auto hidden",
+                                            }}
+                                        />
                                     </Expandable>
                                 </Card>
 
@@ -3017,6 +2730,14 @@ export class Writer implements Endpoint {
                                                     {_paste.CustomURL}
                                                 </Button>
                                             ))}
+
+                                        <Button
+                                            href={`/~${Association[1]}`}
+                                            class={"full justify-start"}
+                                            round={true}
+                                        >
+                                            View All
+                                        </Button>
                                     </Expandable>
                                 </Card>
                             </>
@@ -3094,9 +2815,9 @@ export class Writer implements Endpoint {
                                                 viewBox="0 0 16 16"
                                                 width="16"
                                                 height="16"
-                                                aria-label={"Info Symbol"}
+                                                aria-label={"Question Mark Symbol"}
                                             >
-                                                <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                                                <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.92 6.085h.001a.749.749 0 1 1-1.342-.67c.169-.339.436-.701.849-.977C6.845 4.16 7.369 4 8 4a2.756 2.756 0 0 1 1.637.525c.503.377.863.965.863 1.725 0 .448-.115.83-.329 1.15-.205.307-.47.513-.692.662-.109.072-.22.138-.313.195l-.006.004a6.24 6.24 0 0 0-.26.16.952.952 0 0 0-.276.245.75.75 0 0 1-1.248-.832c.184-.264.42-.489.692-.661.103-.067.207-.132.313-.195l.007-.004c.1-.061.182-.11.258-.161a.969.969 0 0 0 .277-.245C8.96 6.514 9 6.427 9 6.25a.612.612 0 0 0-.262-.525A1.27 1.27 0 0 0 8 5.5c-.369 0-.595.09-.74.187a1.01 1.01 0 0 0-.34.398ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
                                             </svg>
 
                                             <div className="card secondary round border tooltip left">
@@ -3274,7 +2995,6 @@ export class Writer implements Endpoint {
 // ...
 import { ViewPasteMedia, InspectMedia } from "./repos/Media";
 import { contentType } from "mime-types";
-import PublishModals from "./components/site/modals/PublishModals";
 
 // default export
 export default {

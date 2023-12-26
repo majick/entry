@@ -474,8 +474,9 @@ export class CreatePaste implements Endpoint {
 
         if (body.CustomURL) body.CustomURL = body.CustomURL.toLowerCase();
 
-        // make sure association is correct
-        const Association = await GetAssociation(request, null);
+        // get association
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // load associated
         if (!Association[1].startsWith("associated=refresh"))
@@ -659,7 +660,8 @@ export class EditPaste implements Endpoint {
         if (!paste) return new _404Page().request(request);
 
         // get association
-        const Association = await GetAssociation(request, null);
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // check NewEditPassword length
         if (
@@ -927,9 +929,18 @@ export class GetAllPastesOwnedByPaste implements Endpoint {
         const IncorrectInstance = await Pages.CheckInstance(request, server);
         if (IncorrectInstance) return IncorrectInstance;
 
+        // get association
+        const _ip = GetRemoteIP(request, server);
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
         // get owner
-        const owner = url.pathname.slice("/api/owner/".length, url.pathname.length);
+        let owner = url.pathname.slice("/api/owner/".length, url.pathname.length);
         if (!owner) return new _404Page().request(request);
+
+        // if owner is ":me", return pastes owned by associated
+        if (owner === ":me" && Association[0] && Association[1])
+            owner = Association[1];
 
         // get pastes
         const pastes = await db.GetAllPastesOwnedByPaste(owner);
@@ -979,7 +990,9 @@ export class GetRawPaste implements Endpoint {
         if (!result) return new _404Page().request(request);
 
         // get association
-        const Association = await GetAssociation(request, null);
+        const _ip = GetRemoteIP(request, server);
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // check PrivateSource value
         if (
@@ -1107,7 +1120,9 @@ export class GetPasteHTML implements Endpoint {
         if (!result) return new _404Page().request(request);
 
         // get association
-        const Association = await GetAssociation(request, null);
+        const _ip = GetRemoteIP(request, server);
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
 
         // check PrivateSource value
         if (
@@ -1221,8 +1236,10 @@ export class DeleteComment implements Endpoint {
         if (!paste) return new _404Page().request(request);
         if (paste.HostServer) return new _404Page().request(request);
 
-        // check association
-        const association = await GetAssociation(request, null);
+        // get association
+        const _ip = GetRemoteIP(request, server);
+        const association = await GetAssociation(request, _ip);
+        if (association[1].startsWith("associated=")) association[0] = false;
 
         if (!association[0])
             return new Response(
