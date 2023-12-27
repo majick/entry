@@ -38,7 +38,7 @@
         "error_file_not_found": "File does not exist!",
 
         "error_invalid_password": "Invalid password",
-        "error_locked": "This paste has been locked by a server administrator.",
+        "error_locked": "This asset is currently locked or you do not have the necessary permissions to change it.",
         "error_invalid_body": "Body inputs invalid, missing 1 or more required parameters!",
         "error_cannot_claim": "URL cannot be repossessed!",
 

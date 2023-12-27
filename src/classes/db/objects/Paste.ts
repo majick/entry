@@ -63,6 +63,7 @@ export type PasteMetadata = {
     GroupData?: {
         Group?: Group;
         Description: string;
+        LockGroupSettings?: boolean; // locks group settings to owner only!
     };
 };
 

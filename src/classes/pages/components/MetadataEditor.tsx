@@ -336,6 +336,12 @@ export function ClientEditor(_metadata: string, id: string): any {
                     metadata.root.GroupData.Description,
                     "Brief summary of this group",
                 ],
+                LockGroupSettings: [
+                    metadata.root.GroupData.LockGroupSettings === undefined
+                        ? false
+                        : metadata.root.GroupData.LockGroupSettings,
+                    "Lock group settings to owner only, IT CANNOT BE UNLOCKED WITHOUT BEING OWNER!",
+                ],
             },
             ["GroupData"]
         );

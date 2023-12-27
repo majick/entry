@@ -1635,6 +1635,16 @@ export class EditMetadata implements Endpoint {
                 }
             );
 
+        // check group lock
+        if (
+            IsGroup &&
+            paste.Metadata &&
+            paste.Metadata.GroupData &&
+            paste.Metadata.GroupData.LockGroupSettings === true &&
+            Association[1] !== paste.Metadata.Owner
+        )
+            return new _401PageEndpoint().request(request);
+
         // unpack metadata
         const Unpacked = BaseParser.parse(body.Metadata) as PasteMetadata;
 
@@ -1670,6 +1680,9 @@ export class EditMetadata implements Endpoint {
                 else {
                     paste.Metadata.GroupData.Description =
                         Unpacked.GroupData.Description;
+
+                    paste.Metadata.GroupData.LockGroupSettings =
+                        Unpacked.GroupData.LockGroupSettings;
                 }
 
             // staff only updates
@@ -2172,6 +2185,14 @@ export class ChangeGroupPassword implements Endpoint {
                     },
                 }
             );
+
+        // check lock
+        if (
+            group.Metadata.GroupData &&
+            group.Metadata.GroupData.LockGroupSettings === true &&
+            Association[1] !== group.Metadata.Owner
+        )
+            return new _401PageEndpoint().request(request);
 
         // check password
         if (CreateHash(body.EditPassword) !== group.EditPassword)

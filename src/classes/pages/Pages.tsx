@@ -2117,6 +2117,16 @@ export class UserSettings implements Endpoint {
             const IsGroup = name.startsWith("g/");
             if (IsGroup) name = name.slice(2);
 
+            // ...check group lock
+            if (
+                IsGroup &&
+                result.Metadata &&
+                result.Metadata.GroupData &&
+                result.Metadata.GroupData.LockGroupSettings === true &&
+                Association[1] !== result.Metadata.Owner
+            )
+                return new _401PageEndpoint().request(request);
+
             // try to fetch custom domain log
             const CustomDomainLog = (
                 await BundlesDB.Logs.QueryLogs(

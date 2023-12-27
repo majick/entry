@@ -325,13 +325,15 @@ export function RegisterEditorFormListeners(): void {
                 }
             );
 
-            const json = await res.json();
+            if (!(res.headers.get("Content-Type") || "").includes("text/html")) {
+                const json = await res.json();
 
-            // @ts-ignore close loading modal (it's like it never happened)
-            (globalThis as any).modals["bundles:modal.Loading"](false);
+                // @ts-ignore close loading modal (it's like it never happened)
+                (globalThis as any).modals["bundles:modal.Loading"](false);
 
-            // navigate
-            window.location.href = json.redirect;
+                // navigate
+                window.location.href = json.redirect;
+            } else document.body.innerHTML = await res.text();
         });
     }
 }

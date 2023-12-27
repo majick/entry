@@ -17,6 +17,6 @@ body:
       id: "version"
       attributes:
           label: Bundles Version
-          description: This can be found by visiting /ver on your Bundles server.
+          description: This can be found by hovering over the site name in the footer.
       validations:
           required: true
