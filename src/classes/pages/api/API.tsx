@@ -1539,8 +1539,14 @@ export class EditMetadata implements Endpoint {
         // get request body
         const body = Honeybee.FormDataToJSON(await request.formData()) as any;
 
+        const IsGroup = (body.CustomURL || "").startsWith("g/");
+        if (IsGroup) body.CustomURL = body.CustomURL.slice(2);
+
         // get paste
-        const paste = await db.GetPasteFromURL(body.CustomURL, false, true); // do not fetch from cache!
+        const paste = !IsGroup
+            ? await db.GetPasteFromURL(body.CustomURL, false, true) // do not fetch from cache!
+            : await db.GetGroupFromURL(body.CustomURL);
+
         if (!paste) return new _404Page().request(request);
 
         if (!body.Metadata)
@@ -1576,11 +1582,13 @@ export class EditMetadata implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+            CreateHash(body.EditPassword || "clearly wrong") ===
+            CreateHash(BundlesDB.config.admin);
 
         if (
             // if we used the wrong password
-            paste.EditPassword !== CreateHash(body.EditPassword) &&
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong again") &&
             // ...and we're not using the admin password
             !admin &&
             // ...and we're not the owner of the paste
@@ -1593,7 +1601,9 @@ export class EditMetadata implements Endpoint {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    redirect: `/${paste.CustomURL}?err=${translations.English.error_invalid_password}`,
+                    redirect: `/${!IsGroup ? paste.CustomURL : ""}?err=${
+                        translations.English.error_invalid_password
+                    }`,
                     result: [false, translations.English.error_invalid_password],
                 }),
                 {
@@ -1611,7 +1621,9 @@ export class EditMetadata implements Endpoint {
             return new Response(
                 JSON.stringify({
                     success: false,
-                    redirect: `/${paste.CustomURL}?err=${translations.English.error_locked}`,
+                    redirect: `/${!IsGroup ? paste.CustomURL : ""}?err=${
+                        translations.English.error_locked
+                    }`,
                     result: [false, translations.English.error_locked],
                 }),
                 {
@@ -1646,10 +1658,18 @@ export class EditMetadata implements Endpoint {
                 if (!paste.Metadata.Comments)
                     paste.Metadata.Comments = Unpacked.Comments;
                 else {
-                    paste.Metadata.Comments.Enabled = Unpacked.Comments!.Enabled;
-                    paste.Metadata.Comments.Filter = Unpacked.Comments!.Filter;
+                    paste.Metadata.Comments.Enabled = Unpacked.Comments.Enabled;
+                    paste.Metadata.Comments.Filter = Unpacked.Comments.Filter;
                     paste.Metadata.Comments.AllowAnonymous =
-                        Unpacked.Comments!.AllowAnonymous;
+                        Unpacked.Comments.AllowAnonymous;
+                }
+
+            if (Unpacked.GroupData)
+                if (!paste.Metadata.GroupData)
+                    paste.Metadata.GroupData = Unpacked.GroupData;
+                else {
+                    paste.Metadata.GroupData.Description =
+                        Unpacked.GroupData.Description;
                 }
 
             // staff only updates
@@ -1661,7 +1681,9 @@ export class EditMetadata implements Endpoint {
         // update paste
         await SQL.QueryOBJ({
             db: db.db,
-            query: 'UPDATE "Pastes" SET "Metadata" = ? WHERE "CustomURL" = ?',
+            query: `UPDATE "${
+                !IsGroup ? "Pastes" : "Groups"
+            }" SET "Metadata" = ? WHERE "CustomURL" = ?`,
             params: [JSON.stringify(paste.Metadata), paste.CustomURL],
             use: "Prepare",
         });
@@ -1670,7 +1692,9 @@ export class EditMetadata implements Endpoint {
         return new Response(
             JSON.stringify({
                 success: true,
-                redirect: `/${paste.CustomURL}?msg=${translations.English.metadata_updated}`,
+                redirect: `/${!IsGroup ? paste.CustomURL : ""}?msg=${
+                    translations.English.metadata_updated
+                }`,
                 result: [
                     true,
                     translations.English.metadata_updated,
@@ -1974,21 +1998,17 @@ export class CreateURLClaim implements Endpoint {
         // verify body
         if (!body.CustomURL) return new _404Page().request(request);
 
-        // if domain is server hostname, return (that's no good!)
-        if (
-            BundlesDB.config.app &&
-            BundlesDB.config.app.hostname &&
-            body.Domain === BundlesDB.config.app.hostname
-        )
-            return new _404Page().request(request);
-
         // get paste
         const paste = await db.GetPasteFromURL(body.CustomURL);
         if (!paste) return new _404Page().request(request);
         if (paste.HostServer) return new _404Page().request(request);
 
         // make sure url can be claimed
-        if (paste.Metadata && paste.Metadata.ClaimAllowed === false)
+        if (
+            paste.Metadata &&
+            paste.Metadata.ClaimAllowed === false &&
+            !paste.GroupName
+        )
             return new Response(
                 JSON.stringify({
                     success: false,
@@ -2092,6 +2112,105 @@ export class CreateURLClaim implements Endpoint {
     }
 }
 
+/**
+ * @export
+ * @class ChangeGroupPassword
+ * @implements {Endpoint}
+ */
+export class ChangeGroupPassword implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        const url = new URL(request.url);
+        const search = new URLSearchParams(url.search);
+
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // make sure groups are enabled
+        if (!BundlesDB.config.app || BundlesDB.config.app.enable_groups === false)
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: "/?err=Groups are disabled!",
+                    result: [false, translations.English.error_configuration],
+                }),
+                {
+                    status: 404,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        // verify body
+        if (!body.CustomURL || !body.EditPassword || !body.NewEditPassword)
+            return new _404Page().request(request);
+
+        // get group
+        const group = await db.GetGroupFromURL(body.CustomURL);
+        if (!group) return new _404Page().request(request);
+
+        // check association
+        const _ip = GetRemoteIP(request, server);
+        const Association = await GetAssociation(request, _ip);
+        if (Association[1].startsWith("associated=")) Association[0] = false;
+
+        if (!Association[0])
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: `/s/g/${group.CustomURL}?err=${translations.English.error_association_required}`,
+                    result: [false, translations.English.error_association_required],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+        // check password
+        if (CreateHash(body.EditPassword) !== group.EditPassword)
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: `/s/g/${group.CustomURL}?err=${translations.English.error_invalid_password}`,
+                    result: [
+                        true,
+                        translations.English.error_invalid_password,
+                        group,
+                    ],
+                })
+            );
+
+        // update group
+        const result = await db.UpdateGroup({
+            CustomURL: body.CustomURL,
+            EditPassword: body.NewEditPassword,
+            Metadata: group.Metadata,
+        });
+
+        // return
+        return new Response(
+            JSON.stringify({
+                success: true,
+                redirect: `/s/g/${group.CustomURL}?msg=${translations.English.group_updated}`,
+                result,
+            }),
+            {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
+}
+
 // ...
 import {
     GetFile,
@@ -2142,4 +2261,5 @@ export default {
     UpdateCustomDomain, // supports cloud routing
     GetSocialProfile, // supports cloud routing
     CreateURLClaim, // supports cloud routing
+    ChangeGroupPassword, // supports cloud routing
 };

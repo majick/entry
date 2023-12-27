@@ -59,12 +59,23 @@ export type PasteMetadata = {
         AllowAnonymous?: boolean;
         ReportsEnabled?: boolean;
     };
+    // group stuff
+    GroupData?: {
+        Group?: Group;
+        Description: string;
+    };
 };
 
 export type Revision = {
     CustomURL: string;
     Content: string;
     EditDate: number;
+};
+
+export type Group = {
+    CustomURL: string;
+    EditPassword: string;
+    Metadata: PasteMetadata;
 };
 
 // ...

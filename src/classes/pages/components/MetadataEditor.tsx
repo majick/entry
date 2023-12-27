@@ -326,6 +326,22 @@ export function ClientEditor(_metadata: string, id: string): any {
     }
 
     // generate only the fields we want
+
+    // ...GroupData (groups only)
+    if (metadata.root.GroupData && !metadata.root.GroupData.Group) {
+        GenerateInputFields(
+            {
+                Comments: ["div", "GroupData"],
+                Description: [
+                    metadata.root.GroupData.Description,
+                    "Brief summary of this group",
+                ],
+            },
+            ["GroupData"]
+        );
+    }
+
+    // ...root
     GenerateInputFields({
         // tab display section
         TabDisplay: ["div", "Tab Display"],
@@ -395,6 +411,7 @@ export function ClientEditor(_metadata: string, id: string): any {
         ],
     });
 
+    // ...comments
     if (
         metadata.root.Comments &&
         (window as any).ENTRYDB_CONFIG_ENABLE_COMMENTS === true

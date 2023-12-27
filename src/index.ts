@@ -332,6 +332,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/api/delete": { Method: "POST", Page: API.DeletePaste },
         "/api/decrypt": { Method: "POST", Page: API.DecryptPaste },
         "/api/search": { Method: "POST", Page: Pages.PastesSearch },
+        "/api/group/update": { Method: "POST", Page: API.ChangeGroupPassword },
         // ...comments
         "/api/comments/delete": {
             Type: "begins",

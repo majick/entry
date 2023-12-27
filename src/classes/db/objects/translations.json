@@ -3,6 +3,11 @@
         "paste_updated": "Paste updated!",
         "paste_created": "Paste created!",
         "paste_deleted": "Paste deleted!",
+
+        "group_updated": "Group updated!",
+        "group_created": "Group created!",
+        "group_deleted": "Group deleted!",
+
         "metadata_updated": "Metadata updated!",
         "url_repossessed": "URL repossessed!",
 
@@ -24,8 +29,10 @@
         "error_repossession": "URL does not meet the minimum requirements for repossession!",
         "error_association_required": "You must be associated with a paste to do this!",
         "error_filter": "Comment violates this paste's comment filter!",
+        "error_asset_url_taken": "An asset with the URL already exists.",
 
         "error_paste_not_found": "This paste does not exist!",
+        "error_group_not_found": "This group does not exist!",
         "error_revision_not_found": "This revision does not exist!",
         "error_log_not_found": "This log does not exist!",
         "error_file_not_found": "File does not exist!",

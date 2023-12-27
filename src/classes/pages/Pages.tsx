@@ -924,22 +924,23 @@ export class PasteDocView implements Endpoint {
                         <SidebarLayout
                             nav={
                                 <TopNav breadcrumbs={[result.CustomURL]}>
-                                    <Button
-                                        type="border"
-                                        round={true}
-                                        href={`/paste/writer?edit=${name}`}
+                                    <button
+                                        id={"bundles:button.PasteStats"}
+                                        class={
+                                            "border round modal:bundles:button.PasteStats"
+                                        }
                                     >
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             height="16"
-                                            aria-label={"Pencil Symbol"}
+                                            aria-label={"Sparkle Symbol"}
                                         >
-                                            <path d="M11.013 1.427a1.75 1.75 0 0 1 2.474 0l1.086 1.086a1.75 1.75 0 0 1 0 2.474l-8.61 8.61c-.21.21-.47.364-.756.445l-3.251.93a.75.75 0 0 1-.927-.928l.929-3.25c.081-.286.235-.547.445-.758l8.61-8.61Zm.176 4.823L9.75 4.81l-6.286 6.287a.253.253 0 0 0-.064.108l-.558 1.953 1.953-.558a.253.253 0 0 0 .108-.064Zm1.238-3.763a.25.25 0 0 0-.354 0L10.811 3.75l1.439 1.44 1.263-1.263a.25.25 0 0 0 0-.354Z"></path>
+                                            <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
                                         </svg>
-                                        Edit
-                                    </Button>
+                                        Info
+                                    </button>
                                 </TopNav>
                             }
                             sidebar={
@@ -987,31 +988,9 @@ export class PasteDocView implements Endpoint {
                                     __html: Rendered,
                                 }}
                             />
-
-                            <hr />
-
-                            <div style={{ opacity: "75%" }}>
-                                <ul>
-                                    <li>
-                                        Published:{" "}
-                                        <span class={"utc-date-to-localize"}>
-                                            {new Date(result.PubDate).toUTCString()}
-                                        </span>
-                                    </li>
-                                    <li>
-                                        Updated:{" "}
-                                        <span class={"utc-date-to-localize"}>
-                                            {new Date(result.EditDate).toUTCString()}
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <a href={`/r/${result.CustomURL}`}>
-                                            More Info
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
                         </SidebarLayout>
+
+                        <PasteStatsModal paste={result} />
 
                         <script
                             type="module"
@@ -2126,8 +2105,15 @@ export class UserSettings implements Endpoint {
                 return new _404Page().request(request);
 
             // get paste
-            const result = await db.GetPasteFromURL(name);
-            if (!result || result.HostServer) return new _404Page().request(request);
+            const result = !name.startsWith("g/")
+                ? await db.GetPasteFromURL(name)
+                : await db.GetGroupFromURL(name.slice(2));
+
+            if (!result) return new _404Page().request(request);
+
+            // ...
+            const IsGroup = name.startsWith("g/");
+            if (IsGroup) name = name.slice(2);
 
             // try to fetch custom domain log
             const CustomDomainLog = (
@@ -2159,7 +2145,11 @@ export class UserSettings implements Endpoint {
                             </div>
 
                             <main class={"small flex flex-column g-4"}>
-                                <ReposNav name={name} current="Settings" />
+                                {!IsGroup && (
+                                    <ReposNav name={name} current="Settings" />
+                                )}
+
+                                <MessageDisplays search={url.searchParams} />
 
                                 <div className="card round border">
                                     <div
@@ -2174,7 +2164,7 @@ export class UserSettings implements Endpoint {
                                         }}
                                     >
                                         <h4 class={"no-margin text-center"}>
-                                            Paste Settings
+                                            {!IsGroup ? "Paste" : "Group"} Settings
                                         </h4>
 
                                         <a
@@ -2195,12 +2185,85 @@ export class UserSettings implements Endpoint {
                                         </a>
                                     </div>
 
-                                    <p>
-                                        Paste settings require the paste edit code to
-                                        save. If you want to change how this paste
-                                        looks for you, view{" "}
-                                        <a href={"/s"}>User Settings</a>
-                                    </p>
+                                    {!IsGroup && (
+                                        <p>
+                                            Paste settings require the paste edit
+                                            code to save. If you want to change how
+                                            this paste looks for you, view{" "}
+                                            <a href={"/s"}>User Settings</a>
+                                        </p>
+                                    )}
+
+                                    {IsGroup && (
+                                        <>
+                                            <hr />
+
+                                            <div
+                                                class={
+                                                    "mobile:justify-center flex justify-center align-center flex-wrap"
+                                                }
+                                                style={{
+                                                    marginBottom: "1rem",
+                                                }}
+                                            >
+                                                <form
+                                                    action="/api/group/update"
+                                                    method={"POST"}
+                                                    class={
+                                                        "flex g-4 justify-center flex-wrap"
+                                                    }
+                                                >
+                                                    <input
+                                                        type={"hidden"}
+                                                        name={"CustomURL"}
+                                                        value={result.CustomURL}
+                                                        class={"secondary"}
+                                                        required
+                                                    />
+
+                                                    <input
+                                                        class={
+                                                            "round mobile:max flex justify-center"
+                                                        }
+                                                        type="text"
+                                                        placeholder={"Edit code"}
+                                                        maxLength={
+                                                            BundlesDB.MaxPasswordLength
+                                                        }
+                                                        minLength={
+                                                            BundlesDB.MinPasswordLength
+                                                        }
+                                                        name={"EditPassword"}
+                                                        required
+                                                    />
+
+                                                    <input
+                                                        class={
+                                                            "round mobile:max flex justify-center"
+                                                        }
+                                                        type="text"
+                                                        placeholder={"New edit code"}
+                                                        maxLength={
+                                                            BundlesDB.MaxPasswordLength
+                                                        }
+                                                        minLength={
+                                                            BundlesDB.MinPasswordLength
+                                                        }
+                                                        name={"NewEditPassword"}
+                                                        required
+                                                    />
+
+                                                    <button
+                                                        class={
+                                                            "round green mobile:max modal:bundles:button.Loading"
+                                                        }
+                                                    >
+                                                        Save
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </>
+                                    )}
 
                                     <hr />
 
@@ -2222,7 +2285,9 @@ export class UserSettings implements Endpoint {
                                             <input
                                                 type={"hidden"}
                                                 name={"CustomURL"}
-                                                value={result.CustomURL}
+                                                value={`${
+                                                    IsGroup === true ? "g/" : ""
+                                                }${result.CustomURL}`}
                                                 class={"secondary"}
                                                 required
                                             />
@@ -2294,7 +2359,8 @@ export class UserSettings implements Endpoint {
                                         </noscript>
                                     </div>
 
-                                    {BundlesDB.config.log &&
+                                    {!IsGroup &&
+                                        BundlesDB.config.log &&
                                         BundlesDB.config.log.events.includes(
                                             "custom_domain"
                                         ) && (

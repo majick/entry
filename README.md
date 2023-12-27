@@ -82,8 +82,12 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
 - `POST /api/media/edit`, Edit text file contents, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string), FileContent`
 - `POST /api/domain`, Update paste custom domain, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, Domain`
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
-- `POST /api/claim`, Repossess an unused custom URL, expects form data with the fields: `CustomURL`
+- `POST /api/claim`, Repossess an unused custom URL, expects `application/x-www-form-urlencoded` with the fields: `CustomURL`
     - Also requires a prior paste association!
+- `POST /api/search`, Search pastes with a JSON return, expects no body with the query parameters: `q(string), by("CustomURL" | "Content" | "Group")`
+    - This is the same as the `/search` page, but with a JSON return instead of HTML
+- `POST /api/group/update`, Update a group EditPassword, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, NewEditPassword`
+    - `CustomURL` refers to the name of a group, not paste!
 - `GET  /api/get/{paste}`, Get an existing paste
 - `GET  /api/raw/{paste}`, Get raw paste content
 - `GET  /api/exists/{paste}`, Check if a paste exists

@@ -115,10 +115,13 @@ export default function PasteStatsModal(props: {
                         </Button>
 
                         {props.paste.Metadata &&
-                            props.paste.Metadata.Owner !== props.paste.CustomURL && (
+                            props.paste.Metadata.Owner !== props.paste.CustomURL &&
+                            props.paste.Metadata &&
+                            props.paste.Metadata.ShowOwnerEnabled !== false && (
                                 <Button
                                     round={true}
                                     href={`/~${props.paste.Metadata.Owner}`}
+                                    class="tooltip-wrapper"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -130,6 +133,9 @@ export default function PasteStatsModal(props: {
                                         <path d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142.75.75 0 1 1-1.498.07 4.5 4.5 0 0 0-8.99 0 .75.75 0 0 1-1.498-.07 6.004 6.004 0 0 1 3.431-5.142 3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path>
                                     </svg>
                                     Owner
+                                    <div className="card secondary round border tooltip left">
+                                        {props.paste.Metadata.Owner}
+                                    </div>
                                 </Button>
                             )}
                     </Card>
@@ -189,29 +195,34 @@ export default function PasteStatsModal(props: {
 
                     <Expandable title="Social" open={true}>
                         <span>
-                            {BundlesDB.config.log.events.includes("view_paste") && (
-                                <span
-                                    class={"flex align-center g-4"}
-                                    title={new Date(
-                                        props.paste.PubDate
-                                    ).toUTCString()}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 16 16"
-                                        width="16"
-                                        height="16"
-                                        aria-label={"Telescope Symbol"}
+                            {BundlesDB.config.log.events.includes("view_paste") &&
+                                props.paste.Metadata &&
+                                props.paste.Metadata.ShowViewCount !== false && (
+                                    <span
+                                        class={"flex align-center g-4"}
+                                        title={new Date(
+                                            props.paste.PubDate
+                                        ).toUTCString()}
                                     >
-                                        <path d="M14.184 1.143v-.001l1.422 2.464a1.75 1.75 0 0 1-.757 2.451L3.104 11.713a1.75 1.75 0 0 1-2.275-.702l-.447-.775a1.75 1.75 0 0 1 .53-2.32L11.682.573a1.748 1.748 0 0 1 2.502.57Zm-4.709 9.32h-.001l2.644 3.863a.75.75 0 1 1-1.238.848l-1.881-2.75v2.826a.75.75 0 0 1-1.5 0v-2.826l-1.881 2.75a.75.75 0 1 1-1.238-.848l2.049-2.992a.746.746 0 0 1 .293-.253l1.809-.87a.749.749 0 0 1 .944.252ZM9.436 3.92h-.001l-4.97 3.39.942 1.63 5.42-2.61Zm3.091-2.108h.001l-1.85 1.26 1.505 2.605 2.016-.97a.247.247 0 0 0 .13-.151.247.247 0 0 0-.022-.199l-1.422-2.464a.253.253 0 0 0-.161-.119.254.254 0 0 0-.197.038ZM1.756 9.157a.25.25 0 0 0-.075.33l.447.775a.25.25 0 0 0 .325.1l1.598-.769-.83-1.436-1.465 1Z"></path>
-                                    </svg>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Telescope Symbol"}
+                                        >
+                                            <path d="M14.184 1.143v-.001l1.422 2.464a1.75 1.75 0 0 1-.757 2.451L3.104 11.713a1.75 1.75 0 0 1-2.275-.702l-.447-.775a1.75 1.75 0 0 1 .53-2.32L11.682.573a1.748 1.748 0 0 1 2.502.57Zm-4.709 9.32h-.001l2.644 3.863a.75.75 0 1 1-1.238.848l-1.881-2.75v2.826a.75.75 0 0 1-1.5 0v-2.826l-1.881 2.75a.75.75 0 1 1-1.238-.848l2.049-2.992a.746.746 0 0 1 .293-.253l1.809-.87a.749.749 0 0 1 .944.252ZM9.436 3.92h-.001l-4.97 3.39.942 1.63 5.42-2.61Zm3.091-2.108h.001l-1.85 1.26 1.505 2.605 2.016-.97a.247.247 0 0 0 .13-.151.247.247 0 0 0-.022-.199l-1.422-2.464a.253.253 0 0 0-.161-.119.254.254 0 0 0-.197.038ZM1.756 9.157a.25.25 0 0 0-.075.33l.447.775a.25.25 0 0 0 .325.1l1.598-.769-.83-1.436-1.465 1Z"></path>
+                                        </svg>
 
-                                    <span>Views: {props.paste.Views}</span>
-                                </span>
-                            )}
+                                        <span>Views: {props.paste.Views}</span>
+                                    </span>
+                                )}
 
                             {BundlesDB.config.app &&
-                                BundlesDB.config.app.enable_comments === true && (
+                                BundlesDB.config.app.enable_comments === true &&
+                                props.paste.Metadata &&
+                                props.paste.Metadata.Comments &&
+                                props.paste.Metadata.Comments.Enabled !== false && (
                                     <span
                                         class={"flex align-center g-4"}
                                         title={new Date(

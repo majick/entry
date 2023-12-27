@@ -10,7 +10,12 @@ import path from "node:path";
 import fs from "node:fs";
 
 import { ComputeRandomObjectHash, CreateHash, Encrypt } from "./helpers/Hash";
-import PasteConnection, { Paste, PasteMetadata, Revision } from "./objects/Paste";
+import PasteConnection, {
+    Group,
+    Paste,
+    PasteMetadata,
+    Revision,
+} from "./objects/Paste";
 import SQL from "./helpers/SQL";
 
 import Media from "./MediaDB";
@@ -146,6 +151,16 @@ export default class BundlesDB {
                     "CustomURL" varchar(${BundlesDB.MaxCustomURLLength}),
                     "Content" varchar(${BundlesDB.MaxContentLength}),
                     "EditDate" float
+                )`,
+            });
+
+            await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+                // @ts-ignore
+                db: db,
+                query: `CREATE TABLE IF NOT EXISTS "Groups" (
+                    "CustomURL" varchar(${BundlesDB.MaxCustomURLLength}),
+                    "EditPassword" varchar(${BundlesDB.MaxPasswordLength}),
+                    "Metadata" varchar(${BundlesDB.MaxContentLength})
                 )`,
             });
 
@@ -629,6 +644,43 @@ export default class BundlesDB {
                         );
                 }
 
+                // if paste has a group BUT that group does not exist, create it!
+                if (record.GroupName) {
+                    const GroupRecord = await this.GetGroupFromURL(record.GroupName);
+
+                    if (GroupRecord) {
+                        // show group record data in the GroupData field of every group paste
+                        GroupRecord.EditPassword = "";
+
+                        record.Metadata.GroupData = {
+                            Group: GroupRecord,
+                            Description: (
+                                GroupRecord.Metadata.GroupData || {
+                                    Description: "New Group",
+                                }
+                            ).Description,
+                        };
+                    }
+
+                    // compatibility with old groups below
+                    else
+                        await this.CreateGroup({
+                            CustomURL: record.GroupName,
+                            EditPassword: record.GroupSubmitPassword as string, // password is already hashed!
+                            Metadata: {
+                                // group metadata is inherited by the pastes created in them!
+                                Version: 1,
+                                Owner: record.Metadata.Owner || "",
+                                Comments: {
+                                    Enabled: true,
+                                },
+                                GroupData: {
+                                    Description: "New Group",
+                                },
+                            },
+                        });
+                }
+
                 // return
                 return resolve(record);
             } else {
@@ -701,6 +753,9 @@ export default class BundlesDB {
         // encode with punycode
         PasteInfo.CustomURL = punycode.toASCII(PasteInfo.CustomURL);
 
+        if (PasteInfo.GroupName)
+            PasteInfo.GroupName = punycode.toASCII(PasteInfo.GroupName);
+
         // if edit password was not provided, randomize it
         if (!SkipHash)
             if (!PasteInfo.EditPassword) {
@@ -718,14 +773,6 @@ export default class BundlesDB {
             return [
                 false,
                 `Custom URL does not pass test: ${BundlesDB.URLRegex}`,
-                PasteInfo,
-            ];
-
-        // check group name
-        if (PasteInfo.GroupName && !PasteInfo.GroupName.match(BundlesDB.URLRegex))
-            return [
-                false,
-                `Group name does not pass test: ${BundlesDB.URLRegex}`,
                 PasteInfo,
             ];
 
@@ -760,80 +807,91 @@ export default class BundlesDB {
                 PasteInfo,
             ];
 
-        // check if group already exists, i it does make sure the password matches
+        // check if group already exists, make sure the password matches
         // groups don't really have a table for themselves, more of just if a paste
         // with that group name already exists!
         if (PasteInfo.GroupName) {
-            const GroupRecord = (await (BundlesDB.config.pg
-                ? SQL.PostgresQueryOBJ
-                : SQL.QueryOBJ)({
-                // @ts-ignore
-                db: this.db,
-                query: 'SELECT * FROM "Pastes" WHERE "GroupName" = ?',
-                params: [PasteInfo.GroupName],
-                get: true, // only return 1
-                transaction: true,
-                use: "Prepare",
-            })) as Paste | undefined;
+            let GroupRecord = await this.GetGroupFromURL(PasteInfo.GroupName);
 
             if (
                 GroupRecord &&
                 // it's safe to assume PasteInfo.GroupSubmitPassword exists becauuse we
                 // required it in the previous step, it was also hashed previously!
-                PasteInfo.GroupSubmitPassword! !== GroupRecord.GroupSubmitPassword
+                PasteInfo.GroupSubmitPassword! !== GroupRecord.EditPassword
             )
                 return [
                     false,
-                    "Please use the correct paste group password!",
+                    translations.English.error_invalid_password,
                     PasteInfo,
+                ];
+            else if (!GroupRecord) {
+                // check group name (again)
+                const NotAllowed = [
+                    "admin",
+                    "api",
+                    "search",
+                    "new",
+                    "paste",
+                    "group",
+                    "reports",
+                    "components",
                 ];
 
-            // check group name (again)
-            // it can't be anything that exists in Server.ts
-            // ...this is because of the thing we do after this!
-            // if we didn't check this and the paste had the group of admin or something,
-            // somebody could make a paste named "login" and the paste would have the URL
-            // of "/admin/login" which would make the real admin login page either inaccessible
-            // OR make the paste inaccessible!
-            const NotAllowed = [
-                "admin",
-                "api",
-                "search",
-                "new",
-                "paste",
-                "group",
-                "reports",
-                "components",
-            ];
+                if (NotAllowed.includes(PasteInfo.GroupName))
+                    return [
+                        false,
+                        `Group name cannot be any of the following: ${JSON.stringify(
+                            NotAllowed
+                        )}`,
+                        PasteInfo,
+                    ];
+                else if (NotAllowed.includes(PasteInfo.CustomURL))
+                    return [
+                        false,
+                        `Paste name cannot be any of the following: ${JSON.stringify(
+                            NotAllowed
+                        )}`,
+                        PasteInfo,
+                    ];
 
-            if (NotAllowed.includes(PasteInfo.GroupName))
-                return [
-                    false,
-                    `Group name cannot be any of the following: ${JSON.stringify(
-                        NotAllowed
-                    )}`,
-                    PasteInfo,
-                ];
-            else if (NotAllowed.includes(PasteInfo.CustomURL))
-                return [
-                    false,
-                    `Paste name cannot be any of the following: ${JSON.stringify(
-                        NotAllowed
-                    )}`,
-                    PasteInfo,
-                ];
+                // create new group!
+                GroupRecord = {
+                    CustomURL: PasteInfo.GroupName,
+                    EditPassword: PasteInfo.GroupSubmitPassword as string,
+                    Metadata: {
+                        // group metadata is inherited by the pastes created in them!
+                        Version: 1,
+                        Owner: PasteInfo.Associated || "",
+                        Comments: {
+                            Enabled: true,
+                        },
+                        GroupData: {
+                            Description: "New Group",
+                        },
+                    },
+                };
+
+                const res = await this.CreateGroup(GroupRecord);
+                if (!res[0]) return [res[0], res[1], PasteInfo];
+            }
+
+            // inherit group metadata
+            GroupRecord.Metadata.GroupData = undefined; // remove the group metadata object
+            GroupRecord.Metadata.Owner = PasteInfo.Associated || ""; // remove the group owner (so pastes can have their own owner!)
+
+            PasteInfo.Metadata = GroupRecord.Metadata;
 
             // append group name to CustomURL
-            PasteInfo.CustomURL = `${PasteInfo.GroupName}/${PasteInfo.CustomURL}`;
+            PasteInfo.CustomURL = `${GroupRecord.CustomURL}/${PasteInfo.CustomURL}`;
+
+            // delete values from PasteInfo
+            // delete PasteInfo.GroupName;
+            delete PasteInfo.GroupSubmitPassword;
         }
 
         // make sure a paste does not already exist with this custom URL
         if (await this.GetPasteFromURL(PasteInfo.CustomURL, true))
-            return [
-                false,
-                "A paste with this custom URL already exists!",
-                PasteInfo,
-            ];
+            return [false, translations.English.error_asset_url_taken, PasteInfo];
 
         // make sure content is unique if config app.enable_claim is true (prevent CustomURL squatting)
         if (BundlesDB.config.app && BundlesDB.config.app.enable_claim === true)
@@ -882,7 +940,7 @@ export default class BundlesDB {
             );
 
         // create metadata
-        const metadata: PasteMetadata = {
+        const metadata: PasteMetadata = PasteInfo.Metadata || {
             Version: 1,
             Owner: PasteInfo.Associated || "",
             Comments: {
@@ -2204,5 +2262,117 @@ export default class BundlesDB {
 
         // return
         return [true, translations.English.revision_created, props];
+    }
+
+    // groups
+
+    /**
+     * @function GetGroupFromURL
+     *
+     * @param {string} GroupURL
+     * @return {Promise<Group | undefined>}
+     * @memberof BundlesDB
+     */
+    public async GetGroupFromURL(GroupURL: string): Promise<Group | undefined> {
+        // get paste from local db
+        const record = (await (BundlesDB.config.pg
+            ? SQL.PostgresQueryOBJ
+            : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'SELECT * FROM "Groups" WHERE "CustomURL" = ?',
+            params: [GroupURL.toLowerCase()],
+            get: true,
+            use: "Query",
+        })) as Group;
+
+        if (!record) return undefined;
+
+        // ...parse metadata
+        if (typeof record.Metadata === "string")
+            record.Metadata = JSON.parse(record.Metadata);
+
+        // return
+        return record;
+    }
+
+    /**
+     * @function CreateGroup
+     *
+     * @param {Group} props
+     * @return {Promise<[boolean, string, Group]>}
+     * @memberof BundlesDB
+     */
+    public async CreateGroup(props: Group): Promise<[boolean, string, Group]> {
+        // check group name
+        if (!props.CustomURL.match(BundlesDB.URLRegex))
+            return [
+                false,
+                `Group name does not pass test: ${BundlesDB.URLRegex}`,
+                props,
+            ];
+
+        // make sure group doesn't already exist
+        const record = await this.GetGroupFromURL(props.CustomURL);
+
+        if (record)
+            return [false, translations.English.error_asset_url_taken, props];
+
+        // create group
+        await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'INSERT INTO "Groups" VALUES (?, ?, ?)',
+            params: [
+                props.CustomURL.toLowerCase(),
+                props.EditPassword,
+                JSON.stringify(props.Metadata),
+            ],
+            get: true,
+            use: "Query",
+        });
+
+        // return
+        return [true, translations.English.group_created, props];
+    }
+
+    /**
+     * @function UpdateGroup
+     *
+     * @param {Group} props
+     * @return {Promise<[boolean, string, Group]>}
+     * @memberof BundlesDB
+     */
+    public async UpdateGroup(props: Group): Promise<[boolean, string, Group]> {
+        // check group name
+        if (!props.CustomURL.match(BundlesDB.URLRegex))
+            return [
+                false,
+                `Group name does not pass test: ${BundlesDB.URLRegex}`,
+                props,
+            ];
+
+        // make sure group exists
+        const record = await this.GetGroupFromURL(props.CustomURL);
+
+        if (!record)
+            return [false, translations.English.error_group_not_found, props];
+
+        // create group
+        await (BundlesDB.config.pg ? SQL.PostgresQueryOBJ : SQL.QueryOBJ)({
+            // @ts-ignore
+            db: this.db,
+            query: 'UPDATE "Groups" SET ("EditPassword", "Metadata") = (?, ?) WHERE "CustomURL" = ?',
+            params: [
+                CreateHash(props.EditPassword),
+                JSON.stringify(props.Metadata),
+                props.CustomURL.toLowerCase(),
+            ],
+            get: true,
+            use: "Query",
+        });
+
+        // return
+        return [true, translations.English.group_updated, props];
     }
 }
