@@ -1128,6 +1128,23 @@ export class PastesSearch implements Endpoint {
                                 </span>
                             </div>
 
+                            {search.get("group") !== null && (
+                                <CardWithHeader
+                                    round={true}
+                                    border={true}
+                                    header={<b>Group Options</b>}
+                                >
+                                    <div className="flex g-4 flex-wrap">
+                                        <Button
+                                            round={true}
+                                            href={`/s/g/${search.get("group")}`}
+                                        >
+                                            Settings
+                                        </Button>
+                                    </div>
+                                </CardWithHeader>
+                            )}
+
                             <CardWithHeader
                                 round={true}
                                 border={true}

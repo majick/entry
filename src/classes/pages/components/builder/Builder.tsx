@@ -564,7 +564,13 @@ function RenderPage() {
                     height: "100vh",
                 }}
                 onWheel={(event) => {
-                    if (AllowScrollZoom === false) return;
+                    if (
+                        AllowScrollZoom === false ||
+                        !Hovered ||
+                        !Hovered.classList.contains("builder:page")
+                    )
+                        return;
+
                     PageScale += (event.deltaY * -0.01) / 50;
 
                     // restrict scale
@@ -1001,6 +1007,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         NewScript.src = url;
 
         // append
+        NewScript.setAttribute("data-builder-internal", "load_asset");
         element.appendChild(NewScript);
 
         // revoke url
@@ -1025,6 +1032,7 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
         NewStyle.href = url;
 
         // append
+        NewStyle.setAttribute("data-builder-internal", "load_asset");
         element.appendChild(NewStyle);
 
         // if content includes "@font-face", append outside of the shadowroot too
@@ -1057,6 +1065,12 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
         // ...
         hydrate(parser.ParsePage(doc.Pages[CurrentPage], _EditMode), element);
+
+        // delete already loaded assets
+        for (const asset of Array.from(
+            element.querySelectorAll('[data-builder-internal="load_asset"]')
+        ) as HTMLElement[])
+            asset.remove();
 
         // set current page in client lib
         if (!EditMode) {
@@ -1323,6 +1337,12 @@ export function RenderDocument(_doc: string, _EditMode: boolean = true) {
 
             // render
             render(parser.ParsePage(doc.Pages[CurrentPage], EditMode), _page);
+
+            // delete already loaded assets
+            for (const asset of Array.from(
+                _page.querySelectorAll('[data-builder-internal="load_asset"]')
+            ) as HTMLElement[])
+                asset.remove();
 
             // reload scripts
             const scripts = _page.querySelectorAll("script");
