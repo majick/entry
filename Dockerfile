@@ -1,11 +1,17 @@
 FROM oven/bun:latest
 
-WORKDIR /app
+COPY . /app
 
-COPY ["package.json", "./"]
+WORKDIR /app
+RUN ["bun", "install"]
+RUN ["bun","run", "build"]
+
+
+FROM oven/bun:latest
+COPY --from=0 ["/app/package.json", "./"]
 RUN bun install
 
-COPY ["dist", "./dist"]
+COPY --from=0 ["/app/dist", "./dist"]
 CMD ["bun", "run", "start:no-build"]
 
 # image details
