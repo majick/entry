@@ -19,6 +19,7 @@ export default function PasteStatsModal(props: {
     paste: Paste;
     includeFooter?: boolean;
     noIdMatch?: boolean;
+    revisionNumber?: number;
 }): any {
     return (
         <Modal
@@ -82,8 +83,18 @@ export default function PasteStatsModal(props: {
                             href={
                                 props.paste.Metadata &&
                                 props.paste.Metadata.PasteType === "normal"
-                                    ? `/?mode=edit&OldURL=${props.paste.CustomURL}`
-                                    : `/paste/builder?edit=${props.paste.CustomURL}`
+                                    ? `/?mode=edit&OldURL=${props.paste.CustomURL}${
+                                          props.revisionNumber !== 0 &&
+                                          props.revisionNumber !== undefined
+                                              ? `&r=${props.revisionNumber}`
+                                              : ""
+                                      }`
+                                    : `/paste/builder?edit=${props.paste.CustomURL}${
+                                          props.revisionNumber !== 0 &&
+                                          props.revisionNumber !== undefined
+                                              ? `&r=${props.revisionNumber}`
+                                              : ""
+                                      }`
                             }
                         >
                             <svg

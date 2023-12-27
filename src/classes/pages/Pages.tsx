@@ -464,7 +464,6 @@ export class GetPasteFromURL implements Endpoint {
         const SessionCookie = !IsFromWildcard ? await Session(request) : "";
 
         // count view
-        let Viewed = false;
         if (
             result &&
             !result.HostServer &&
@@ -494,7 +493,6 @@ export class GetPasteFromURL implements Endpoint {
                     Type: "view_paste",
                     Content: `${result.CustomURL};${SessionCookieValue}`,
                 });
-            else Viewed = true;
         }
 
         // get association
@@ -590,6 +588,7 @@ export class GetPasteFromURL implements Endpoint {
                             paste={result}
                             includeFooter={true}
                             noIdMatch={true}
+                            revisionNumber={RevisionNumber}
                         />
                     </>,
                     <>
@@ -806,7 +805,10 @@ export class GetPasteFromURL implements Endpoint {
                             />
                         )}
 
-                        <PasteStatsModal paste={result} />
+                        <PasteStatsModal
+                            paste={result}
+                            revisionNumber={RevisionNumber}
+                        />
 
                         {/* curiosity */}
                         <Curiosity Association={Association} />
