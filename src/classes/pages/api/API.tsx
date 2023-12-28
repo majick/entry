@@ -5,8 +5,8 @@
  */
 
 import Honeybee, { Endpoint, Renderer } from "honeybee";
-import { Server, SocketAddress } from "bun";
 import punycode from "node:punycode";
+import { Server } from "bun";
 import path from "node:path";
 import fs from "node:fs";
 
@@ -2237,6 +2237,7 @@ import {
     GetFile,
     ListFiles,
     UploadFile,
+    CreateFile,
     DeleteFile,
     EditFile,
 } from "../repos/Media";
@@ -2277,6 +2278,7 @@ export default {
     GetFile, // supports cloud routing
     ListFiles, // supports cloud routing
     UploadFile, // supports cloud routing
+    CreateFile, // supports cloud routing
     DeleteFile, // supports cloud routing
     EditFile, // supports cloud routing
     UpdateCustomDomain, // supports cloud routing

@@ -335,7 +335,9 @@ export default class Media {
 
         if (Mime.startsWith("image/")) return "image";
         else if (Mime.startsWith("audio/")) return "audio";
-        else if (Mime.startsWith("text/")) return "text";
+        else if (Mime.startsWith("text/"))
+            if (Mime.startsWith("text/html")) return "html";
+            else return "text";
 
         return "binary";
     }

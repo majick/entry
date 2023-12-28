@@ -20,10 +20,10 @@ import TopNav from "../components/site/TopNav";
 import _404Page from "../components/40x";
 import { ReposNav } from "./Repos";
 
-import { Card, CardWithHeader } from "fusion";
+import { Button, Card, CardWithHeader } from "fusion";
 
 import translations from "../../db/objects/translations.json";
-import mime from "mime-types";
+import pack from "../../../../package.json";
 
 /**
  * @export
@@ -98,6 +98,22 @@ export class ViewPasteMedia implements Endpoint {
                                             <path d="M11.78 4.72a.749.749 0 1 1-1.06 1.06L8.75 3.811V9.5a.75.75 0 0 1-1.5 0V3.811L5.28 5.78a.749.749 0 1 1-1.06-1.06l3.25-3.25a.749.749 0 0 1 1.06 0l3.25 3.25Z"></path>
                                         </svg>
                                         Upload File
+                                    </button>
+
+                                    <button
+                                        id={"bundles:button.CreateFile"}
+                                        className="border round full"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Plus Symbol"}
+                                        >
+                                            <path d="M7.75 2a.75.75 0 0 1 .75.75V7h4.25a.75.75 0 0 1 0 1.5H8.5v4.25a.75.75 0 0 1-1.5 0V8.5H2.75a.75.75 0 0 1 0-1.5H7V2.75A.75.75 0 0 1 7.75 2Z"></path>
+                                        </svg>
+                                        Create File
                                     </button>
 
                                     <a
@@ -292,6 +308,90 @@ export class ViewPasteMedia implements Endpoint {
                                     </button>
                                 </form>
                             </Modal>
+
+                            <Modal
+                                modalid="bundles:modal.CreateFile"
+                                buttonid="bundles:button.CreateFile"
+                                round={true}
+                            >
+                                <h1
+                                    style={{
+                                        width: "25rem",
+                                        maxWidth: "100%",
+                                    }}
+                                >
+                                    Create File
+                                </h1>
+
+                                <hr />
+
+                                <form
+                                    action="/api/media/create"
+                                    method={"POST"}
+                                    class={"flex flex-column g-8"}
+                                >
+                                    <input
+                                        type="hidden"
+                                        name="CustomURL"
+                                        value={paste.CustomURL}
+                                        required
+                                    />
+
+                                    <label htmlFor="EditPassword">
+                                        <b>Paste Edit Code</b>
+                                    </label>
+
+                                    <input
+                                        class={"round"}
+                                        type="text"
+                                        placeholder={"Edit code"}
+                                        maxLength={BundlesDB.MaxPasswordLength}
+                                        minLength={BundlesDB.MinPasswordLength}
+                                        name={"EditPassword"}
+                                        id={"EditPassword"}
+                                        required
+                                    />
+
+                                    <label htmlFor="FileName">
+                                        <b>File Name</b>
+                                    </label>
+
+                                    <input
+                                        class={"round"}
+                                        type="text"
+                                        name="FileName"
+                                        id={"FileName"}
+                                        placeholder={"index.html"}
+                                        maxLength={BundlesDB.MaxCustomURLLength}
+                                        minlength={4}
+                                        required
+                                    />
+
+                                    <hr style={{ margin: 0 }} />
+
+                                    <button
+                                        className="round green"
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                    >
+                                        Create File
+                                    </button>
+                                </form>
+
+                                <hr />
+
+                                <form method={"dialog"}>
+                                    <button
+                                        className="red round"
+                                        style={{
+                                            width: "100%",
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </form>
+                            </Modal>
                         </main>
                     </div>
 
@@ -351,10 +451,127 @@ export class InspectMedia implements Endpoint {
 
         // ...
         const EditMode = url.searchParams.get("edit") === "true";
+        const EditPassword = url.searchParams.get("EditPassword");
 
         // get media file
         const File = await BundlesDB.Media.GetFile(name, FileName);
         if (!File[0] || !File[2]) return new _404Page().request(request);
+
+        // if file is an HTML file, display HTML editor ALWAYS (these will be displayed in a different way!)
+        if (FileType === "html" && EditMode && EditPassword) {
+            return new Response(
+                Renderer.Render(
+                    <>
+                        <TopNav margin={false}>
+                            <Button
+                                class="bundles:button.SaveFile green-cta"
+                                round={true}
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 16 16"
+                                    width="16"
+                                    height="16"
+                                    aria-label={"Check Mark Symbol"}
+                                >
+                                    <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"></path>
+                                </svg>
+                                Save
+                            </Button>
+
+                            <form
+                                action="/api/media/delete"
+                                encType={"multipart/form-data"}
+                                method={"POST"}
+                            >
+                                <input
+                                    type="hidden"
+                                    name="CustomURL"
+                                    value={paste.CustomURL}
+                                    required
+                                />
+
+                                <input
+                                    type="hidden"
+                                    name="EditPassword"
+                                    value={EditPassword || ""}
+                                    required
+                                />
+
+                                <input
+                                    type="hidden"
+                                    name="File"
+                                    value={FileName}
+                                    required
+                                />
+
+                                <button className="border round red">
+                                    Delete File
+                                </button>
+                            </form>
+
+                            <Button
+                                type="border"
+                                round={true}
+                                class="bundles:button.HTMLPreview"
+                            >
+                                Render Preview
+                            </Button>
+                        </TopNav>
+
+                        <noscript>
+                            The HTML editor does not work without JavaScript enabled!
+                            Bundles is open source, and you can audit the code
+                            yourself{" "}
+                            <a href="https://codeberg.org/SentryTwo/bundles">here</a>
+                            !
+                        </noscript>
+
+                        <div
+                            id={"_doc"}
+                            style={{
+                                height: "calc(100vh - var(--nav-height))",
+                            }}
+                        />
+
+                        <script
+                            type="module"
+                            dangerouslySetInnerHTML={{
+                                __html: `import CreateEditor from "/EditHTMLFile.js?v=${
+                                    pack.version
+                                }";
+                                CreateEditor(document.getElementById("_doc"), \`${encodeURIComponent(
+                                    await File[2].text()
+                                )}\`, "${EditPassword}", "${
+                                    paste.CustomURL
+                                }", "${FileName}");
+                                
+                                document.querySelector("nav").classList.add("scroll");`,
+                            }}
+                        />
+
+                        <style
+                            dangerouslySetInnerHTML={{
+                                __html: `.cm-line, .cm-line span { font-family: monospace !important; }`,
+                            }}
+                        />
+                    </>,
+                    <>
+                        <title>
+                            {FileName} - {BundlesDB.config.name}
+                        </title>
+
+                        <link rel="icon" href="/favicon" />
+                    </>
+                ),
+                {
+                    headers: {
+                        ...PageHeaders,
+                        "Content-Type": "text/html",
+                    },
+                }
+            );
+        }
 
         // render
         if (request.headers.get("Sec-Fetch-Dest") === "document")
@@ -430,102 +647,92 @@ export class InspectMedia implements Endpoint {
                                     </div>
 
                                     {/* edit mode stuff */}
-                                    {!url.searchParams.get("EditPassword") &&
-                                        EditMode && (
-                                            <CardWithHeader
-                                                round={true}
-                                                border={true}
-                                                header={<b>Enter Edit Mode</b>}
-                                            >
-                                                <div className="flex justify-center">
-                                                    <form
+                                    {!EditPassword && EditMode && (
+                                        <CardWithHeader
+                                            round={true}
+                                            border={true}
+                                            header={<b>Enter Edit Mode</b>}
+                                        >
+                                            <div className="flex justify-center">
+                                                <form
+                                                    class={
+                                                        "flex g-4 justify-center flex-wrap"
+                                                    }
+                                                >
+                                                    <input
+                                                        class={"round mobile:max"}
+                                                        type="text"
+                                                        placeholder={"Edit code"}
+                                                        maxLength={
+                                                            BundlesDB.MaxPasswordLength
+                                                        }
+                                                        minLength={
+                                                            BundlesDB.MinPasswordLength
+                                                        }
+                                                        name={"EditPassword"}
+                                                        id={"EditPassword"}
+                                                        required
+                                                    />
+
+                                                    <input
+                                                        type="hidden"
+                                                        name="edit"
+                                                        value={"true"}
+                                                        required
+                                                    />
+
+                                                    <button
                                                         class={
-                                                            "flex g-4 justify-center flex-wrap"
+                                                            "round green mobile:max"
                                                         }
                                                     >
-                                                        <input
-                                                            class={
-                                                                "round mobile:max"
-                                                            }
-                                                            type="text"
-                                                            placeholder={"Edit code"}
-                                                            maxLength={
-                                                                BundlesDB.MaxPasswordLength
-                                                            }
-                                                            minLength={
-                                                                BundlesDB.MinPasswordLength
-                                                            }
-                                                            name={"EditPassword"}
-                                                            id={"EditPassword"}
-                                                            required
-                                                        />
+                                                        Continue
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </CardWithHeader>
+                                    )}
 
-                                                        <input
-                                                            type="hidden"
-                                                            name="edit"
-                                                            value={"true"}
-                                                            required
-                                                        />
+                                    {EditPassword && EditMode && (
+                                        <CardWithHeader
+                                            round={true}
+                                            border={true}
+                                            header={<b>Actions</b>}
+                                        >
+                                            <div className="flex flex-wrap g-4">
+                                                <form
+                                                    action="/api/media/delete"
+                                                    encType={"multipart/form-data"}
+                                                    method={"POST"}
+                                                >
+                                                    <input
+                                                        type="hidden"
+                                                        name="CustomURL"
+                                                        value={paste.CustomURL}
+                                                        required
+                                                    />
 
-                                                        <button
-                                                            class={
-                                                                "round green mobile:max"
-                                                            }
-                                                        >
-                                                            Continue
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </CardWithHeader>
-                                        )}
+                                                    <input
+                                                        type="hidden"
+                                                        name="EditPassword"
+                                                        value={EditPassword || ""}
+                                                        required
+                                                    />
 
-                                    {url.searchParams.get("EditPassword") &&
-                                        EditMode && (
-                                            <CardWithHeader
-                                                round={true}
-                                                border={true}
-                                                header={<b>Actions</b>}
-                                            >
-                                                <div className="flex flex-wrap g-4">
-                                                    <form
-                                                        action="/api/media/delete"
-                                                        encType={
-                                                            "multipart/form-data"
-                                                        }
-                                                        method={"POST"}
-                                                    >
-                                                        <input
-                                                            type="hidden"
-                                                            name="CustomURL"
-                                                            value={paste.CustomURL}
-                                                            required
-                                                        />
+                                                    <input
+                                                        type="hidden"
+                                                        name="File"
+                                                        value={FileName}
+                                                        required
+                                                    />
 
-                                                        <input
-                                                            type="hidden"
-                                                            name="EditPassword"
-                                                            value={
-                                                                url.searchParams.get(
-                                                                    "EditPassword"
-                                                                ) || ""
-                                                            }
-                                                            required
-                                                        />
-
-                                                        <input
-                                                            type="hidden"
-                                                            name="File"
-                                                            value={FileName}
-                                                            required
-                                                        />
-
-                                                        <button className="round red">
-                                                            Delete File
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </CardWithHeader>
-                                        )}
+                                                    <button className="round red">
+                                                        Delete File
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </CardWithHeader>
+                                    )}
 
                                     {/* normal stuff */}
                                     {(FileType === "image" && (
@@ -568,7 +775,7 @@ export class InspectMedia implements Endpoint {
                                             </CardWithHeader>
                                         )) ||
                                         (FileType === "text" &&
-                                            url.searchParams.get("EditPassword") &&
+                                            EditPassword &&
                                             EditMode && (
                                                 <CardWithHeader
                                                     round={true}
@@ -591,9 +798,7 @@ export class InspectMedia implements Endpoint {
                                                             type="hidden"
                                                             name="EditPassword"
                                                             value={
-                                                                url.searchParams.get(
-                                                                    "EditPassword"
-                                                                ) || ""
+                                                                EditPassword || ""
                                                             }
                                                             required
                                                         />
@@ -866,6 +1071,75 @@ export class UploadFile implements Endpoint {
 
 /**
  * @export
+ * @class CreateFile
+ * @implements {Endpoint}
+ */
+export class CreateFile implements Endpoint {
+    public async request(request: Request, server: Server): Promise<Response> {
+        // handle cloud pages
+        const IncorrectInstance = await Pages.CheckInstance(request, server);
+        if (IncorrectInstance) return IncorrectInstance;
+
+        // make sure media is enabled (and exists)
+        if (!BundlesDB.Media) return new _404Page().request(request);
+
+        // verify content type
+        const WrongType = VerifyContentType(
+            request,
+            "application/x-www-form-urlencoded"
+        );
+
+        if (WrongType) return WrongType;
+
+        // get request body
+        const body = Honeybee.FormDataToJSON(await request.formData()) as any;
+
+        if (!body.CustomURL || !body.EditPassword || !body.FileName)
+            return new _404Page().request(request);
+
+        // get paste
+        const paste = await db.GetPasteFromURL(body.CustomURL);
+        if (!paste) return new _404Page().request(request);
+
+        // validate password
+        const admin =
+            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+
+        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+            return new Response(translations.English.error_invalid_password, {
+                status: 302,
+                headers: {
+                    Location: `/?err=${translations.English.error_invalid_password}`,
+                    "X-Bundles-Error": translations.English.error_invalid_password,
+                },
+            });
+
+        // upload file
+        const result = await BundlesDB.Media.UploadFile(
+            paste.CustomURL as string,
+            new File(["New File"], body.FileName)
+        );
+
+        // return
+        return new Response(
+            JSON.stringify({
+                success: result[0],
+                redirect:
+                    result[0] === true ? `/?msg=${result[1]}` : `/?err=${result[1]}`,
+                result,
+            }),
+            {
+                status: 302,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+    }
+}
+
+/**
+ * @export
  * @class DeleteFile
  * @implements {Endpoint}
  */
@@ -973,13 +1247,21 @@ export class EditFile implements Endpoint {
             CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
 
         if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
-            return new Response(translations.English.error_invalid_password, {
-                status: 302,
-                headers: {
-                    Location: `/?err=${translations.English.error_invalid_password}`,
-                    "X-Bundles-Error": translations.English.error_invalid_password,
-                },
-            });
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    redirect: `/?err=${translations.English.error_invalid_password}`,
+                    result: [false, translations.English.error_invalid_password],
+                }),
+                {
+                    status: 401,
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Bundles-Error":
+                            translations.English.error_invalid_password,
+                    },
+                }
+            );
 
         // edit file
         const result = await BundlesDB.Media.EditFile(

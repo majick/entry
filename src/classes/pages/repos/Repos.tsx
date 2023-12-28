@@ -5,7 +5,6 @@
  */
 
 import { Endpoint, Renderer } from "honeybee";
-import punycode from "node:punycode";
 import { Server } from "bun";
 
 import { CheckInstance, Curiosity, db, PasteOpenGraph } from "../Pages";
@@ -938,7 +937,7 @@ export class ProfileView implements Endpoint {
                                             maxWidth: "100%",
                                         }}
                                     >
-                                        {punycode.toUnicode(result.CustomURL)}
+                                        {result.CustomURL}
                                     </h2>
 
                                     <Button
@@ -1010,9 +1009,7 @@ export class ProfileView implements Endpoint {
                                                     <a
                                                         href={`/r/${paste.CustomURL}`}
                                                     >
-                                                        {punycode.toUnicode(
-                                                            paste.CustomURL
-                                                        )}
+                                                        {paste.CustomURL}
                                                     </a>
 
                                                     <span>

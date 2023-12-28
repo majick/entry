@@ -346,6 +346,7 @@ export const ServerConfig: HoneybeeConfig = {
         "/api/metadata": { Method: "POST", Page: API.EditMetadata },
         // ...media
         "/api/media/upload": { Method: "POST", Page: API.UploadFile },
+        "/api/media/create": { Method: "POST", Page: API.CreateFile },
         "/api/media/delete": { Method: "POST", Page: API.DeleteFile },
         "/api/media/edit": { Method: "POST", Page: API.EditFile },
         // ...misc

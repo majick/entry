@@ -36,6 +36,7 @@ import {
     completionKeymap,
     closeBrackets,
     closeBracketsKeymap,
+    CompletionContext,
 } from "@codemirror/autocomplete";
 
 import {
@@ -45,7 +46,7 @@ import {
     indentWithTab,
 } from "@codemirror/commands";
 
-import { html } from "@codemirror/lang-html";
+import { html, htmlCompletionSource } from "@codemirror/lang-html";
 import { tags } from "@lezer/highlight";
 
 import { linter, Diagnostic, lintGutter } from "@codemirror/lint";
@@ -152,11 +153,48 @@ export const HTMLLint = linter((view) => {
     return diagnostics;
 });
 
+// create completion context
+
+/**
+ * @function BasicCompletion
+ *
+ * @param {CompletionContext} context
+ * @return {*}
+ */
+function BasicCompletion(context: CompletionContext): any {
+    let word = context.matchBefore(/\w*/);
+    if (!word || (word.from == word.to && !context.explicit)) return null;
+
+    return {
+        from: word.from,
+        options: [
+            {
+                label: "boilerplate",
+                type: "variable",
+                apply: `<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+
+    <body>
+        <span>Hello, world!</span>
+    </body>
+</html>`,
+                info: "Basic HTML Page Boilerplate",
+            },
+        ],
+    };
+}
+
 // create editor function
 export function CreateEditor(
     element: HTMLElement,
-    mode: "html",
-    UpdateNode: (content: string) => void
+    mode: "html" = "html",
+    UpdateNode: (content: string) => void = () => {}
 ) {
     if (globalThis.Bun) return; // must be run from client
 
@@ -177,7 +215,10 @@ export function CreateEditor(
                 syntaxHighlighting(BundlesCodeHighlight, { fallback: true }),
                 bracketMatching(),
                 closeBrackets(),
-                autocompletion(),
+                autocompletion({
+                    override: [BasicCompletion, htmlCompletionSource],
+                    activateOnTyping: true,
+                }),
                 rectangularSelection(),
                 crosshairCursor(),
                 highlightActiveLine(),

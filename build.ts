@@ -11,6 +11,7 @@ const output = await build({
         "./src/index.ts",
         "./src/Executable.ts",
         "./src/classes/pages/components/Editor.ts",
+        "./src/classes/pages/repos/EditHTMLFile.ts",
         "./src/classes/pages/assets/ClientFixMarkdown.ts",
         "./src/classes/pages/components/Markdown.ts",
         "./src/classes/pages/components/builder/Builder.tsx",

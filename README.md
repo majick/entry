@@ -79,7 +79,7 @@ All API endpoints expect a `Content-Type` of `application/x-www-form-urlencoded`
     - The `metadata` field is JSON stringified, URI encoded and base64 encoded **ON CLIENT**
 - `POST /api/media/upload`, Upload file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(binary)`
 - `POST /api/media/delete`, Delete file, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string)`
-- `POST /api/media/edit`, Edit text file contents, expects `multipart/form-data` with the fields: `CustomURL, EditPassword, File(string), FileContent`
+- `POST /api/media/edit`, Edit text file contents, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, File(string), FileContent`
 - `POST /api/domain`, Update paste custom domain, expects `application/x-www-form-urlencoded` with the fields: `CustomURL, EditPassword, Domain`
 - `POST /api/disassociate`, Disassociate (Logout) from a paste
 - `POST /api/claim`, Repossess an unused custom URL, expects `application/x-www-form-urlencoded` with the fields: `CustomURL`
@@ -508,6 +508,8 @@ Example:
 Note that wildcard paths cannot be indexed by search engines, and all relative links should redirect to the main site.
 
 You can allow people to use custom domains and link with a CNAME record by enabling the `custom_domain` log type.
+
+When somebody visits a wildcard domain for a paste that has a static HTML file in its [media storage](#media-storage), this HTML file will be served. By default, `index.html` is served for `/`. Every path is checked for an HTML file match, so users can also specify their own file names.
 
 ### Revisions
 

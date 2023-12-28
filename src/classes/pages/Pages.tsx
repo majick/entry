@@ -387,6 +387,43 @@ export class GetPasteFromURL implements Endpoint {
                 `https://${BundlesDB.config.app.hostname}/`) ||
             "/";
 
+        // handle static HTML serving for WILDCARD ONLY
+        if (
+            BundlesDB.config.app &&
+            BundlesDB.config.app.wildcard &&
+            BundlesDB.config.app.hostname
+        ) {
+            const subdomain = url.hostname.split(
+                `.${BundlesDB.config.app.hostname}`
+            )[0];
+
+            // ...
+            if (
+                subdomain &&
+                subdomain !== BundlesDB.config.app.hostname &&
+                subdomain !== "www" &&
+                url.hostname.includes(BundlesDB.config.app.hostname) // make sure hostname is actually in the url
+            ) {
+                // get paste
+                const paste = await db.GetPasteFromURL(subdomain, true);
+                if (!paste) return new _404Page().request(request);
+
+                // check for html file (path)
+                if (url.pathname === "/") url.pathname = "/index.html";
+                const HTMLFile = await BundlesDB.Media.GetFile(
+                    subdomain,
+                    url.pathname.slice(1)
+                );
+
+                if (HTMLFile[2])
+                    // serve file!
+                    return new Response(await HTMLFile[2].text(), {
+                        headers: { "Content-Type": "text/html" },
+                    });
+                else if (url.pathname === "/index.html") url.pathname = "/";
+            }
+        }
+
         // load doc view if specified
         if (search.get("view") && search.get("view") === "doc")
             return await new PasteDocView().request(request, server);
