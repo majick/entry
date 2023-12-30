@@ -669,7 +669,7 @@ export class EditPaste implements Endpoint {
                 // if NewEditPassword is less than the expected length, set it to the old edit password
                 body.NewEditPassword.length < BundlesDB.MinPasswordLength) &&
             // verify this supplied EditPassword
-            CreateHash(body.EditPassword) === paste.EditPassword
+            CreateHash(body.EditPassword || "clearly wrong") === paste.EditPassword
         )
             body.NewEditPassword = body.EditPassword;
 
@@ -677,7 +677,7 @@ export class EditPaste implements Endpoint {
         const result = await db.EditPaste(
             {
                 Content: "",
-                EditPassword: body.EditPassword ? body.EditPassword : undefined,
+                EditPassword: body.EditPassword || undefined,
                 CustomURL: body.OldURL,
                 PubDate: 0,
                 EditDate: 0,
@@ -1330,7 +1330,8 @@ export class PasteLogin implements Endpoint {
 
         // check edit password
         if (
-            paste.EditPassword !== CreateHash(body.EditPassword) &&
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong") &&
             body.EditPassword !== BundlesDB.config.admin
         )
             return new Response(
@@ -1804,9 +1805,14 @@ export class UpdateCustomDomain implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+            CreateHash(body.EditPassword || "clearly wrong") ===
+            CreateHash(BundlesDB.config.admin);
 
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+        if (
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong") &&
+            !admin
+        )
             return new Response(
                 JSON.stringify({
                     success: false,
@@ -2195,7 +2201,7 @@ export class ChangeGroupPassword implements Endpoint {
             return new _401PageEndpoint().request(request);
 
         // check password
-        if (CreateHash(body.EditPassword) !== group.EditPassword)
+        if (CreateHash(body.EditPassword || "clearly wrong") !== group.EditPassword)
             return new Response(
                 JSON.stringify({
                     success: false,

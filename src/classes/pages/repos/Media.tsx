@@ -1082,9 +1082,14 @@ export class UploadFile implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+            CreateHash(body.EditPassword || "clearly wrong") ===
+            CreateHash(BundlesDB.config.admin);
 
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+        if (
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong") &&
+            !admin
+        )
             return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
@@ -1151,9 +1156,14 @@ export class CreateFile implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+            CreateHash(body.EditPassword || "clearly wrong") ===
+            CreateHash(BundlesDB.config.admin);
 
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+        if (
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong") &&
+            !admin
+        )
             return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
@@ -1223,9 +1233,14 @@ export class DeleteFile implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+            CreateHash(body.EditPassword || "clearly wrong") ===
+            CreateHash(BundlesDB.config.admin);
 
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+        if (
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong") &&
+            !admin
+        )
             return new Response(translations.English.error_invalid_password, {
                 status: 302,
                 headers: {
@@ -1292,9 +1307,14 @@ export class EditFile implements Endpoint {
 
         // validate password
         const admin =
-            CreateHash(body.EditPassword) === CreateHash(BundlesDB.config.admin);
+            CreateHash(body.EditPassword || "clearly wrong") ===
+            CreateHash(BundlesDB.config.admin);
 
-        if (paste.EditPassword !== CreateHash(body.EditPassword) && !admin)
+        if (
+            paste.EditPassword !==
+                CreateHash(body.EditPassword || "clearly wrong") &&
+            !admin
+        )
             return new Response(
                 JSON.stringify({
                     success: false,

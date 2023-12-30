@@ -1234,12 +1234,17 @@ export default class BundlesDB {
         NewPasteInfo.UnhashedEditPassword = `${NewPasteInfo.EditPassword}`;
 
         // ...hash
-        PasteInfo.EditPassword = CreateHash(PasteInfo.EditPassword);
-        NewPasteInfo.EditPassword = CreateHash(NewPasteInfo.EditPassword);
+        PasteInfo.EditPassword = CreateHash(
+            PasteInfo.EditPassword || "clearly undefined"
+        );
+
+        NewPasteInfo.EditPassword = CreateHash(
+            NewPasteInfo.EditPassword || "clearly undefined"
+        );
 
         // if PasteInfo doesn't include an EditPassword, set it to the current password
         // ...ONLY IF we're the owner of the paste!
-        const UndefinedHash = CreateHash("undefined");
+        const UndefinedHash = CreateHash("clearly undefined");
         let UsedPasswordless = false;
 
         if (
