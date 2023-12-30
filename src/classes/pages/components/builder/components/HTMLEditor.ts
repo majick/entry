@@ -171,7 +171,7 @@ function BasicCompletion(context: CompletionContext): any {
             {
                 label: "boilerplate",
                 type: "variable",
-                apply: `<!DOCTYPE html>
+                apply: `<!doctype html>
 
 <html lang="en">
     <head>

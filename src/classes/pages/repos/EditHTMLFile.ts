@@ -80,6 +80,15 @@ export default function CreateEditor(
         Windows.push(window.open(url, "_blank") as Window);
     });
 
+    // get format button
+    const FormatButton = document.querySelector(".bundles\\:button\\.FormatCode");
+    if (!FormatButton) return;
+
+    // handle format
+    FormatButton.addEventListener("click", () =>
+        (window as any).HTMLEditor.Format()
+    );
+
     // get save button
     const SaveButton = document.querySelector(".bundles\\:button\\.SaveFile");
     if (!SaveButton) return;

@@ -20,7 +20,7 @@ import TopNav from "../components/site/TopNav";
 import _404Page from "../components/40x";
 import { ReposNav } from "./Repos";
 
-import { Button, Card, CardWithHeader } from "fusion";
+import { Button, Card, CardWithHeader, SidebarLayout } from "fusion";
 
 import translations from "../../db/objects/translations.json";
 import pack from "../../../../package.json";
@@ -461,64 +461,110 @@ export class InspectMedia implements Endpoint {
         if (FileType === "html" && EditMode && EditPassword) {
             return new Response(
                 Renderer.Render(
-                    <>
-                        <TopNav margin={false}>
-                            <Button
-                                class="bundles:button.SaveFile green-cta"
-                                round={true}
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 16 16"
-                                    width="16"
-                                    height="16"
-                                    aria-label={"Check Mark Symbol"}
-                                >
-                                    <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"></path>
-                                </svg>
-                                Save
-                            </Button>
+                    <SidebarLayout
+                        sidebar={
+                            <>
+                                <TopNav>
+                                    <Button
+                                        class="bundles:button.SaveFile green-cta"
+                                        round={true}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Check Mark Symbol"}
+                                        >
+                                            <path d="M8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16Zm3.78-9.72a.751.751 0 0 0-.018-1.042.751.751 0 0 0-1.042-.018L6.75 9.19 5.28 7.72a.751.751 0 0 0-1.042.018.751.751 0 0 0-.018 1.042l2 2a.75.75 0 0 0 1.06 0Z"></path>
+                                        </svg>
+                                        Save
+                                    </Button>
+                                </TopNav>
 
-                            <form
-                                action="/api/media/delete"
-                                encType={"multipart/form-data"}
-                                method={"POST"}
-                            >
-                                <input
-                                    type="hidden"
-                                    name="CustomURL"
-                                    value={paste.CustomURL}
-                                    required
-                                />
+                                <div className="content flex flex-column g-4">
+                                    <Button
+                                        type="border"
+                                        round={true}
+                                        class={
+                                            "bundles:button.FormatCode justify-start full"
+                                        }
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"List Symbol"}
+                                        >
+                                            <path d="M2 2h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Zm4.655 8.595a.75.75 0 0 1 0 1.06L4.03 14.28a.75.75 0 0 1-1.06 0l-1.5-1.5a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l.97.97 2.095-2.095a.75.75 0 0 1 1.06 0ZM9.75 2.5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm0 5h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Zm-7.25-9v3h3v-3Z"></path>
+                                        </svg>
+                                        Format Code
+                                    </Button>
 
-                                <input
-                                    type="hidden"
-                                    name="EditPassword"
-                                    value={EditPassword || ""}
-                                    required
-                                />
+                                    <Button
+                                        type="border"
+                                        round={true}
+                                        class="bundles:button.HTMLPreview justify-start full"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            viewBox="0 0 16 16"
+                                            width="16"
+                                            height="16"
+                                            aria-label={"Browser Symbol"}
+                                        >
+                                            <path d="M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25ZM14.5 6h-13v7.25c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25Zm-6-3.5v2h6V2.75a.25.25 0 0 0-.25-.25ZM5 2.5v2h2v-2Zm-3.25 0a.25.25 0 0 0-.25.25V4.5h2v-2Z"></path>
+                                        </svg>
+                                        Render Preview
+                                    </Button>
 
-                                <input
-                                    type="hidden"
-                                    name="File"
-                                    value={FileName}
-                                    required
-                                />
+                                    <hr />
 
-                                <button className="border round red">
-                                    Delete File
-                                </button>
-                            </form>
+                                    <form
+                                        action="/api/media/delete"
+                                        encType={"multipart/form-data"}
+                                        method={"POST"}
+                                        class={"full"}
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="CustomURL"
+                                            value={paste.CustomURL}
+                                            required
+                                        />
 
-                            <Button
-                                type="border"
-                                round={true}
-                                class="bundles:button.HTMLPreview"
-                            >
-                                Render Preview
-                            </Button>
-                        </TopNav>
+                                        <input
+                                            type="hidden"
+                                            name="EditPassword"
+                                            value={EditPassword || ""}
+                                            required
+                                        />
 
+                                        <input
+                                            type="hidden"
+                                            name="File"
+                                            value={FileName}
+                                            required
+                                        />
+
+                                        <button className="border round red justify-start full">
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 16 16"
+                                                width="16"
+                                                height="16"
+                                                aria-label={"Trash Symbol"}
+                                            >
+                                                <path d="M11 1.75V3h2.25a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1 0-1.5H5V1.75C5 .784 5.784 0 6.75 0h2.5C10.216 0 11 .784 11 1.75ZM4.496 6.675l.66 6.6a.25.25 0 0 0 .249.225h5.19a.25.25 0 0 0 .249-.225l.66-6.6a.75.75 0 0 1 1.492.149l-.66 6.6A1.748 1.748 0 0 1 10.595 15h-5.19a1.75 1.75 0 0 1-1.741-1.575l-.66-6.6a.75.75 0 1 1 1.492-.15ZM6.5 1.75V3h3V1.75a.25.25 0 0 0-.25-.25h-2.5a.25.25 0 0 0-.25.25Z"></path>
+                                            </svg>
+                                            Delete File
+                                        </button>
+                                    </form>
+                                </div>
+                            </>
+                        }
+                    >
                         <noscript>
                             The HTML editor does not work without JavaScript enabled!
                             Bundles is open source, and you can audit the code
@@ -530,7 +576,9 @@ export class InspectMedia implements Endpoint {
                         <div
                             id={"_doc"}
                             style={{
-                                height: "calc(100vh - var(--nav-height))",
+                                height: "calc(100% + 1.5rem * 2)",
+                                width: "calc(100% + 1.5rem * 2)",
+                                margin: "-1.5rem",
                             }}
                         />
 
@@ -555,7 +603,7 @@ export class InspectMedia implements Endpoint {
                                 __html: `.cm-line, .cm-line span { font-family: monospace !important; }`,
                             }}
                         />
-                    </>,
+                    </SidebarLayout>,
                     <>
                         <title>
                             {FileName} - {BundlesDB.config.name}
