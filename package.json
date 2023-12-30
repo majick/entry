@@ -44,7 +44,7 @@
     "build:docker": "bun run build && docker buildx build --push --platform linux/amd64,linux/arm64 --tag codeberg.org/sentrytwo/bundles:latest .",
     "build:docker-nopush": "bun run build && docker buildx build --load --tag codeberg.org/sentrytwo/bundles:latest .",
     "start:docker-debug": "docker run --env PORT=8080 --env NAME=Bundles --env ADMIN_PASSWORD=test -p 8080:8080 codeberg.org/sentrytwo/bundles:latest",
-    "build:exec": "bun run build && bun build dist/Executable.js --compile --minify --outfile build/entry"
+    "build:exec": "bun run build && bun build dist/Executable.js --compile --minify --outfile build/bundles"
   },
   "repository": {
     "type": "git",

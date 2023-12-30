@@ -23,12 +23,16 @@ process.env.IMPORT_DIR! =
 if (!fs.existsSync(process.env.IMPORT_DIR))
     fs.mkdirSync(process.env.IMPORT_DIR, { recursive: true });
 
-// check for "_entry_old" file
-const _entry_old_path = path.resolve(path.dirname(process.execPath), "_entry_old");
-if (fs.existsSync(_entry_old_path)) fs.rmSync(_entry_old_path);
+// check for "_bundles_old" file
+const _bundles_old_path = path.resolve(
+    path.dirname(process.execPath),
+    "_bundles_old"
+);
+
+if (fs.existsSync(_bundles_old_path)) fs.rmSync(_bundles_old_path);
 
 // update executable
-const ExpectedExecutable = `entry-${process.platform}-${process.arch}`;
+const ExpectedExecutable = `bundles-${process.platform}-${process.arch}`;
 let NeedsExecutableUpdate = false;
 
 try {
@@ -53,7 +57,7 @@ try {
         const Dir = path.dirname(process.execPath); // path to save the executable in
 
         // ...mark current executable as old
-        fs.renameSync(process.execPath, path.join(Dir, "_entry_old"));
+        fs.renameSync(process.execPath, path.join(Dir, "_bundles_old_path"));
 
         // ...download new
         console.log("\x1b[30;100m info \x1b[0m Installing updated executable...");
@@ -140,6 +144,7 @@ if (!NeedsExecutableUpdate) {
 
                 // download file
                 fs.mkdirSync(path.dirname(FilePath), { recursive: true }); // make sure directory exists!
+
                 await Bun.write(
                     FilePath,
                     await fetch(`https://sentrytwo.com/${file[0]}`)

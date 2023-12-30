@@ -808,18 +808,18 @@ export class GetPasteFromURL implements Endpoint {
 
                             <button
                                 id={"bundles:button.PasteStats"}
-                                class={"round tooltip-wrapper"}
+                                class={"round tooltip-wrapper border"}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     height="16"
-                                    aria-label={"Sparkle Symbol"}
+                                    aria-label={"Ellipsis Symbol"}
                                 >
-                                    <path d="M7.53 1.282a.5.5 0 0 1 .94 0l.478 1.306a7.492 7.492 0 0 0 4.464 4.464l1.305.478a.5.5 0 0 1 0 .94l-1.305.478a7.492 7.492 0 0 0-4.464 4.464l-.478 1.305a.5.5 0 0 1-.94 0l-.478-1.305a7.492 7.492 0 0 0-4.464-4.464L1.282 8.47a.5.5 0 0 1 0-.94l1.306-.478a7.492 7.492 0 0 0 4.464-4.464Z"></path>
+                                    <path d="M0 5.75C0 4.784.784 4 1.75 4h12.5c.966 0 1.75.784 1.75 1.75v4.5A1.75 1.75 0 0 1 14.25 12H1.75A1.75 1.75 0 0 1 0 10.25ZM12 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM7 8a1 1 0 1 0 2 0 1 1 0 0 0-2 0ZM4 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"></path>
                                 </svg>
-
+                                More
                                 <div className="card secondary round border tooltip bottom">
                                     Paste Options
                                 </div>
