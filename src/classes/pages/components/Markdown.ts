@@ -58,9 +58,6 @@ export function ParseMarkdownSync(
     // allow html escapes (prefixed by &E)
     content = content.replaceAll(/(&!)(.*?);/g, "&$2;");
 
-    // stupid backslash line continuation
-    content = content.replaceAll("\\\n", "");
-
     // code blocks
 
     // ...fenced code block
@@ -349,80 +346,6 @@ export function ParseMarkdownSync(
         '<span style="text-decoration: underline;" role="underline">$2</span>'
     );
 
-    // ...underline (compatibility)
-    content = content.replaceAll(
-        /(\!\~)\s(?<CONTENT>.*?)\s*(\~\!)/gs, // space after "!~" is REQUIRED
-        '<span style="text-decoration: underline;" role="underline">$2</span>'
-    );
-
-    // ...underline (with effects)
-    content = content.replaceAll(
-        /(\!\~)\s*(?<OPTIONS>.*?)(\;\s)(?<CONTENT>.*?)\s*(\~\!)/gs, // space after "!~" is NOT ALLOWED
-        (match: string) => {
-            const res = new RegExp(
-                /(\!\~)\s*(?<OPTIONS>.*?)(\;\s)(?<CONTENT>.*?)\s*(\~\!)/gs
-            ).exec(match);
-
-            if (!res || !res.groups) return "Parsing Error";
-
-            // split options and parse
-            const split = res.groups.OPTIONS.split(";");
-            let style = "";
-
-            for (const effect of split) {
-                const index = split.indexOf(effect);
-
-                switch (index) {
-                    case 0:
-                        // color, default: currentColor
-                        if (effect === "default" || effect === ":") {
-                            style += `text-decoration-color: currentColor; `;
-                            break;
-                        }
-
-                        style += `text-decoration-color: ${effect}; `;
-                        break;
-
-                    case 1:
-                        // style, default: solid
-                        if (effect === "default" || effect === ":") {
-                            style += `text-decoration-style: solid; `;
-                            break;
-                        }
-
-                        style += `text-decoration-style: ${effect}; `;
-                        break;
-
-                    case 2:
-                        // type, default: underline
-                        if (effect === "default" || effect === ":") {
-                            style += `text-decoration-line: underline; `;
-                            break;
-                        }
-
-                        style += `text-decoration-line: ${effect}; `;
-                        break;
-
-                    case 3:
-                        // thickness, default: unset
-                        if (effect === "default" || effect === ":") {
-                            style += `text-decoration-thickness: unset; `;
-                            break;
-                        }
-
-                        style += `text-decoration-thickness: ${effect}; `;
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-
-            // return
-            return `<span style="text-decoration: underline; ${style}" role="underline:effects">${res.groups.CONTENT}</span>`;
-        }
-    );
-
     // paste mentions (autolink)
     content = content.replaceAll(
         /(\.\/)(?<NAME>.*?)(?<END>\s|\n)/gm,
@@ -549,6 +472,7 @@ export async function ParseMarkdown(
         silent: true,
         breaks: true,
         async: true,
+        mangle: false,
     });
 
     // AUTO-PARAGRAPH!!!

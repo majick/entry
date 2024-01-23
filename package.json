@@ -31,6 +31,7 @@
     "highlight.js": "^11.8.0",
     "honeybee": "https://codeberg.org/api/packages/hkau/npm/honeybee/-/1.0.11/honeybee-1.0.11.tgz",
     "htmlhint": "^1.1.4",
+    "marked": "^5.1.0",
     "pg": "^8.11.3",
     "smol-toml": "^1.1.3"
   },
