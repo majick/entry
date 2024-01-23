@@ -1,7 +1,7 @@
 # 🧶 bundles
 
 <comment>
-Certain features of this README only work on Bundles! You can view this README at https://www.sentrytwo.com/what
+Certain features of this README only work on Bundles! You can view the progenitor of this README at https://www.sentrytwo.com/what
 
 ***
 </comment>
@@ -14,6 +14,15 @@ The official Bundles instance is hosted at [sentrytwo.com](https://sentrytwo.com
 
 ## Install
 
+### Container Image
+
+No installation methods for this project other than OCI ("Docker") image are supported any more. Non-containerized workloads of this weird-ass runtime and build system won't be further documented beyond the archaeological information from before the project was forked.
+
+The only canonical installation method is to use the container:
+`ghcr.io/majick/entry:latest`
+
+### Manual Installation (Unsupported/Unmaintained)
+
 - Make sure you have [Bun installed](https://bun.sh/docs/installation)
     - Bun only runs on unix and unix-like systems (Linux, MacOS)
     - One of these systems is required to host the server, but it can be viewed by anyone on any system
@@ -24,7 +33,7 @@ Bundles can also be installed using Docker. Follow [these instructions](https://
 
 The main Bundles repository also includes the source for Bundles related packages. These can be found in the [/packages](https://codeberg.org/sentrytwo/bundles/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
 
-### Executable
+### Executable (Unsupported/Unmaintained)
 
 Bundles can be installed through an executable. The executable will automatically install static files the client needs into the directory it is contained in. You can change this install location through the `EXECUTABLE_STATIC_DIR` environment variable. This must be an exact path to the directory you want static files to be contained in.
 
