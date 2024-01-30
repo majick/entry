@@ -6,25 +6,26 @@ Make sure you have [Docker](https://www.docker.com/) installed before following 
 
 Make sure you have [docker-compose](https://docs.docker.com/compose/install/) installed before following this guide.
 
-Bundles can be run by copying the [docker-compose.yml](https://codeberg.org/sentrytwo/bundles/src/branch/master/docs/docker/docker-compose.yml) file and configuring the values accordingly. The values in the `environment` section match those that are configured when you first run Bundles.
+Bundles can be run by copying the [docker-compose.yml]([https://codeberg.org/sentrytwo/bundles/src/branch/master/docs/docker/docker-compose.yml](https://raw.githubusercontent.com/majick/entry/main/docs/docker/docker-compose.yml)) file and configuring the values accordingly. The values in the `environment` section match those that are configured when you first run Entry.
 
 ```yml
 services:
     web:
-        image: codeberg.org/sentrytwo/bundles:latest
+        image: ghcr.io/majick/entry:latest
         restart: unless-stopped
         ports:
+        # Use "ports" only if you're not planning to put it behind Traefik or something.
             - "8080:8080" # match this (both sides) with your values from env.port
         environment:
             PORT: "8080" # optional, 8080 is default
-            NAME: "Bundles" # optional, Bundles is default
+            NAME: "Entry" # optional, Bundles is default
             ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
             DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default, only used during first setup
             #                            edit within config file, this value is only used to prefill the value in config.json
             CONFIG_LOCATION: ":cwd/data/config.json" # optional, :cwd/data/config.json is default
 ```
 
-You can then run `docker-compose up -d` to start Bundles locally. Visit the port you configured and you should see the Bundles UI.
+You can then run `docker compose up -d` to start Bundles locally. Visit the port you configured and you should see the Bundles UI.
 
 Note the `DATA_LOCATION` field is not required, and is just used to fill the value in the config file. You can create the config file yourself to skip this step.
 
@@ -32,7 +33,7 @@ Note the `DATA_LOCATION` field is not required, and is just used to fill the val
 // $CONFIG_LOCATION
 {
     "port": 8080,
-    "name": "Bundles",
+    "name": "Entry",
     "data": ":cwd/data",
     "config": ":cwd/data/config.json",
     "admin": "supersecretpassword"
