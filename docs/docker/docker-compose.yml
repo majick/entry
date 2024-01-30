@@ -1,12 +1,13 @@
 services:
     web:
-        image: codeberg.org/sentrytwo/bundles:latest
+        image: ghcr.io/majick/entry:latest
         restart: unless-stopped
         ports:
+        # Use "ports" only if you're not planning to put it behind Traefik or something.
             - "8080:8080" # match this (both sides) with your values from env.port
         environment:
             PORT: "8080" # optional, 8080 is default
-            NAME: "Bundles" # optional, Bundles is default
+            NAME: "Entry" # optional, Bundles is default
             ADMIN_PASSWORD: "supersecretpassword" # !!!CHANGE THIS!!! (required)
             DATA_LOCATION: ":cwd/data" # optional, :cwd/data is default, only used during first setup
             #                            edit within config file, this value is only used to prefill the value in config.json
