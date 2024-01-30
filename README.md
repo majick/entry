@@ -1,16 +1,16 @@
-# 🧶 bundles
+# 🧶 entry
 
 <comment>
-Certain features of this README only work on Bundles! You can view the progenitor of this README at https://www.sentrytwo.com/what
+Certain features of this README only work on ~~Bundles~~ Entry ! You can view the progenitor of this README at https://www.sentrytwo.com/what
 
 ***
 </comment>
 
-Bundles is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features).
+Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features). The original developer was 2/3 of the way through rebranding the project as "Bundles," before abandoning to rewrite everything in Rust. The name makes no sense to anyone who isn't infatuated with Bun, so I'm steadily reverting it. I have no interest in fucking around with Rust or dealing with an even more unfinished version of the project so this fork exists to semi-maintain Entry for my own use.
 
-*Bun*dles uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Bundles also supports using a PostgreSQL database through config `pg`.
+~~*Bun*dles~~Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Entry also supports using a PostgreSQL database through config `pg`.
 
-The official Bundles instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support provided by Bundles.
+The official "Bundles" instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support. Note that I personally don't use or care about the decentralization, and in fact think it's a bad idea, so the feature is likely to either wither on the vine or be removed at some point.
 
 ## Install
 
@@ -21,7 +21,10 @@ No installation methods for this project other than OCI ("Docker") image are sup
 The only canonical installation method is to use the container:
 `ghcr.io/majick/entry:latest`
 
-### Manual Installation (Unsupported/Unmaintained)
+You're free to build your own version of the container. The `Dockerfile` has been fixed so that it uses a staged build rather than assuming you want to build the project locally and wrap your local "but it works on my machine!" stuff in a container. This means you don't need to fuck around installing or figuring out the ass-backwards Bun build system or anything else. Just build a container normally like a normal person and run.
+
+### Manual Installation (Unsupported/Unmaintained/Unwanted)
+Note: This is archaeological information, I'm updating it once, and after that is no longer guaranteed to be correct.
 
 - Make sure you have [Bun installed](https://bun.sh/docs/installation)
     - Bun only runs on unix and unix-like systems (Linux, MacOS)
@@ -29,9 +32,9 @@ The only canonical installation method is to use the container:
 - Clone the repository and run `bun install` to install dependencies
 - Start the server with `bun run start`
 
-Bundles can also be installed using Docker. Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.
+It can also be installed using Docker. ~~Follow [these instructions](https://www.sentrytwo.com/docs/docker) to get started.~~ There used to be instructions on how to install and configure the OCI container, but they are wrong in several places and even link to conflicting information. I'd feel bad linking to it.
 
-The main Bundles repository also includes the source for Bundles related packages. These can be found in the [/packages](https://codeberg.org/sentrytwo/bundles/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README.
+The main Bundles repository also includes the source for Bundles related packages. These can be found in the [/packages](https://codeberg.org/sentrytwo/bundles/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README. Note that this link goes to the old, unmaintained, abandoned repo.
 
 ### Executable (Unsupported/Unmaintained)
 
