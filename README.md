@@ -1,16 +1,16 @@
 # 🧶 entry
 
 <comment>
-Certain features of this README only work on ~~Bundles~~ Entry ! You can view the progenitor of this README at https://www.sentrytwo.com/what
+Certain features of this README only work on Entry ! You can view the progenitor of this README at https://www.sentrytwo.com/what
 
 ***
 </comment>
 
-Entry is a lightweight and anonymous Markdown pastebin written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features). The original developer was 2/3 of the way through rebranding the project as "Bundles," before abandoning to rewrite everything in Rust. The name makes no sense to anyone who isn't infatuated with Bun, so I'm steadily reverting it. I have no interest in fucking around with Rust or dealing with an even more unfinished version of the project so this fork exists to semi-maintain Entry for my own use.
+Entry is a lightweight and anonymous Markdown pastebin (a Rentry clone, pretty much) written in TypeScript that allows for publishing Markdown documents with Markdown preview, easy editing, quick deletion, custom URLs, versioning, comments, media uploads and [many more features](#features). The original developer was 2/3 of the way through rebranding the project as "Bundles," before abandoning to rewrite everything in Rust. The name makes no sense to anyone who isn't infatuated with Bun, so I'm steadily reverting it. I have no interest in fucking around with Rust or dealing with an even more unfinished version of the project so this fork exists to semi-maintain Entry for my own use.
 
 ~~*Bun*dles~~Entry uses the [Bun](https://bun.sh) runtime. Pastes are stored in an SQLite database using the [Bun SQLite3 API](https://bun.sh/docs/api/sqlite). Entry also supports using a PostgreSQL database through config `pg`.
 
-The official "Bundles" instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support. Note that I personally don't use or care about the decentralization, and in fact think it's a bad idea, so the feature is likely to either wither on the vine or be removed at some point.
+The official "Bundles" instance is hosted at [sentrytwo.com](https://sentrytwo.com), but any instance can interact with any other instance through the basic decentralization support. **Note that I personally don't use or care about the decentralization, and in fact think it's a bad idea, so the feature is likely to either wither on the vine or be removed at some point.**
 
 ## Install
 
@@ -36,7 +36,7 @@ It can also be installed using Docker. ~~Follow [these instructions](https://www
 
 The main Bundles repository also includes the source for Bundles related packages. These can be found in the [/packages](https://codeberg.org/sentrytwo/bundles/src/branch/master/packages) directory. Install directions are detailed for each package in their respective README. Note that this link goes to the old, unmaintained, abandoned repo.
 
-### Executable (Unsupported/Unmaintained)
+### Executable (Unsupported/Unmaintained/Untested/Unwanted)
 
 Bundles can be installed through an executable. The executable will automatically install static files the client needs into the directory it is contained in. You can change this install location through the `EXECUTABLE_STATIC_DIR` environment variable. This must be an exact path to the directory you want static files to be contained in.
 
